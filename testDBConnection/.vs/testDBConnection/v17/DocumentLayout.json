@@ -1,0 +1,153 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\models\\mydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\models\\mydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\controllers\\testcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\controllers\\testcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 161,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Customer.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\Customer.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Models\\Customer.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\Customer.cs",
+              "RelativeToolTip": "testDBConnection\\Models\\Customer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T08:56:32.993Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "testDBConnection\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T07:19:37.862Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Program.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Program.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Program.cs",
+              "RelativeToolTip": "testDBConnection\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T06:54:07.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MyDbContext.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\MyDbContext.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Models\\MyDbContext.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\MyDbContext.cs",
+              "RelativeToolTip": "testDBConnection\\Models\\MyDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T06:50:27.959Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TestController.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\TestController.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Controllers\\TestController.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\TestController.cs",
+              "RelativeToolTip": "testDBConnection\\Controllers\\TestController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T06:57:02.623Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "testDBConnection\\appsettings.Development.json",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.Development.json",
+              "RelativeToolTip": "testDBConnection\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-08-29T07:17:52.512Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.json",
+              "RelativeDocumentMoniker": "testDBConnection\\appsettings.json",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.json",
+              "RelativeToolTip": "testDBConnection\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-08-29T06:29:09.398Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedWidth": 35,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
