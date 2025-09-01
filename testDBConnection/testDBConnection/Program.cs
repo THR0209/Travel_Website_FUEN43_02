@@ -32,7 +32,7 @@ namespace testDBConnection
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Test}/{action=CheckDb}/{id?}");
 
             app.Run();
         }
