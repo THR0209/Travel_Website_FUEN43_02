@@ -1,0 +1,258 @@
+wwwroot\css\site.css
+wwwroot\favicon.ico
+wwwroot\images\Logo.png
+wwwroot\js\site.js
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
+wwwroot\lib\bootstrap\LICENSE
+wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
+wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
+wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+wwwroot\lib\jquery-validation\dist\additional-methods.js
+wwwroot\lib\jquery-validation\dist\additional-methods.min.js
+wwwroot\lib\jquery-validation\dist\jquery.validate.js
+wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
+wwwroot\lib\jquery-validation\LICENSE.md
+wwwroot\lib\jquery\dist\jquery.js
+wwwroot\lib\jquery\dist\jquery.min.js
+wwwroot\lib\jquery\dist\jquery.min.map
+wwwroot\lib\jquery\LICENSE.txt
+wwwroot\UI Design\.browserslistrc
+wwwroot\UI Design\.eslintignore
+wwwroot\UI Design\.eslintrc.json
+wwwroot\UI Design\.gitignore
+wwwroot\UI Design\.prettierignore
+wwwroot\UI Design\.prettierrc.json
+wwwroot\UI Design\assets\css\demo.css
+wwwroot\UI Design\assets\img\avatars\1.png
+wwwroot\UI Design\assets\img\avatars\5.png
+wwwroot\UI Design\assets\img\avatars\6.png
+wwwroot\UI Design\assets\img\avatars\7.png
+wwwroot\UI Design\assets\img\backgrounds\18.jpg
+wwwroot\UI Design\assets\img\elements\1.jpg
+wwwroot\UI Design\assets\img\elements\11.jpg
+wwwroot\UI Design\assets\img\elements\12.jpg
+wwwroot\UI Design\assets\img\elements\13.jpg
+wwwroot\UI Design\assets\img\elements\17.jpg
+wwwroot\UI Design\assets\img\elements\18.jpg
+wwwroot\UI Design\assets\img\elements\19.jpg
+wwwroot\UI Design\assets\img\elements\2.jpg
+wwwroot\UI Design\assets\img\elements\20.jpg
+wwwroot\UI Design\assets\img\elements\3.jpg
+wwwroot\UI Design\assets\img\elements\4.jpg
+wwwroot\UI Design\assets\img\elements\5.jpg
+wwwroot\UI Design\assets\img\elements\7.jpg
+wwwroot\UI Design\assets\img\favicon\favicon.ico
+wwwroot\UI Design\assets\img\icons\brands\asana.png
+wwwroot\UI Design\assets\img\icons\brands\behance.png
+wwwroot\UI Design\assets\img\icons\brands\dribbble.png
+wwwroot\UI Design\assets\img\icons\brands\facebook.png
+wwwroot\UI Design\assets\img\icons\brands\github.png
+wwwroot\UI Design\assets\img\icons\brands\google.png
+wwwroot\UI Design\assets\img\icons\brands\instagram.png
+wwwroot\UI Design\assets\img\icons\brands\mailchimp.png
+wwwroot\UI Design\assets\img\icons\brands\slack.png
+wwwroot\UI Design\assets\img\icons\brands\twitter.png
+wwwroot\UI Design\assets\img\icons\unicons\cc-primary.png
+wwwroot\UI Design\assets\img\icons\unicons\cc-success.png
+wwwroot\UI Design\assets\img\icons\unicons\cc-warning.png
+wwwroot\UI Design\assets\img\icons\unicons\chart-success.png
+wwwroot\UI Design\assets\img\icons\unicons\chart.png
+wwwroot\UI Design\assets\img\icons\unicons\paypal.png
+wwwroot\UI Design\assets\img\icons\unicons\wallet-info.png
+wwwroot\UI Design\assets\img\icons\unicons\wallet.png
+wwwroot\UI Design\assets\img\illustrations\girl-doing-yoga-light.png
+wwwroot\UI Design\assets\img\illustrations\man-with-laptop-light.png
+wwwroot\UI Design\assets\img\illustrations\page-misc-error-light.png
+wwwroot\UI Design\assets\img\layouts\layout-container-light.png
+wwwroot\UI Design\assets\img\layouts\layout-fluid-light.png
+wwwroot\UI Design\assets\img\layouts\layout-without-menu-light.png
+wwwroot\UI Design\assets\img\layouts\layout-without-navbar-light.png
+wwwroot\UI Design\assets\js\config.js
+wwwroot\UI Design\assets\js\dashboards-analytics.js
+wwwroot\UI Design\assets\js\extended-ui-perfect-scrollbar.js
+wwwroot\UI Design\assets\js\form-basic-inputs.js
+wwwroot\UI Design\assets\js\main.js
+wwwroot\UI Design\assets\js\pages-account-settings-account.js
+wwwroot\UI Design\assets\js\ui-modals.js
+wwwroot\UI Design\assets\js\ui-popover.js
+wwwroot\UI Design\assets\js\ui-toasts.js
+wwwroot\UI Design\assets\vendor\css\core.css
+wwwroot\UI Design\assets\vendor\css\pages\page-account-settings.css
+wwwroot\UI Design\assets\vendor\css\pages\page-auth.css
+wwwroot\UI Design\assets\vendor\css\pages\page-icons.css
+wwwroot\UI Design\assets\vendor\css\pages\page-misc.css
+wwwroot\UI Design\assets\vendor\css\theme-default.css
+wwwroot\UI Design\assets\vendor\fonts\boxicons.css
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.eot
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.svg
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.ttf
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.woff
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.woff2
+wwwroot\UI Design\assets\vendor\js\bootstrap.js
+wwwroot\UI Design\assets\vendor\js\helpers.js
+wwwroot\UI Design\assets\vendor\js\menu.js
+wwwroot\UI Design\assets\vendor\libs\apex-charts\apex-charts.css
+wwwroot\UI Design\assets\vendor\libs\apex-charts\apexcharts.js
+wwwroot\UI Design\assets\vendor\libs\highlight\highlight-github.css
+wwwroot\UI Design\assets\vendor\libs\highlight\highlight.css
+wwwroot\UI Design\assets\vendor\libs\highlight\highlight.js
+wwwroot\UI Design\assets\vendor\libs\jquery\jquery.js
+wwwroot\UI Design\assets\vendor\libs\masonry\masonry.js
+wwwroot\UI Design\assets\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
+wwwroot\UI Design\assets\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
+wwwroot\UI Design\assets\vendor\libs\popper\popper.js
+wwwroot\UI Design\build-config.js
+wwwroot\UI Design\CHANGELOG.md
+wwwroot\UI Design\fonts\boxicons.scss
+wwwroot\UI Design\gulpfile.js
+wwwroot\UI Design\js\bootstrap.js
+wwwroot\UI Design\js\helpers.js
+wwwroot\UI Design\js\menu.js
+wwwroot\UI Design\libs\apex-charts\apex-charts.scss
+wwwroot\UI Design\libs\apex-charts\apexcharts.js
+wwwroot\UI Design\libs\highlight\highlight-github.scss
+wwwroot\UI Design\libs\highlight\highlight.js
+wwwroot\UI Design\libs\highlight\highlight.scss
+wwwroot\UI Design\libs\jquery\jquery.js
+wwwroot\UI Design\libs\masonry\masonry.js
+wwwroot\UI Design\libs\perfect-scrollbar\perfect-scrollbar.js
+wwwroot\UI Design\libs\perfect-scrollbar\perfect-scrollbar.scss
+wwwroot\UI Design\libs\popper\popper.js
+wwwroot\UI Design\LICENSE.md
+wwwroot\UI Design\package-lock.json
+wwwroot\UI Design\package.json
+wwwroot\UI Design\README.md
+wwwroot\UI Design\scss\core.scss
+wwwroot\UI Design\scss\pages\page-account-settings.scss
+wwwroot\UI Design\scss\pages\page-auth.scss
+wwwroot\UI Design\scss\pages\page-icons.scss
+wwwroot\UI Design\scss\pages\page-misc.scss
+wwwroot\UI Design\scss\theme-default.scss
+wwwroot\UI Design\scss\_bootstrap-extended.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_floating-labels.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_form-control.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_form-range.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_form-select.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_input-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_labels.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_validation.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_alert.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_badge.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_buttons.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_caret.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_dropdown.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_forms.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_list-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_misc.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_navs.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_pagination.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_progress.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_table-variants.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_toasts.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_accordion.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_alert.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_badge.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_breadcrumb.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_button-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_buttons.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_card.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_carousel.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_close.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_dropdown.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_forms.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_functions.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_include.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_list-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_mixins.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_modal.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_nav.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_navbar.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_offcanvas.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_pagination.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_popover.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_progress.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_reboot.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_root.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_spinners.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_tables.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_toasts.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_tooltip.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_type.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_utilities-ltr.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_utilities.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_variables.scss
+wwwroot\UI Design\scss\_bootstrap.scss
+wwwroot\UI Design\scss\_colors.scss
+wwwroot\UI Design\scss\_components.scss
+wwwroot\UI Design\scss\_components\mixins\_app-brand.scss
+wwwroot\UI Design\scss\_components\mixins\_avatar.scss
+wwwroot\UI Design\scss\_components\mixins\_footer.scss
+wwwroot\UI Design\scss\_components\mixins\_menu.scss
+wwwroot\UI Design\scss\_components\mixins\_misc.scss
+wwwroot\UI Design\scss\_components\mixins\_navbar.scss
+wwwroot\UI Design\scss\_components\mixins\_text-divider.scss
+wwwroot\UI Design\scss\_components\_app-brand.scss
+wwwroot\UI Design\scss\_components\_avatar.scss
+wwwroot\UI Design\scss\_components\_base.scss
+wwwroot\UI Design\scss\_components\_common.scss
+wwwroot\UI Design\scss\_components\_footer.scss
+wwwroot\UI Design\scss\_components\_include.scss
+wwwroot\UI Design\scss\_components\_layout.scss
+wwwroot\UI Design\scss\_components\_menu.scss
+wwwroot\UI Design\scss\_components\_mixins.scss
+wwwroot\UI Design\scss\_components\_text-divider.scss
+wwwroot\UI Design\scss\_components\_variables.scss
+wwwroot\UI Design\scss\_custom-variables\_bootstrap-extended.scss
+wwwroot\UI Design\scss\_custom-variables\_components.scss
+wwwroot\UI Design\scss\_custom-variables\_libs.scss
+wwwroot\UI Design\scss\_custom-variables\_pages.scss
+wwwroot\UI Design\scss\_custom-variables\_support.scss
+wwwroot\UI Design\scss\_theme\_common.scss
+wwwroot\UI Design\scss\_theme\_theme.scss
+wwwroot\UI Design\tasks\build.js
+wwwroot\UI Design\tasks\prod.js
+wwwroot\UI Design\webpack.config.js
+wwwroot\UI Design\yarn.lock
