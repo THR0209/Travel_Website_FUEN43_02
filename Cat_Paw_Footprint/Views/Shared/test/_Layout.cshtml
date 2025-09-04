@@ -37,8 +37,11 @@
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="~/ui design/assets/js/config.js"></script>
-
-    @await RenderSectionAsync("Styles", required: false)
+    @* @{
+        var roleId = Context.Session.GetString("EmpRoleId");
+        var status = Context.Session.GetString("Status"); // "True" 或 "False"
+    }
+    @await RenderSectionAsync("Styles", required: false) *@
 </head>
 <body> 
     <!-- Layout wrapper -->
@@ -47,7 +50,37 @@
             <!-- Menu -->
 
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand demo">
+                @* @if (status == "True")
+                {
+                    switch (roleId)
+                    {
+                        case "6":
+                            @await Html.PartialAsync("_SuperAdmin")
+                            break;
+                        case "5":
+                            @await Html.PartialAsync("_Admin")
+                            break;
+                        case "4":
+                            @await Html.PartialAsync("_CustomerService")
+                            break;
+                        case "3":
+                            @await Html.PartialAsync("_Sales")
+                            break;
+                        case "2":
+                            @await Html.PartialAsync("_TourGuide")
+                            break;
+                        case "1":
+                            @await Html.PartialAsync("_ProductPlanner")
+                            break;
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-danger p-3 m-2">
+                        此帳號已被停權，請聯絡管理員。
+                    </div>
+                } *@
+                @* <div class="app-brand demo">
                     <span class="app-brand-logo demo">
                         <img src="/images/Logo.png" alt="TravelPaws Logo" style="height:60px;">
                     </span>
@@ -245,7 +278,7 @@
                             <div data-i18n="Analytics">帳號登出</div>
                         </a>
                     </li>
-                </ul>
+                </ul> *@
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->

@@ -21,12 +21,10 @@ else
 {
     <div class="alert alert-danger">@Model.ErrorMessage</div>
 }
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
+
 
 <form asp-area="Employee" asp-action="Register" method="post" class="w-50 mx-auto">
+    @Html.AntiForgeryToken()
    
     <div class="form-group mb-3">
         <label asp-for="Account" class="form-label">帳號</label>

@@ -3,7 +3,7 @@
 
 
 
-@if (Model != null)
+@* @if (Model != null)
 {
     <div style="border: 1px solid red; padding: 10px;">
         測試 ErrorMessage 是否有綁定成功：<strong>@Model.ErrorMessage</strong>
@@ -14,13 +14,13 @@ else
     <div style="border: 1px solid blue; padding: 10px;">
         View 的 Model 是 null！
     </div>
-}
+} *@
 <div class="row justify-content-center">
     <div class="col-md-6">
         <h2 class="text-center mb-4">員工登入</h2>
 
         <form asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Login" method="post">
-            
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             
             <div class="form-floating mb-3">
