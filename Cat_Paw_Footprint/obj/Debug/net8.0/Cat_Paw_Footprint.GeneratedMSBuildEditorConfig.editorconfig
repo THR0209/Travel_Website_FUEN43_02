@@ -17,69 +17,69 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Cat_Paw_Footprint
 build_property.RootNamespace = Cat_Paw_Footprint
-build_property.ProjectDir = D:\FUEN43\Travel_Website_FUEN43_02\Cat_Paw_Footprint\
+build_property.ProjectDir = D:\Project\Travel_Website_FUEN43_02\Cat_Paw_Footprint\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = D:\FUEN43\Travel_Website_FUEN43_02\Cat_Paw_Footprint
+build_property.MSBuildProjectDirectory = D:\Project\Travel_Website_FUEN43_02\Cat_Paw_Footprint
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Employee/Views/EmployeeAuth/Login.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Employee/Views/EmployeeAuth/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRW1wbG95ZWVcVmlld3NcRW1wbG95ZWVBdXRoXExvZ2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Employee/Views/EmployeeAuth/Register.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Employee/Views/EmployeeAuth/Register.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRW1wbG95ZWVcVmlld3NcRW1wbG95ZWVBdXRoXFJlZ2lzdGVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Employee/Views/_ViewStart.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Employee/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcRW1wbG95ZWVcVmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Identity/Pages/_ViewStart.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Identity/Pages/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Vendor/Views/_ViewStart.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Areas/Vendor/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcVmVuZG9yXFZpZXdzXF9WaWV3U3RhcnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Home/Index.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Home/Privacy.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/Error.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_AdminLayout.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_AdminLayout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BZG1pbkxheW91dC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_LoginPartial.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_LoginPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9Mb2dpblBhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_ValidationScriptsPartial.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/_ViewImports.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/_ViewStart.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/FUEN43/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_Layout.cshtml]
+[D:/Project/Travel_Website_FUEN43_02/Cat_Paw_Footprint/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-mw0a0vd1w0

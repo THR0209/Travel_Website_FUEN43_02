@@ -1,34 +1,26 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\",
+  "WorkspaceRootPath": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\models\\mydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\models\\mydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\models\\mydbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\views\\test\\checkdb.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\views\\test\\checkdb.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\controllers\\testcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\project\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\controllers\\testcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\controllers\\testcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|d:\\fuen43\\travel_website_fuen43_02\\testdbconnection\\testdbconnection\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{116C80B0-9408-4AF6-B23E-3B56BE76C22A}|testDBConnection\\testDBConnection.csproj|solutionrelative:testdbconnection\\models\\customer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 161,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,11 +38,37 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Program.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Program.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Program.cs",
+              "RelativeToolTip": "testDBConnection\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA0AAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T06:54:07.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MyDbContext.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\MyDbContext.cs",
+              "RelativeDocumentMoniker": "testDBConnection\\Models\\MyDbContext.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\MyDbContext.cs",
+              "RelativeToolTip": "testDBConnection\\Models\\MyDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAcwA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T06:50:27.959Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.json",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.json",
               "RelativeDocumentMoniker": "testDBConnection\\appsettings.json",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.json",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.json",
               "RelativeToolTip": "testDBConnection\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
@@ -59,77 +77,37 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "HomeController.cs",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\HomeController.cs",
-              "RelativeDocumentMoniker": "testDBConnection\\Controllers\\HomeController.cs",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\HomeController.cs",
-              "RelativeToolTip": "testDBConnection\\Controllers\\HomeController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T07:19:37.862Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Program.cs",
-              "RelativeDocumentMoniker": "testDBConnection\\Program.cs",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Program.cs",
-              "RelativeToolTip": "testDBConnection\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T06:54:07.909Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "appsettings.Development.json",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.Development.json",
-              "RelativeDocumentMoniker": "testDBConnection\\appsettings.Development.json",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\appsettings.Development.json",
-              "RelativeToolTip": "testDBConnection\\appsettings.Development.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-29T07:17:52.512Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MyDbContext.cs",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\MyDbContext.cs",
-              "RelativeDocumentMoniker": "testDBConnection\\Models\\MyDbContext.cs",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\MyDbContext.cs",
-              "RelativeToolTip": "testDBConnection\\Models\\MyDbContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T06:50:27.959Z",
-              "EditorCaption": ""
+              "Title": "CheckDb.cshtml",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Views\\Test\\CheckDb.cshtml",
+              "RelativeDocumentMoniker": "testDBConnection\\Views\\Test\\CheckDb.cshtml",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Views\\Test\\CheckDb.cshtml",
+              "RelativeToolTip": "testDBConnection\\Views\\Test\\CheckDb.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-04T03:02:58.29Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "TestController.cs",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\TestController.cs",
+              "DocumentMoniker": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\TestController.cs",
               "RelativeDocumentMoniker": "testDBConnection\\Controllers\\TestController.cs",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\TestController.cs",
+              "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Controllers\\TestController.cs",
               "RelativeToolTip": "testDBConnection\\Controllers\\TestController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAeAAAAAAAAAA==",
+              "ViewState": "AgIAABQAAAAAAAAAAAAIwCwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-29T06:57:02.623Z"
-            },
+            }
+          ]
+        },
+        {
+          "DockedWidth": 35,
+          "SelectedChildIndex": -1,
+          "Children": [
             {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Customer.cs",
-              "DocumentMoniker": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\Customer.cs",
-              "RelativeDocumentMoniker": "testDBConnection\\Models\\Customer.cs",
-              "ToolTip": "D:\\FUEN43\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Models\\Customer.cs",
-              "RelativeToolTip": "testDBConnection\\Models\\Customer.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T08:56:32.993Z"
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             }
           ]
         }
