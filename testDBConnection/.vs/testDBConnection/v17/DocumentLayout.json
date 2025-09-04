@@ -51,8 +51,7 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-04T05:49:51.103Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -68,8 +67,7 @@
               "RelativeToolTip": "testDBConnection\\Program.cs",
               "ViewState": "AgIAAAoAAAAAAAAAAAAAwBAAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T06:54:07.909Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T06:54:07.909Z"
             },
             {
               "$type": "Document",
@@ -81,8 +79,7 @@
               "RelativeToolTip": "testDBConnection\\Models\\MyDbContext.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T06:50:27.959Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T06:50:27.959Z"
             },
             {
               "$type": "Document",
@@ -92,7 +89,7 @@
               "RelativeDocumentMoniker": "testDBConnection\\Views\\Test\\CheckDb.cshtml",
               "ToolTip": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\Views\\Test\\CheckDb.cshtml",
               "RelativeToolTip": "testDBConnection\\Views\\Test\\CheckDb.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAALAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-09-04T03:02:58.29Z",
               "EditorCaption": ""
@@ -107,8 +104,7 @@
               "RelativeToolTip": "testDBConnection\\Controllers\\TestController.cs",
               "ViewState": "AgIAAA4AAAAAAAAAAAAAwBsAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-29T06:57:02.623Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T06:57:02.623Z"
             },
             {
               "$type": "Document",
@@ -120,8 +116,7 @@
               "RelativeToolTip": "testDBConnection\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-29T06:29:09.398Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-29T06:29:09.398Z"
             },
             {
               "$type": "Document",
@@ -133,8 +128,7 @@
               "RelativeToolTip": "testDBConnection\\appsettings.Development.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-04T05:37:56.253Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-04T05:37:56.253Z"
             }
           ]
         },
