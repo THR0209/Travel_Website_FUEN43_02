@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\a1478\\Desktop\\全端工程師課程\\小組專題\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {}
+    "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {}
   },
   "projects": {
-    "C:\\Users\\a1478\\Desktop\\全端工程師課程\\小組專題\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {
+    "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\a1478\\Desktop\\全端工程師課程\\小組專題\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
+        "projectUniqueName": "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
         "projectName": "Cat_Paw_Footprint",
-        "projectPath": "C:\\Users\\a1478\\Desktop\\全端工程師課程\\小組專題\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
-        "packagesPath": "C:\\Users\\a1478\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\a1478\\Desktop\\全端工程師課程\\小組專題\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\obj\\",
+        "projectPath": "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
+        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\a1478\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

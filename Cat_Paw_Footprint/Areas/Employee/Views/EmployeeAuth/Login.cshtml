@@ -1,0 +1,57 @@
+﻿@using Cat_Paw_Footprint.Areas.Employee.ViewModel
+@model Cat_Paw_Footprint.Areas.Employee.ViewModel.LoginViewModel
+
+
+
+@if (Model != null)
+{
+    <div style="border: 1px solid red; padding: 10px;">
+        測試 ErrorMessage 是否有綁定成功：<strong>@Model.ErrorMessage</strong>
+    </div>
+}
+else
+{
+    <div style="border: 1px solid blue; padding: 10px;">
+        View 的 Model 是 null！
+    </div>
+}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">員工登入</h2>
+
+        <form asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Login" method="post">
+            
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            
+            <div class="form-floating mb-3">
+                <input asp-for="Account" class="form-control" placeholder="請輸入帳號" name="Account" />
+                <label asp-for="Account">帳號</label>
+                <span asp-validation-for="Account" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Password" class="form-control" placeholder="請輸入密碼" type="password" name="Password" />
+                <label asp-for="Password">密碼</label>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">登入</button>
+
+            @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+            {
+                <div class="alert alert-danger mt-3"><p style="color: red;">Debug：@Model?.ErrorMessage</p></div>
+            }
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            const error = document.querySelector('.alert-danger');
+            if (error) {
+                document.getElementById('Account')?.focus(); //自動聚焦帳號欄
+                error.scrollIntoView({ behavior: "smooth", block: "center" }); //滑到錯誤框
+            }
+        });
+    </script>
+}
