@@ -532,3 +532,5 @@ Cat_Paw_Footprint/obj/
 *.db
 
 Cat_Paw_Footprint/bin/Debug/net8.0/
+
+*.bin
