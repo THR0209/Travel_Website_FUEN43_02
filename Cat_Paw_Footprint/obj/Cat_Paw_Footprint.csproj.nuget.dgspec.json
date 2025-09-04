@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {}
+    "D:\\FUEN43\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {}
   },
   "projects": {
-    "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {
+    "D:\\FUEN43\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
+        "projectUniqueName": "D:\\FUEN43\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
         "projectName": "Cat_Paw_Footprint",
-        "projectPath": "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\user\\Desktop\\專題\\小組專題後台\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\obj\\",
+        "projectPath": "D:\\FUEN43\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
+        "outputPath": "D:\\FUEN43\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -50,6 +51,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
             "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.19, )"
@@ -61,6 +66,10 @@
             "Microsoft.AspNetCore.Identity.UI": {
               "target": "Package",
               "version": "[8.0.19, )"
+            },
+            "Microsoft.CodeAnalysis.Scripting.Common": {
+              "target": "Package",
+              "version": "[4.14.0, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
