@@ -1,0 +1,62 @@
+﻿@using Cat_Paw_Footprint.Areas.Employee.ViewModel
+@model Cat_Paw_Footprint.Areas.Employee.ViewModel.RegisterViewModel
+
+
+@if (Model != null)
+{
+    <div style="border: 1px solid red; padding: 10px;">
+        測試 ErrorMessage 是否有綁定成功：<strong>@Model.ErrorMessage</strong>
+    </div>
+}
+else
+{
+    <div style="border: 1px solid blue; padding: 10px;">
+        View 的 Model 是 null！
+    </div>
+}
+
+<h2 class="mb-4">註冊員工帳號</h2>
+
+@if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<form asp-area="Employee" asp-action="Register" method="post" class="w-50 mx-auto">
+   
+    <div class="form-group mb-3">
+        <label asp-for="Account" class="form-label">帳號</label>
+        <input asp-for="Account" class="form-control" name="Account" />
+        <span asp-validation-for="Account" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Password" class="form-label">密碼</label>
+        <input asp-for="Password" class="form-control" type="password" name="Password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="EmployeeName" class="form-label">員工姓名</label>
+        <input asp-for="EmployeeName" class="form-control" name="EmployeeName" />
+        <span asp-validation-for="EmployeeName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="RoleId" class="form-label" name="RoleId">角色</label>
+        @Html.DropDownListFor(m => m.RoleId, (SelectList)ViewBag.RoleList, "請選擇角色", new { @class = "form-select" })
+        <span asp-validation-for="RoleId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">註冊</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

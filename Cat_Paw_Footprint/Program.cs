@@ -10,15 +10,26 @@ namespace Cat_Paw_Footprint
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+			// Add services to the container.
+			builder.Services.AddDbContext<EmployeeDbContext>(options =>
+	options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            builder.Services.AddControllersWithViews();
+
+			builder.Services.AddSession(options =>
+			{
+				options.Cookie.Name = ".CatPaw.Employee.Session"; // 自訂員工 Session 名稱
+				options.IdleTimeout = TimeSpan.FromHours(9);   // 自訂逾時時間
+				options.Cookie.HttpOnly = true;                   // 阻止 JS 存取，防止 XSS
+				options.Cookie.IsEssential = true;                // 避免被瀏覽器阻擋
+			});
+
+			builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
@@ -38,9 +49,9 @@ namespace Cat_Paw_Footprint
             app.UseStaticFiles();
 
             app.UseRouting();
+			app.UseSession(); // 啟用 Session 中介軟體
 
-            app.UseAuthorization();
-
+			app.UseAuthorization();
 			app.MapControllerRoute(
 				name: "areas",
 				pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
@@ -53,5 +64,3 @@ namespace Cat_Paw_Footprint
         }
     }
 }
-
-// test
