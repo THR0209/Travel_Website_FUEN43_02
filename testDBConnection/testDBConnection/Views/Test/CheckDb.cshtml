@@ -1,5 +1,33 @@
-﻿<div>
+﻿@model IEnumerable<testDBConnection.Models.Customer>
+<div>
 	@ViewBag.DbConnectionResult
-	<br />
-	@ViewBag.FirstCustomerAccount
+    <br>
+    現在外網IP: @ViewBag.IpAddress
+    <br>
+</<div>
+
+<h2 class="mt-1">客戶清單</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>CustomerId</th>
+            <th>FullName</th>
+            <th>Account</th>
+            <!-- 其他欄位 -->
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model)
+    {
+        <tr>
+            <td>@c.CustomerID</td>
+            <td>@c.FullName</td>
+            <td>@c.Account</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+	
 </div>

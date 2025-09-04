@@ -9,16 +9,22 @@ namespace testDBConnection.Models
 		}
 
 		
-		public DbSet<User> Users { get; set; }
+		
 		public DbSet<Customer> Customers { get; set; }
 
-		public class User 
-		{
-			public int Id { get; set; }
-			public string Name { get; set; }
-			public string Email { get; set; }
-		}
-
+		//public class Customer
+		//{
+		//	public int CustomerID { get; set; }
+		//	public string Account { get; set; }
+		//	public string Password { get; set; }
+		//	public string FullName { get; set; }
+		//	public int Level { get; set; }
+		//	public DateTime CreateDate { get; set; }
+		//	public bool Status { get; set; }
+		//	public bool IsBlacklisted { get; set; }
+		//	public string CustomerCode { get; set; }
+		//}
+		
 
 	}
 }
