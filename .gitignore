@@ -524,3 +524,11 @@ FodyWeavers.xsd
 # JetBrains Rider
 
 # End of https://www.toptal.com/developers/gitignore/api/csharp,aspnetcore
+
+Cat_Paw_Footprint/obj/
+
+*.vsidx
+
+*.db
+
+Cat_Paw_Footprint/bin/Debug/net8.0/
