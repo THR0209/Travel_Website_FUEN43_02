@@ -1,0 +1,115 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.EmployeeViewModel>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    var roles = ViewBag.Roles as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+}
+<h2 class="mb-3">員工管理</h2>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle" id="emp-table">
+        <thead>
+            <tr>
+                <th style="width:90px;">員編</th>
+                <th style="width:160px;">帳號</th>
+                <th style="width:160px;">姓名</th>
+                <th style="width:220px;">角色</th>
+                <th style="width:90px;">啟用</th>
+                <th style="width:220px;">新密碼</th>
+                <th style="width:120px;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr data-id="@emp.EmployeeID">
+                <td>@emp.EmployeeID</td>
+                <td>@emp.Account</td>
+                <td>@emp.EmployeeName</td>
+                <td>
+                    <select class="form-select js-role">
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.Value" selected="@(emp.RoleID.HasValue && emp.RoleID.Value.ToString() == role.Value)">
+                                    @role.Text
+                                </option>
+                            }
+                    </select>
+                </td>
+                <td>
+                    <input type="checkbox" class="form-check-input js-status" @(emp.Status == true ? "checked" : "") />
+                </td>
+                <td>
+                    <input type="password" class="form-control js-password" placeholder="留空不變" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<!-- 只用來取 Anti-Forgery Token -->
+<form id="anti-form" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+@section Scripts {
+<script>
+(function () {
+    const table = document.getElementById("emp-table");
+    const token = document.querySelector('#anti-form input[name="__RequestVerificationToken"]').value;
+
+    table.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".js-save");
+        if (!btn) return;
+
+        const tr = btn.closest("tr");
+        const id = tr.dataset.id;
+        const roleId = tr.querySelector(".js-role").value;
+        const status = tr.querySelector(".js-status").checked;
+        const password = tr.querySelector(".js-password").value;
+
+        const form = new FormData();
+        form.append("id", id);
+        form.append("roleId", roleId);
+        form.append("status", status ? "true" : "false");
+
+        // 留空就不更新密碼（你也可改成永遠送，後端再把空白正規化為 null）
+        if (password && password.trim().length > 0) {
+            form.append("password", password);
+        }
+
+        form.append("__RequestVerificationToken", token);
+
+        btn.disabled = true;
+        const oldText = btn.textContent;
+        btn.textContent = "儲存中…";
+
+        try {
+            const res = await fetch('@Url.Action("UpdateRow", "EmployeeAuth", new { area = "Employee" })', {
+                method: "POST",
+                body: form,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            if (!res.ok) throw new Error("HTTP " + res.status);
+
+            const data = await res.json();
+            if (data.ok) {
+                alert("更新成功");
+                tr.querySelector(".js-password").value = ""; // 成功後清空密碼框
+            } else {
+                alert("更新失敗：" + (data.message || "請稍後再試"));
+            }
+        } catch (err) {
+            alert("發生錯誤：" + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    });
+})();
+</script>
+}
