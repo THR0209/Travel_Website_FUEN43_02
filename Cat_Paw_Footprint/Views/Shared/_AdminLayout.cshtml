@@ -39,8 +39,8 @@
     @* @{
         var roleId = Context.Session.GetString("EmpRoleId");
         var status = Context.Session.GetString("Status"); // "True" 或 "False"
-    }
-    @await RenderSectionAsync("Styles", required: false) *@
+    }*@
+    @await RenderSectionAsync("Styles", required: false);
 </head>
 <body> 
     @{
