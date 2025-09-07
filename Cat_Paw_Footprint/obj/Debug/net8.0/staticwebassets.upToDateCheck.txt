@@ -1,0 +1,484 @@
+wwwroot\css\site.css
+wwwroot\favicon.ico
+wwwroot\images\Logo.png
+wwwroot\js\site.js
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css
+wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.js.map
+wwwroot\lib\bootstrap\dist\js\bootstrap.min.js
+wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map
+wwwroot\lib\bootstrap\LICENSE
+wwwroot\lib\ckeditor5\ckeditor.js
+wwwroot\lib\ckeditor5\ckeditor.js.map
+wwwroot\lib\ckeditor5\translations\af.js
+wwwroot\lib\ckeditor5\translations\af.min.js
+wwwroot\lib\ckeditor5\translations\ar.js
+wwwroot\lib\ckeditor5\translations\ar.min.js
+wwwroot\lib\ckeditor5\translations\ast.js
+wwwroot\lib\ckeditor5\translations\ast.min.js
+wwwroot\lib\ckeditor5\translations\az.js
+wwwroot\lib\ckeditor5\translations\az.min.js
+wwwroot\lib\ckeditor5\translations\bg.js
+wwwroot\lib\ckeditor5\translations\bg.min.js
+wwwroot\lib\ckeditor5\translations\bn.js
+wwwroot\lib\ckeditor5\translations\bn.min.js
+wwwroot\lib\ckeditor5\translations\bs.js
+wwwroot\lib\ckeditor5\translations\bs.min.js
+wwwroot\lib\ckeditor5\translations\ca.js
+wwwroot\lib\ckeditor5\translations\ca.min.js
+wwwroot\lib\ckeditor5\translations\cs.js
+wwwroot\lib\ckeditor5\translations\cs.min.js
+wwwroot\lib\ckeditor5\translations\da.js
+wwwroot\lib\ckeditor5\translations\da.min.js
+wwwroot\lib\ckeditor5\translations\de-ch.js
+wwwroot\lib\ckeditor5\translations\de-ch.min.js
+wwwroot\lib\ckeditor5\translations\de.js
+wwwroot\lib\ckeditor5\translations\de.min.js
+wwwroot\lib\ckeditor5\translations\el.js
+wwwroot\lib\ckeditor5\translations\el.min.js
+wwwroot\lib\ckeditor5\translations\en-au.js
+wwwroot\lib\ckeditor5\translations\en-au.min.js
+wwwroot\lib\ckeditor5\translations\en-gb.js
+wwwroot\lib\ckeditor5\translations\en-gb.min.js
+wwwroot\lib\ckeditor5\translations\eo.js
+wwwroot\lib\ckeditor5\translations\eo.min.js
+wwwroot\lib\ckeditor5\translations\es-co.js
+wwwroot\lib\ckeditor5\translations\es-co.min.js
+wwwroot\lib\ckeditor5\translations\es.js
+wwwroot\lib\ckeditor5\translations\es.min.js
+wwwroot\lib\ckeditor5\translations\et.js
+wwwroot\lib\ckeditor5\translations\et.min.js
+wwwroot\lib\ckeditor5\translations\eu.js
+wwwroot\lib\ckeditor5\translations\eu.min.js
+wwwroot\lib\ckeditor5\translations\fa.js
+wwwroot\lib\ckeditor5\translations\fa.min.js
+wwwroot\lib\ckeditor5\translations\fi.js
+wwwroot\lib\ckeditor5\translations\fi.min.js
+wwwroot\lib\ckeditor5\translations\fr.js
+wwwroot\lib\ckeditor5\translations\fr.min.js
+wwwroot\lib\ckeditor5\translations\gl.js
+wwwroot\lib\ckeditor5\translations\gl.min.js
+wwwroot\lib\ckeditor5\translations\gu.js
+wwwroot\lib\ckeditor5\translations\gu.min.js
+wwwroot\lib\ckeditor5\translations\he.js
+wwwroot\lib\ckeditor5\translations\he.min.js
+wwwroot\lib\ckeditor5\translations\hi.js
+wwwroot\lib\ckeditor5\translations\hi.min.js
+wwwroot\lib\ckeditor5\translations\hr.js
+wwwroot\lib\ckeditor5\translations\hr.min.js
+wwwroot\lib\ckeditor5\translations\hu.js
+wwwroot\lib\ckeditor5\translations\hu.min.js
+wwwroot\lib\ckeditor5\translations\hy.js
+wwwroot\lib\ckeditor5\translations\hy.min.js
+wwwroot\lib\ckeditor5\translations\id.js
+wwwroot\lib\ckeditor5\translations\id.min.js
+wwwroot\lib\ckeditor5\translations\it.js
+wwwroot\lib\ckeditor5\translations\it.min.js
+wwwroot\lib\ckeditor5\translations\ja.js
+wwwroot\lib\ckeditor5\translations\ja.min.js
+wwwroot\lib\ckeditor5\translations\jv.js
+wwwroot\lib\ckeditor5\translations\jv.min.js
+wwwroot\lib\ckeditor5\translations\kk.js
+wwwroot\lib\ckeditor5\translations\kk.min.js
+wwwroot\lib\ckeditor5\translations\km.js
+wwwroot\lib\ckeditor5\translations\km.min.js
+wwwroot\lib\ckeditor5\translations\kn.js
+wwwroot\lib\ckeditor5\translations\kn.min.js
+wwwroot\lib\ckeditor5\translations\ko.js
+wwwroot\lib\ckeditor5\translations\ko.min.js
+wwwroot\lib\ckeditor5\translations\ku.js
+wwwroot\lib\ckeditor5\translations\ku.min.js
+wwwroot\lib\ckeditor5\translations\lt.js
+wwwroot\lib\ckeditor5\translations\lt.min.js
+wwwroot\lib\ckeditor5\translations\lv.js
+wwwroot\lib\ckeditor5\translations\lv.min.js
+wwwroot\lib\ckeditor5\translations\ms.js
+wwwroot\lib\ckeditor5\translations\ms.min.js
+wwwroot\lib\ckeditor5\translations\nb.js
+wwwroot\lib\ckeditor5\translations\nb.min.js
+wwwroot\lib\ckeditor5\translations\ne.js
+wwwroot\lib\ckeditor5\translations\ne.min.js
+wwwroot\lib\ckeditor5\translations\nl.js
+wwwroot\lib\ckeditor5\translations\nl.min.js
+wwwroot\lib\ckeditor5\translations\no.js
+wwwroot\lib\ckeditor5\translations\no.min.js
+wwwroot\lib\ckeditor5\translations\oc.js
+wwwroot\lib\ckeditor5\translations\oc.min.js
+wwwroot\lib\ckeditor5\translations\pl.js
+wwwroot\lib\ckeditor5\translations\pl.min.js
+wwwroot\lib\ckeditor5\translations\pt-br.js
+wwwroot\lib\ckeditor5\translations\pt-br.min.js
+wwwroot\lib\ckeditor5\translations\pt.js
+wwwroot\lib\ckeditor5\translations\pt.min.js
+wwwroot\lib\ckeditor5\translations\ro.js
+wwwroot\lib\ckeditor5\translations\ro.min.js
+wwwroot\lib\ckeditor5\translations\ru.js
+wwwroot\lib\ckeditor5\translations\ru.min.js
+wwwroot\lib\ckeditor5\translations\si.js
+wwwroot\lib\ckeditor5\translations\si.min.js
+wwwroot\lib\ckeditor5\translations\sk.js
+wwwroot\lib\ckeditor5\translations\sk.min.js
+wwwroot\lib\ckeditor5\translations\sl.js
+wwwroot\lib\ckeditor5\translations\sl.min.js
+wwwroot\lib\ckeditor5\translations\sq.js
+wwwroot\lib\ckeditor5\translations\sq.min.js
+wwwroot\lib\ckeditor5\translations\sr-latn.js
+wwwroot\lib\ckeditor5\translations\sr-latn.min.js
+wwwroot\lib\ckeditor5\translations\sr.js
+wwwroot\lib\ckeditor5\translations\sr.min.js
+wwwroot\lib\ckeditor5\translations\sv.js
+wwwroot\lib\ckeditor5\translations\sv.min.js
+wwwroot\lib\ckeditor5\translations\th.js
+wwwroot\lib\ckeditor5\translations\th.min.js
+wwwroot\lib\ckeditor5\translations\ti.js
+wwwroot\lib\ckeditor5\translations\ti.min.js
+wwwroot\lib\ckeditor5\translations\tk.js
+wwwroot\lib\ckeditor5\translations\tk.min.js
+wwwroot\lib\ckeditor5\translations\tr.js
+wwwroot\lib\ckeditor5\translations\tr.min.js
+wwwroot\lib\ckeditor5\translations\tt.js
+wwwroot\lib\ckeditor5\translations\tt.min.js
+wwwroot\lib\ckeditor5\translations\ug.js
+wwwroot\lib\ckeditor5\translations\ug.min.js
+wwwroot\lib\ckeditor5\translations\uk.js
+wwwroot\lib\ckeditor5\translations\uk.min.js
+wwwroot\lib\ckeditor5\translations\ur.js
+wwwroot\lib\ckeditor5\translations\ur.min.js
+wwwroot\lib\ckeditor5\translations\uz.js
+wwwroot\lib\ckeditor5\translations\uz.min.js
+wwwroot\lib\ckeditor5\translations\vi.js
+wwwroot\lib\ckeditor5\translations\vi.min.js
+wwwroot\lib\ckeditor5\translations\zh-cn.js
+wwwroot\lib\ckeditor5\translations\zh-cn.min.js
+wwwroot\lib\ckeditor5\translations\zh.js
+wwwroot\lib\ckeditor5\translations\zh.min.js
+wwwroot\lib\datatables\css\dataTables.bootstrap.css
+wwwroot\lib\datatables\css\dataTables.bootstrap.min.css
+wwwroot\lib\datatables\css\dataTables.bootstrap4.css
+wwwroot\lib\datatables\css\dataTables.bootstrap4.min.css
+wwwroot\lib\datatables\css\dataTables.foundation.css
+wwwroot\lib\datatables\css\dataTables.foundation.min.css
+wwwroot\lib\datatables\css\dataTables.jqueryui.css
+wwwroot\lib\datatables\css\dataTables.jqueryui.min.css
+wwwroot\lib\datatables\css\dataTables.material.css
+wwwroot\lib\datatables\css\dataTables.material.min.css
+wwwroot\lib\datatables\css\dataTables.semanticui.css
+wwwroot\lib\datatables\css\dataTables.semanticui.min.css
+wwwroot\lib\datatables\css\dataTables.uikit.css
+wwwroot\lib\datatables\css\dataTables.uikit.min.css
+wwwroot\lib\datatables\css\jquery.dataTables.css
+wwwroot\lib\datatables\css\jquery.dataTables.min.css
+wwwroot\lib\datatables\css\jquery.dataTables_themeroller.css
+wwwroot\lib\datatables\css\jquery.dataTables_themeroller.min.css
+wwwroot\lib\datatables\images\sort_asc.png
+wwwroot\lib\datatables\images\sort_asc_disabled.png
+wwwroot\lib\datatables\images\sort_both.png
+wwwroot\lib\datatables\images\sort_desc.png
+wwwroot\lib\datatables\images\sort_desc_disabled.png
+wwwroot\lib\datatables\js\dataTables.bootstrap.js
+wwwroot\lib\datatables\js\dataTables.bootstrap.min.js
+wwwroot\lib\datatables\js\dataTables.bootstrap4.js
+wwwroot\lib\datatables\js\dataTables.bootstrap4.min.js
+wwwroot\lib\datatables\js\dataTables.dataTables.js
+wwwroot\lib\datatables\js\dataTables.dataTables.min.js
+wwwroot\lib\datatables\js\dataTables.foundation.js
+wwwroot\lib\datatables\js\dataTables.foundation.min.js
+wwwroot\lib\datatables\js\dataTables.jqueryui.js
+wwwroot\lib\datatables\js\dataTables.jqueryui.min.js
+wwwroot\lib\datatables\js\dataTables.material.js
+wwwroot\lib\datatables\js\dataTables.material.min.js
+wwwroot\lib\datatables\js\dataTables.semanticui.js
+wwwroot\lib\datatables\js\dataTables.semanticui.min.js
+wwwroot\lib\datatables\js\dataTables.uikit.js
+wwwroot\lib\datatables\js\dataTables.uikit.min.js
+wwwroot\lib\datatables\js\jquery.dataTables.js
+wwwroot\lib\datatables\js\jquery.dataTables.min.js
+wwwroot\lib\font-awesome\css\all.css
+wwwroot\lib\font-awesome\css\all.min.css
+wwwroot\lib\font-awesome\css\brands.css
+wwwroot\lib\font-awesome\css\brands.min.css
+wwwroot\lib\font-awesome\css\fontawesome.css
+wwwroot\lib\font-awesome\css\fontawesome.min.css
+wwwroot\lib\font-awesome\css\regular.css
+wwwroot\lib\font-awesome\css\regular.min.css
+wwwroot\lib\font-awesome\css\solid.css
+wwwroot\lib\font-awesome\css\solid.min.css
+wwwroot\lib\font-awesome\css\svg-with-js.css
+wwwroot\lib\font-awesome\css\svg-with-js.min.css
+wwwroot\lib\font-awesome\css\svg.css
+wwwroot\lib\font-awesome\css\svg.min.css
+wwwroot\lib\font-awesome\css\v4-font-face.css
+wwwroot\lib\font-awesome\css\v4-font-face.min.css
+wwwroot\lib\font-awesome\css\v4-shims.css
+wwwroot\lib\font-awesome\css\v4-shims.min.css
+wwwroot\lib\font-awesome\css\v5-font-face.css
+wwwroot\lib\font-awesome\css\v5-font-face.min.css
+wwwroot\lib\font-awesome\js\all.js
+wwwroot\lib\font-awesome\js\all.min.js
+wwwroot\lib\font-awesome\js\brands.js
+wwwroot\lib\font-awesome\js\brands.min.js
+wwwroot\lib\font-awesome\js\conflict-detection.js
+wwwroot\lib\font-awesome\js\conflict-detection.min.js
+wwwroot\lib\font-awesome\js\fontawesome.js
+wwwroot\lib\font-awesome\js\fontawesome.min.js
+wwwroot\lib\font-awesome\js\regular.js
+wwwroot\lib\font-awesome\js\regular.min.js
+wwwroot\lib\font-awesome\js\solid.js
+wwwroot\lib\font-awesome\js\solid.min.js
+wwwroot\lib\font-awesome\js\v4-shims.js
+wwwroot\lib\font-awesome\js\v4-shims.min.js
+wwwroot\lib\font-awesome\sprites\brands.svg
+wwwroot\lib\font-awesome\sprites\regular.svg
+wwwroot\lib\font-awesome\sprites\solid.svg
+wwwroot\lib\font-awesome\webfonts\fa-brands-400.woff2
+wwwroot\lib\font-awesome\webfonts\fa-regular-400.woff2
+wwwroot\lib\font-awesome\webfonts\fa-solid-900.woff2
+wwwroot\lib\font-awesome\webfonts\fa-v4compatibility.woff2
+wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js
+wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js
+wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt
+wwwroot\lib\jquery-validation\dist\additional-methods.js
+wwwroot\lib\jquery-validation\dist\additional-methods.min.js
+wwwroot\lib\jquery-validation\dist\jquery.validate.js
+wwwroot\lib\jquery-validation\dist\jquery.validate.min.js
+wwwroot\lib\jquery-validation\LICENSE.md
+wwwroot\lib\jquery\dist\jquery.js
+wwwroot\lib\jquery\dist\jquery.min.js
+wwwroot\lib\jquery\dist\jquery.min.map
+wwwroot\lib\jquery\LICENSE.txt
+wwwroot\UI Design\.browserslistrc
+wwwroot\UI Design\.eslintignore
+wwwroot\UI Design\.eslintrc.json
+wwwroot\UI Design\.gitignore
+wwwroot\UI Design\.prettierignore
+wwwroot\UI Design\.prettierrc.json
+wwwroot\UI Design\assets\css\demo.css
+wwwroot\UI Design\assets\img\avatars\1.png
+wwwroot\UI Design\assets\img\avatars\5.png
+wwwroot\UI Design\assets\img\avatars\6.png
+wwwroot\UI Design\assets\img\avatars\7.png
+wwwroot\UI Design\assets\img\backgrounds\18.jpg
+wwwroot\UI Design\assets\img\elements\1.jpg
+wwwroot\UI Design\assets\img\elements\11.jpg
+wwwroot\UI Design\assets\img\elements\12.jpg
+wwwroot\UI Design\assets\img\elements\13.jpg
+wwwroot\UI Design\assets\img\elements\17.jpg
+wwwroot\UI Design\assets\img\elements\18.jpg
+wwwroot\UI Design\assets\img\elements\19.jpg
+wwwroot\UI Design\assets\img\elements\2.jpg
+wwwroot\UI Design\assets\img\elements\20.jpg
+wwwroot\UI Design\assets\img\elements\3.jpg
+wwwroot\UI Design\assets\img\elements\4.jpg
+wwwroot\UI Design\assets\img\elements\5.jpg
+wwwroot\UI Design\assets\img\elements\7.jpg
+wwwroot\UI Design\assets\img\favicon\favicon.ico
+wwwroot\UI Design\assets\img\icons\brands\asana.png
+wwwroot\UI Design\assets\img\icons\brands\behance.png
+wwwroot\UI Design\assets\img\icons\brands\dribbble.png
+wwwroot\UI Design\assets\img\icons\brands\facebook.png
+wwwroot\UI Design\assets\img\icons\brands\github.png
+wwwroot\UI Design\assets\img\icons\brands\google.png
+wwwroot\UI Design\assets\img\icons\brands\instagram.png
+wwwroot\UI Design\assets\img\icons\brands\mailchimp.png
+wwwroot\UI Design\assets\img\icons\brands\slack.png
+wwwroot\UI Design\assets\img\icons\brands\twitter.png
+wwwroot\UI Design\assets\img\icons\unicons\cc-primary.png
+wwwroot\UI Design\assets\img\icons\unicons\cc-success.png
+wwwroot\UI Design\assets\img\icons\unicons\cc-warning.png
+wwwroot\UI Design\assets\img\icons\unicons\chart-success.png
+wwwroot\UI Design\assets\img\icons\unicons\chart.png
+wwwroot\UI Design\assets\img\icons\unicons\paypal.png
+wwwroot\UI Design\assets\img\icons\unicons\wallet-info.png
+wwwroot\UI Design\assets\img\icons\unicons\wallet.png
+wwwroot\UI Design\assets\img\illustrations\girl-doing-yoga-light.png
+wwwroot\UI Design\assets\img\illustrations\man-with-laptop-light.png
+wwwroot\UI Design\assets\img\illustrations\page-misc-error-light.png
+wwwroot\UI Design\assets\img\layouts\layout-container-light.png
+wwwroot\UI Design\assets\img\layouts\layout-fluid-light.png
+wwwroot\UI Design\assets\img\layouts\layout-without-menu-light.png
+wwwroot\UI Design\assets\img\layouts\layout-without-navbar-light.png
+wwwroot\UI Design\assets\js\config.js
+wwwroot\UI Design\assets\js\dashboards-analytics.js
+wwwroot\UI Design\assets\js\extended-ui-perfect-scrollbar.js
+wwwroot\UI Design\assets\js\form-basic-inputs.js
+wwwroot\UI Design\assets\js\main.js
+wwwroot\UI Design\assets\js\pages-account-settings-account.js
+wwwroot\UI Design\assets\js\ui-modals.js
+wwwroot\UI Design\assets\js\ui-popover.js
+wwwroot\UI Design\assets\js\ui-toasts.js
+wwwroot\UI Design\assets\vendor\css\core.css
+wwwroot\UI Design\assets\vendor\css\pages\page-account-settings.css
+wwwroot\UI Design\assets\vendor\css\pages\page-auth.css
+wwwroot\UI Design\assets\vendor\css\pages\page-icons.css
+wwwroot\UI Design\assets\vendor\css\pages\page-misc.css
+wwwroot\UI Design\assets\vendor\css\theme-default.css
+wwwroot\UI Design\assets\vendor\fonts\boxicons.css
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.eot
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.svg
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.ttf
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.woff
+wwwroot\UI Design\assets\vendor\fonts\boxicons\boxicons.woff2
+wwwroot\UI Design\assets\vendor\js\bootstrap.js
+wwwroot\UI Design\assets\vendor\js\helpers.js
+wwwroot\UI Design\assets\vendor\js\menu.js
+wwwroot\UI Design\assets\vendor\libs\apex-charts\apex-charts.css
+wwwroot\UI Design\assets\vendor\libs\apex-charts\apexcharts.js
+wwwroot\UI Design\assets\vendor\libs\highlight\highlight-github.css
+wwwroot\UI Design\assets\vendor\libs\highlight\highlight.css
+wwwroot\UI Design\assets\vendor\libs\highlight\highlight.js
+wwwroot\UI Design\assets\vendor\libs\jquery\jquery.js
+wwwroot\UI Design\assets\vendor\libs\masonry\masonry.js
+wwwroot\UI Design\assets\vendor\libs\perfect-scrollbar\perfect-scrollbar.css
+wwwroot\UI Design\assets\vendor\libs\perfect-scrollbar\perfect-scrollbar.js
+wwwroot\UI Design\assets\vendor\libs\popper\popper.js
+wwwroot\UI Design\build-config.js
+wwwroot\UI Design\CHANGELOG.md
+wwwroot\UI Design\fonts\boxicons.scss
+wwwroot\UI Design\gulpfile.js
+wwwroot\UI Design\js\bootstrap.js
+wwwroot\UI Design\js\helpers.js
+wwwroot\UI Design\js\menu.js
+wwwroot\UI Design\libs\apex-charts\apex-charts.scss
+wwwroot\UI Design\libs\apex-charts\apexcharts.js
+wwwroot\UI Design\libs\highlight\highlight-github.scss
+wwwroot\UI Design\libs\highlight\highlight.js
+wwwroot\UI Design\libs\highlight\highlight.scss
+wwwroot\UI Design\libs\jquery\jquery.js
+wwwroot\UI Design\libs\masonry\masonry.js
+wwwroot\UI Design\libs\perfect-scrollbar\perfect-scrollbar.js
+wwwroot\UI Design\libs\perfect-scrollbar\perfect-scrollbar.scss
+wwwroot\UI Design\libs\popper\popper.js
+wwwroot\UI Design\LICENSE.md
+wwwroot\UI Design\package-lock.json
+wwwroot\UI Design\package.json
+wwwroot\UI Design\README.md
+wwwroot\UI Design\scss\core.scss
+wwwroot\UI Design\scss\pages\page-account-settings.scss
+wwwroot\UI Design\scss\pages\page-auth.scss
+wwwroot\UI Design\scss\pages\page-icons.scss
+wwwroot\UI Design\scss\pages\page-misc.scss
+wwwroot\UI Design\scss\theme-default.scss
+wwwroot\UI Design\scss\_bootstrap-extended.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_floating-labels.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_form-control.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_form-range.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_form-select.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_input-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_labels.scss
+wwwroot\UI Design\scss\_bootstrap-extended\forms\_validation.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_alert.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_badge.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_buttons.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_caret.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_dropdown.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_forms.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_list-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_misc.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_navs.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_pagination.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_progress.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_table-variants.scss
+wwwroot\UI Design\scss\_bootstrap-extended\mixins\_toasts.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_accordion.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_alert.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_badge.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_breadcrumb.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_button-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_buttons.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_card.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_carousel.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_close.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_dropdown.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_forms.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_functions.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_include.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_list-group.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_mixins.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_modal.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_nav.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_navbar.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_offcanvas.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_pagination.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_popover.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_progress.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_reboot.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_root.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_spinners.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_tables.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_toasts.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_tooltip.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_type.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_utilities-ltr.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_utilities.scss
+wwwroot\UI Design\scss\_bootstrap-extended\_variables.scss
+wwwroot\UI Design\scss\_bootstrap.scss
+wwwroot\UI Design\scss\_colors.scss
+wwwroot\UI Design\scss\_components.scss
+wwwroot\UI Design\scss\_components\mixins\_app-brand.scss
+wwwroot\UI Design\scss\_components\mixins\_avatar.scss
+wwwroot\UI Design\scss\_components\mixins\_footer.scss
+wwwroot\UI Design\scss\_components\mixins\_menu.scss
+wwwroot\UI Design\scss\_components\mixins\_misc.scss
+wwwroot\UI Design\scss\_components\mixins\_navbar.scss
+wwwroot\UI Design\scss\_components\mixins\_text-divider.scss
+wwwroot\UI Design\scss\_components\_app-brand.scss
+wwwroot\UI Design\scss\_components\_avatar.scss
+wwwroot\UI Design\scss\_components\_base.scss
+wwwroot\UI Design\scss\_components\_common.scss
+wwwroot\UI Design\scss\_components\_footer.scss
+wwwroot\UI Design\scss\_components\_include.scss
+wwwroot\UI Design\scss\_components\_layout.scss
+wwwroot\UI Design\scss\_components\_menu.scss
+wwwroot\UI Design\scss\_components\_mixins.scss
+wwwroot\UI Design\scss\_components\_text-divider.scss
+wwwroot\UI Design\scss\_components\_variables.scss
+wwwroot\UI Design\scss\_custom-variables\_bootstrap-extended.scss
+wwwroot\UI Design\scss\_custom-variables\_components.scss
+wwwroot\UI Design\scss\_custom-variables\_libs.scss
+wwwroot\UI Design\scss\_custom-variables\_pages.scss
+wwwroot\UI Design\scss\_custom-variables\_support.scss
+wwwroot\UI Design\scss\_theme\_common.scss
+wwwroot\UI Design\scss\_theme\_theme.scss
+wwwroot\UI Design\tasks\build.js
+wwwroot\UI Design\tasks\prod.js
+wwwroot\UI Design\webpack.config.js
+wwwroot\UI Design\yarn.lock

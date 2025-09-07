@@ -1,0 +1,393 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\data\\webtravel2context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\data\\webtravel2context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\data\\employeedbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\data\\employeedbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customersupportfeedback.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customersupportfeedback.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customerorders.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customerorders.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customerordermemberinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customerordermemberinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customerorderfeedback.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customerorderfeedback.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customerloginhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customerloginhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customerlevels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customerlevels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customercouponsrecords.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customercouponsrecords.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\customerblacklist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\customerblacklist.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\couponpics.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\couponpics.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\models\\coupons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\models\\coupons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\views\\shared\\_adminlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\views\\shared\\_adminlayout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\views\\shared\\_admin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\views\\shared\\_admin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\areas\\productmanagement\\views\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\areas\\productmanagement\\views\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\areas\\productmanagement\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\areas\\productmanagement\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\areas\\couponmanagement\\views\\coupons\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\areas\\couponmanagement\\views\\coupons\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\areas\\productmanagement\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\areas\\productmanagement\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\views\\shared\\_superadmin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\views\\shared\\_superadmin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\views\\shared\\_sales.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\views\\shared\\_sales.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|c:\\users\\user\\desktop\\test\\travel_website_fuen43_02\\cat_paw_footprint\\areas\\couponmanagement\\controllers\\couponscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6760E542-8AA4-40AD-A250-47A6CF806605}|Cat_Paw_Footprint\\Cat_Paw_Footprint.csproj|solutionrelative:cat_paw_footprint\\areas\\couponmanagement\\controllers\\couponscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "CustomerSupportFeedback.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerSupportFeedback.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerSupportFeedback.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerSupportFeedback.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerSupportFeedback.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:58.388Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CustomerOrders.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerOrders.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerOrders.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerOrders.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerOrders.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:57.489Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "CustomerOrderMemberInfo.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerOrderMemberInfo.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerOrderMemberInfo.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerOrderMemberInfo.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerOrderMemberInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:56.603Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "EmployeeDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Data\\EmployeeDbContext.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Data\\EmployeeDbContext.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Data\\EmployeeDbContext.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Data\\EmployeeDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:33:53.495Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "webtravel2Context.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Data\\webtravel2Context.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Data\\webtravel2Context.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Data\\webtravel2Context.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Data\\webtravel2Context.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALwAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T11:44:12.343Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Program.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Program.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Program.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T11:31:14.403Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CustomerOrderFeedback.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerOrderFeedback.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerOrderFeedback.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerOrderFeedback.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerOrderFeedback.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:55.277Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "CustomerLoginHistory.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerLoginHistory.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerLoginHistory.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerLoginHistory.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerLoginHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:54.364Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CustomerLevels.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerLevels.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerLevels.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerLevels.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerLevels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:52.794Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "CustomerCouponsRecords.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerCouponsRecords.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerCouponsRecords.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerCouponsRecords.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerCouponsRecords.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:51.916Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "CustomerBlacklist.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerBlacklist.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CustomerBlacklist.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CustomerBlacklist.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CustomerBlacklist.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:50.021Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CouponPics.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CouponPics.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\CouponPics.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\CouponPics.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\CouponPics.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:48.841Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Coupons.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\Coupons.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Models\\Coupons.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Models\\Coupons.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Models\\Coupons.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T12:34:44.947Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\CouponManagement\\Views\\Coupons\\Index.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Areas\\CouponManagement\\Views\\Coupons\\Index.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\CouponManagement\\Views\\Coupons\\Index.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Areas\\CouponManagement\\Views\\Coupons\\Index.cshtml",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABYAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:36:11.997Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\Products\\Index.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\Products\\Index.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\Products\\Index.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\Products\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGwAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:32:29.436Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\appsettings.json",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\appsettings.json",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\appsettings.json",
+              "RelativeToolTip": "Cat_Paw_Footprint\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-07T11:31:33.688Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "_Sales.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_Sales.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Views\\Shared\\_Sales.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_Sales.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Views\\Shared\\_Sales.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:26:44.569Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "_AdminLayout.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_AdminLayout.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Views\\Shared\\_AdminLayout.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_AdminLayout.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Views\\Shared\\_AdminLayout.cshtml",
+              "ViewState": "AgIAAKYAAAAAAAAAAAAAALYAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:26:24.763Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "_Admin.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_Admin.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Views\\Shared\\_Admin.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_Admin.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Views\\Shared\\_Admin.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:45:09.354Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "_ViewStart.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\_ViewStart.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\_ViewStart.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\_ViewStart.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Areas\\ProductManagement\\Views\\_ViewStart.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:44:02.684Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "_SuperAdmin.cshtml",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_SuperAdmin.cshtml",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Views\\Shared\\_SuperAdmin.cshtml",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Views\\Shared\\_SuperAdmin.cshtml",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Views\\Shared\\_SuperAdmin.cshtml",
+              "ViewState": "AgIAAIEAAAAAAAAAAAAAAEYAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-07T11:26:42.386Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "ProductsController.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\ProductManagement\\Controllers\\ProductsController.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Areas\\ProductManagement\\Controllers\\ProductsController.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\ProductManagement\\Controllers\\ProductsController.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Areas\\ProductManagement\\Controllers\\ProductsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T11:25:36.366Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "CouponsController.cs",
+              "DocumentMoniker": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\CouponManagement\\Controllers\\CouponsController.cs",
+              "RelativeDocumentMoniker": "Cat_Paw_Footprint\\Areas\\CouponManagement\\Controllers\\CouponsController.cs",
+              "ToolTip": "C:\\Users\\user\\Desktop\\TEST\\Travel_Website_FUEN43_02\\Cat_Paw_Footprint\\Areas\\CouponManagement\\Controllers\\CouponsController.cs",
+              "RelativeToolTip": "Cat_Paw_Footprint\\Areas\\CouponManagement\\Controllers\\CouponsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-07T11:24:48.187Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
