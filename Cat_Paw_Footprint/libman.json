@@ -5,6 +5,15 @@
     {
       "library": "font-awesome@7.0.1",
       "destination": "wwwroot/lib/font-awesome/"
+    },
+    {
+      "library": "datatables@1.10.21",
+      "destination": "wwwroot/lib/datatables/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "ckeditor5@44.3.0",
+      "destination": "wwwroot/lib/ckeditor5/"
     }
   ]
 }

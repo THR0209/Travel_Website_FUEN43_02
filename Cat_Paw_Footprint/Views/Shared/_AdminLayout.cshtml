@@ -39,8 +39,8 @@
     @* @{
         var roleId = Context.Session.GetString("EmpRoleId");
         var status = Context.Session.GetString("Status"); // "True" 或 "False"
-    }
-    @await RenderSectionAsync("Styles", required: false) *@
+    }*@
+    @await RenderSectionAsync("Styles", required: false);
 </head>
 <body> 
     @{
@@ -97,18 +97,6 @@
                                 @await Html.PartialAsync("_ProductPlanner")
                                 break;
                         }
-
-                        <ul>
-                            <li class="menu-item">
-                                <!-- 放在 _Layout 任何地方一次就好 -->
-                                <form id="logoutForm" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Logout" method="post" class="d-none">
-                                    @Html.AntiForgeryToken()
-                                </form>
-
-                                <!-- 下拉選單項目 -->
-                                <button type="submit" form="logoutForm" class="dropdown-item"><i class="menu-icon tf-icons fa-solid fa-right-from-bracket"></i>登出</button>
-                            </li>
-                        </ul>
                     }
                 </div>
             </aside>
@@ -140,10 +128,6 @@
                                 </li>
                                 <li class="nav-item">
                                         <p><span>@RoleName</span></p>
-                                </li>
-                                
-                                <li class="nav-item ms-auto">
-                                    源頭圖片
                                 </li>
                             </ul>
                             }
@@ -198,6 +182,10 @@
 
     <!-- Page JS -->
     <script src="~/ui design/assets/js/dashboards-analytics.js"></script>
+    <!-- 放在 _Layout 任何地方一次就好 -->
+    <form id="logoutForm" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Logout" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
 
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

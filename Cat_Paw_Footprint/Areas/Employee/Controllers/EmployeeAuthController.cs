@@ -1,4 +1,5 @@
-﻿using Cat_Paw_Footprint.Areas.Employee.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.Employee.Services;
+using Cat_Paw_Footprint.Areas.Employee.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -13,17 +14,22 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 	public class EmployeeAuthController: Controller//這邊搞登入與註冊功能
 	{
 		private readonly EmployeeDbContext _context;
-		public EmployeeAuthController(EmployeeDbContext context)
+		private readonly IEmployeeService _svc;
+
+		public EmployeeAuthController(EmployeeDbContext context, IEmployeeService svc)
 		{
 			_context = context;
+			_svc = svc;
 		}
-
+		#region 登入註冊基礎功能邏輯一次放這就好不傳到Service
+		// 登入
 		[HttpGet]
 		public IActionResult Login()
 		{
 			var model = new LoginViewModel(); // ✅ 傳入空模型
 			return View(model);
 		}
+		// 登入
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult Login([Bind("Account,Password")] LoginViewModel vm)
@@ -47,10 +53,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				vm.ErrorMessage = "帳號不存在";
 				return View(vm);
 			}
-			System.Diagnostics.Debug.WriteLine("🧪 讀取帳號資訊");
-			System.Diagnostics.Debug.WriteLine($"資料庫內部帳號:{emp.Account}");
-			System.Diagnostics.Debug.WriteLine($"資料庫內部密碼:{emp.Password}");
-			System.Diagnostics.Debug.WriteLine("🧪 讀取完畢");
+
 
 			// ❗ 密碼比對失敗
 			if (!BCrypt.Net.BCrypt.Verify(vm.Password, emp.Password))
@@ -86,7 +89,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			return RedirectToAction("Index", "Home", new { area = "" });
 		}
 
-
+		// 產生角色下拉選單
 		private void PopulateRoleList()
 		{
 			var roles = _context.EmployeeRoles
@@ -96,11 +99,13 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			ViewBag.RoleList = new SelectList(roles, "RoleID", "RoleName");
 		}
 		[HttpGet]
+		// 註冊
 		public IActionResult Register()
 		{
 			PopulateRoleList(); // GET 呼叫
 			return View(new RegisterViewModel());
 		}
+		// 註冊
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult Register(RegisterViewModel model)
@@ -140,6 +145,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 
 			return RedirectToAction("Privacy", "Home", new { area = "" });
 		}
+		// 登出
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult Logout()
@@ -157,5 +163,33 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			// 4) 回登入頁
 			return RedirectToAction("Index", "Home", new { area = "" });
 		}
+		#endregion
+		#region 這邊開始用service
+		[HttpGet]
+		public async Task<IActionResult> EmployeeList()
+		{
+			var employees = await _svc.GetAllAsync();
+			ViewBag.Roles = _context.EmployeeRoles
+		.Select(r => new SelectListItem
+		{
+			Value = r.RoleID.ToString(),
+			Text = r.RoleName
+		})
+		.ToList();
+			return View(employees);
+		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> UpdateRow(int id, bool status, string? password, int roleId)
+		{
+			// 空字串 / 只空白 → 視為不改密碼
+			var newPwd = string.IsNullOrWhiteSpace(password) ? null : password;
+
+			await _svc.UpdateAccountAsync(id, status, newPwd, roleId);
+			return Json(new { ok = true, message = "更新成功" });
+		}
+
+		#endregion
 	}
 }

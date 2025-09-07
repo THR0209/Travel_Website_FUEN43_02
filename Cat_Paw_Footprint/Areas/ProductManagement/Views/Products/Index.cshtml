@@ -1,0 +1,125 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Products>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+@section Styles {
+    <link href="~/lib/datatables/css/jquery.datatables.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/fixedheader/4.0.2/css/fixedHeader.bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/2.3.3/css/dataTables.dataTables.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css" rel="stylesheet" />
+}
+
+<h1>產品管理</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> 新增產品</a>
+</p>
+<table class="table table-striped table-hover table-bordered">
+    <thead class="table-primary">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductCode)
+            </th>
+            @* <th>
+                @Html.DisplayNameFor(model => model.ProductImage)
+            </th> *@
+            <th>
+                @Html.DisplayNameFor(model => model.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MaxPeople)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Region)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductCode)
+                </td>
+                @* <td>
+                @Html.DisplayFor(modelItem => item.ProductImage)
+            </td> *@
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.MaxPeople)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Region.RegionID)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ProductID"><i class="fa-solid fa-eye"></i></a> |
+                    <a asp-action="Details" asp-route-id="@item.ProductID" class="btn btn-secondary">上架</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ProductID" class="btn btn-danger">下架</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/4.0.2/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.print.min.js"></script>
+
+    <script>
+        $(document).ready(function (){
+            $('table').DataTable({
+
+                // columns: [
+                //     {"data" : "ProductCode", "width": "10%", "title": "流水號" },
+                //     {"data" : "ProductName", "width": "10%", "title": "產品名稱"},
+                //     {"data" : "ProductPrice", "width": "10%", "title": "價格"},
+                //     {"data" : "StartDate", "width": "10%", "title": "上架時間"},
+                //     {"data" : "EndDate", "width": "10%", "title": "下架時間"},
+                //     {"data" : "MaxPeople", "width": "10%", "title": "人數上限"},
+                //     {"data" : "RegionID", "width": "10%", "title": "區域"}
+                // ],
+                "language" : {
+                    url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json',
+                },
+                layout: {
+                    topStart: {
+                        buttons: ['copy', 'csv', 'pdf', 'print']
+                    }
+                }
+            });
+        });
+    </script>
+}

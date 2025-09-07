@@ -1,3 +1,5 @@
+using Cat_Paw_Footprint.Areas.Employee.Repositories;
+using Cat_Paw_Footprint.Areas.Employee.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +19,13 @@ namespace Cat_Paw_Footprint
 
             builder.Services.AddDbContext<EmployeeDbContext>(options =>
 	        options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+			// Add services to the container.
+			builder.Services.AddDbContext<EmployeeDbContext>(options =>
+	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+
+			builder.Services.AddDbContext<webtravel2Context>(options =>
+	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+
 			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -27,11 +36,14 @@ namespace Cat_Paw_Footprint
 
 			builder.Services.AddSession(options =>
 			{
-				options.Cookie.Name = ".CatPaw.Employee.Session"; // ¦Û­q­û¤u Session ¦WºÙ
-				options.IdleTimeout = TimeSpan.FromHours(9);   // ¦Û­q¹O®É®É¶¡
-				options.Cookie.HttpOnly = true;                   // ªý¤î JS ¦s¨ú¡A¨¾¤î XSS
-				options.Cookie.IsEssential = true;                // Á×§K³QÂsÄý¾¹ªý¾×
+				options.Cookie.Name = ".CatPaw.Employee.Session"; // ï¿½Û­qï¿½ï¿½ï¿½u Session ï¿½Wï¿½ï¿½
+				options.IdleTimeout = TimeSpan.FromHours(9);   // ï¿½Û­qï¿½Oï¿½É®É¶ï¿½
+				options.Cookie.HttpOnly = true;                   // ï¿½ï¿½ï¿½ï¿½ JS ï¿½sï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ XSS
+				options.Cookie.IsEssential = true;                // ï¿½×§Kï¿½Qï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			});
+
+			builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+			builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 			builder.Services.AddControllersWithViews();
 
@@ -53,8 +65,8 @@ namespace Cat_Paw_Footprint
             app.UseStaticFiles();
 
             app.UseRouting();
-			app.UseSession(); // ±Ò¥Î Session ¤¤¤¶³nÅé
-
+			app.UseSession(); // ï¿½Ò¥ï¿½ Session ï¿½ï¿½ï¿½ï¿½ï¿½nï¿½ï¿½
+			app.UseAuthentication();
 			app.UseAuthorization();
 			app.MapControllerRoute(
 				name: "areas",
