@@ -1,4 +1,5 @@
 using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +11,12 @@ namespace Cat_Paw_Footprint
         {
             var builder = WebApplication.CreateBuilder(args);
 
-			// Add services to the container.
-			builder.Services.AddDbContext<EmployeeDbContext>(options =>
-	options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+            // Add services to the container.
+            builder.Services.AddDbContext<webtravel2Context>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("WebTravelConnection")));
+
+            builder.Services.AddDbContext<EmployeeDbContext>(options =>
+	        options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
 			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
