@@ -2,56 +2,46 @@
 @model Cat_Paw_Footprint.Areas.Employee.ViewModel.RegisterViewModel
 
 
-@if (Model != null)
-{
-    <div style="border: 1px solid red; padding: 10px;">
-        測試 ErrorMessage 是否有綁定成功：<strong>@Model.ErrorMessage</strong>
-    </div>
-}
-else
-{
-    <div style="border: 1px solid blue; padding: 10px;">
-        View 的 Model 是 null！
-    </div>
-}
+
 
 <h2 class="mb-4">註冊員工帳號</h2>
 
-@if (Model != null && !string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
+<!-- 顯示 ModelState 的整體錯誤（非欄位級） -->
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-
-<form asp-area="Employee" asp-action="Register" method="post" class="w-50 mx-auto">
+<form asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Register" method="post" class="w-50 mx-auto">
     @Html.AntiForgeryToken()
-   
+
     <div class="form-group mb-3">
-        <label asp-for="Account" class="form-label">帳號</label>
-        <input asp-for="Account" class="form-control" name="Account" />
+        <label asp-for="Account" class="form-label"></label>
+        <input asp-for="Account" class="form-control" />
         <span asp-validation-for="Account" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Password" class="form-label">密碼</label>
-        <input asp-for="Password" class="form-control" type="password" name="Password" />
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="EmployeeName" class="form-label">員工姓名</label>
-        <input asp-for="EmployeeName" class="form-control" name="EmployeeName" />
+        <label asp-for="EmployeeName" class="form-label"></label>
+        <input asp-for="EmployeeName" class="form-control" />
         <span asp-validation-for="EmployeeName" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="RoleId" class="form-label" name="RoleId">角色</label>
-        @Html.DropDownListFor(m => m.RoleId, (SelectList)ViewBag.RoleList, "請選擇角色", new { @class = "form-select" })
+        <label asp-for="RoleId" class="form-label"></label>
+        <select asp-for="RoleId" asp-items="ViewBag.RoleList" class="form-select">
+            <option value="">請選擇角色</option>
+        </select>
         <span asp-validation-for="RoleId" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary w-100">註冊</button>
 </form>
+
+
 
 @section Scripts {
     @{

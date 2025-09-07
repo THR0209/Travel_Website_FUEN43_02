@@ -69,13 +69,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				.Select(r => r.RoleName)
 				.FirstOrDefault() ?? string.Empty;
 
-			System.Diagnostics.Debug.WriteLine("🧪 讀取帳號資訊");
-			System.Diagnostics.Debug.WriteLine($"資料庫內部帳號:{emp.Account}");
-			System.Diagnostics.Debug.WriteLine($"資料庫內部密碼:{emp.Password}");
-			System.Diagnostics.Debug.WriteLine($"資料庫內部員工姓名:{empName}");
-			System.Diagnostics.Debug.WriteLine($"資料庫內部角色:{roleName}");
-			System.Diagnostics.Debug.WriteLine($"資料庫帳號啟用狀態:{emp.Status}");
-			System.Diagnostics.Debug.WriteLine("🧪 讀取完畢");
 
 			if (emp.Status!= true)
 			{
@@ -93,43 +86,35 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			return RedirectToAction("Index", "Home", new { area = "" });
 		}
 
-		[HttpGet]
-		public IActionResult Register()
+
+		private void PopulateRoleList()
 		{
-			
 			var roles = _context.EmployeeRoles
 				.Select(r => new { r.RoleID, r.RoleName })
 				.ToList();
 
 			ViewBag.RoleList = new SelectList(roles, "RoleID", "RoleName");
-
+		}
+		[HttpGet]
+		public IActionResult Register()
+		{
+			PopulateRoleList(); // GET 呼叫
 			return View(new RegisterViewModel());
-			
 		}
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult Register(RegisterViewModel model)
 		{
-			System.Diagnostics.Debug.WriteLine($"帳號:{model.Account}");
-			System.Diagnostics.Debug.WriteLine($"密碼:{model.Password}");
-			System.Diagnostics.Debug.WriteLine($"員工名:{model.EmployeeName}");
-			System.Diagnostics.Debug.WriteLine($"角色等級:{model.RoleId}");
+			PopulateRoleList();
+			
 			if (!ModelState.IsValid)
 			{
-				var roles = _context.EmployeeRoles
-			.Select(r => new { r.RoleID, r.RoleName })
-			.ToList();
-				ViewBag.RoleList = new SelectList(roles, "RoleID", "RoleName");
 				return View(model);
 			}
-			if(_context.Employees.Any(e=>e.Account==model.Account))
+			if (_context.Employees.Any(e => e.Account == model.Account))
 			{
-				var roles = _context.EmployeeRoles
-			.Select(r => new { r.RoleID, r.RoleName })
-			.ToList();
-				ViewBag.RoleList = new SelectList(roles, "RoleID", "RoleName");
-
-				model.ErrorMessage="此帳號已被註冊";
+				ModelState.AddModelError(nameof(model.Account), "此帳號已被註冊");
+				
 				return View(model);
 			}
 			var emp = new Cat_Paw_Footprint.Models.Employees//註冊員工帳號

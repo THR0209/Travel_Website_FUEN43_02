@@ -10,35 +10,37 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="~/ui design/assets/img/favicon/favicon.ico" /> <!-- 路徑注意 -->
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC&display=swap">
 
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="~/ui design/assets/vendor/fonts/boxicons.css" /> <!-- 路徑注意 -->
-    
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="~/ui design/assets/vendor/css/core.css" class="template-customizer-core-css" />  <!-- 路徑注意 -->
     <link rel="stylesheet" href="~/ui design/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />  <!-- 路徑注意 -->
     <link rel="stylesheet" href="~/ui design/assets/css/demo.css" />  <!-- 路徑注意 -->
-
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="~/ui design/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <link rel="stylesheet" href="~/ui design/assets/vendor/libs/apex-charts/apex-charts.css" />
 
     <!-- Page CSS -->
-
     <!-- Helpers -->
     <script src="~/ui design/assets/vendor/js/helpers.js"></script>
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="~/ui design/assets/js/config.js"></script>
-
-    @await RenderSectionAsync("Styles", required: false)
+    @* @{
+        var roleId = Context.Session.GetString("EmpRoleId");
+        var status = Context.Session.GetString("Status"); // "True" 或 "False"
+    }
+    @await RenderSectionAsync("Styles", required: false) *@
 </head>
 <body> 
     @{
@@ -104,7 +106,7 @@
                                 </form>
 
                                 <!-- 下拉選單項目 -->
-                                <button type="submit" form="logoutForm" class="dropdown-item">登出</button>
+                                <button type="submit" form="logoutForm" class="dropdown-item"><i class="menu-icon tf-icons fa-solid fa-right-from-bracket"></i>登出</button>
                             </li>
                         </ul>
                     }
