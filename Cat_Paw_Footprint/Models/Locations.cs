@@ -31,7 +31,9 @@ public partial class Locations
 
     public string? LocationCode { get; set; }
 
-    public virtual Districts? District { get; set; }
+	public bool? IsActive { get; set; }
+
+	public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
 }

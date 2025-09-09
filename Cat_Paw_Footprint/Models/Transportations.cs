@@ -20,4 +20,6 @@ public partial class Transportations
     public int? Views { get; set; }
 
     public string? TransportCode { get; set; }
+
+	public bool? IsActive { get; set; }
 }
