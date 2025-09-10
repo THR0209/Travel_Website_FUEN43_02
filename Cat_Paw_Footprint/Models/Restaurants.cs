@@ -29,6 +29,8 @@ public partial class Restaurants
 
 	public bool? IsActive { get; set; }
 
+    public string? RestaurantCode { get; set; }
+
 	public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
