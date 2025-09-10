@@ -29,7 +29,9 @@ public partial class Hotels
 
     public string? HotelCode { get; set; }
 
-    public virtual Districts? District { get; set; }
+    public bool? IsActive { get; set; }
+
+	public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
 }

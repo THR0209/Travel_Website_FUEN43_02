@@ -27,7 +27,11 @@ public partial class Restaurants
 
     public int? Views { get; set; }
 
-    public virtual Districts? District { get; set; }
+	public bool? IsActive { get; set; }
+
+    public string? RestaurantCode { get; set; }
+
+	public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
 }
