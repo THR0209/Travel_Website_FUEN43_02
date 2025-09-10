@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 {
-    public class NewsReadViewModel
+    public class NewsIndexViewModel
     {
        
         public int NewsID { get; set; }
 
-        [Display(Name = "新聞標題")]
+        [Display(Name = "消息標題")]
         public string? NewsTitle { get; set; }
         [Display(Name = "發佈時間")]
         public DateTime? PublishTime { get; set; }

@@ -274,7 +274,7 @@
                             </li>
                         </ul>
                     </li>
-                                 <li class="menu-item">
+                     <li class="menu-item">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons fa-solid fa-ellipsis-vertical"></i>
                             <div data-i18n="關鍵字搜尋">關鍵字搜尋</div>
@@ -287,11 +287,7 @@
                             </li>
                         </ul>
                     </li>
-                    
-                    </li>
-    @await Html.PartialAsync("_Logout")  <!-- 把登出放在同一個 menu-inner 裡 -->
-                    <!-- #endregion -->
-
+                     <!-- #region  -->
                      <li class="menu-header text-uppercase">
                          <i class="fa-solid fa-magnifying-glass-chart"></i>
                         <span class="menu-header-text">報表分析/最新消息活動管理</span>
@@ -329,7 +325,14 @@
                             </li>
                         </ul>
                     </li>
-
-
+                    
                     <!-- #endregion -->
+
+                    </li>
+    @await Html.PartialAsync("_Logout")  <!-- 把登出放在同一個 menu-inner 裡 -->
+                    <!-- #endregion -->
+
+                    
+
+
 </ul>

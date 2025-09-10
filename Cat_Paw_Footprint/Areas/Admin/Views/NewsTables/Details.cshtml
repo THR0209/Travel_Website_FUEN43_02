@@ -1,13 +1,13 @@
-﻿@model Cat_Paw_Footprint.Models.NewsTable
+﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsDetailViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "詳細資訊";
 }
 
-<h1>Details</h1>
+<h1>詳細資訊</h1>
 
 <div>
-    <h4>NewsTable</h4>
+    <h4>消息</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -53,10 +53,10 @@
             @Html.DisplayFor(model => model.UpdateTime)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
+            @Html.DisplayNameFor(model => model.EmployeeName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.EmployeeID)
+            @Html.DisplayFor(model => model.EmployeeName)
         </dd>
     </dl>
 </div>

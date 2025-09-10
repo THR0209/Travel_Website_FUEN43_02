@@ -26,7 +26,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         {
             var data = await _context.NewsTable
                 .Include(n => n.Employee)
-                    .Select(n => new NewsReadViewModel
+                    .Select(n => new NewsIndexViewModel
                         {
                             NewsID = n.NewsID,
                             NewsTitle = n.NewsTitle,
@@ -54,14 +54,29 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
             }
 
             var newsTable = await _context.NewsTable
-                .Include(n => n.Employee)
+                .Include(n => n.Employee) // 如果要抓員工姓名
                 .FirstOrDefaultAsync(m => m.NewsID == id);
+
             if (newsTable == null)
             {
                 return NotFound();
             }
 
-            return View(newsTable);
+            // 映射成 ViewModel
+            var viewModel = new NewsDetailViewModel
+            {
+                NewsID = newsTable.NewsID,
+                NewsTitle = newsTable.NewsTitle,
+                NewsContent = newsTable.NewsContent,
+                PublishTime = newsTable.PublishTime,
+                ExpireTime = newsTable.ExpireTime,
+                IsActive = newsTable.IsActive?? false, // 確保不是 null
+                CreateTime = newsTable.CreateTime,
+                UpdateTime = newsTable.UpdateTime,
+                EmployeeName = newsTable.Employee?.EmployeeName
+            };
+
+            return View(viewModel);
         }
 
         // GET: Admin/NewsTables/Create
@@ -101,8 +116,29 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeID", newsTable.EmployeeID);
-            return View(newsTable);
+
+            // 映射成 ViewModel
+            var viewModel = new NewsEditViewModel
+            {
+                NewsID = newsTable.NewsID,
+                NewsTitle = newsTable.NewsTitle,
+                NewsContent = newsTable.NewsContent,
+                PublishTime = newsTable.PublishTime,
+                ExpireTime = newsTable.ExpireTime,
+                IsActive = newsTable.IsActive?? false, // 確保不是 null
+                EmployeeID = newsTable.EmployeeID,
+                EmployeeName = newsTable.Employee?.EmployeeName,
+            };
+
+            // 下拉選單 (員工清單)
+            ViewData["EmployeeID"] = new SelectList(
+                _context.EmployeeProfile,
+                "EmployeeID",
+                "EmployeeName", // 如果你有姓名欄位可以顯示
+                newsTable.EmployeeID
+            );
+
+            return View(viewModel);
         }
 
         // POST: Admin/NewsTables/Edit/5
@@ -110,9 +146,9 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NewsID,NewsTitle,NewsContent,PublishTime,ExpireTime,IsActive,CreateTime,UpdateTime,EmployeeID")] NewsTable newsTable)
+        public async Task<IActionResult> Edit(int id, NewsEditViewModel viewModel)
         {
-            if (id != newsTable.NewsID)
+            if (id != viewModel.NewsID)
             {
                 return NotFound();
             }
@@ -121,12 +157,28 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
             {
                 try
                 {
+                    // 找到要更新的資料
+                    var newsTable = await _context.NewsTable.FindAsync(id);
+                    if (newsTable == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // 將 ViewModel 的資料更新回 Entity
+                    newsTable.NewsTitle = viewModel.NewsTitle;
+                    newsTable.NewsContent = viewModel.NewsContent;
+                    newsTable.PublishTime = viewModel.PublishTime;
+                    newsTable.ExpireTime = viewModel.ExpireTime;
+                    newsTable.IsActive = viewModel.IsActive;
+                    newsTable.UpdateTime = DateTime.Now; // 通常編輯會更新 UpdateTime
+                    newsTable.EmployeeID = viewModel.EmployeeID;
+
                     _context.Update(newsTable);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!NewsTableExists(newsTable.NewsID))
+                    if (!_context.NewsTable.Any(e => e.NewsID == viewModel.NewsID))
                     {
                         return NotFound();
                     }
@@ -137,8 +189,16 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeID", newsTable.EmployeeID);
-            return View(newsTable);
+
+            // 如果 ModelState 驗證失敗，要重建下拉選單
+            ViewData["EmployeeID"] = new SelectList(
+                _context.EmployeeProfile,
+                "EmployeeID",
+                "EmployeeName",
+                viewModel.EmployeeID
+            );
+
+            return View(viewModel);
         }
 
         // GET: Admin/NewsTables/Delete/5

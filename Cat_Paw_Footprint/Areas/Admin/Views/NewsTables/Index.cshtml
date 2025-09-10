@@ -1,36 +1,44 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsReadViewModel>
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsIndexViewModel>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "最新消息";
 }
 
-<h1>Index</h1>
+<style>
+.action-btn {
+    min-width: 100px;
+    text-align: center;
+}
+</style>
+
+
+<h1>最新消息</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary mt-2 mb-2">新增消息</a>
 </p>
 <table class="table">
     <thead>
         <tr>
-            <th style="width: 30%;">
+            <th class="fs-5" style="width: 28%;">
                 @Html.DisplayNameFor(model => model.NewsTitle)
             </th>
-            <th style="width: 12%;">
+            <th class="fs-5" style="width: 12%;">
                 @Html.DisplayNameFor(model => model.PublishTime)
             </th>
-            <th style="width: 12%;">
+            <th class="fs-5" style="width: 12%;">
                 @Html.DisplayNameFor(model => model.ExpireTime)
             </th>
-            <th style="width: 8%;">
+            <th class="fs-5" style="width: 10%;">
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
-            <th style="width: 12%;">
+            <th class="fs-5" style="width: 12%;">
                 @Html.DisplayNameFor(model => model.UpdateTime)
             </th> 
-            <th style="width: 12%;">
+            <th class="fs-5" style="width: 12%;">
                 @Html.DisplayNameFor(model => model.EmployeeName)
             </th>
-            <th style="width: 14%;"></th>
+            <th class="fs-5" style="width: 14%;">操作</th>
         </tr>
     </thead>
     <tbody>
@@ -50,7 +58,10 @@
                      <input class="form-check-input" type="checkbox" disabled @(item.IsActive == true ? "checked" : "") />
                     </div> *@
 
-                  @Html.DisplayFor(modelItem => item.IsActive)
+
+                 <div class="form-check">
+               <input class="form-check-input" type="checkbox" @(item.IsActive == true ? "checked" : "") disabled />
+                </div>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.UpdateTime)
@@ -59,9 +70,12 @@
                 @Html.DisplayFor(modelItem => item.EmployeeName)
             </td>
             <td>
-                <a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.NewsID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.NewsID">Delete</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID" class="btn btn-primary action-btn">編輯</a> <span class="fs-4 fw-bold">|</span>
+                    <a asp-action="Details" asp-route-id="@item.NewsID" class="btn btn-info action-btn">詳細資訊</a> <span class="fs-4">|</span>
+                    <a asp-action="Delete" asp-route-id="@item.NewsID" class="btn btn-danger action-btn">刪除</a>
+                </div>
+    
             </td>
         </tr>
 }
