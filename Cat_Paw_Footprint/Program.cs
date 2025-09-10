@@ -19,12 +19,7 @@ namespace Cat_Paw_Footprint
 
             builder.Services.AddDbContext<EmployeeDbContext>(options =>
 	        options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
-			// Add services to the container.
-			builder.Services.AddDbContext<EmployeeDbContext>(options =>
-	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
-
-			builder.Services.AddDbContext<webtravel2Context>(options =>
-	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+	
 
 			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>

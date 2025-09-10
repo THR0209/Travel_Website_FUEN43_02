@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Data;
 
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 {
