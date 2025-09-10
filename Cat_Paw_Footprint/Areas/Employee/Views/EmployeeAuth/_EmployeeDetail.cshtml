@@ -1,0 +1,35 @@
+﻿@model Cat_Paw_Footprint.Areas.Employee.ViewModel.EmployeeViewModel
+@{
+    Layout = null;
+}
+
+<div class="container-fluid">
+    <div class="row g-3">
+        <div class="col-md-4 text-center">
+            @if (Model.Photo != null && Model.Photo.Length > 0)
+            {
+                var base64 = Convert.ToBase64String(Model.Photo);
+                <img class="img-fluid rounded" alt="照片" src="data:image/png;base64,@base64" />
+            }
+            else
+            {
+                <div class="border rounded p-5 text-muted">無照片</div>
+            }
+        </div>
+        <div class="col-md-8">
+            <table class="table table-sm table-bordered">
+                <tr><th style="width:140px">員編</th><td>@Model.EmployeeID</td></tr>
+                <tr><th>員工代號</th><td>@Model.EmployeeCode</td></tr>
+                <tr><th>帳號</th><td>@Model.Account</td></tr>
+                <tr><th>姓名</th><td>@Model.EmployeeName</td></tr>
+                <tr><th>角色</th><td>@Model.RoleName (@Model.RoleID)</td></tr>
+                <tr><th>建立時間</th><td>@Model.CreateDate?.ToString("yyyy-MM-dd HH:mm")</td></tr>
+                <tr><th>Email</th><td>@Model.Email</td></tr>
+                <tr><th>電話</th><td>@Model.Phone</td></tr>
+                <tr><th>地址</th><td>@Model.Address</td></tr>
+                <tr><th>身分證</th><td>@Model.IDNumber</td></tr>
+                <tr><th>個資代號</th><td>@Model.EmployeeProfileCode</td></tr>
+            </table>
+        </div>
+    </div>
+</div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
+    <title>@ViewData["Title"] - WebApplication1</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" />
@@ -40,7 +40,7 @@
         var roleId = Context.Session.GetString("EmpRoleId");
         var status = Context.Session.GetString("Status"); // "True" 或 "False"
     }*@
-    @await RenderSectionAsync("Styles", required: false);
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body> 
     @{
@@ -68,7 +68,7 @@
 
                 <div class="menu-inner-shadow"></div>
 
-                <div>
+                <ul class="menu-inner py-1" style="scrollbar-width:none; -ms-overflow-style:none; overflow-y:auto;">
 
                     @if (login != "True")
                     {
@@ -98,43 +98,20 @@
                                 break;
                         }
                     }
-                </div>
+                </ul>
             </aside>
             <!-- / Menu -->
             <!-- Layout container -->
             <div class="layout-page">
-                <!-- Navbar -->
-                <nav aria-label="breadcrumb" class="small">
-                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-                            <i class="bx bx-menu bx-sm"></i>
-                        </a>
-                    </div>
 
-                    <div class="container-fluid pt-3">
-                        <div class="bg-body border rounded-4 shadow-sm px-3 py-2">
-                                @if (login != "True")
-                            {
-                                    <p>請登入</p>
-                            }
-                            else if (status != "True")
-                            {
-                                    <p>您的帳號未啟用</p>
-                            }
-                            else{
-                            <ul class="nav nav-underline">
-                                <li class="nav-item">
-                                            <p>您好:<span>@Name</span></p>
-                                </li>
-                                <li class="nav-item">
-                                        <p><span>@RoleName</span></p>
-                                </li>
-                            </ul>
-                            }
+                <nav aria-label="breadcrumb" class="small">
+                        <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                                <i class="bx bx-menu bx-sm"></i>
+                            </a>
                         </div>
-                    </div>
                 </nav>
-               
+  
 
                 <!-- / Navbar -->
                 <!-- Content wrapper -->
@@ -190,7 +167,5 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
-
-   
 </body>
 </html>

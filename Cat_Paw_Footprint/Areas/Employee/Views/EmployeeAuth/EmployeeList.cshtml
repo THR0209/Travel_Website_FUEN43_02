@@ -42,6 +42,7 @@
                     <input type="password" class="form-control js-password" placeholder="留空不變" />
                 </td>
                 <td>
+                        <button type="button" class="btn btn-info btn-sm js-detail">詳細</button>
                     <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
                 </td>
             </tr>
@@ -54,62 +55,109 @@
 <form id="anti-form" method="post">
     @Html.AntiForgeryToken()
 </form>
-
+<div class="modal fade" id="empDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">員工詳細資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
-<script>
-(function () {
-    const table = document.getElementById("emp-table");
-    const token = document.querySelector('#anti-form input[name="__RequestVerificationToken"]').value;
+    <script>
+        (() => {
+          const table = document.getElementById("emp-table");
+          if (!table) return;
 
-    table.addEventListener("click", async (e) => {
-        const btn = e.target.closest(".js-save");
-        if (!btn) return;
+          const tokenInput = document.querySelector('#anti-form input[name="__RequestVerificationToken"]');
+          const token = tokenInput ? tokenInput.value : "";
 
-        const tr = btn.closest("tr");
-        const id = tr.dataset.id;
-        const roleId = tr.querySelector(".js-role").value;
-        const status = tr.querySelector(".js-status").checked;
-        const password = tr.querySelector(".js-password").value;
+          // 1) 儲存
+          table.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".js-save");
+            if (!btn) return;
 
-        const form = new FormData();
-        form.append("id", id);
-        form.append("roleId", roleId);
-        form.append("status", status ? "true" : "false");
+            const tr = btn.closest("tr");
+            const id = tr.dataset.id;
+            const roleId = tr.querySelector(".js-role").value;
+            const status = tr.querySelector(".js-status").checked;
+            const password = tr.querySelector(".js-password").value;
 
-        // 留空就不更新密碼（你也可改成永遠送，後端再把空白正規化為 null）
-        if (password && password.trim().length > 0) {
-            form.append("password", password);
-        }
+            const form = new FormData();
+            form.append("id", id);
+            form.append("roleId", roleId);
+            form.append("status", status ? "true" : "false");
+            if (password && password.trim().length > 0) form.append("password", password);
+            if (token) form.append("__RequestVerificationToken", token);
 
-        form.append("__RequestVerificationToken", token);
+            btn.disabled = true;
+            const oldText = btn.textContent;
+            btn.textContent = "儲存中…";
 
-        btn.disabled = true;
-        const oldText = btn.textContent;
-        btn.textContent = "儲存中…";
-
-        try {
-            const res = await fetch('@Url.Action("UpdateRow", "EmployeeAuth", new { area = "Employee" })', {
+            try {
+              const res = await fetch('@Url.Action("UpdateRow", "EmployeeAuth", new { area = "Employee" })', {
                 method: "POST",
                 body: form,
                 headers: { "X-Requested-With": "XMLHttpRequest" }
-            });
-
-            if (!res.ok) throw new Error("HTTP " + res.status);
-
-            const data = await res.json();
-            if (data.ok) {
+              });
+              if (!res.ok) throw new Error("HTTP " + res.status);
+              const data = await res.json();
+              if (data.ok) {
                 alert("更新成功");
-                tr.querySelector(".js-password").value = ""; // 成功後清空密碼框
-            } else {
+                tr.querySelector(".js-password").value = "";
+              } else {
                 alert("更新失敗：" + (data.message || "請稍後再試"));
+              }
+            } catch (err) {
+              alert("發生錯誤：" + err.message);
+            } finally {
+              btn.disabled = false;
+              btn.textContent = oldText;
             }
-        } catch (err) {
-            alert("發生錯誤：" + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.textContent = oldText;
-        }
-    });
-})();
-</script>
+          });
+
+          // 2) 詳細
+          table.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".js-detail");
+            if (!btn) return;
+
+            const tr = btn.closest("tr");
+            const id = tr.dataset.id;
+
+            btn.disabled = true;
+            const old = btn.textContent;
+            btn.textContent = "載入中…";
+
+            try {
+              const res = await fetch('@Url.Action("Detail", "EmployeeAuth", new { area = "Employee" })' + `?id=${id}`, {
+                method: "GET",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+              });
+              if (!res.ok) throw new Error("HTTP " + res.status);
+
+              const html = await res.text();
+              document.querySelector("#empDetailModal .modal-body").innerHTML = html;
+
+              if (!window.bootstrap || !bootstrap.Modal) {
+                console.error("Bootstrap JS 未載入");
+                alert("Modal 需要載入 Bootstrap JS（bundle）");
+                return;
+              }
+              new bootstrap.Modal(document.getElementById('empDetailModal')).show();
+            } catch (err) {
+              alert("載入失敗：" + err.message);
+            } finally {
+              btn.disabled = false;
+              btn.textContent = old;
+            }
+          });
+        })();
+    </script>
+
 }

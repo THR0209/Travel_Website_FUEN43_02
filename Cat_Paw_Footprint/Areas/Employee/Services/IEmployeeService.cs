@@ -11,7 +11,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 		Task<EmployeeViewModel?> GetByIdAsync(int id);
 
 		// 更新員工（含 Profile）
-		Task UpdateAsync(EmployeeViewModel vm);
+		Task<bool> UpdateSelfAsync(int empId, string name, string? phone, string? email, string? address, byte[]? photo, string? newPassword, string? idNumber);
 		// 更新員工帳號狀態、密碼、角色
 		Task UpdateAccountAsync(int id, bool status, string? password, int roleId);
 	}

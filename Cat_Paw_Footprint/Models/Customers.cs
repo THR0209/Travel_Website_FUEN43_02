@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -24,10 +25,12 @@ public partial class Customers
     public bool? IsBlacklisted { get; set; }
 
     public string? CustomerCode { get; set; }
+	public string? UserId { get; set; }// ★ 新增：指向 AspNetUsers(Id)
 
-    public virtual ICollection<CustomerLoginHistory> CustomerLoginHistory { get; set; } = new List<CustomerLoginHistory>();
+	public virtual ICollection<CustomerLoginHistory> CustomerLoginHistory { get; set; } = new List<CustomerLoginHistory>();
 
     public virtual CustomerProfile? CustomerProfile { get; set; }
 
     public virtual CustomerLevels? LevelNavigation { get; set; }
+	public IdentityUser User { get; set; }
 }

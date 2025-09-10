@@ -1,0 +1,181 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.CustomerAdminViewModel>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    var Level = ViewBag.Levels as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+    <link href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" rel="stylesheet" />
+}
+<h2 class="mb-3">客戶管理</h2>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle" id="productsTable">
+        <thead>
+            <tr>
+                <th class="text-center" style="width:10%;">編號</th>
+                <th class="text-center" style="width:15%;">姓名</th>
+                <th class="text-center" style="width:10%;">等級</th>
+                <th style="width:8%;">啟用</th>
+                <th style="width:10%;">黑名單</th>
+                <th class="text-center" style="width:28%;">信箱</th>
+                <th class="text-center" style="width:28%;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cus in Model)
+            {
+                <tr data-id="@cus.CustomerID">
+                    <td class="text-center">@cus.CustomerID</td>
+                    <td class="text-center">@cus.CustomerName</td>
+                    <td class="text-center">
+                        <select class="form-select js-leavel">
+                            @foreach (var Levels in Level)
+                            {
+                                <option value="@Levels.Value" selected="@(cus.Level.HasValue && cus.Level.Value.ToString() == Levels.Value)">
+                                    @Levels.Text
+                                </option>
+                            }
+                        </select>
+
+                    </td>
+                    <td>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input js-status" type="checkbox" role="switch"
+                                   @(cus.Status == true ? "checked" : "") />
+                        </div>
+                    </td>
+                    <td>
+                        <input type="checkbox" class="form-check-input js-isblacklisted" @(cus.IsBlacklisted == true ? "checked" : "") />
+                    </td>
+                    <td class="text-center">@cus.Email</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-info btn-sm js-detail">客戶資訊</button>
+                        <button type="button" class="btn btn-info btn-sm js-history">登陸紀錄</button>
+                        <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ✅ 跟 Script 有關 -->
+<form id="anti-form" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<!-- ✅ 跟 Script 有關 -->
+<div class="modal fade" id="cusDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">客戶詳細資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- 這裡會被 Script 填資料 -->
+            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#productsTable').DataTable({
+                "pageLength": 20, // 每頁顯示 20 筆
+                "language": {
+                    url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json'
+                }
+            });
+        });
+//下方是詳細資料
+                document.querySelectorAll(".js-detail").forEach(btn => {
+            btn.addEventListener("click", async e => {
+                const tr = btn.closest("tr");
+                const email = tr.querySelector("td:nth-child(6)").textContent; // 假設信箱在第6欄
+
+                try {
+                    const res = await fetch('@Url.Action("CustomerDetail", "CustomerAdmin", new { area = "Employee" })' + `?email=${encodeURIComponent(email)}`, {
+                        method: "GET",
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+
+                    const html = await res.text();
+                    document.querySelector("#cusDetailModal .modal-body").innerHTML = html;
+
+                    new bootstrap.Modal(document.getElementById('cusDetailModal')).show();
+                } catch (err) {
+                    alert("載入失敗：" + err.message);
+                }
+            });
+        });
+                //下方是登陸紀錄
+                        document.querySelectorAll(".js-history").forEach(btn => {
+                                    btn.addEventListener("click", async e => {
+                                        const tr = btn.closest("tr");
+                                        const email = tr.querySelector("td:nth-child(6)").textContent; // 假設信箱在第6欄
+                                        try {
+                                                    const res = await fetch('@Url.Action("LoginHistory", "CustomerAdmin", new { area = "Employee" })' + `?email=${encodeURIComponent(email)}`, {
+                                                method: "GET",
+                                                headers: { "X-Requested-With": "XMLHttpRequest" }
+                                            });
+                                            if (!res.ok) throw new Error("HTTP " + res.status);
+                                            const html = await res.text();
+                                            document.querySelector("#cusDetailModal .modal-body").innerHTML = html;
+                                            new bootstrap.Modal(document.getElementById('cusDetailModal')).show();
+                                        } catch (err) {
+                                            alert("載入失敗：" + err.message);
+                                        }
+                        });
+    });
+
+    //儲存
+        document.querySelectorAll(".js-save").forEach(btn => {
+            btn.addEventListener("click", async e => {
+                const tr = btn.closest("tr");
+                const id = tr.dataset.id;
+                const leavel = tr.querySelector(".js-leavel").value;
+                const Status = tr.querySelector(".js-status").checked;
+                const IsBlacklistedd = tr.querySelector(".js-isblacklisted").checked;
+                const form = new FormData();
+
+                        form.append("customerId", id);
+        form.append("levelId", leavel);
+        form.append("status", Status ? "true" : "false");
+        form.append("isBlacklisted", IsBlacklistedd ? "true" : "false");
+
+                const token = document.querySelector("#anti-form input[name=__RequestVerificationToken]").value;
+
+                if (token) form.append("__RequestVerificationToken", token);
+                    btn.disabled = true;
+                    const oldText = btn.textContent;
+                    btn.textContent = "儲存中…";
+                    try {
+                    const res = await fetch('@Url.Action("UpdateCustomer", "CustomerAdmin", new { area = "Employee" })', {
+                    method: "POST",
+                    body: form,
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                    const data = await res.json();
+                if (data.ok) {
+                    alert("更新成功");
+                } 
+                else {
+                                alert("更新失敗：" + (data.message || "請稍後再試"));
+                            }
+                    } catch (err) {
+                    alert("發生錯誤：" + err.message);
+                    } finally {
+                            btn.disabled = false;
+                                btn.textContent = oldText;
+                    }
+                });
+                                           
+            });
+    </script>
+}
