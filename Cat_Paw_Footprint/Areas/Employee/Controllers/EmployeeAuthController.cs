@@ -98,8 +98,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 
 			ViewBag.RoleList = new SelectList(roles, "RoleID", "RoleName");
 		}
-		[HttpGet]
-		// 註冊
+		[HttpGet]// 註冊
 		public IActionResult Register()
 		{
 			PopulateRoleList(); // GET 呼叫
@@ -131,7 +130,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				Status= true
 			};
 			_context.Employees.Add(emp);
-			_context.SaveChanges();
+			
 
 			var profile = new EmployeeProfile//註冊之後產生基本員工個資表，剩下給員工自己寫
 			{
@@ -188,6 +187,84 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 
 			await _svc.UpdateAccountAsync(id, status, newPwd, roleId);
 			return Json(new { ok = true, message = "更新成功" });
+		}
+		[HttpGet]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EmployeeListNotUpdate()//彈出子視窗用但不確定是不是這樣寫
+		{
+			var employees = await _svc.GetAllAsync();
+			ViewBag.Roles = _context.EmployeeRoles
+		.Select(r => new SelectListItem
+		{
+			Value = r.RoleID.ToString(),
+			Text = r.RoleName
+		})
+		.ToList();
+			return View(employees);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Detail(int id)
+		{
+			var vm = await _svc.GetByIdAsync(id);
+			if (vm == null) return NotFound();
+			return PartialView("_EmployeeDetail", vm);
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Profile()
+		{
+			var idStr = HttpContext.Session.GetString("EmpId");
+			if (!int.TryParse(idStr, out var empId))
+				return RedirectToAction("Login", "EmployeeAuth", new { area = "Employee" });
+
+			var vm = await _svc.GetByIdAsync(empId);
+			if (vm == null) return NotFound();
+
+			// 轉換成 ProfileEditInput
+			var input = new ProfileEditInput
+			{
+				EmployeeName = vm!.EmployeeName!,
+				Phone = vm.Phone,
+				Email = vm.Email,
+				IDNumber = vm.IDNumber,
+				Address = vm.Address,
+				ExistingPhoto = vm.Photo
+			};
+
+			return View("Profile", input);
+		}
+
+		[HttpPost]//單獨帳號個人資料頁更新
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Profile(ProfileEditInput input)
+		{
+			var empId = int.Parse(HttpContext.Session.GetString("EmpId")!);
+
+			// 將檔案轉換成 byte[]
+			byte[]? photoBytes = null;
+			if (input.PhotoFile != null)
+			{
+				using var ms = new MemoryStream();
+				await input.PhotoFile.CopyToAsync(ms);
+				photoBytes = ms.ToArray();
+			}
+
+			var success = await _svc.UpdateSelfAsync(
+				empId,
+				input.EmployeeName,
+				input.Phone,
+				input.Email,
+				input.Address,
+				photoBytes,
+				input.NewPassword,
+				input.IDNumber
+			);
+
+			if (success)
+				return Json(new { ok = true, message = "更新成功" });
+			else
+				return Json(new { ok = false, message = "更新失敗" });
 		}
 
 		#endregion

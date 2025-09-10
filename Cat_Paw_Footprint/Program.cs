@@ -13,36 +13,44 @@ namespace Cat_Paw_Footprint
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddDbContext<webtravel2Context>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("WebTravelConnection")));
+			// Add services to the container.
+			builder.Services.AddDbContext<EmployeeDbContext>(options =>
+	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
 
-            builder.Services.AddDbContext<EmployeeDbContext>(options =>
-	        options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
-	
+			builder.Services.AddDbContext<webtravel2Context>(options =>
+	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
 
-			var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+			var connectionString = builder.Configuration.GetConnectionString("EmployeeConnection") ?? throw new InvalidOperationException("Connection string 'EmployeeConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+			builder.Services
+				.AddIdentity<IdentityUser, IdentityRole>(opt => {
+					opt.SignIn.RequireConfirmedAccount = false; // ´ú¸Õ¥ýÃö±¼«H½cÅçÃÒ
+					opt.Password.RequiredLength = 6;
+				})
+				.AddEntityFrameworkStores<ApplicationDbContext>()
+				.AddDefaultTokenProviders()
+				.AddDefaultUI();
 
 			builder.Services.AddSession(options =>
 			{
-				options.Cookie.Name = ".CatPaw.Employee.Session"; // ï¿½Û­qï¿½ï¿½ï¿½u Session ï¿½Wï¿½ï¿½
-				options.IdleTimeout = TimeSpan.FromHours(9);   // ï¿½Û­qï¿½Oï¿½É®É¶ï¿½
-				options.Cookie.HttpOnly = true;                   // ï¿½ï¿½ï¿½ï¿½ JS ï¿½sï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ XSS
-				options.Cookie.IsEssential = true;                // ï¿½×§Kï¿½Qï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				options.Cookie.Name = ".CatPaw.Employee.Session"; // ¦Û­q­û¤u Session ¦WºÙ
+				options.IdleTimeout = TimeSpan.FromHours(9);   // ¦Û­q¹O®É®É¶¡
+				options.Cookie.HttpOnly = true;                   // ªý¤î JS ¦s¨ú¡A¨¾¤î XSS
+				options.Cookie.IsEssential = true;                // Á×§K³QÂsÄý¾¹ªý¾×
 			});
 
 			builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 			builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+			builder.Services.AddScoped<ICustomerAdminRepository, CustomerAdminRepository>();
+			builder.Services.AddScoped<ICustomerAdminService, CustomerAdminService>();
 
 			builder.Services.AddControllersWithViews();
+			builder.Services.AddRazorPages();
 
-            var app = builder.Build();
+			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -60,8 +68,8 @@ namespace Cat_Paw_Footprint
             app.UseStaticFiles();
 
             app.UseRouting();
-			app.UseSession(); // ï¿½Ò¥ï¿½ Session ï¿½ï¿½ï¿½ï¿½ï¿½nï¿½ï¿½
-			app.UseAuthentication();
+			app.UseSession(); // ±Ò¥Î Session ¤¤¤¶³nÅé
+			app.UseAuthentication();// ¦b Authorization ¤§«e
 			app.UseAuthorization();
 			app.MapControllerRoute(
 				name: "areas",

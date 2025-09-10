@@ -21,12 +21,15 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 
 		public async Task<EmployeeViewModel?> GetByIdAsync(int id)// 依 ID 取得單一員工（含角色 & 個資）
 		{
-			throw new NotImplementedException();
+			return await _repo.GetByIdAsync(id);
 		}
 
-		public async Task UpdateAsync(EmployeeViewModel vm)// 更新員工（含 Profile）
+		public async Task<bool> UpdateSelfAsync(int empId, string name, string? phone, string? email, string? address, byte[]? photo, string? newPassword, string? idNumber)// 更新員工
 		{
-			throw new NotImplementedException();
+			var newPasswordHash = string.IsNullOrWhiteSpace(newPassword) ? null : BCrypt.Net.BCrypt.HashPassword(newPassword);
+			var newpjoto = photo == null ? null : photo;
+
+			return await _repo.UpdateSelfAsync(empId,name,phone,email,address,photo, newPasswordHash,idNumber) ;
 		}
 		public async Task UpdateAccountAsync(int id, bool status, string? password, int roleId)
 		{

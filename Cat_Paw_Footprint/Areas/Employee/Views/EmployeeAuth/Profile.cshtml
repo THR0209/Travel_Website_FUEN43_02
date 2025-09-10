@@ -1,0 +1,101 @@
+﻿@model Cat_Paw_Footprint.Areas.Employee.ViewModel.ProfileEditInput
+@using System
+@{
+    ViewData["Title"] = "我的資料";
+}
+
+<h2>我的資料</h2>
+
+<form id="profileForm" asp-action="Profile" asp-controller="EmployeeAuth" asp-area="Employee"
+      method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <table class="table table-bordered">
+        <tr>
+            <th>姓名</th>
+            <td>
+                <input asp-for="EmployeeName" class="form-control" />
+                <span asp-validation-for="EmployeeName" class="text-danger"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>電話</th>
+            <td>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>身分證</th>
+            <td>
+                <input asp-for="IDNumber" class="form-control" />
+                <span asp-validation-for="IDNumber" class="text-danger"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>地址</th>
+            <td>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>大頭照</th>
+            <td>
+                @if (Model.ExistingPhoto != null && Model.ExistingPhoto.Length > 0)
+                {
+                    var base64 = Convert.ToBase64String(Model.ExistingPhoto);
+                    <img id="photoPreview" src="data:image/*;base64,@base64"
+                         alt="大頭照" class="img-thumbnail mb-2" style="max-height:160px;" />
+                }
+                else
+                {
+                    <img id="photoPreview" class="img-thumbnail mb-2 d-none" style="max-height:160px;" />
+                    <span class="text-muted d-block">目前沒有上傳照片</span>
+                }
+
+                <input asp-for="PhotoFile" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="PhotoFile" class="text-danger"></span>
+            </td>
+        </tr>
+        <tr>
+            <th>新密碼</th>
+            <td>
+                <input asp-for="NewPassword" type="password" class="form-control" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </td>
+        </tr>
+    </table>
+
+    <button type="submit" class="btn btn-primary">儲存變更</button>
+</form>
+@section Scripts {
+    <script>
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+          e.preventDefault(); // 阻止預設跳頁
+          const form = e.target;
+          const fd = new FormData(form);
+
+          const res = await fetch(form.action, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' } // 讓後端知道是 Ajax
+          });
+
+          const data = await res.json();
+          if (data.ok) {
+            alert(data.message || '更新成功');
+            // 需要的話：location.reload();  // 重整页面
+          } else {
+            alert(data.message || '更新失敗');
+          }
+        });
+    </script>
+}

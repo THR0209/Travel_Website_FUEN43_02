@@ -39,15 +39,66 @@ namespace Cat_Paw_Footprint.Areas.Employee.Repositories
 		}
 		
 
-		public Task<EmployeeViewModel?> GetByIdAsync(int id)// 依 ID 取得單一員工（含角色 & 個資）
+		public async Task<EmployeeViewModel?> GetByIdAsync(int id)// 依 ID 取得單一員工（含角色 & 個資）
 		{
-			throw new NotImplementedException();
+			return await _db.Employees
+		.AsNoTracking()
+		.Where(e => e.EmployeeID == id)
+		.Select(e => new EmployeeViewModel
+		{
+			EmployeeID = e.EmployeeID,
+			EmployeeName = e.EmployeeProfile.EmployeeName,
+			Account = e.Account,
+			RoleID = e.RoleID,
+			RoleName = e.Role.RoleName,
+			CreateDate = e.CreateDate,
+			Status = e.Status,
+			EmployeeCode = e.EmployeeCode,
+			EmployeeProfileCode = e.EmployeeProfile.EmployeeProfileCode,
+			IDNumber = e.EmployeeProfile.IDNumber,
+			Phone = e.EmployeeProfile.Phone,
+			Email = e.EmployeeProfile.Email,
+			Address = e.EmployeeProfile.Address,
+			Photo = e.EmployeeProfile.Photo
+		})
+		.FirstOrDefaultAsync();
 		}
 
-		public Task UpdateAsync(Employees employee, EmployeeProfile? profile = null)// 更新員工（含 Profile）
+		public async Task<bool> UpdateSelfAsync(
+		int empId, string name, string? phone, string? email, string? address, byte[]? photo, string? newPasswordHash, string? idNumber)// 員工自我更新
 		{
-			throw new NotImplementedException();
+
+			try
+			{
+				var emp = await _db.Employees
+					.Include(e => e.EmployeeProfile) // ← 跨表關鍵：把 Profile 一起載入
+					.FirstOrDefaultAsync(e => e.EmployeeID == empId);
+
+				if (emp == null) return false;
+
+				// 修改 EmployeeProfile 表
+				emp.EmployeeProfile.EmployeeName = name;
+				emp.EmployeeProfile.Phone = phone;
+				emp.EmployeeProfile.Email = email;
+				emp.EmployeeProfile.Address = address;
+				emp.EmployeeProfile.IDNumber = idNumber;
+				if (photo != null) emp.EmployeeProfile.Photo = photo;
+
+				// 修改 Employees 表
+				if (!string.IsNullOrWhiteSpace(newPasswordHash))
+					emp.Password = newPasswordHash; // ⚠️ 這裡要傳 Service 已經雜湊好的字串
+
+				// 一次 SaveChanges
+				await _db.SaveChangesAsync();
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+
 		}
+
 
 		public async Task UpdateStatusAndPasswordAndRoleAsync(int id, bool status, string? password, int roleId)
 		{
