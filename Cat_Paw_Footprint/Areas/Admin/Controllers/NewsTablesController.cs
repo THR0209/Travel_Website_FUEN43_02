@@ -204,38 +204,51 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         // GET: Admin/NewsTables/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var newsTable = await _context.NewsTable
-                .Include(n => n.Employee)
-                .FirstOrDefaultAsync(m => m.NewsID == id);
-            if (newsTable == null)
-            {
-                return NotFound();
-            }
+			var newsTable = await _context.NewsTable
+				.Include(n => n.Employee)
+				.FirstOrDefaultAsync(m => m.NewsID == id);
 
-            return View(newsTable);
-        }
+			if (newsTable == null)
+			{
+				return NotFound();
+			}
+
+			var vm = new NewsDeleteViewModel
+			{
+				NewsID = newsTable.NewsID,
+				NewsTitle = newsTable.NewsTitle,
+				NewsContent = newsTable.NewsContent,
+				IsActive = newsTable.IsActive??false, // 確保不是 null
+				PublishTime = newsTable.PublishTime,
+				ExpireTime = newsTable.ExpireTime,
+				CreateTime = newsTable.CreateTime,
+				UpdateTime = newsTable.UpdateTime,
+				EmployeeName = newsTable.Employee?.EmployeeName // 注意要防止 null
+			};
+
+			return View(vm);
+		}
 
         // POST: Admin/NewsTables/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var newsTable = await _context.NewsTable.FindAsync(id);
-            if (newsTable != null)
-            {
-                _context.NewsTable.Remove(newsTable);
-            }
+		public async Task<IActionResult> DeleteConfirmed(NewsDeleteViewModel model)
+		{
+			var newsTable = await _context.NewsTable.FindAsync(model.NewsID);
+			if (newsTable != null)
+			{
+				_context.NewsTable.Remove(newsTable);
+				await _context.SaveChangesAsync();
+			}
+			return RedirectToAction(nameof(Index));
+		}
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool NewsTableExists(int id)
+		private bool NewsTableExists(int id)
         {
             return _context.NewsTable.Any(e => e.NewsID == id);
         }

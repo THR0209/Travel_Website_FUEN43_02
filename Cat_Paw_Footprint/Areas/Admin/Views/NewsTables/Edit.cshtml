@@ -1,12 +1,12 @@
 ﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsEditViewModel
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "編輯";
+    ViewData["Title"] = "編輯消息";
 }
 
 <h1>編輯</h1>
 
-<h4>最新消息</h4>
+<h4>消息</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -14,7 +14,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="NewsID" />
             <div class="form-group">
-                <label asp-for="NewsTitle" class="control-label"></label>
+                <label asp-for="NewsTitle" class="control-label fs-5"></label>
                 <input asp-for="NewsTitle" class="form-control" />
                 <span asp-validation-for="NewsTitle" class="text-danger"></span>
             </div>
@@ -46,15 +46,16 @@
                 <select asp-for="EmployeeID" class="form-control form-select" asp-items="ViewBag.EmployeeID"></select>
                 <span asp-validation-for="EmployeeID" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
+            @* <div class="form-group">
+                
+            </div> *@
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <input type="submit" value="儲存" class="btn btn-primary" /> |
+    <a asp-action="Index" class="btn btn-secondary">回上一頁</a>
 </div>
 
 @section Scripts {
