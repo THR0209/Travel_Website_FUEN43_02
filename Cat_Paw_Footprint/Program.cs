@@ -1,5 +1,7 @@
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
+using Cat_Paw_Footprint.Areas.Vendor.Repositories;
+using Cat_Paw_Footprint.Areas.Vendor.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Identity;
@@ -46,6 +48,10 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 			builder.Services.AddScoped<ICustomerAdminRepository, CustomerAdminRepository>();
 			builder.Services.AddScoped<ICustomerAdminService, CustomerAdminService>();
+			builder.Services.AddScoped<IVendorAdminRepository, VendorAdminRepository>();
+			builder.Services.AddScoped<IVendorAdminService, VendorAdminService>();
+			builder.Services.AddScoped<IVendorHomeRepository, VendorHomeRepository>();
+			builder.Services.AddScoped<IVendorHomeService, VendorHomeService>();
 
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();

@@ -1,5 +1,6 @@
 ﻿using Cat_Paw_Footprint.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 namespace Cat_Paw_Footprint.Data
 {
 	public class EmployeeDbContext : DbContext
@@ -15,8 +16,12 @@ namespace Cat_Paw_Footprint.Data
 		public DbSet<Models.CustomerProfile> CustomerProfiles { get; set; }
 		public DbSet<Models.CustomerLevels> CustomerLevels { get; set; }
 		public DbSet<Models.CustomerLoginHistory> CustomerLoginHistory { get; set; }
+		public DbSet<Vendors> Vendors { get; set; }
+		public DbSet<VendorLoginHistory> VendorLoginHistories { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			//員工
 			modelBuilder.Entity<Employees>(entity =>
 			{
 				entity.HasKey(e => e.EmployeeID);
@@ -48,7 +53,7 @@ namespace Cat_Paw_Footprint.Data
 			});
 
 
-
+			//客戶
 			modelBuilder.Entity<Customers>(entity =>
 			{
 				entity.HasKey(c => c.CustomerID);
@@ -67,7 +72,30 @@ namespace Cat_Paw_Footprint.Data
 			modelBuilder.Entity<CustomerProfile>().ToTable("CustomerProfile", t => t.ExcludeFromMigrations());
 			modelBuilder.Entity<CustomerLevels>().ToTable("CustomerLevels", t => t.ExcludeFromMigrations());
 			modelBuilder.Entity<CustomerLoginHistory>().ToTable("CustomerLoginHistory", t => t.ExcludeFromMigrations());
+
+			//廠商
+			modelBuilder.Entity<Vendors>(entity =>
+			{
+				entity.HasKey(v => v.VendorId);
+
+				entity.HasOne(v => v.User)
+					  .WithMany()
+					  .HasForeignKey(v => v.UserId)
+					  .OnDelete(DeleteBehavior.Restrict);
+
+				entity.HasMany(v => v.VendorLoginHistory)
+					  .WithOne(l => l.Vendor)
+					  .HasForeignKey(l => l.VendorID)
+					  .OnDelete(DeleteBehavior.Cascade);
+			});
+
+			modelBuilder.Entity<VendorLoginHistory>(entity =>
+			{
+				entity.HasKey(l => l.LoginLogID);
+			});
 		}
+
+
 
 	}
 }
