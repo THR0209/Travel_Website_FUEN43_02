@@ -1,0 +1,101 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Locations>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th >
+                @Html.DisplayNameFor(model => model.LocationName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationAddr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationLat)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationLng)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationDesc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Rating)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Views)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.District)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Region)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationAddr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationLat)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationLng)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationDesc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rating)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Views)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.District.DistrictID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Region.RegionID)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.LocationID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.LocationID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.LocationID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

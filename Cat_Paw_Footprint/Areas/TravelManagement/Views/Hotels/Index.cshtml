@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Hotels>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.HotelName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HotelAddr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HotelLat)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HotelLng)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HotelDesc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Rating)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Views)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.HotelCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.District)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Region)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.HotelName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HotelAddr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HotelLat)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HotelLng)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HotelDesc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rating)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Views)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.HotelCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.District.DistrictID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Region.RegionID)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.HotelID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.HotelID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.HotelID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
