@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 {
-	[DateRange]
+	[DateRange("PublishTime", "ExpireTime", ErrorMessage = "發佈時間不可大於到期時間")]
 	public class NewsCreateViewModel
     {
         public int NewsID { get; set; }
@@ -33,7 +33,9 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
         public DateTime? UpdateTime { get; set; }
 
 		[Display(Name = "員工姓名")]
-		public string EmployeeName { get; set; }
+		public string? EmployeeName { get; set; }
+
+		[Required(ErrorMessage = "必須選擇員工")]
 		public int? EmployeeID { get; set; }
 
 		//public virtual EmployeeProfile? Employee { get; set; }

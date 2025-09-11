@@ -1,11 +1,12 @@
 ﻿using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.ValidationAttributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 {
-    public class NewsEditViewModel
-    {
-       
+	[DateRange("PublishTime", "ExpireTime", ErrorMessage = "發佈時間不可大於到期時間")]
+	public class NewsEditViewModel
+    {  
         public int NewsID { get; set; }
 
         [Display(Name = "消息標題")]

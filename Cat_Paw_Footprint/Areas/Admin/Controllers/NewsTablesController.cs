@@ -94,8 +94,6 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(NewsCreateViewModel model)
         {
-		
-
 			if (ModelState.IsValid)
 			{
 				var entity = new NewsTable
@@ -115,7 +113,20 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				return RedirectToAction(nameof(Index));
 			}
 
-			ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeName");
+			// ❗ 除錯：把所有錯誤列出來
+			if (!ModelState.IsValid)
+			{
+				var errors = ModelState.Values
+									   .SelectMany(v => v.Errors)
+									   .Select(e => e.ErrorMessage);
+
+				foreach (var err in errors)
+				{
+					Console.WriteLine("驗證錯誤：" + err);
+				}
+			}
+
+			ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeName", model.EmployeeID);
 			return View(model);
 		}
 
@@ -133,8 +144,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            // 映射成 ViewModel
-            var viewModel = new NewsEditViewModel
+			// 映射成 ViewModel
+			var viewModel = new NewsEditViewModel
             {
                 NewsID = newsTable.NewsID,
                 NewsTitle = newsTable.NewsTitle,
