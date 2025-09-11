@@ -17,7 +17,7 @@ public partial class NewsTable
 
     public DateTime? ExpireTime { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public DateTime? CreateTime { get; set; }
 

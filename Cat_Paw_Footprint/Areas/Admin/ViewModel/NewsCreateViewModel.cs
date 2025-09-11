@@ -15,7 +15,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 
         public DateTime? ExpireTime { get; set; }
 
-        public bool? IsActive { get; set; }
+        public bool IsActive { get; set; }
 
         public DateTime? CreateTime { get; set; }
 

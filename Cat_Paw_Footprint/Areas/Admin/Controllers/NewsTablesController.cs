@@ -70,7 +70,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
                 NewsContent = newsTable.NewsContent,
                 PublishTime = newsTable.PublishTime,
                 ExpireTime = newsTable.ExpireTime,
-                IsActive = newsTable.IsActive?? false, // 確保不是 null
+                IsActive = newsTable.IsActive, // 確保不是 null
                 CreateTime = newsTable.CreateTime,
                 UpdateTime = newsTable.UpdateTime,
                 EmployeeName = newsTable.Employee?.EmployeeName
@@ -82,7 +82,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         // GET: Admin/NewsTables/Create
         public IActionResult Create()
         {
-            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeID");
+            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeID");//下拉式選單
+
             return View();
         }
 
@@ -91,17 +92,30 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("NewsID,NewsTitle,NewsContent,PublishTime,ExpireTime,IsActive,CreateTime,UpdateTime,EmployeeID")] NewsTable newsTable)
+        public async Task<IActionResult> Create(NewsCreateViewModel model)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(newsTable);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeID", newsTable.EmployeeID);
-            return View(newsTable);
-        }
+			if (ModelState.IsValid)
+			{
+				var entity = new NewsTable
+				{
+					NewsTitle = model.NewsTitle,
+					NewsContent = model.NewsContent,
+					IsActive = model.IsActive,
+					PublishTime = model.PublishTime,
+					ExpireTime = model.ExpireTime,
+					CreateTime = DateTime.Now,
+					UpdateTime = DateTime.Now,
+					EmployeeID = model.EmployeeID
+				};
+
+				_context.Add(entity);
+				await _context.SaveChangesAsync();
+				return RedirectToAction(nameof(Index));
+			}
+
+			ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeName", model.EmployeeID);
+			return View(model);
+		}
 
         // GET: Admin/NewsTables/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -125,7 +139,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
                 NewsContent = newsTable.NewsContent,
                 PublishTime = newsTable.PublishTime,
                 ExpireTime = newsTable.ExpireTime,
-                IsActive = newsTable.IsActive?? false, // 確保不是 null
+                IsActive = newsTable.IsActive,
                 EmployeeID = newsTable.EmployeeID,
                 EmployeeName = newsTable.Employee?.EmployeeName,
             };
@@ -223,7 +237,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				NewsID = newsTable.NewsID,
 				NewsTitle = newsTable.NewsTitle,
 				NewsContent = newsTable.NewsContent,
-				IsActive = newsTable.IsActive??false, // 確保不是 null
+				IsActive = newsTable.IsActive,
 				PublishTime = newsTable.PublishTime,
 				ExpireTime = newsTable.ExpireTime,
 				CreateTime = newsTable.CreateTime,
