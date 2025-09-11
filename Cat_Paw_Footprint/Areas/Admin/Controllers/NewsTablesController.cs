@@ -82,7 +82,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         // GET: Admin/NewsTables/Create
         public IActionResult Create()
         {
-            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeID");//下拉式選單
+            ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeName");//下拉式選單
 
             return View();
         }
@@ -94,6 +94,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(NewsCreateViewModel model)
         {
+		
+
 			if (ModelState.IsValid)
 			{
 				var entity = new NewsTable
@@ -105,7 +107,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 					ExpireTime = model.ExpireTime,
 					CreateTime = DateTime.Now,
 					UpdateTime = DateTime.Now,
-					EmployeeID = model.EmployeeID
+					EmployeeID = model.EmployeeID,
 				};
 
 				_context.Add(entity);
@@ -113,7 +115,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				return RedirectToAction(nameof(Index));
 			}
 
-			ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeName", model.EmployeeID);
+			ViewData["EmployeeID"] = new SelectList(_context.EmployeeProfile, "EmployeeID", "EmployeeName");
 			return View(model);
 		}
 
