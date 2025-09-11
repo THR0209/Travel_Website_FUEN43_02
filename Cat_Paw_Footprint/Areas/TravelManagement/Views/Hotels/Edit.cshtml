@@ -1,0 +1,84 @@
+﻿@model Cat_Paw_Footprint.Models.Hotels
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Hotels</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="HotelID" />
+            <div class="form-group">
+                <label asp-for="HotelName" class="control-label"></label>
+                <input asp-for="HotelName" class="form-control" />
+                <span asp-validation-for="HotelName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HotelAddr" class="control-label"></label>
+                <input asp-for="HotelAddr" class="form-control" />
+                <span asp-validation-for="HotelAddr" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HotelLat" class="control-label"></label>
+                <input asp-for="HotelLat" class="form-control" />
+                <span asp-validation-for="HotelLat" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HotelLng" class="control-label"></label>
+                <input asp-for="HotelLng" class="form-control" />
+                <span asp-validation-for="HotelLng" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HotelDesc" class="control-label"></label>
+                <input asp-for="HotelDesc" class="form-control" />
+                <span asp-validation-for="HotelDesc" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RegionID" class="control-label"></label>
+                <select asp-for="RegionID" class="form-control" asp-items="ViewBag.RegionID"></select>
+                <span asp-validation-for="RegionID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DistrictID" class="control-label"></label>
+                <select asp-for="DistrictID" class="form-control" asp-items="ViewBag.DistrictID"></select>
+                <span asp-validation-for="DistrictID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Rating" class="control-label"></label>
+                <input asp-for="Rating" class="form-control" />
+                <span asp-validation-for="Rating" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Views" class="control-label"></label>
+                <input asp-for="Views" class="form-control" />
+                <span asp-validation-for="Views" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HotelCode" class="control-label"></label>
+                <input asp-for="HotelCode" class="form-control" />
+                <span asp-validation-for="HotelCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="IsActive" class="control-label"></label>
+                <input asp-for="IsActive" class="form-control" />
+                <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

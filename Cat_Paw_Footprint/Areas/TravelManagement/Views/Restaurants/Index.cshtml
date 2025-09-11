@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Restaurants>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.RestaurantName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RestaurantAddr)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RestaurantLat)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RestaurantLng)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RestaurantDesc)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Rating)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Views)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RestaurantCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.District)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Region)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.RestaurantName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RestaurantAddr)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RestaurantLat)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RestaurantLng)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RestaurantDesc)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rating)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Views)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsActive)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RestaurantCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.District.DistrictID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Region.RegionID)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.RestaurantID">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.RestaurantID">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.RestaurantID">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
