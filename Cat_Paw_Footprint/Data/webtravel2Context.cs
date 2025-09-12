@@ -909,6 +909,8 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__TripProje__Trans__59C55456");
         });
 
+
+
         OnModelCreatingPartial(modelBuilder);
     }
 

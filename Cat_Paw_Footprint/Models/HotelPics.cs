@@ -14,4 +14,5 @@ public partial class HotelPics
     public byte[]? Picture { get; set; }
 
     public virtual Hotels? Hotel { get; set; }
+
 }

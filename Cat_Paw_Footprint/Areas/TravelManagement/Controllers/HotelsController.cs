@@ -23,7 +23,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         // GET: TravelManagement/Hotels
         public async Task<IActionResult> Index()
         {
-            var webtravel2Context = _context.Hotels.Include(h => h.District).Include(h => h.Region);
+            var webtravel2Context = _context.Hotels
+                .Include(h => h.District)
+                .Include(h => h.Region);
+
             return View(await webtravel2Context.ToListAsync());
         }
 

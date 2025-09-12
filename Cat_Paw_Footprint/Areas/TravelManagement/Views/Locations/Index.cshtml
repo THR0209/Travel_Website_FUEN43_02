@@ -4,7 +4,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>景點</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -85,10 +85,10 @@
                 @Html.DisplayFor(modelItem => item.IsActive)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.District.DistrictID)
+                @Html.DisplayFor(modelItem => item.District.DistrictName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Region.RegionID)
+                @Html.DisplayFor(modelItem => item.Region.RegionName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.LocationID">Edit</a> |
