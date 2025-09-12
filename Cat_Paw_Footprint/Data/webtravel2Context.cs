@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Cat_Paw_Footprint.Models;
 using Microsoft.EntityFrameworkCore;
