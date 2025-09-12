@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Cat_Paw_Footprint.Models;
 using Microsoft.EntityFrameworkCore;
@@ -134,20 +134,15 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<TripProjectDetails> TripProjectDetails { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=tcp:web-travel.database.windows.net,1433;Database=web-travel2;User Id=webTravel-ap@web-travel;Password=P9L9M6+n6m8B]hw;Encrypt=True;TrustServerCertificate=True;MultipleActiveResultSets=true;");
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Data Source=LAPTOP-GD2BR52T\\SQLEXPRESS;Initial Catalog=web-travel2;Integrated Security=True;TrustServerCertificate=True;");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<CouponPics>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Coupon).WithMany()
+            entity.HasKey(e => e.CouponPicID); // 預計更改的
+
+			entity.HasOne(d => d.Coupon).WithMany(p => p.CouponPics)
                 .HasForeignKey(d => d.CouponID)
                 .HasConstraintName("FK__CouponPic__Coupo__151B244E");
         });
@@ -433,9 +428,11 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<HotelKeywords>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Hotel).WithMany()
+			 entity.HasKey(e => e.HotelKeywordID);  // 預計更改的
+
+			entity.HasOne(d => d.Hotel).WithMany(p => p.HotelKeywords)
                 .HasForeignKey(d => d.HotelID)
                 .HasConstraintName("FK__HotelKeyw__Hotel__2B0A656D");
 
@@ -446,9 +443,11 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<HotelPics>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Hotel).WithMany()
+			 entity.HasKey(e => e.HotelPicID);  // 預計更改的
+
+            entity.HasOne(d => d.Hotel).WithMany(p => p.HotelPics)
                 .HasForeignKey(d => d.HotelID)
                 .HasConstraintName("FK__HotelPics__Hotel__2CF2ADDF");
         });
@@ -487,11 +486,13 @@ public partial class webtravel2Context : DbContext
         {
             entity.HasNoKey();
 
+			 entity.HasKey(e => e.LocationKeywordID);  // 預計更改的
+
             entity.HasOne(d => d.Keyword).WithMany()
                 .HasForeignKey(d => d.KeywordID)
                 .HasConstraintName("FK__LocationK__Keywo__2FCF1A8A");
 
-            entity.HasOne(d => d.Location).WithMany()
+            entity.HasOne(d => d.Location).WithMany(p => p.LocationKeywords)
                 .HasForeignKey(d => d.LocationID)
                 .HasConstraintName("FK__LocationK__Locat__30C33EC3");
         });
@@ -500,7 +501,9 @@ public partial class webtravel2Context : DbContext
         {
             entity.HasNoKey();
 
-            entity.HasOne(d => d.Location).WithMany()
+			 entity.HasKey(e => e.LocationPicID);  // 預計更改的
+
+            entity.HasOne(d => d.Location).WithMany(p => p.LocationPics)
                 .HasForeignKey(d => d.LocationID)
                 .HasConstraintName("FK__LocationP__Locat__31B762FC");
         });
@@ -531,7 +534,9 @@ public partial class webtravel2Context : DbContext
         {
             entity.HasNoKey();
 
-            entity.HasOne(d => d.News).WithMany()
+			 entity.HasKey(e => e.NewsPicID);  // 預計更改的
+
+            entity.HasOne(d => d.News).WithMany(p => p.NewsPics)
                 .HasForeignKey(d => d.NewsID)
                 .HasConstraintName("FK__NewsPics__NewsID__3493CFA7");
         });
@@ -577,19 +582,23 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<ProductAnalysis>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Product).WithMany()
+			entity.HasKey(e => e.ProductAnalysisID);  // 預計更改的
+
+			entity.HasOne(d => d.Product).WithMany(p => p.ProductAnalyses) // 更改過WithMany
                 .HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__ProductAn__Produ__3864608B");
         });
 
         modelBuilder.Entity<ProductPics>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+			 entity.HasKey(e => e.ProductPicID);  // 預計更改的
+
+			entity.HasOne(d => d.Product).WithMany(p => p.ProductPics)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__ProductPi__Produ__395884C4");
         });
 
@@ -600,47 +609,53 @@ public partial class webtravel2Context : DbContext
             entity.Property(e => e.ProductCode)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.ProductDesc).HasMaxLength(200);
-            entity.Property(e => e.ProductName).HasMaxLength(150);
-            entity.Property(e => e.ProductNote).HasMaxLength(200);
+            //entity.Property(e => e.ProductDesc).HasMaxLength(200); /* 可能會要刪除整行，因調整成 nvarchar(max) */
+			entity.Property(e => e.ProductName).HasMaxLength(150);
+			//entity.Property(e => e.ProductNote).HasMaxLength(200); /* 可能會要刪除整行，因調整成 nvarchar(max) */
 
-            entity.HasOne(d => d.Region).WithMany(p => p.Products)
+			entity.HasOne(d => d.Region).WithMany(p => p.Products)
                 .HasForeignKey(d => d.RegionID)
                 .HasConstraintName("FK_Products_Regions");
         });
 
         modelBuilder.Entity<Products_Hotels>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Hotel).WithMany()
-                .HasForeignKey(d => d.HotelID)
+			entity.HasKey(e => e.ProductHotelID);  // 預計更改的
+
+			entity.HasOne(d => d.Hotel).WithMany()
+				.HasForeignKey(d => d.HotelID)
                 .HasConstraintName("FK__Products___Hotel__3B40CD36");
 
-            entity.HasOne(d => d.Product).WithMany()
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductHotels)
                 .HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Products___Produ__3C34F16F");
         });
 
         modelBuilder.Entity<Products_Locations>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Location).WithMany()
+			entity.HasKey(e => e.ProductLocationID);  // 預計更改的
+
+			entity.HasOne(d => d.Location).WithMany()
                 .HasForeignKey(d => d.LocationID)
                 .HasConstraintName("FK__Products___Locat__3D2915A8");
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductLocations)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Products___Produ__3E1D39E1");
         });
 
         modelBuilder.Entity<Products_Promotions>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+			entity.HasKey(e => e.ProductPromoID);  // 預計更改的
+
+			entity.HasOne(d => d.Product).WithMany()
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Products___Produ__3F115E1A");
 
             entity.HasOne(d => d.Promo).WithMany()
@@ -650,10 +665,12 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<Products_Restaurants>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+			entity.HasKey(e => e.ProductRestaurantID);  // 預計更改的
+
+			entity.HasOne(d => d.Product).WithMany(p => p.ProductRestaurants)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Products___Produ__40F9A68C");
 
             entity.HasOne(d => d.Restaurant).WithMany()
@@ -663,10 +680,12 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<Products_Transportations>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+            entity.HasKey(e => e.ProductTransID);  // 預計更改的
+
+			entity.HasOne(d => d.Product).WithMany(p => p.ProductsTransportations)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Products___Produ__44CA3770");
 
             entity.HasOne(d => d.Transport).WithMany()
@@ -692,23 +711,27 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<RestaurantKeywords>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
+
+			entity.HasKey(e => e.RestaurantKeywordID);  // 預計更改的
 
             entity.HasOne(d => d.Keyword).WithMany()
-                .HasForeignKey(d => d.KeywordID)
+				.HasForeignKey(d => d.KeywordID)
                 .HasConstraintName("FK__Restauran__Keywo__46B27FE2");
 
-            entity.HasOne(d => d.Restaurant).WithMany()
+            entity.HasOne(d => d.Restaurant).WithMany(p => p.RestaurantKeywords)
                 .HasForeignKey(d => d.RestaurantID)
                 .HasConstraintName("FK__Restauran__Resta__47A6A41B");
         });
 
         modelBuilder.Entity<RestaurantPics>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Restaurant).WithMany()
-                .HasForeignKey(d => d.RestaurantID)
+			entity.HasKey(e => e.RestaurantPicID);  // 預計更改的
+
+			entity.HasOne(d => d.Restaurant).WithMany(p => p.RestaurantPics)
+				.HasForeignKey(d => d.RestaurantID)
                 .HasConstraintName("FK__Restauran__Resta__489AC854");
         });
 
@@ -743,36 +766,42 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<Semi_Hotels>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
+
+			entity.HasKey(e => e.SemiHotelID);  // 預計更改的
 
             entity.HasOne(d => d.Hotel).WithMany()
                 .HasForeignKey(d => d.HotelID)
                 .HasConstraintName("FK__Semi_Hote__Hotel__4B7734FF");
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+            entity.HasOne(d => d.Product).WithMany(p => p.SemiHotels)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Semi_Hote__Produ__4C6B5938");
         });
 
         modelBuilder.Entity<Semi_Locations>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Location).WithMany()
+			entity.HasKey(e => e.SemiLocationID);  // 預計更改的
+
+			entity.HasOne(d => d.Location).WithMany()
                 .HasForeignKey(d => d.LocationID)
                 .HasConstraintName("FK__Semi_Loca__Locat__4D5F7D71");
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+            entity.HasOne(d => d.Product).WithMany(p => p.SemiLocations)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Semi_Loca__Produ__4E53A1AA");
         });
 
         modelBuilder.Entity<Semi_Transportations>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Product).WithMany()
-                .HasForeignKey(d => d.ProductID)
+            entity.HasKey(e => e.SemiTransID);  // 預計更改的
+
+			entity.HasOne(d => d.Product).WithMany(p => p.SemiTransportations)
+				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Semi_Tran__Produ__4F47C5E3");
 
             entity.HasOne(d => d.Transport).WithMany()
@@ -818,23 +847,27 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<TransportKeywords>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Keyword).WithMany()
+            entity.HasKey(e => e.TransportKeywordID);  // 預計更改的
+
+			entity.HasOne(d => d.Keyword).WithMany()
                 .HasForeignKey(d => d.KeywordID)
                 .HasConstraintName("FK__Transport__Keywo__531856C7");
 
-            entity.HasOne(d => d.Transport).WithMany()
-                .HasForeignKey(d => d.TransportID)
+            entity.HasOne(d => d.Transport).WithMany(p => p.TransportKeywords)
+				.HasForeignKey(d => d.TransportID)
                 .HasConstraintName("FK__Transport__Trans__540C7B00");
         });
 
         modelBuilder.Entity<TransportPics>(entity =>
         {
-            entity.HasNoKey();
+            //entity.HasNoKey();
 
-            entity.HasOne(d => d.Transport).WithMany()
-                .HasForeignKey(d => d.TransportID)
+            entity.HasKey(e => e.TransportPicID);  // 預計更改的
+
+			entity.HasOne(d => d.Transport).WithMany(p => p.TransportPics)
+				.HasForeignKey(d => d.TransportID)
                 .HasConstraintName("FK__Transport__Trans__55009F39");
         });
 

@@ -36,4 +36,8 @@ public partial class Locations
 	public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
+
+    public virtual ICollection<LocationPics> LocationPics { get; set; } = new List<LocationPics>();
+
+    public virtual ICollection<LocationKeywords> LocationKeywords { get; set; } = new List<LocationKeywords>();
 }

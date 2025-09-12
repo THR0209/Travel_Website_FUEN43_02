@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Models;
 
 public partial class TransportKeywords
 {
-    public int? TransportID { get; set; }
+	[Key]
+	public int TransportKeywordID { get; set; }  // 預計更改的
+	public int? TransportID { get; set; }
 
     public int? KeywordID { get; set; }
 

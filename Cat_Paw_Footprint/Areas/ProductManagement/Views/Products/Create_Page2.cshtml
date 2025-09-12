@@ -94,7 +94,7 @@
 
             <!-- 送出按鈕：放在右側 card 最底部 -->
             <div class="form-group ms-auto">
-                <input type="submit" value="儲存資料" class="btn btn-primary" />
+                <input type="submit" value="儲存並進到下一頁" class="btn btn-primary" asp-action="" />
             </div>
         </div>
     </form>
@@ -103,39 +103,41 @@
 
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
     <script src="~/js/myckeditor.js"></script>
 
     <script>
-         function previewImage(inputFile) {
-             if (inputFile.files && inputFile.files[0]) {
-                var allowType = "image.*";
-                //允許檔案格式
-                if (inputFile.files[0].type.match(allowType)) {
-                    // 讀取上圖片並預覽圖片內容
-                     var reader = new FileReader();
-                     reader.onload = function (e) {
-                         $('#ProductImage').prev().attr('src', e.target.result) ;
-                         $('#ProductImage').prev().attr('title', inputFile.files[0].name);
-                     };
-                     reader.readAsDataURL(inputFile.files[0]);
-                     $('.btn').prop('disabled', false);
-                }
-                else {
-                     alert("不支援上傳的檔案格式!");
-                     $('.btn').prop('disabled', true);
-                     inputFile.value = "";
-                     $("#ProductImage").prev().attr('src', "/images/NoImage.png");
-                     $("#ProductImage").prev().attr('title', "尚無圖片");
-                }
-             }
-         }
+        function previewImage(inputFile) {
+            if (inputFile.files && inputFile.files[0]) {
+               var allowType = "image.*";
+               //允許檔案格式
+               if (inputFile.files[0].type.match(allowType)) {
+                   // 讀取上圖片並預覽圖片內容
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#ProductImage').prev().attr('src', e.target.result) ;
+                        $('#ProductImage').prev().attr('title', inputFile.files[0].name);
+                    };
+                    reader.readAsDataURL(inputFile.files[0]);
+                    $('.btn').prop('disabled', false);
+               }
+               else {
+                    alert("不支援上傳的檔案格式!");
+                    $('.btn').prop('disabled', true);
+                    inputFile.value = "";
+                    $("#ProductImage").prev().attr('src', "/images/NoImage.png");
+                    $("#ProductImage").prev().attr('title', "尚無圖片");
+               }
+            }
+        }
 
-         $("#ProductImage").change( function () {
-             previewImage(this);
-         });
+        $("#ProductImage").change( function () {
+            previewImage(this);
+        });
     </script>
 
     <script>

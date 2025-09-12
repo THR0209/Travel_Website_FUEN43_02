@@ -22,4 +22,8 @@ public partial class Transportations
     public string? TransportCode { get; set; }
 
 	public bool? IsActive { get; set; }
+
+	public virtual ICollection<TransportKeywords> TransportKeywords { get; set; } = new List<TransportKeywords>();
+
+	public virtual ICollection<TransportPics> TransportPics { get; set; } = new List<TransportPics>();
 }
