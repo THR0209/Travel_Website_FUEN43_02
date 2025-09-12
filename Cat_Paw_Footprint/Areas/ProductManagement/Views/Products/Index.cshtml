@@ -10,6 +10,31 @@
     <link href="https://cdn.datatables.net/fixedheader/4.0.2/css/fixedHeader.bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/2.3.3/css/dataTables.dataTables.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css" rel="stylesheet" />
+    <link href="~/lib/datatables/css/mydatatables.css" rel="stylesheet" />
+    <style>
+        .my-copy {
+            background-color: #6c757d !important; /* 灰色 */
+            border-color: #6c757d !important;
+            color: white !important;
+        }
+
+        .my-excel {
+            background-color: #198754 !important; /* 綠色 */
+            border-color: #198754 !important;
+            color: white !important;
+        }
+
+        .my-pdf {
+            background-color: #dc3545 !important; /* 紅色 */
+            border-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        #test thead th {
+            background-color: #22B3C1;
+            color: white;
+        }
+    </style>
 }
 
 <h1>產品管理</h1>
@@ -17,72 +42,19 @@
 <p>
     <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> 新增產品</a>
 </p>
-<table class="table table-striped table-hover table-bordered">
+<table id="test" class="table table-striped table-hover table-bordered">
     <thead class="table-primary">
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductCode)
-            </th>
-            @* <th>
-                @Html.DisplayNameFor(model => model.ProductImage)
-            </th> *@
-            <th>
-                @Html.DisplayNameFor(model => model.ProductName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ProductPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.MaxPeople)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Region)
-            </th>
-            <th></th>
-        </tr>
+        <tr class="text-center">
+            <th>流水號</th>
+            <th>產品名稱</th>
+            <th>產品圖片</th>
+            <th>價格</th>
+            <th>出團時間</th>
+            <th>上架時間</th>
+            <th>人數上限</th>
+            <th>區域</th>
+        </tr>    
     </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProductCode)
-                </td>
-                @* <td>
-                @Html.DisplayFor(modelItem => item.ProductImage)
-            </td> *@
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProductName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ProductPrice)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.StartDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EndDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.MaxPeople)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Region.RegionID)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.ProductID"><i class="fa-solid fa-eye"></i></a> |
-                    <a asp-action="Details" asp-route-id="@item.ProductID" class="btn btn-secondary">上架</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ProductID" class="btn btn-danger">下架</a>
-                </td>
-            </tr>
-        }
-    </tbody>
 </table>
 
 @section Scripts {
@@ -92,34 +64,80 @@
     <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/fixedheader/4.0.2/js/dataTables.fixedHeader.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script>
+    @* <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script> *@
+    <link href="~/lib/datatables/css/buttons.datatables.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.print.min.js"></script>
 
-    <script>
-        $(document).ready(function (){
-            $('table').DataTable({
+    
 
-                // columns: [
-                //     {"data" : "ProductCode", "width": "10%", "title": "流水號" },
-                //     {"data" : "ProductName", "width": "10%", "title": "產品名稱"},
-                //     {"data" : "ProductPrice", "width": "10%", "title": "價格"},
-                //     {"data" : "StartDate", "width": "10%", "title": "上架時間"},
-                //     {"data" : "EndDate", "width": "10%", "title": "下架時間"},
-                //     {"data" : "MaxPeople", "width": "10%", "title": "人數上限"},
-                //     {"data" : "RegionID", "width": "10%", "title": "區域"}
-                // ],
-                "language" : {
-                    url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json',
+    <script>
+        DataTable.type('num', 'className', 'dt-body-right');
+        DataTable.type('num-fmt', 'className', 'dt-body-right');
+        DataTable.type('date', 'className', 'dt-body-right');
+
+
+         $(document).ready(function () {
+            $('#test').dataTable({
+                ajax: {
+                    type: 'POST',
+                    url: '@Url.Action("IndexJson", "Products", new { area = "ProductManagement" })',
+                    dataSrc: ''
                 },
-                layout: {
-                    topStart: {
-                        buttons: ['copy', 'csv', 'pdf', 'print']
+                columns: [
+                    { data: "productCode", title: "流水號", "width": "5%" },
+                    { data: "productImage", title: "產品封面照", "width": "10%", },
+                    { data: "productName", title: "產品名稱", "width": "10%" },
+                    { data: "productPrice", title: "價格", "width": "10%" },
+                    { data: "startDate", title: "出團時間", "width": "10%" },
+                    { data: "analyses[0].releaseDate", title: "上架時間", "width": "10%", defaultContent: '' },
+                    // { data: "endDate", title: "下架時間", "width": "10%" },
+                    { data: "maxPeople", title: "人數上限", "width": "10%" },
+                    { data: "regionName", title: "出團區域", "width": "10%" },
+                    {
+                        data: null,
+                        title: "操作",
+                        orderable: false,
+                        searchable: false,
+                        width: "14%",
+                        render: function (data, type, row) {
+                            return `
+                               <a href="/ProductManagement/Products/Edit/${row.productCode}" class="btn btn-sm btn-primary ms-1">編輯</a>
+                               <a href="/ProductManagement/Products/Delete/${row.productCode}" class="btn btn-sm btn-success ms-2">上架</a>
+                               <a href="/ProductManagement/Products/Delete/${row.productCode}" class="btn btn-sm btn-danger ms-2">下架</a>
+                            `;
+                        }
                     }
-                }
+                ],
+                fixedHeader: { header: true },
+                language: {
+                    url:'https://cdn.datatables.net/plug-ins/1.13.1/i18n/zh-HANT.json'
+                },
+                // dom: 'Bftip',
+                // buttons: [
+                //     {
+                //         extend: 'copy',
+                //         text: '📋 複製',
+                //         className: 'btn btn-secondary my-copy'
+                //     },
+                //     {
+                //         extend: 'csv',
+                //         text: '📊 匯出 Excel',
+                //         className: 'btn btn-success my-excel',
+                //         filename: '產品清單',
+                //         title: '我的產品資料'
+                //     },
+                //     {
+                //         extend: 'pdf',
+                //         text: '📄 下載 PDF',
+                //         className: 'btn btn-danger my-pdf',
+                //         filename: '產品清單',
+                //         title: '我的產品資料'
+                //     }
+                // ]
             });
-        });
+         });
     </script>
 }
