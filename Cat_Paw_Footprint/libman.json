@@ -11,9 +11,12 @@
       "destination": "wwwroot/lib/datatables/"
     },
     {
-      "provider": "cdnjs",
       "library": "ckeditor5@44.3.0",
       "destination": "wwwroot/lib/ckeditor5/"
+    },
+    {
+      "library": "Chart.js@4.5.0",
+      "destination": "wwwroot/Chart.js/"
     }
   ]
 }

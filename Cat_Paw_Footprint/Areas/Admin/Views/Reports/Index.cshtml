@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "報表分析";
+}
+
+
+
+<h1>這是dashboard</h1>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>本月訂單</h5>
+            <h2>128</h2>
+            <small class="text-success">比上月 +14%</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>開放行程</h5>
+            <h2>8</h2>
+            <span class="badge bg-danger">Soon</span>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>客戶總數</h5>
+            <h2>8</h2>
+            <span class="badge bg-primary">比上個月新增3%</span>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>已解決案件數</h5>
+            <h2>8</h2>
+            <span class="badge bg-info">比上個月新增5%</span>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <h4>📊 銷售額趨勢（假資料示範）</h4>
+        <canvas id="salesChart"></canvas>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 範例：使用 Chart.js 繪製簡單的折線圖
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['一月', '二月', '三月', '四月', '五月', '六月'],
+                datasets: [{
+                    label: '訂單數量',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+    銷售報表
+
+    用戶行為分析
+
+
+
+    熱門行程排行
+
+    客服分析表
+
+    訂閱會員比例
+}
