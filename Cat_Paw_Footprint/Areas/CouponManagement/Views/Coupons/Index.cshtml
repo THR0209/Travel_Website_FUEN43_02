@@ -10,6 +10,11 @@
     <link href="https://cdn.datatables.net/fixedheader/4.0.2/css/fixedHeader.bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/2.3.3/css/dataTables.dataTables.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css" rel="stylesheet" />
+    <style>
+        tr {
+            background-color: #22B3C1;
+        }
+    </style>
 }
 
 <h1>優惠券管理</h1>
@@ -98,7 +103,7 @@
                     url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json',
                 },
                 layout: {
-                    topStart: {
+                    bottomEnd: {
                         buttons: ['copy', 'csv', 'pdf', 'print']
                     }
                 }

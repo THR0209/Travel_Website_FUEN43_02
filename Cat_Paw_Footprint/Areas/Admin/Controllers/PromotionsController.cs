@@ -1,158 +1,272 @@
-﻿using System;
+﻿using Cat_Paw_Footprint.Areas.Admin.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Models;
-using Cat_Paw_Footprint.Data;
 
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 {
-    [Area("Admin")]
-    public class PromotionsController : Controller
-    {
-        private readonly webtravel2Context _context;
+	[Area("Admin")]
+	public class PromotionsController : Controller
+	{
+		private readonly webtravel2Context _context;
 
-        public PromotionsController(webtravel2Context context)
-        {
-            _context = context;
-        }
+		public PromotionsController(webtravel2Context context)
+		{
+			_context = context;
+		}
 
-        // GET: Admin/Promotions
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Promotions.ToListAsync());
-        }
+		// ✅ Index: 活動列表 + 綁定產品
+		public async Task<IActionResult> Index()
+		{
+			var vmList = await _context.Promotions
+	   .Include(p => p.Products_Promotions)      // 先抓中介表
+		   .ThenInclude(pp => pp.Product)       // 再抓產品
+	   .Select(p => new PromotionViewModel
+	   {
+		   PromoID = p.PromoID,
+		   PromoName = p.PromoName,
+		   PromoDesc = p.PromoDesc,
+		   StartTime = p.StartTime,
+		   EndTime = p.EndTime,
+		   DiscountType = p.DiscountType,
+		   DiscountValue = p.DiscountValue,
+		   IsActive = p.IsActive,
+		   CreateTime = p.CreateTime,
+		   UpdateTime = p.UpdateTime,
 
-        // GET: Admin/Promotions/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		   Products = p.Products_Promotions.Select(pp => new ProductViewModel
+		   {
+			   ProductID = pp.ProductID,
+			   ProductName = pp.Product.ProductName,
+			   ProductPrice = pp.Product.ProductPrice
+		   }).ToList()
+	   })
+	   .ToListAsync();
 
-            var promotions = await _context.Promotions
-                .FirstOrDefaultAsync(m => m.PromoID == id);
-            if (promotions == null)
-            {
-                return NotFound();
-            }
+			return View(vmList);
+		}
 
-            return View(promotions);
-        }
+		// ✅ Details: 活動詳細
+		public async Task<IActionResult> Details(int? id)
+		{
+			if (id == null) return NotFound();
 
-        // GET: Admin/Promotions/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+			var p = await _context.Promotions.FirstOrDefaultAsync(x => x.PromoID == id);
+			if (p == null) return NotFound();
 
-        // POST: Admin/Promotions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PromoID,PromoName,PromoDesc,StartTime,EndTime,DiscountType,DiscountValue,IsActive,CreateTime,UpdateTime")] Promotions promotions)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(promotions);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(promotions);
-        }
+			var vm = new PromotionViewModel
+			{
+				PromoID = p.PromoID,
+				PromoName = p.PromoName,
+				PromoDesc = p.PromoDesc,
+				StartTime = p.StartTime,
+				EndTime = p.EndTime,
+				DiscountType = p.DiscountType,
+				DiscountValue = p.DiscountValue,
+				IsActive = p.IsActive,
+				CreateTime = p.CreateTime,
+				UpdateTime = p.UpdateTime,
+				Products = _context.Products_Promotions
+					.Where(pp => pp.PromoID == p.PromoID)
+					.Select(pp => new ProductViewModel
+					{
+						ProductID = pp.ProductID,
+						ProductName = pp.Product.ProductName,
+						ProductPrice = pp.Product.ProductPrice
+					}).ToList()
+			};
 
-        // GET: Admin/Promotions/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+			return View(vm);
+		}
 
-            var promotions = await _context.Promotions.FindAsync(id);
-            if (promotions == null)
-            {
-                return NotFound();
-            }
-            return View(promotions);
-        }
+		// ✅ Create (GET)
+		public IActionResult Create()
+		{
+			var vm = new PromotionViewModel
+			{
+				Products = _context.Products
+					.Select(x => new ProductViewModel
+					{
+						ProductID = x.ProductID,
+						ProductName = x.ProductName,
+						ProductPrice = x.ProductPrice
+					}).ToList()
+			};
+			return View(vm);
+		}
 
-        // POST: Admin/Promotions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PromoID,PromoName,PromoDesc,StartTime,EndTime,DiscountType,DiscountValue,IsActive,CreateTime,UpdateTime")] Promotions promotions)
-        {
-            if (id != promotions.PromoID)
-            {
-                return NotFound();
-            }
+		// ✅ Create (POST)
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(PromotionViewModel vm)
+		{
+			if (ModelState.IsValid)
+			{
+				var promo = new Promotions
+				{
+					PromoName = vm.PromoName,
+					PromoDesc = vm.PromoDesc,
+					StartTime = vm.StartTime,
+					EndTime = vm.EndTime,
+					DiscountType = vm.DiscountType,
+					DiscountValue = vm.DiscountValue,
+					IsActive = vm.IsActive,
+					CreateTime = DateTime.Now,
+					UpdateTime = DateTime.Now
+				};
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(promotions);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PromotionsExists(promotions.PromoID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(promotions);
-        }
+				_context.Promotions.Add(promo);
+				await _context.SaveChangesAsync();
 
-        // GET: Admin/Promotions/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+				foreach (var productId in vm.SelectedProductIDs)
+				{
+					_context.Products_Promotions.Add(new Products_Promotions
+					{
+						PromoID = promo.PromoID,
+						ProductID = productId
+					});
+				}
+				await _context.SaveChangesAsync();
 
-            var promotions = await _context.Promotions
-                .FirstOrDefaultAsync(m => m.PromoID == id);
-            if (promotions == null)
-            {
-                return NotFound();
-            }
+				return RedirectToAction(nameof(Index));
+			}
 
-            return View(promotions);
-        }
+			// 如果失敗，重建產品清單再回傳
+			vm.Products = _context.Products
+				.Select(x => new ProductViewModel
+				{
+					ProductID = x.ProductID,
+					ProductName = x.ProductName,
+					ProductPrice = x.ProductPrice
+				}).ToList();
 
-        // POST: Admin/Promotions/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var promotions = await _context.Promotions.FindAsync(id);
-            if (promotions != null)
-            {
-                _context.Promotions.Remove(promotions);
-            }
+			return View(vm);
+		}
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+		// ✅ Edit (GET)
+		public async Task<IActionResult> Edit(int? id)
+		{
+			if (id == null) return NotFound();
 
-        private bool PromotionsExists(int id)
-        {
-            return _context.Promotions.Any(e => e.PromoID == id);
-        }
-    }
+			var p = await _context.Promotions.FindAsync(id);
+			if (p == null) return NotFound();
+
+			var vm = new PromotionViewModel
+			{
+				PromoID = p.PromoID,
+				PromoName = p.PromoName,
+				PromoDesc = p.PromoDesc,
+				StartTime = p.StartTime,
+				EndTime = p.EndTime,
+				DiscountType = p.DiscountType,
+				DiscountValue = p.DiscountValue,
+				IsActive = p.IsActive,
+				CreateTime = p.CreateTime,
+				UpdateTime = p.UpdateTime,
+				Products = _context.Products
+					.Select(x => new ProductViewModel
+					{
+						ProductID = x.ProductID,
+						ProductName = x.ProductName,
+						ProductPrice = x.ProductPrice
+					}).ToList(),
+				SelectedProductIDs = _context.Products_Promotions
+					.Where(pp => pp.PromoID == p.PromoID)
+					.Select(pp => pp.ProductID)
+					.ToList()
+			};
+
+			return View(vm);
+		}
+
+		// ✅ Edit (POST)
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(PromotionViewModel vm)
+		{
+			if (ModelState.IsValid)
+			{
+				var promo = await _context.Promotions.FindAsync(vm.PromoID);
+				if (promo == null) return NotFound();
+
+				promo.PromoName = vm.PromoName;
+				promo.PromoDesc = vm.PromoDesc;
+				promo.StartTime = vm.StartTime;
+				promo.EndTime = vm.EndTime;
+				promo.DiscountType = vm.DiscountType;
+				promo.DiscountValue = vm.DiscountValue;
+				promo.IsActive = vm.IsActive;
+				promo.UpdateTime = DateTime.Now;
+
+				// 清掉舊的產品綁定
+				var oldLinks = _context.Products_Promotions.Where(pp => pp.PromoID == vm.PromoID);
+				_context.Products_Promotions.RemoveRange(oldLinks);
+
+				// 新增新的綁定
+				foreach (var productId in vm.SelectedProductIDs)
+				{
+					_context.Products_Promotions.Add(new Products_Promotions
+					{
+						PromoID = promo.PromoID,
+						ProductID = productId
+					});
+				}
+
+				await _context.SaveChangesAsync();
+				return RedirectToAction(nameof(Index));
+			}
+
+			// 如果失敗，重建產品清單再回傳
+			vm.Products = _context.Products
+				.Select(x => new ProductViewModel
+				{
+					ProductID = x.ProductID,
+					ProductName = x.ProductName,
+					ProductPrice = x.ProductPrice
+				}).ToList();
+
+			return View(vm);
+		}
+
+		// ✅ Delete (GET)
+		public async Task<IActionResult> Delete(int? id)
+		{
+			if (id == null) return NotFound();
+
+			var promo = await _context.Promotions.FindAsync(id);
+			if (promo == null) return NotFound();
+
+			var vm = new PromotionViewModel
+			{
+				PromoID = promo.PromoID,
+				PromoName = promo.PromoName,
+				PromoDesc = promo.PromoDesc
+			};
+
+			return View(vm);
+		}
+
+		// ✅ Delete (POST)
+		[HttpPost, ActionName("Delete")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(int id)
+		{
+			var promo = await _context.Promotions.FindAsync(id);
+			if (promo != null)
+			{
+				_context.Promotions.Remove(promo);
+
+				var links = _context.Products_Promotions.Where(pp => pp.PromoID == id);
+				_context.Products_Promotions.RemoveRange(links);
+
+				await _context.SaveChangesAsync();
+			}
+			return RedirectToAction(nameof(Index));
+		}
+	}
 }

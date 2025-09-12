@@ -20,4 +20,6 @@ public partial class Coupons
     public DateTime? EndTime { get; set; }
 
     public bool? IsActive { get; set; }
+
+    public ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 }

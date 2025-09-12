@@ -31,7 +31,11 @@ public partial class Hotels
 
     public bool? IsActive { get; set; }
 
-	public virtual Districts? District { get; set; }
+    public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
+
+    public virtual ICollection<HotelPics> HotelPics { get; set; } = new List<HotelPics>();
+
+    public virtual ICollection<HotelKeywords> HotelKeywords { get; set; } = new List<HotelKeywords>();
 }

@@ -11,6 +11,8 @@ public partial class Restaurants
 
     public string? RestaurantName { get; set; }
 
+    public string? RestaurantCode { get; set; }
+
     public string? RestaurantAddr { get; set; }
 
     public decimal? RestaurantLat { get; set; }
@@ -29,9 +31,11 @@ public partial class Restaurants
 
 	public bool? IsActive { get; set; }
 
-    public string? RestaurantCode { get; set; }
-
 	public virtual Districts? District { get; set; }
 
     public virtual Regions? Region { get; set; }
+
+    public virtual ICollection<RestaurantPics> RestaurantPics { get; set; } = new List<RestaurantPics>();
+
+    public virtual ICollection<RestaurantKeywords> RestaurantKeywords { get; set; } = new List<RestaurantKeywords>();
 }
