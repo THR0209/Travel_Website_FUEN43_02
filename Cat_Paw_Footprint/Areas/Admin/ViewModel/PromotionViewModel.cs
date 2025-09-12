@@ -25,7 +25,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 		public decimal? DiscountValue { get; set; }
 
 		[Display(Name = "是否啟用")]
-		public bool? IsActive { get; set; }
+		public bool IsActive { get; set; }
 
 		[Display(Name = "建立時間")]
 		public DateTime? CreateTime { get; set; }

@@ -21,7 +21,7 @@ public partial class Promotions
 
     public decimal? DiscountValue { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public DateTime? CreateTime { get; set; }
 

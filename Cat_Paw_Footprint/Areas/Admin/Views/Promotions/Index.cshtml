@@ -1,16 +1,23 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Models.Promotions>
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.PromotionViewModel>
 
 @{
     ViewData["Title"] = "Index";
 }
+
+@section Styles {
+    <link href="~/lib/datatables/css/jquery.datatables.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
+
+}
+
 
 <h1>Index</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
+<table class="table table-striped table-hover table-bordered">
+    <thead class="table-primary">
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.PromoName)
@@ -81,3 +88,24 @@
 }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json'
+                },
+                layout: {
+                    topStart: {
+                        buttons: ['copy', 'csv', 'pdf', 'print']
+                    }
+                },
+                fixedHeader: true
+            });
+        });
+
+    </script>
+}

@@ -3,10 +3,6 @@ using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 {
@@ -20,43 +16,46 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 			_context = context;
 		}
 
-		// ✅ Index: 活動列表 + 綁定產品
+		// Index
 		public async Task<IActionResult> Index()
 		{
 			var vmList = await _context.Promotions
-	   .Include(p => p.Products_Promotions)      // 先抓中介表
-		   .ThenInclude(pp => pp.Product)       // 再抓產品
-	   .Select(p => new PromotionViewModel
-	   {
-		   PromoID = p.PromoID,
-		   PromoName = p.PromoName,
-		   PromoDesc = p.PromoDesc,
-		   StartTime = p.StartTime,
-		   EndTime = p.EndTime,
-		   DiscountType = p.DiscountType,
-		   DiscountValue = p.DiscountValue,
-		   IsActive = p.IsActive,
-		   CreateTime = p.CreateTime,
-		   UpdateTime = p.UpdateTime,
-
-		   Products = p.Products_Promotions.Select(pp => new ProductViewModel
-		   {
-			   ProductID = pp.ProductID,
-			   ProductName = pp.Product.ProductName,
-			   ProductPrice = pp.Product.ProductPrice
-		   }).ToList()
-	   })
-	   .ToListAsync();
+				.Include(p => p.Products_Promotions)
+				.ThenInclude(pp => pp.Product)
+				.Select(p => new PromotionViewModel
+				{
+					PromoID = p.PromoID,
+					PromoName = p.PromoName,
+					PromoDesc = p.PromoDesc,
+					StartTime = p.StartTime,
+					EndTime = p.EndTime,
+					DiscountType = p.DiscountType,
+					DiscountValue = p.DiscountValue,
+					IsActive = p.IsActive,
+					CreateTime = p.CreateTime,
+					UpdateTime = p.UpdateTime,
+					Products = p.Products_Promotions.Select(pp => new ProductViewModel
+					{
+						ProductID = pp.ProductID,
+						ProductName = pp.Product.ProductName,
+						ProductPrice = pp.Product.ProductPrice
+					}).ToList()
+				})
+				.ToListAsync();
 
 			return View(vmList);
 		}
 
-		// ✅ Details: 活動詳細
+		// Details
 		public async Task<IActionResult> Details(int? id)
 		{
 			if (id == null) return NotFound();
 
-			var p = await _context.Promotions.FirstOrDefaultAsync(x => x.PromoID == id);
+			var p = await _context.Promotions
+				.Include(x => x.Products_Promotions)
+				.ThenInclude(pp => pp.Product)
+				.FirstOrDefaultAsync(x => x.PromoID == id);
+
 			if (p == null) return NotFound();
 
 			var vm = new PromotionViewModel
@@ -71,36 +70,33 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				IsActive = p.IsActive,
 				CreateTime = p.CreateTime,
 				UpdateTime = p.UpdateTime,
-				Products = _context.Products_Promotions
-					.Where(pp => pp.PromoID == p.PromoID)
-					.Select(pp => new ProductViewModel
-					{
-						ProductID = pp.ProductID,
-						ProductName = pp.Product.ProductName,
-						ProductPrice = pp.Product.ProductPrice
-					}).ToList()
+				Products = p.Products_Promotions.Select(pp => new ProductViewModel
+				{
+					ProductID = pp.ProductID,
+					ProductName = pp.Product.ProductName,
+					ProductPrice = pp.Product.ProductPrice
+				}).ToList()
 			};
 
 			return View(vm);
 		}
 
-		// ✅ Create (GET)
+		// Create (GET)
 		public IActionResult Create()
 		{
 			var vm = new PromotionViewModel
 			{
-				Products = _context.Products
-					.Select(x => new ProductViewModel
-					{
-						ProductID = x.ProductID,
-						ProductName = x.ProductName,
-						ProductPrice = x.ProductPrice
-					}).ToList()
+				Products = _context.Products.Select(x => new ProductViewModel
+				{
+					ProductID = x.ProductID,
+					ProductName = x.ProductName,
+					ProductPrice = x.ProductPrice
+				}).ToList()
 			};
 			return View(vm);
 		}
 
-		// ✅ Create (POST)
+		// Create (POST)
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(PromotionViewModel vm)
@@ -120,18 +116,23 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 					UpdateTime = DateTime.Now
 				};
 
+				// 先存 Promotion，確保有正確的 PromoID
 				_context.Promotions.Add(promo);
 				await _context.SaveChangesAsync();
 
-				foreach (var productId in vm.SelectedProductIDs)
+				// 再存 Products_Promotions
+				if (vm.SelectedProductIDs != null && vm.SelectedProductIDs.Any())
 				{
-					_context.Products_Promotions.Add(new Products_Promotions
+					foreach (var productId in vm.SelectedProductIDs)
 					{
-						PromoID = promo.PromoID,
-						ProductID = productId
-					});
+						_context.Products_Promotions.Add(new Products_Promotions
+						{
+							PromoID = promo.PromoID,   // 此時已經有值
+							ProductID = productId
+						});
+					}
+					await _context.SaveChangesAsync();
 				}
-				await _context.SaveChangesAsync();
 
 				return RedirectToAction(nameof(Index));
 			}
@@ -148,7 +149,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 			return View(vm);
 		}
 
-		// ✅ Edit (GET)
+		// Edit (GET)
 		public async Task<IActionResult> Edit(int? id)
 		{
 			if (id == null) return NotFound();
@@ -168,13 +169,12 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				IsActive = p.IsActive,
 				CreateTime = p.CreateTime,
 				UpdateTime = p.UpdateTime,
-				Products = _context.Products
-					.Select(x => new ProductViewModel
-					{
-						ProductID = x.ProductID,
-						ProductName = x.ProductName,
-						ProductPrice = x.ProductPrice
-					}).ToList(),
+				Products = _context.Products.Select(x => new ProductViewModel
+				{
+					ProductID = x.ProductID,
+					ProductName = x.ProductName,
+					ProductPrice = x.ProductPrice
+				}).ToList(),
 				SelectedProductIDs = _context.Products_Promotions
 					.Where(pp => pp.PromoID == p.PromoID)
 					.Select(pp => pp.ProductID)
@@ -184,16 +184,18 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 			return View(vm);
 		}
 
-		// ✅ Edit (POST)
+		// Edit (POST)
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(PromotionViewModel vm)
 		{
 			if (ModelState.IsValid)
 			{
+				// 先找到 Promotion
 				var promo = await _context.Promotions.FindAsync(vm.PromoID);
 				if (promo == null) return NotFound();
 
+				// 更新基本欄位
 				promo.PromoName = vm.PromoName;
 				promo.PromoDesc = vm.PromoDesc;
 				promo.StartTime = vm.StartTime;
@@ -203,25 +205,32 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				promo.IsActive = vm.IsActive;
 				promo.UpdateTime = DateTime.Now;
 
-				// 清掉舊的產品綁定
-				var oldLinks = _context.Products_Promotions.Where(pp => pp.PromoID == vm.PromoID);
-				_context.Products_Promotions.RemoveRange(oldLinks);
+				// 存一次，確保 PromoID 還存在資料庫
+				await _context.SaveChangesAsync();
 
-				// 新增新的綁定
-				foreach (var productId in vm.SelectedProductIDs)
+				// 先清掉舊的綁定
+				var oldLinks = _context.Products_Promotions.Where(pp => pp.PromoID == promo.PromoID);
+				_context.Products_Promotions.RemoveRange(oldLinks);
+				await _context.SaveChangesAsync();
+
+				// 再新增新的綁定
+				if (vm.SelectedProductIDs != null && vm.SelectedProductIDs.Any())
 				{
-					_context.Products_Promotions.Add(new Products_Promotions
+					foreach (var productId in vm.SelectedProductIDs)
 					{
-						PromoID = promo.PromoID,
-						ProductID = productId
-					});
+						_context.Products_Promotions.Add(new Products_Promotions
+						{
+							PromoID = promo.PromoID,
+							ProductID = productId
+						});
+					}
+					await _context.SaveChangesAsync();
 				}
 
-				await _context.SaveChangesAsync();
 				return RedirectToAction(nameof(Index));
 			}
 
-			// 如果失敗，重建產品清單再回傳
+			// 如果驗證失敗，重建產品清單再回傳
 			vm.Products = _context.Products
 				.Select(x => new ProductViewModel
 				{
@@ -233,39 +242,61 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 			return View(vm);
 		}
 
-		// ✅ Delete (GET)
+		// Delete (GET)
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (id == null) return NotFound();
 
-			var promo = await _context.Promotions.FindAsync(id);
+			var promo = await _context.Promotions
+				.Include(p => p.Products_Promotions)
+					.ThenInclude(pp => pp.Product)
+				.FirstOrDefaultAsync(p => p.PromoID == id);
+
 			if (promo == null) return NotFound();
 
 			var vm = new PromotionViewModel
 			{
 				PromoID = promo.PromoID,
 				PromoName = promo.PromoName,
-				PromoDesc = promo.PromoDesc
+				PromoDesc = promo.PromoDesc,
+				StartTime = promo.StartTime,
+				EndTime = promo.EndTime,
+				DiscountType = promo.DiscountType,
+				DiscountValue = promo.DiscountValue,
+				IsActive = promo.IsActive,
+				CreateTime = promo.CreateTime,
+				UpdateTime = promo.UpdateTime,
+
+				Products = promo.Products_Promotions.Select(pp => new ProductViewModel
+				{
+					ProductID = pp.ProductID,
+					ProductName = pp.Product.ProductName,
+					ProductPrice = pp.Product.ProductPrice
+				}).ToList()
 			};
 
 			return View(vm);
 		}
 
-		// ✅ Delete (POST)
+		// Delete (POST)
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
+			// 先找 Promotion
 			var promo = await _context.Promotions.FindAsync(id);
 			if (promo != null)
 			{
-				_context.Promotions.Remove(promo);
-
+				// 🔹 先刪掉 Products_Promotions 的關聯
 				var links = _context.Products_Promotions.Where(pp => pp.PromoID == id);
 				_context.Products_Promotions.RemoveRange(links);
+				await _context.SaveChangesAsync();
 
+				// 🔹 再刪 Promotion
+				_context.Promotions.Remove(promo);
 				await _context.SaveChangesAsync();
 			}
+
 			return RedirectToAction(nameof(Index));
 		}
 	}
