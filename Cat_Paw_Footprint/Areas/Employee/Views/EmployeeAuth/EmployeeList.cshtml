@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.EmployeeViewModel>
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
+    ViewData["Title"] = "員工管理";
     var roles = ViewBag.Roles as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
 }
 <h2 class="mb-3">員工管理</h2>

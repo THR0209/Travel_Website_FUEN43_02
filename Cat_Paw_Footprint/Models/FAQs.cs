@@ -15,7 +15,9 @@ public partial class FAQs
 
     public int? CategoryID { get; set; }
 
-    public DateTime? CreateTime { get; set; }
+	public bool IsActive { get; set; }
+
+	public DateTime? CreateTime { get; set; }
 
     public DateTime? UpdateTime { get; set; }
 
