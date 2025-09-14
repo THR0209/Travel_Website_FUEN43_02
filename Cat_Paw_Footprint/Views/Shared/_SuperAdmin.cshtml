@@ -35,9 +35,27 @@
                     <div data-i18n="Connections">我的資料</div>
                 </a>
             </li>
+        </ul>
+    </li>
+    <li class="menu-item">
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-dock-top"></i>
+            <div data-i18n="Account Settings">外部帳號管理管理</div>
+        </a>
+        <ul class="menu-sub">
             <li class="menu-item">
                 <a class="menu-link" asp-area="Employee" asp-controller="CustomerAdmin" asp-action="CustomerList">
                     <div data-i18n="Connections">客戶資料</div>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" asp-area="Employee" asp-controller="VendorAdmin" asp-action="VendorRegister">
+                    <div data-i18n="Connections">廠商註冊</div>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" asp-area="Employee" asp-controller="VendorAdmin" asp-action="VendorList">
+                    <div data-i18n="Connections">廠商資料</div>
                 </a>
             </li>
         </ul>

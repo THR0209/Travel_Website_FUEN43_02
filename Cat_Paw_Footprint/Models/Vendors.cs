@@ -20,7 +20,8 @@ namespace Cat_Paw_Footprint.Models
 		public bool Status { get; set; }
 		public DateTime CreateDate { get; set; }
 		public DateTime? UpdateDate { get; set; }
-		public IdentityUser User { get; set; } = null!;
+		public virtual IdentityUser User { get; set; } = null!;
+		//public IdentityUser User { get; set; } = null!;
 		public virtual ICollection<VendorLoginHistory> VendorLoginHistory { get; set; } = new List<VendorLoginHistory>();
 
 	}
