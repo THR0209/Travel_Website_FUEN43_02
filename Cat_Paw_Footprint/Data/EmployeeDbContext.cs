@@ -17,7 +17,7 @@ namespace Cat_Paw_Footprint.Data
 		public DbSet<Models.CustomerLevels> CustomerLevels { get; set; }
 		public DbSet<Models.CustomerLoginHistory> CustomerLoginHistory { get; set; }
 		public DbSet<Vendors> Vendors { get; set; }
-		public DbSet<VendorLoginHistory> VendorLoginHistories { get; set; }
+		public DbSet<VendorLoginHistory> VendorLoginHistory { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

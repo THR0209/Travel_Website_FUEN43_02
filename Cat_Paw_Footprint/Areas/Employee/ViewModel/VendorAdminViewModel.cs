@@ -1,11 +1,15 @@
-﻿namespace Cat_Paw_Footprint.Areas.Employee.ViewModel
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Cat_Paw_Footprint.Areas.Employee.ViewModel
 {
 	public class VendorAdminViewModel
 	{
 		public int VendorId { get; set; }//廠商編號
 		public string UserId { get; set; } = null!;// AspNetUsers.Id
 		public string Account { get; set; } = null!;//廠商帳號
+		[Display(Name = "廠商名稱")]
 		public string CompanyName { get; set; } = null!;//廠商名稱
+		[Display(Name = "聯絡信箱")]
 		public string? Email { get; set; }//聯絡信箱
 		public string? ContactName { get; set; }//聯絡人
 		public string? Phone { get; set; }//聯絡電話
