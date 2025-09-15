@@ -96,10 +96,10 @@
              document.querySelectorAll(".js-history").forEach(btn => {
                     btn.addEventListener("click", async e => {
                         const tr = btn.closest("tr");
-                            const account = tr.querySelector("td:nth-child(1)").textContent; // 假設廠商id在第1欄
+                        const vendorId = tr.querySelector("td:nth-child(1)").textContent; // 假設廠商id在第1欄
 
                         try {
-                               const res = await fetch('@Url.Action("LoginHistory", "VendorAdmin", new { area = "Employee" })' + `?email=${encodeURIComponent(account)}`, {
+                               const res = await fetch('@Url.Action("LoginHistory", "VendorAdmin", new { area = "Employee" })' + `?VendorId=${encodeURIComponent(vendorId)}`, {
                                 method: "GET",
                                 headers: { "X-Requested-With": "XMLHttpRequest" }
                             });

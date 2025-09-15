@@ -18,5 +18,6 @@
 		public DateTime LoginTime { get; set; }//登入時間
 		public bool IsSuccessful { get; set; }//是否登入成功
 		public string? LoginIP { get; set; }// 登入 IP (IPv4/IPv6)
+		public string? Message { get; set; }// 額外訊息(資料庫表單沒有用來傳遞回傳結果)
 	}
 }

@@ -59,12 +59,17 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		public async Task<IActionResult> VendorDetail(VendorAdminViewModel model)//互動式按鈕取得單獨廠商資訊
 		{
 			var vendor = await _svc.GetVendorByAccountAsync(model.Account);
+			if (vendor == null)
+			{
+				return NotFound(); // 或者回傳一個空的 ViewModel 避免 null
+			}
 			return PartialView("_VendorDetail", vendor);
 		}
 		[HttpGet]//互動式按鈕取得廠商登入紀錄
 		public async Task<IActionResult> LoginHistory(VendorAdminViewModel model)
 		{
 			var loginHistory = await _svc.GetVendorsLoginHistoryAsync(model.VendorId);
+
 			return PartialView("_LoginHistory", loginHistory);
 		}
 		[HttpPost]//更新按鈕

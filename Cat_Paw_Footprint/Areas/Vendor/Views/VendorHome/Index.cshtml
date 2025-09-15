@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "廠商首頁";
+}
+
+<h2>廠商首頁</h2>
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <p>目前登入帳號：@User.Identity.Name</p>
+
+    <form asp-action="Logout" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-danger">登出</button>
+    </form>
+}
+else
+{
+    <p>尚未登入</p>
+    <a asp-action="Login" asp-controller="VendorHome" asp-area="Vendor" class="btn btn-primary">前往登入</a>
+}
