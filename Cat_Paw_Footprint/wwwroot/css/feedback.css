@@ -1,0 +1,184 @@
+﻿/* --- 卡片樣式 --- */
+.card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+    /* --- 表格樣式 --- */
+    #feedbackTable {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        border: 2px solid #e6e6e6 !important;
+        font-size: 15px;
+    }
+
+    #feedbackTable th,
+    #feedbackTable td {
+        padding: 10px 12px !important;
+        border: 1px solid #bbb !important;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 15px !important;
+    }
+
+#feedbackTable th {
+    background: #22b3C1 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+
+#feedbackTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9 !important;
+}
+
+#feedbackTable tbody tr:hover {
+    background-color: #e6f7f9 !important;
+}
+
+/* --- 按鈕樣式 --- */
+.btn {
+    padding: 6px 10px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+}
+
+.btn-primary {
+    background: #22b3C1 !important;
+    color: #fff !important;
+}
+
+.btn-secondary {
+    background: #22b3C1 !important;
+    color: #fff !important;
+}
+
+.btn-danger {
+    background: #e84118 !important;
+    color: #fff !important;
+}
+
+/* --- 表單輸入欄位 --- */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #fff;
+}
+
+textarea {
+    height: 80px;
+    resize: none;
+}
+
+/* --- Modal 樣式 --- */
+.modal .modal-content {
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.modal-footer .btn {
+    margin-left: 6px;
+}
+
+/* --- DataTables 控制元件樣式 --- */
+
+    /* 搜尋框 */
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #22b3C1 !important;
+        border-radius: 6px;
+        padding: 6px 10px;
+        outline: none;
+        margin-left: 6px;
+    }
+
+    .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: #138996 !important;
+        box-shadow: 0 0 4px rgba(34,179,193,0.6);
+    }
+
+    /* 每頁顯示下拉 */
+    .dataTables_wrapper .dataTables_length select {
+        border: 1px solid #22b3C1 !important;
+        border-radius: 6px;
+        padding: 4px 8px;
+        outline: none;
+        margin: 0 6px;
+        background-color: #fff;
+    }
+
+    /* 分頁按鈕 */
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        border: 1px solid #22b3C1 !important;
+        border-radius: 6px;
+        padding: 4px 10px;
+        margin: 2px;
+        color: #22b3C1 !important;
+        background: #fff;
+        cursor: pointer;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #22b3C1 !important;
+        color: #fff !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #fff !important;
+        color: #333 !important;
+        border: 1px solid #22b3C1 !important;
+    }
+
+    /* 資訊文字 */
+    .dataTables_wrapper .dataTables_info {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #333;
+    }
+
+    /* 載入中 / 處理中 */
+    .dataTables_processing {
+        color: #22b3C1 !important;
+        font-weight: bold;
+    }
+
+    /* --- DataTables label 調整 --- */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+        white-space: nowrap; /* 不換行 */
+        display: inline-flex; /* 水平排列內部元素 */
+        align-items: center; /* 垂直置中 */
+    }
+
+    /* 調整 select 與 input 之間間距 */
+    .dataTables_wrapper .dataTables_length select,
+    .dataTables_wrapper .dataTables_filter input {
+        margin-left: 6px;
+        margin-right: 12px;
+    }
+
+    /* 調整整個 wrapper 讓搜尋框和下拉不換行 */
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    /* 將 DataTables 的 zeroRecords / info / processing 文字置中 */
+    #feedbackTable_wrapper .dataTables_empty {
+        text-align: center !important;
+        font-size: 15px;
+        color: #555;
+        padding: 20px 0;
+    }

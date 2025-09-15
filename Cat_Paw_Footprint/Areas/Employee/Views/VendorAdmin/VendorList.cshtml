@@ -14,19 +14,19 @@
     <table class="table table-striped align-middle" id="productsTable">
         <thead>
             <tr>
-
-                <th class="text-center" style="width:17%;">廠商帳號</th>
-                <th class="text-center" style="width:22%;">廠商名稱</th>
-                <th class="text-center" style="width:17%;">聯絡人</th>
-                <th class="text-center" style="width:12%;">啟用</th>
-                <th class="text-center" style="width:32%;">操作</th>
+                <th class="text-center" style="width:10%;">廠商編號</th>
+                <th class="text-center" style="width:15%;">廠商帳號</th>
+                <th class="text-center" style="width:20%;">廠商名稱</th>
+                <th class="text-center" style="width:15%;">聯絡人</th>
+                <th class="text-center" style="width:10%;">啟用</th>
+                <th class="text-center" style="width:30%;">操作</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var ven in Model)
             {
                 <tr data-id="@ven.VendorId" data-Account="@ven.Account">
-
+                    <td class="text-center">@ven.VendorId</td>
                     <td class="text-center">@ven.Account</td>
                     <td class="text-center">@ven.CompanyName</td>
                     <td class="text-center">@ven.ContactName</td>

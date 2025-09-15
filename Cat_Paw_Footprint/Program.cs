@@ -1,3 +1,5 @@
+using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
+using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
 using Cat_Paw_Footprint.Areas.Vendor.Repositories;
@@ -52,6 +54,15 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<IVendorAdminService, VendorAdminService>();
 			builder.Services.AddScoped<IVendorHomeRepository, VendorHomeRepository>();
 			builder.Services.AddScoped<IVendorHomeService, VendorHomeService>();
+			builder.Services.AddScoped<IFAQService, FAQService>();
+			builder.Services.AddScoped<IFAQRepository, FAQRepository>();
+			builder.Services.AddScoped<ICustomerSupportTicketsRepository, CustomerSupportTicketsRepository>();
+			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
+			builder.Services.AddScoped<ICustomerSupportTicketsRepository, CustomerSupportTicketsRepository>();
+			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
+			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
+			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
+
 
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();

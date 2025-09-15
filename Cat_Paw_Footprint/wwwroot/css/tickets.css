@@ -1,0 +1,148 @@
+﻿.card {
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+th, td {
+    padding: 10px 12px;
+    border: 1px solid #e6e6e6;
+    text-align: left;
+}
+
+th {
+    background: #22b3C1;
+    color: #fff;
+}
+#ticketTable {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 2px solid #e6e6e6 !important;
+    font-size: 15px;
+}
+
+#ticketTable th,
+#ticketTable td {
+    padding: 10px 12px !important;
+    border: 1px solid #bbb !important;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 15px !important;
+}
+
+/* 將 zeroRecords / info / processing 文字置中 */
+#ticketTable .dataTables_empty {
+    text-align: center !important;
+    font-size: 15px;
+    color: #555;
+    padding: 20px 0;
+}
+/* 表格外框 */
+#ticketTable {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* 表頭 */
+#ticketTable th {
+    background: #22b3C1;
+    color: #fff;
+    border: 1px solid #bbb;
+}
+
+/* 表格內格線 */
+#ticketTable td {
+    border: 1px solid #bbb;
+    padding: 10px 12px;
+}
+
+/* 偶數列底色 */
+#ticketTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9 !important;
+}
+
+/* 滑鼠移入效果 */
+#ticketTable tbody tr:hover {
+    background-color: #e6f7f9 !important;
+}
+
+
+.btn {
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #22b3C1;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #22b3C1;
+    color: #fff;
+}
+
+.btn-danger {
+    background: #e84118;
+    color: #fff;
+}
+
+.btn-ghost {
+    background: #ecf0f1;
+}
+
+input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #fff;
+}
+
+textarea {
+    height: 80px;
+    resize: none;
+}
+
+.modal .modal-content label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 500;
+    color: #333;
+}
+
+.modal .modal-content input, .modal .modal-content select, .modal .modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 4px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #fff;
+}
+
+/* 分頁按鈕 */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 1px solid #22b3C1 !important;
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin: 2px;
+    color: #22b3C1 !important;
+    background: #fff;
+    cursor: pointer;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #22b3C1;
+}
