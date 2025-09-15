@@ -1,5 +1,3 @@
-using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
-using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
 using Cat_Paw_Footprint.Areas.Vendor.Repositories;
@@ -37,6 +35,23 @@ namespace Cat_Paw_Footprint
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders()
 				.AddDefaultUI();
+			builder.Services.AddAuthentication(options =>
+			{
+				options.DefaultScheme = "VendorAuth"; // 預設使用 VendorAuth
+				options.DefaultChallengeScheme = "VendorAuth";
+			})
+	.AddCookie("VendorAuth", options =>
+	{
+		options.Cookie.Name = ".CatPaw.Vendor.Auth";
+		options.LoginPath = "/Vendor/VendorHome/Login";   // 廠商登入頁
+		options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
+	})
+	.AddCookie("CustomerAuth", options =>
+	{
+		options.Cookie.Name = ".CatPaw.Customer.Auth";
+		options.LoginPath = "/Customer/Account/Login"; // 客戶登入頁
+		options.AccessDeniedPath = "/Customer/Account/Denied";
+	});
 
 			builder.Services.AddSession(options =>
 			{
@@ -54,15 +69,8 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<IVendorAdminService, VendorAdminService>();
 			builder.Services.AddScoped<IVendorHomeRepository, VendorHomeRepository>();
 			builder.Services.AddScoped<IVendorHomeService, VendorHomeService>();
-			builder.Services.AddScoped<IFAQService, FAQService>();
-			builder.Services.AddScoped<IFAQRepository, FAQRepository>();
-			builder.Services.AddScoped<ICustomerSupportTicketsRepository, CustomerSupportTicketsRepository>();
-			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
-			builder.Services.AddScoped<ICustomerSupportTicketsRepository, CustomerSupportTicketsRepository>();
-			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
-			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
-			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
 
+			builder.Services.AddHttpContextAccessor();
 
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
