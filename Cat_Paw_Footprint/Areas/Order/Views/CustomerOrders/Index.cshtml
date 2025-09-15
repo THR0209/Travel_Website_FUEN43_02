@@ -1,0 +1,259 @@
+﻿@using System
+@model IEnumerable<Cat_Paw_Footprint.Models.CustomerOrders>
+
+@{
+    ViewData["Title"] = "訂單一覽";   
+}
+
+<h1 class="mb-3">行程 / 地點</h1>
+
+@{
+    var groups = Model
+        .Where(o => o.ProductID != 0)                    
+        .GroupBy(o => o.ProductID)
+        .Select(g => new
+        {
+            ProductID = g.Key,
+            Name = g.First().Product?.ProductName ?? $"商品 {g.Key}",                     
+            ImageUrl = g.First().Product?.ProductImage != null? "data:image/png;base64," + Convert.ToBase64String(g.First().Product.ProductImage) : $"https://placehold.co/600x400?text=Product+{g.Key}",
+            OrderCount = g.Count()
+        })
+        .OrderBy(x => x.ProductID)
+        .ToList();    
+}
+
+@if (!groups.Any())
+{
+    <div class="alert alert-info">目前尚無訂單資料；請先建立商品並新增訂單。</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in groups)
+        {
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3">
+                <div class="card h-100 shadow-sm">
+                    <img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">@p.Name</h5>
+                            <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
+                        </div>
+                        <button type="button"
+                                class="btn btn-primary mt-auto btn-open-orders"
+                                data-productid="@p.ProductID"
+                                data-productname="@p.Name"
+                                data-bs-toggle="modal"
+                                data-bs-target="#ordersModal">
+                            查看訂單
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+<div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="ordersModalLabel">訂單 — <span id="m_product_name"></span></h5>
+                    <small class="text-muted" id="m_summary"></small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>訂單編號</th>
+                                <th>總金額</th>
+                                <th>建立時間</th>
+                                <th>更新時間</th>
+                                <th>客戶</th>
+                                <th>狀態</th>
+                                <th>商品</th>
+                                <th style="width:80px">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="m_tbody">
+                            <tr><td colspan="8" class="text-center py-4 text-muted">尚無資料</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <small class="text-muted" id="m_updated"></small>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="editOrderLabel" class="modal-title">編輯訂單</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+
+            <form id="editOrderForm" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="OrderID" id="e_OrderID" />
+
+                    <div class="mb-3">
+                        <label class="form-label">客戶ID</label>
+                        <input type="number" class="form-control" name="CustomerID" id="e_CustomerID" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">商品ID</label>
+                        <input type="number" class="form-control" name="ProductID" id="e_ProductID" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">狀態</label>
+                        <select class="form-select" name="OrderStatusID" id="e_OrderStatusID">
+                            <option value="1">已付款</option>
+                            <option value="2">未付款</option>
+                            <option value="3">已取消</option>
+                            <option value="4">錯誤</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">總金額</label>
+                        <input type="number" class="form-control" name="TotalAmount" id="e_TotalAmount" min="0" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">建立時間</label>
+                        <input type="datetime-local" class="form-control" name="CreateTime" id="e_CreateTime" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">更新時間</label>
+                        <input type="datetime-local" class="form-control" name="UpdateTime" id="e_UpdateTime" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        const byProdBase  = '@Url.Action("ByProduct", "CustomerOrders", new { area = "Order" })';
+        const getApiBase  = '@Url.Action("Get", "CustomerOrders", new { area = "Order" })'; 
+        const tbody = document.getElementById('m_tbody');
+        const mProdName = document.getElementById('m_product_name');
+        const mSummary = document.getElementById('m_summary');
+        const mUpdated = document.getElementById('m_updated');
+        document.querySelectorAll('.btn-open-orders').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const productId = btn.dataset.productid;
+            const productName = btn.dataset.productname;
+            mProdName.textContent = productName;
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">載入中…</td></tr>';
+
+            const res = await fetch(`/Order/CustomerOrders/by-product/${productId}`);
+            const data = await res.json();
+
+            const orders = data.orders || [];
+            if (orders.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">這個商品尚無訂單，請先新增。</td></tr>';
+            } else {
+              tbody.innerHTML = '';
+              orders.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                  <td class="font-monospace">${o.orderCode}</td>
+                  <td>NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}</td>
+                  <td>${fmt(o.createTime)}</td>
+                  <td>${fmt(o.updateTime)}</td>
+                  <td>${o.customer ?? ''}</td>
+                  <td><span class="badge ${getStatusClass(o.status)}">${o.status}</span></td>
+                  <td>${o.product ?? ''}</td>
+                  <td><button type="button" class="btn btn-sm btn-outline-primary btn-edit" data-id="${o.id}">編輯</button></td>
+                `;
+                tbody.appendChild(tr);
+              });
+            }
+
+            mSummary.textContent = `共 ${orders.length} 筆｜總金額 NT$ ${Number(data?.kpi?.totalAmount ?? 0).toLocaleString()}`;
+            mUpdated.textContent = `更新時間：${new Date().toLocaleString('zh-TW')}`;
+          });
+        });
+        function getStatusClass(status) {
+          switch (status) {
+            case "已付款": return "bg-success";   
+            case "未付款": return "bg-warning";
+            case "已取消":   return "bg-secondary";
+            case "錯誤":   return "bg-danger";
+            default:       return "bg-secondary"; 
+          }
+        }
+        function fmt(v) {
+          if (!v) return '';
+          const d = new Date(v);
+          if (isNaN(d.getTime())) return v;
+          return d.toLocaleString('zh-TW');
+        }
+        function toLocalInput(dt) {
+          if (!dt) return "";
+          const d = new Date(dt);
+          if (isNaN(d.getTime())) return "";
+          const pad = n => n.toString().padStart(2, '0');
+          const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          return s;
+        }
+         function toLocal(dt) {
+          if (!dt) return "";
+          const d = new Date(dt);
+          return isNaN(d.getTime()) ? dt : d.toLocaleString('zh-TW');
+        }
+
+        function badgeClass(statusText) {
+          switch (statusText) {
+            case "已確認": return "bg-success";
+            case "處理中": return "bg-warning text-dark";
+            case "取消":   return "bg-danger";
+            case "已付款": return "bg-success";
+            case "未付款": return "bg-secondary";
+            case "已退款": return "bg-info text-dark";
+            default:       return "bg-secondary";
+          }
+        }
+        tbody?.addEventListener('click', async (e) => {
+          const btn = e.target.closest('.btn-edit');
+          if (!btn) return;
+
+          const id = btn.dataset.id;
+          const getApiBase = '@Url.Action("Get", "CustomerOrders", new { area = "Order" })';
+
+          const res = await fetch(`${getApiBase}/${id}`);
+          if (!res.ok) { alert('讀取訂單失敗'); return; }
+          const o = await res.json();
+
+          document.getElementById('e_OrderID').value       = o.id;
+          document.getElementById('e_CustomerID').value    = o.customerId ?? '';
+          document.getElementById('e_ProductID').value     = o.productId ?? '';
+          document.getElementById('e_OrderStatusID').value = o.orderStatusId ?? 1;
+          document.getElementById('e_TotalAmount').value   = o.totalAmount ?? 0;
+          document.getElementById('e_CreateTime').value    = toLocalInput(o.createTime);
+          document.getElementById('e_UpdateTime').value    = toLocalInput(o.updateTime);
+
+          const form = document.getElementById('editOrderForm');
+          form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
+
+          const editModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editOrderModal'));
+          editModal.show();
+        });
+    </script>
+}
