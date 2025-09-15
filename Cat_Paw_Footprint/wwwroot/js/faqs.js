@@ -224,6 +224,25 @@
         else if (act === 'c-del') { if (!confirm('確定要刪除此分類？')) return; try { const r = await api.deleteCategory(id); if (r && r.message) alert(r.message); await fetchAndRenderAll(); } catch { alert('刪除分類失敗'); } }
     });
 
+    // ===============================
+    // 顯示/隱藏按鈕
+    // ===============================
+    $(window).scroll(function () {
+        if ($(this).scrollTop() > 300) { // 滾動 200px 就顯示
+            $('#backToTop').fadeIn();
+        } else {
+            $('#backToTop').fadeOut();
+        }
+    });
+
+    // ===============================
+    // 點擊回到頂部
+    // ===============================
+
+    $('#backToTop').click(function () {
+        $('html, body').animate({ scrollTop: 0 }, 200); // 500ms 平滑滾動
+    });
+
     // ==== 初次載入 ====
     fetchAndRenderAll();
 

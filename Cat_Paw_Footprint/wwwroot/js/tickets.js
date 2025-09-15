@@ -177,7 +177,24 @@
                 ticketTable.row.add(newData).draw(false); // 依照目前 DataTable 排序自動顯示
             }
         });
+        // ===============================
+        // 顯示/隱藏按鈕
+        // ===============================
+        $(window).scroll(function () {
+            if ($(this).scrollTop() > 300) { // 滾動 200px 就顯示
+                $('#backToTop').fadeIn();
+            } else {
+                $('#backToTop').fadeOut();
+            }
+        });
 
+        // ===============================
+        // 點擊回到頂部
+        // ===============================
+
+        $('#backToTop').click(function () {
+            $('html, body').animate({ scrollTop: 0 }, 200); // 500ms 平滑滾動
+        });
 
             loadDropdowns().then(initTable);
         });
