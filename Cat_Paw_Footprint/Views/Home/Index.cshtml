@@ -1,12 +1,12 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "首頁";
     var login = Context.Session.GetString("Login");
 }
 
 <div class="text-center">
     <h1 class="display-4">首頁</h1>
     <p>
-        這裡是首頁，您的登入狀態:
+        您的登入狀態:
         <span>
             @if (login == "True") 
             {

@@ -1,0 +1,36 @@
+﻿@using Cat_Paw_Footprint.Areas.Employee.ViewModel
+@model Cat_Paw_Footprint.Areas.Employee.ViewModel.VendorAdminViewModel
+@{
+    ViewData["Title"] = "廠商註冊";
+}
+
+<h2 class="mb-4">註冊廠商帳號</h2>
+
+<!-- 顯示 ModelState 的整體錯誤 -->
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+
+<form asp-area="Employee" asp-controller="VendorAdmin" asp-action="VendorRegister" method="post" class="w-50 mx-auto">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label asp-for="CompanyName" class="form-label"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="text-danger"></span>
+    </div>
+
+
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">註冊</button>
+    <a asp-action="VendorList" class="btn btn-secondary">返回列表</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

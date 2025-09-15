@@ -1,83 +1,134 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsIndexViewModel>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
-    ViewData["Title"] = "最新消息";
+	ViewData["Title"] = "最新消息";
 }
 
-<style>
-.action-btn {
-    min-width: 100px;
-    text-align: center;
+@section Styles {
+	<link href="~/lib/datatables/css/jquery.datatables.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
+
+	<style>
+		/* .action-btn {
+			min-width: 50%;
+			text-align: center;
+		} */
+
+		.table.dataTable thead tr th {
+			background-color: #22B3C1; /* 這裡放你側邊欄的顏色 */
+			color: white;
+			text-align: center;
+		}
+
+		.operation-btn {
+			display: inline-block;
+			min-width: 80px; /* 統一最小寬度 */
+			max-width: 120px; /* 避免太大 */
+			height: 32px; /* 統一高度 */
+			font-size: 0.85rem;
+			padding: 2px 8px; /* 控制間距 */
+			text-align: center;
+			margin: 0 auto; /* 在儲存格置中 */
+		}
+
+		#newsTable_filter {
+			margin-bottom: 15px; /* 距離可以自己調整 */
+		}
+	</style>
+
 }
-</style>
+
+
 
 
 <h1>最新消息</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary mt-2 mb-2">新增消息</a>
+	<a asp-action="Create" class="btn btn-primary mt-2 mb-2"><i class="fa-solid fa-square-plus"></i> 新增消息</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th class="fs-5" style="width: 28%;">
-                @Html.DisplayNameFor(model => model.NewsTitle)
-            </th>
-            <th class="fs-5" style="width: 12%;">
-                @Html.DisplayNameFor(model => model.PublishTime)
-            </th>
-            <th class="fs-5" style="width: 12%;">
-                @Html.DisplayNameFor(model => model.ExpireTime)
-            </th>
-            <th class="fs-5" style="width: 10%;">
-                @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th class="fs-5" style="width: 12%;">
-                @Html.DisplayNameFor(model => model.UpdateTime)
-            </th> 
-            <th class="fs-5" style="width: 12%;">
-                @Html.DisplayNameFor(model => model.EmployeeName)
-            </th>
-            <th class="fs-5" style="width: 14%;">操作</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NewsTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PublishTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExpireTime)
-            </td>
-            <td>
-                   @* <div class="form-check form-switch">
+<table id="newsTable" class="table table-striped table-hover table-bordered table-responsive mb-3">
+	<thead>
+		<tr>
+			<th class="fs-5" style="width: 28%;">
+				@Html.DisplayNameFor(model => model.NewsTitle)
+			</th>
+			<th class="fs-5" style="width: 12%;">
+				@Html.DisplayNameFor(model => model.PublishTime)
+			</th>
+			<th class="fs-5" style="width: 12%;">
+				@Html.DisplayNameFor(model => model.ExpireTime)
+			</th>
+			<th class="fs-5" style="width: 6%;">
+				@Html.DisplayNameFor(model => model.IsActive)
+			</th>
+			<th class="fs-5" style="width: 12%;">
+				@Html.DisplayNameFor(model => model.UpdateTime)
+			</th>
+			<th class="fs-5" style="width: 14%;">
+				@Html.DisplayNameFor(model => model.EmployeeName)
+			</th>
+			<th class="fs-5" style="width: 10%;">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>
+					@Html.DisplayFor(modelItem => item.NewsTitle)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.PublishTime)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.ExpireTime)
+				</td>
+				<td>
+					@* <div class="form-check form-switch">
                      <input class="form-check-input" type="checkbox" disabled @(item.IsActive == true ? "checked" : "") />
                     </div> *@
 
 
-                 <div class="form-check">
-               <input class="form-check-input" type="checkbox" @(item.IsActive == true ? "checked" : "") disabled />
-                </div>
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdateTime)
-            </td> 
-            <td>
-                @Html.DisplayFor(modelItem => item.EmployeeName)
-            </td>
-            <td>
-                <div class="d-flex flex-wrap gap-2">
-                    <a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID" class="btn btn-primary action-btn">編輯</a><span class="fs-4">|</span>
-                    <a asp-action="Details" asp-route-id="@item.NewsID" class="btn btn-info action-btn">詳細資訊</a><span class="fs-4">|</span>
-                    <a asp-action="Delete" asp-route-id="@item.NewsID" class="btn btn-danger action-btn">刪除</a>
-                </div>
-    
-            </td>
-        </tr>
-}
-    </tbody>
+					<div class="form-check">
+						<input class="form-check-input" type="checkbox" @(item.IsActive == true ? "checked" : "") disabled />
+					</div>
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.UpdateTime)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.EmployeeName)
+				</td>
+				<td class="text-center">
+					
+						<a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID" class="btn btn-primary btn-sm mb-1">編輯</a>
+						<a asp-action="Details" asp-route-id="@item.NewsID" class="btn btn-info btn-sm mb-1">詳細資訊</a>
+					<a asp-action="Delete" asp-route-id="@item.NewsID" class="btn btn-danger btn-sm mb-1">刪除</a>
+					
+				</td>
+			</tr>
+		}
+	</tbody>
 </table>
+
+
+@section Scripts {
+	<script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
+	<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			$('#newsTable').DataTable({
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/zh-HANT.json'
+				},
+				layout: {
+					topStart: {
+						buttons: ['copy', 'csv', 'pdf', 'print']
+					}
+				},
+				fixedHeader: true
+			});
+		});
+
+	</script>
+}

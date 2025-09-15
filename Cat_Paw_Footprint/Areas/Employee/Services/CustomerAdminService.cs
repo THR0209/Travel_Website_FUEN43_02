@@ -63,7 +63,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 			
 			return await _repo.UpdateStatusAsync(customerId, status); ;
 		}
-		public async Task<int?> GetCustomerIdByEmailAsync(string email)
+		public async Task<int?> GetCustomerIdByEmailAsync(string email)// 根據Email查詢CustomerId
 		{
 			return await _repo.GetCustomerIdByEmailAsync(email);
 		}

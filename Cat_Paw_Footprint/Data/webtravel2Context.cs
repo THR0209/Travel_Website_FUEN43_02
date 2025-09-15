@@ -658,12 +658,14 @@ public partial class webtravel2Context : DbContext
 				.HasForeignKey(d => d.ProductID)
                 .HasConstraintName("FK__Products___Produ__3F115E1A");
 
-            entity.HasOne(d => d.Promo).WithMany()
-                .HasForeignKey(d => d.PromoID)
-                .HasConstraintName("FK__Products___Promo__40058253");
-        });
+			// ���p�� Promotion
+			entity.HasOne(pp => pp.Promotion)
+				.WithMany(p => p.Products_Promotions)   // Promotions.cs �̪� navigation property
+				.HasForeignKey(pp => pp.PromoID)
+				.HasConstraintName("FK_ProductsPromotions_Promotion");
+		});
 
-        modelBuilder.Entity<Products_Restaurants>(entity =>
+		modelBuilder.Entity<Products_Restaurants>(entity =>
         {
             //entity.HasNoKey();
 

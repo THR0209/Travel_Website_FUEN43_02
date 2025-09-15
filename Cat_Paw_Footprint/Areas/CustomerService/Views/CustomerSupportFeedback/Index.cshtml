@@ -1,0 +1,70 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomerService.ViewModel.CustomerSupportFeedbackViewModel>
+@{
+    ViewData["Title"] = "工單評價維護";
+}
+
+<h1>工單評價維護</h1>
+
+@section Styles {
+    <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="~/css/feedback.css" rel="stylesheet" asp-append-version="true" />
+
+
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            @* <div class="card-header">
+                <h3>評價列表</h3>
+            </div> *@
+            <div class="card-body">
+                <table id="feedbackTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>工單編號</th>
+                            <th>評分</th>
+                            <th>留言</th>
+                            <th>建立時間</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">評價詳情</h5>
+            </div>
+            <div class="modal-body">
+                <p><b>工單編號：</b> <span id="detailTicket"></span></p>
+                <p><b>評分：</b> <span id="detailRating"></span></p>
+                <p><b>留言：</b></p>
+                <p id="detailComment" class="border p-2 rounded"></p>
+                <p><b>建立時間：</b> <span id="detailTime"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-danger" id="btnDeleteFeedback">刪除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 回到頂部按鈕 -->
+<button id="backToTop" title="回到頂部"><i class="fa-solid fa-circle-up"></i></button>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/feedback.js"></script>
+}

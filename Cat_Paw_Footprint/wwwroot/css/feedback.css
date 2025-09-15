@@ -1,0 +1,214 @@
+﻿/* --- 卡片樣式 --- */
+.card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* --- 表格樣式 --- */
+#feedbackTable {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 2px solid #e6e6e6 !important;
+    font-size: 15px;
+}
+
+    #feedbackTable th,
+    #feedbackTable td {
+        padding: 10px 12px !important;
+        border: 1px solid #bbb !important;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 15px !important;
+    }
+
+    #feedbackTable th {
+        background: #22b3C1 !important;
+        color: #fff !important;
+        font-weight: bold;
+    }
+
+    #feedbackTable tbody tr:nth-child(even) {
+        background-color: #f9f9f9 !important;
+    }
+
+    #feedbackTable tbody tr:hover {
+        background-color: #e6f7f9 !important;
+    }
+
+/* --- 按鈕樣式 --- */
+.btn {
+    padding: 6px 10px !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+}
+
+.btn-primary, .btn-secondary {
+    background: #22b3C1 !important;
+    color: #fff !important;
+}
+
+.btn-danger {
+    background: #e84118 !important;
+    color: #fff !important;
+}
+
+/* --- 表單輸入欄位 --- */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+    background: #fff;
+}
+
+textarea {
+    height: 80px;
+    resize: none;
+}
+
+/* --- Modal 樣式 --- */
+.modal .modal-content {
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Modal footer 按鈕間距 */
+.modal-footer .btn {
+    margin-left: 6px;
+}
+
+/* 星號評分 - 黑底白字 tooltip */
+.star-rating {
+    color: gold; /* 星號顏色 */
+    font-size: 1.2rem;
+    font-weight: bold;
+    position: relative;
+    cursor: default;
+}
+
+/* hover 顯示黑底原始數字 */
+.star-rating:hover::after {
+    content: attr(data-rating); /* 使用 data-rating 避免 title */
+    position: absolute;
+    top: -25px;
+    left: 0;
+    background: #000; /* 黑底 */
+    color: #fff; /* 白字 */
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+/* --- DataTables 控制元件樣式 --- */
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #22b3C1 !important;
+    border-radius: 6px;
+    padding: 6px 10px;
+    outline: none;
+    margin-left: 6px;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #138996 !important;
+    box-shadow: 0 0 4px rgba(34,179,193,0.6);
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #22b3C1 !important;
+    border-radius: 6px;
+    padding: 4px 8px;
+    outline: none;
+    margin: 0 6px;
+    background-color: #fff;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 1px solid #22b3C1 !important;
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin: 2px;
+    color: #22b3C1 !important;
+    background: #fff;
+    cursor: pointer;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #22b3C1 !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #fff !important;
+    color: #333 !important;
+    border: 1px solid #22b3C1 !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #333;
+}
+
+.dataTables_processing {
+    color: #22b3C1 !important;
+    font-weight: bold;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    margin-left: 6px;
+    margin-right: 12px;
+}
+
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+#feedbackTable_wrapper .dataTables_empty {
+    text-align: center !important;
+    font-size: 15px;
+    color: #555;
+    padding: 20px 0;
+}
+
+#backToTop {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    background-color: #fff; /* 黑底 */
+    color: #333; /* 白字 */
+    border: none;
+    border-radius: 50%;
+    padding: 10px 14px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: none; /* 預設隱藏 */
+}
+
+#backToTop:hover {
+    background-color: #555;
+}

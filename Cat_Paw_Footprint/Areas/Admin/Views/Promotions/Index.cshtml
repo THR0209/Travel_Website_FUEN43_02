@@ -1,83 +1,133 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Models.Promotions>
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.PromotionViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+	ViewData["Title"] = "優惠活動";
 }
 
-<h1>Index</h1>
+@section Styles {
+	<link href="~/lib/datatables/css/jquery.datatables.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
+	<style>
+		.table.dataTable thead tr th {
+			background-color: #22B3C1; /* 這裡放你側邊欄的顏色 */
+			color: white;
+			text-align: center;
+		}
+
+		.operation-btn {
+			display: inline-block;
+			min-width: 80px; /* 統一最小寬度 */
+			max-width: 120px; /* 避免太大 */
+			height: 32px; /* 統一高度 */
+			font-size: 0.85rem;
+			padding: 2px 8px; /* 控制間距 */
+			text-align: center;
+			margin: 0 auto; /* 在儲存格置中 */
+		}
+
+		#PromotionsTable_filter {
+			margin-bottom: 15px; /* 距離可以自己調整 */
+		}
+	</style>
+}
+
+
+<h1>優惠活動</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+	<a asp-action="Create" class="btn btn-primary mt-2 mb-2"><i class="fa-solid fa-square-plus"></i> 新增優惠活動</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.PromoName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PromoDesc)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiscountType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiscountValue)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreateTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdateTime)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.PromoName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PromoDesc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountValue)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreateTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdateTime)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PromoID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PromoID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PromoID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
+<table id="PromotionsTable" class="table table-striped table-hover table-bordered mb-3">
+	<thead class="table-primary">
+		<tr>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.PromoName)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.PromoDesc)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.StartTime)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.EndTime)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.DiscountType)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.DiscountValue)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.IsActive)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.CreateTime)
+			</th>
+			<th class="fs-5" style="width: 10%;">
+				@Html.DisplayNameFor(model => model.UpdateTime)
+			</th>
+			<th class="fs-5">操作</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>
+					@Html.DisplayFor(modelItem => item.PromoName)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.PromoDesc)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.StartTime)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.EndTime)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.DiscountType)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.DiscountValue)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.IsActive)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.CreateTime)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.UpdateTime)
+				</td>
+				<td class="text-center">
+					<a asp-action="Edit" asp-route-id="@item.PromoID" class="btn btn-primary btn-sm mb-1">編輯</a>
+					<a asp-action="Details" asp-route-id="@item.PromoID" class="btn btn-info btn-sm mb-1">詳細資訊</a> 
+					<a asp-action="Delete" asp-route-id="@item.PromoID" class="btn btn-danger btn-sm mb-1">刪除</a>
+				</td>
+			</tr>
+		}
+	</tbody>
 </table>
+
+@section Scripts {
+	<script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
+	<script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			$('.table').DataTable({
+				language: {
+					url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/zh-HANT.json'
+				},
+				layout: {
+					topStart: {
+						buttons: ['copy', 'csv', 'pdf', 'print']
+					}
+				},
+				fixedHeader: true
+			});
+		});
+
+	</script>
+}

@@ -14,5 +14,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 		Task<bool> UpdateSelfAsync(int empId, string name, string? phone, string? email, string? address, byte[]? photo, string? newPassword, string? idNumber);
 		// 更新員工帳號狀態、密碼、角色
 		Task UpdateAccountAsync(int id, bool status, string? password, int roleId);
+		Task<string> GetNewEmployeeCodeAsync();//預存程序取得員工代號
 	}
 }
