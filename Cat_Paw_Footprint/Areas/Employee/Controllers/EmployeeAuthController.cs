@@ -121,24 +121,23 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				
 				return View(model);
 			}
+			// 產生員工代號
+			var newEmpCode = _svc.GetNewEmployeeCodeAsync().Result;//預存程序產生的字串
 			var emp = new Cat_Paw_Footprint.Models.Employees//註冊員工帳號
 			{
-				Account=model.Account,
+				EmployeeCode=newEmpCode,//員工代號
+				Account =model.Account,
 				Password=BCrypt.Net.BCrypt.HashPassword(model.Password),
 				RoleID=model.RoleId,
 				CreateDate=DateTime.Now,
-				Status= true
+				Status= true,
+				EmployeeProfile = new EmployeeProfile
+				{
+					EmployeeName = model.EmployeeName
+				}
 			};
 			_context.Employees.Add(emp);
-			
-
-			var profile = new EmployeeProfile//註冊之後產生基本員工個資表，剩下給員工自己寫
-			{
-				EmployeeID=emp.EmployeeID,
-				EmployeeName=model.EmployeeName,
-			};
-
-			_context.EmployeeProfile.Add(profile);
+	
 			_context.SaveChanges();
 
 

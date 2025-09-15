@@ -34,8 +34,20 @@ public class CustomerSupportFeedbackController : Controller
 	{
 		var feedback = await _service.GetByIdAsync(id);
 		if (feedback == null) return NotFound();
-		return Json(feedback);
+
+		// 只取必要欄位，避免循環
+		var result = new
+		{
+			feedback.FeedbackID,
+			TicketID = feedback.Ticket?.TicketID,
+			feedback.FeedbackRating,
+			feedback.FeedbackComment,
+			feedback.CreateTime
+		};
+
+		return Json(result);
 	}
+
 
 	[HttpDelete("Delete/{id}")]
 	public async Task<IActionResult> Delete(int id)
