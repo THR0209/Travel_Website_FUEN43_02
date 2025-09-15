@@ -4,7 +4,7 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
+<h1>新增景點</h1>
 
 <h4>Locations</h4>
 <hr />
@@ -69,6 +69,16 @@
                 <label asp-for="IsActive" class="control-label"></label>
                 <input asp-for="IsActive" class="form-control" />
                 <span asp-validation-for="IsActive" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LocationPics" class="control-label"></label>
+                <input asp-for="LocationPics" class="form-control" />
+                <span asp-validation-for="LocationPics" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LocationKeywords" class="control-label"></label>
+                <input asp-for="LocationKeywords" class="form-control" />
+                <span asp-validation-for="LocationKeywords" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

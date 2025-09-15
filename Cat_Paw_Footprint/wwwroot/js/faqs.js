@@ -63,49 +63,11 @@
         `;
     }
 
-    // ==== FAQ 表格渲染 ====
-    function renderFaqTable() {
-        const kw = els.faqSearch.value.trim().toLowerCase();
-        const cat = els.faqCategoryFilter.value;
-        const rows = state.faqs.filter(f => {
-            const hay = ((f.question || "") + " " + (f.answer || "")).toLowerCase();
-            const catMatch = !cat || String(f.categoryID) === cat;
-            return catMatch && (!kw || hay.includes(kw));
-        }).map(f => {
-            const catName = (state.categories.find(c => String(c.id) === String(f.categoryID)) || {}).name || "-";
-            const statusHtml = f.isActive ? '<span class="status done">上架</span>' : '<span class="status pending">下架</span>';
-            return `<tr data-id="${f.faqID}">
-                <td>${escapeHtml(catName)}</td>
-                <td>${escapeHtml(f.question)}</td>
-                <td>${escapeHtml(f.answer)}</td>
-                <td>${statusHtml}</td>
-                <td>
-                    <button class="btn btn-secondary" data-act="edit" data-id="${f.faqID}">編輯</button>
-                    <button class="btn btn-danger" data-act="del" data-id="${f.faqID}">刪除</button>
-                </td>
-            </tr>`;
-        }).join('');
-
-        els.faqTableBody.innerHTML = rows || '<tr><td colspan="5" style="text-align:center;color:#888">無資料</td></tr>';
-        initFaqDataTable();
-    }
-
-    // ==== 分類表格渲染 ====
-    function renderCategoryTable() {
-        els.categoryTableBody.innerHTML = state.categories.map((c, i) => `<tr data-id="${c.id}">
-            <td>${i + 1}</td>
-            <td>${escapeHtml(c.name)}</td>
-            <td>
-                <button class="btn btn-secondary" data-act="rename" data-id="${c.id}">編輯</button>
-                <button class="btn btn-danger" data-act="c-del" data-id="${c.id}">刪除</button>
-            </td>
-        </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:#888">無分類</td></tr>';
-    }
-
-    // ==== 初始化 FAQ DataTable ====
+    // ==== FAQ DataTable 初始化 ====
     function initFaqDataTable() {
         if (typeof jQuery === 'undefined' || !$.fn.DataTable) return console.error('DataTable 尚未載入');
         if ($.fn.DataTable.isDataTable('#faqTable')) $('#faqTable').DataTable().destroy();
+
         $('#faqTable').DataTable({
             paging: true,
             searching: false,
@@ -127,11 +89,68 @@
         });
     }
 
+    // ==== FAQ 表格渲染 (高亮最新) ====
+    function renderFaqTable(highlightId = null) {
+        if (!$.fn.DataTable.isDataTable('#faqTable')) initFaqDataTable();
+        const table = $('#faqTable').DataTable();
+        table.clear();
+
+        const kw = els.faqSearch.value.trim().toLowerCase();
+        const cat = els.faqCategoryFilter.value;
+
+        state.faqs
+            .filter(f => {
+                const hay = ((f.question || "") + " " + (f.answer || "")).toLowerCase();
+                const catMatch = !cat || String(f.categoryID) === cat;
+                return catMatch && (!kw || hay.includes(kw));
+            })
+            .forEach(f => {
+                const catName = (state.categories.find(c => String(c.id) === String(f.categoryID)) || {}).name || "-";
+                const statusHtml = f.isActive ? '<span class="status done">上架</span>' : '<span class="status pending">下架</span>';
+                table.row.add([
+                    catName,
+                    f.question,
+                    f.answer,
+                    statusHtml,
+                    `<button class="btn btn-secondary" data-act="edit" data-id="${f.faqID}">編輯</button>
+                     <button class="btn btn-danger" data-act="del" data-id="${f.faqID}">刪除</button>`
+                ]).node().dataset.id = f.faqID;
+            });
+
+        table.draw();
+
+        if (highlightId) {
+            const rowNode = table.rows().nodes().to$().filter(`[data-id='${highlightId}']`);
+            rowNode.addClass('highlight');
+            $('html, body').animate({ scrollTop: rowNode.offset().top - 100 }, 300);
+        }
+    }
+
+    // ==== 分類表格渲染 ====
+    function renderCategoryTable(highlightId = null) {
+        els.categoryTableBody.innerHTML = state.categories.map((c, i) => `<tr data-id="${c.id}">
+            <td>${i + 1}</td>
+            <td>${escapeHtml(c.name)}</td>
+            <td>
+                <button class="btn btn-secondary" data-act="rename" data-id="${c.id}">編輯</button>
+                <button class="btn btn-danger" data-act="c-del" data-id="${c.id}">刪除</button>
+            </td>
+        </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:#888">無分類</td></tr>';
+
+        if (highlightId) {
+            const row = els.categoryTableBody.querySelector(`tr[data-id='${highlightId}']`);
+            if (row) {
+                row.classList.add('highlight');
+                $('html, body').animate({ scrollTop: $(row).offset().top - 100 }, 300);
+            }
+        }
+    }
+
     // ==== Modal 管理 ====
     function showModal(modal) { modal.classList.add('show'); }
     function hideModal(modal) { modal.classList.remove('show'); }
 
-    // ==== 資料初次載入 ====
+    // ==== 初次載入 ====
     async function fetchAndRenderAll() {
         try {
             const [cats, faqs] = await Promise.all([api.getCategories(), api.getFAQs()]);
@@ -157,8 +176,8 @@
 
     // ==== FAQ 事件綁定 ====
     els.btnFaqNew.addEventListener('click', () => openFaqModal(null));
-    els.faqSearch.addEventListener('input', renderFaqTable);
-    els.faqCategoryFilter.addEventListener('change', renderFaqTable);
+    els.faqSearch.addEventListener('input', () => renderFaqTable());
+    els.faqCategoryFilter.addEventListener('change', () => renderFaqTable());
     els.faqClear.addEventListener('click', () => { els.faqSearch.value = ''; els.faqCategoryFilter.value = ''; renderFaqTable(); });
 
     function openFaqModal(faq) {
@@ -189,6 +208,7 @@
             if (result && result.message) alert(result.message);
             closeFaqModal();
             await fetchAndRenderAll();
+            if (!editingFaqId) renderFaqTable(result.faqID); // 新增時高亮最新
         } catch { alert('儲存失敗'); }
     });
 
@@ -228,22 +248,17 @@
     // 顯示/隱藏按鈕
     // ===============================
     $(window).scroll(function () {
-        if ($(this).scrollTop() > 300) { // 滾動 200px 就顯示
-            $('#backToTop').fadeIn();
-        } else {
-            $('#backToTop').fadeOut();
-        }
+        if ($(this).scrollTop() > 300) { $('#backToTop').fadeIn(); }
+        else { $('#backToTop').fadeOut(); }
     });
 
     // ===============================
     // 點擊回到頂部
     // ===============================
-
     $('#backToTop').click(function () {
-        $('html, body').animate({ scrollTop: 0 }, 200); // 500ms 平滑滾動
+        $('html, body').animate({ scrollTop: 0 }, 200);
     });
 
     // ==== 初次載入 ====
     fetchAndRenderAll();
-
 })();
