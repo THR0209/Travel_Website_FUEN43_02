@@ -34,7 +34,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 				.Include(t => t.Priority)
 				.Include(t => t.Status)
 				.Include(t => t.TicketType)
-				.AsNoTracking()
+				//.AsNoTracking()
 				.FirstOrDefaultAsync(t => t.TicketID == id);
 		}
 
