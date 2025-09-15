@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -23,11 +24,33 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         // GET: TravelManagement/Hotels
         public async Task<IActionResult> Index()
         {
-            var webtravel2Context = _context.Hotels
+            var hotels = _context.Hotels
+                .Include(h => h.HotelPics)
+                .Include(h => h.HotelKeywords)
+                .ThenInclude(hk => hk.Keyword)
                 .Include(h => h.District)
                 .Include(h => h.Region);
 
-            return View(await webtravel2Context.ToListAsync());
+            var viewModel = await hotels.Select(h => new HotelsViewModel
+            {
+                HotelID = h.HotelID,
+                HotelName = h.HotelName,
+                HotelAddr = h.HotelAddr,
+                HotelLat = h.HotelLat,
+                HotelLng = h.HotelLng,
+                HotelDesc = h.HotelDesc,
+                DistrictName = h.District.DistrictName,
+                RegionName = h.Region.RegionName,
+                Rating = h.Rating,
+                Views = h.Views,
+                HotelCode = h.HotelCode,
+                IsActive = h.IsActive,
+                Picture = h.HotelPics.Select(p => p.Picture).ToList(),
+                Keywords = h.HotelKeywords.
+                    Select(k => k.Keyword.KeywordID).ToList()
+            }).ToListAsync();
+            
+			return View(viewModel);
         }
 
         // GET: TravelManagement/Hotels/Details/5
@@ -38,14 +61,37 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
-            var hotels = await _context.Hotels
-                .Include(h => h.District)
-                .Include(h => h.Region)
-                .FirstOrDefaultAsync(m => m.HotelID == id);
-            if (hotels == null)
+			var hotels = await _context.Hotels
+		        .Include(h => h.HotelPics)
+		        .Include(h => h.HotelKeywords)
+			    .ThenInclude(hk => hk.Keyword)
+		        .Include(h => h.District)
+		        .Include(h => h.Region)
+		        .FirstOrDefaultAsync(h => h.HotelID == id);
+
+			if (hotels == null)
             {
                 return NotFound();
             }
+
+            var vm = new HotelsViewModel
+            {
+                HotelID = hotels.HotelID,
+                HotelName = hotels.HotelName,
+                HotelAddr = hotels.HotelAddr,
+                HotelLat = hotels.HotelLat,
+                HotelLng = hotels.HotelLng,
+                HotelDesc = hotels.HotelDesc,
+                DistrictName = hotels.District?.DistrictName,
+                RegionName = hotels.Region?.RegionName,
+                Rating = hotels.Rating,
+                Views = hotels.Views,
+                HotelCode = hotels.HotelCode,
+                IsActive = hotels.IsActive,
+                Picture = hotels.HotelPics.Select(p => p.Picture).ToList(),
+                Keywords = hotels.HotelKeywords.
+                    Select(k => k.Keyword.KeywordID).ToList()
+            };
 
             return View(hotels);
         }

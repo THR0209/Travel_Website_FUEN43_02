@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -23,9 +24,34 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         // GET: TravelManagement/Restaurants
         public async Task<IActionResult> Index()
         {
-            var webtravel2Context = _context.Restaurants.Include(r => r.District).Include(r => r.Region);
-            return View(await webtravel2Context.ToListAsync());
-        }
+			var restaurants = _context.Restaurants
+				.Include(h => h.RestaurantPics)
+				.Include(h => h.RestaurantKeywords)
+				.ThenInclude(hk => hk.Keyword)
+				.Include(h => h.District)
+				.Include(h => h.Region);
+
+			var viewModel = await restaurants.Select(h => new RestaurantsViewModel
+			{
+				RestaurantID = h.RestaurantID,
+				RestaurantName = h.RestaurantName,
+				RestaurantAddr = h.RestaurantAddr,
+				RestaurantLat = h.RestaurantLat,
+				RestaurantLng = h.RestaurantLng,
+				RestaurantDesc = h.RestaurantDesc,
+				DistrictName = h.District.DistrictName,
+				RegionName = h.Region.RegionName,
+				Rating = h.Rating,
+				Views = h.Views,
+				RestaurantCode = h.RestaurantCode,
+				IsActive = h.IsActive,
+				Picture = h.RestaurantPics.Select(p => p.Picture).ToList(),
+				Keywords = h.RestaurantKeywords.
+					Select(k => k.Keyword.KeywordID).ToList()
+			}).ToListAsync();
+
+			return View(viewModel);
+		}
 
         // GET: TravelManagement/Restaurants/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -39,6 +65,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 .Include(r => r.District)
                 .Include(r => r.Region)
                 .FirstOrDefaultAsync(m => m.RestaurantID == id);
+
             if (restaurants == null)
             {
                 return NotFound();

@@ -24,7 +24,6 @@
     <Folder Include="Areas\ProductManagement\Data\" />
     <Folder Include="Areas\ProductManagement\ViewModel\" />
     <Folder Include="Areas\TravelManagement\Data\" />
-    <Folder Include="Areas\TravelManagement\ViewModel\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -23,8 +24,34 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         // GET: TravelManagement/Locations
         public async Task<IActionResult> Index()
         {
-            var webtravel2Context = _context.Locations.Include(l => l.District).Include(l => l.Region);
-            return View(await webtravel2Context.ToListAsync());
+			var location = _context.Locations
+				.Include(h => h.LocationPics)
+				.Include(h => h.LocationKeywords)
+				.ThenInclude(hk => hk.Keyword)
+				.Include(h => h.District)
+				.Include(h => h.Region);
+
+			var viewModel = await location.Select(h => new LocationsViewModel
+			{
+				LocationID = h.LocationID,
+				LocationName = h.LocationName,
+				LocationAddr = h.LocationAddr,
+				LocationLat = h.LocationLat,
+				LocationLng = h.LocationLng,
+				LocationDesc = h.LocationDesc,
+				LocationPrice = h.LocationPrice,
+				DistrictName = h.District.DistrictName,
+				RegionName = h.Region.RegionName,
+				Rating = h.Rating,
+				Views = h.Views,
+				LocationCode = h.LocationCode,
+				IsActive = h.IsActive,
+				Picture = h.LocationPics.Select(p => p.Picture).ToList(),
+				Keywords = h.LocationKeywords.
+					Select(k => k.Keyword.KeywordID).ToList()
+			}).ToListAsync();
+
+			 return View(viewModel);
         }
 
         // GET: TravelManagement/Locations/Details/5
@@ -38,7 +65,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
             var locations = await _context.Locations
                 .Include(l => l.District)
                 .Include(l => l.Region)
+
                 .FirstOrDefaultAsync(m => m.LocationID == id);
+
             if (locations == null)
             {
                 return NotFound();

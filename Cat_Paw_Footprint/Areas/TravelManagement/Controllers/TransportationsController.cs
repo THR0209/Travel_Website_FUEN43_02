@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -23,8 +24,29 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         // GET: TravelManagement/Transportations
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Transportations.ToListAsync());
-        }
+            var transportations = _context.Transportations
+				.Include(h => h.TransportPics)
+                .Include(h => h.TransportKeywords)
+                .ThenInclude(hk => hk.Keyword);
+
+			var viewModel = await transportations.Select(h => new TransportationsViewMoled
+			{
+                TransportID = h.TransportID,
+                TransportName = h.TransportName,
+                TransportDesc = h.TransportDesc,
+                TransportPrice = h.TransportPrice,
+                Rating = h.Rating,
+                Views = h.Views,
+                TransportCode = h.TransportCode,
+                IsActive = h.IsActive,
+                Picture = h.TransportPics.Select(p => p.Picture).ToList(),
+                Keywords = h.TransportKeywords.
+                    Select(k => k.Keyword.KeywordID).ToList()
+            }).ToListAsync();
+
+            return View(viewModel);
+
+		}
 
         // GET: TravelManagement/Transportations/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -36,6 +58,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
             var transportations = await _context.Transportations
                 .FirstOrDefaultAsync(m => m.TransportID == id);
+
             if (transportations == null)
             {
                 return NotFound();

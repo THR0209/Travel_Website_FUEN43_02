@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Models.Locations>
+﻿@* @model IEnumerable<Cat_Paw_Footprint.Models.Locations> *@
+@model IEnumerable<Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.LocationsViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -7,7 +8,7 @@
 <h1>景點</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">新增</a>
 </p>
 <table class="table">
     <thead>
@@ -43,12 +44,17 @@
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.District)
+                @Html.DisplayNameFor(model => model.DistrictName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Region)
+                @Html.DisplayNameFor(model => model.RegionName)
             </th>
-            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Keywords)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Picture)
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -85,10 +91,23 @@
                 @Html.DisplayFor(modelItem => item.IsActive)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.District.DistrictName)
+                @Html.DisplayFor(modelItem => item.DistrictName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Region.RegionName)
+                @Html.DisplayFor(modelItem => item.RegionName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Keywords)
+            </td>
+            <td>
+                @foreach (var pic in item.Picture) // Pictures 是 List<string> 或 List<byte[]>
+                {
+                    if (pic is byte[] bytes)
+                    {
+                        var base64 = "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
+                        <img src="@base64" alt="圖片" width="80" />
+                    }
+                }
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.LocationID">Edit</a> |
