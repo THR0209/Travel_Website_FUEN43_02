@@ -11,9 +11,11 @@ public partial class Products_Hotels
 
 	public int? ProductID { get; set; }
 
-    public int? HotelID { get; set; }
+	public int? HotelID { get; set; }
 
-    public virtual Hotels? Hotel { get; set; }
+	public int? OrderIndex { get; set; } // 914新增
 
-    public virtual Products? Product { get; set; }
+	public virtual Hotels? Hotel { get; set; }
+
+	public virtual Products? Product { get; set; }
 }
