@@ -10,33 +10,44 @@
     <div class="col-md-3">
         <div class="card p-3 rounded-5">
             <h5>本月訂單</h5>
-            <h2>128</h2>
-            <small class="text-success">比上月 +14%</small>
+            <h2>@Model.MonthlyOrders</h2>
+            <small class="@(Model.OrderGrowthRate >= 0 ? "text-success" : "text-danger")">@(Model.OrderGrowthRate >= 0 ? "比上月新增" : "比上月減少")@Model.OrderGrowthRate.ToString("F1")% </small>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card p-3 rounded-5">
             <h5>開放行程</h5>
-            <h2>8</h2>
-            <span class="badge bg-danger">Soon</span>
+            <h2>@Model.OpenTrips</h2>
+            <span class="badge bg-info">即時狀態</span>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="card p-3 rounded-5">
             <h5>客戶總數</h5>
-            <h2>101</h2>
-            <span class="badge bg-primary">比上個月新增3%</span>
+            <h2>@Model.CustomerCount</h2>
+            <span class="@(Model.CustomerGrowthRate >= 0 ? "text-primary" : "text-danger")">@(Model.CustomerGrowthRate >= 0 ? "比上月新增" : "比上月減少")@Model.CustomerGrowthRate.ToString("F1")%</span>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="card p-3 rounded-5">
-            <h5>已解決案件數</h5>
+            <h5>本月已解決案件數</h5>
             <h2>8</h2>
-            <span class="badge bg-info">比上個月新增5%</span>
+            <span class="@(Model.TicketGrowthRate >= 0 ? "text-info" : "text-danger")"> @(Model.TicketGrowthRate >= 0 ? "比上月新增" : "比上月減少")@Model.TicketGrowthRate.ToString("F1")%</span>
         </div>
     </div>
+   
+
+    <h2>銷售報表</h2>
+    <select id="timeRange" class="form-select" style="width:200px; margin-bottom:20px;">
+        <option value="day">日報表</option>
+        <option value="month">月報表</option>
+        <option value="quarter">季報表</option>
+        <option value="year">年報表</option>
+    </select>
+
+
 
     <div class="container mt-4">
         <h4>📊 銷售額趨勢（假資料示範）</h4>
@@ -48,29 +59,52 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // 範例：使用 Chart.js 繪製簡單的折線圖
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'line',
+        let ctx = document.getElementById('salesChart').getContext('2d');
+        let chart = new Chart(ctx, {
+            type: 'bar',
             data: {
-                labels: ['一月', '二月', '三月', '四月', '五月', '六月'],
                 datasets: [{
-                    label: '訂單數量',
-                    data: [12, 19, 3, 5, 2, 3],
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
+                    label: '銷售額',
+                    data: []
                 }]
             },
             options: {
                 responsive: true,
                 scales: {
+                    x: {
+                        type: 'category'
+                    },
                     y: {
                         beginAtZero: true
                     }
                 }
             }
         });
+
+        function loadData(groupBy) {
+            fetch(`/Reports/GetSalesReport?groupBy=${groupBy}`)
+                .then(r => r.json())
+                .then(data => {
+                    chart.data.labels = data.map(d => d.x);
+                    chart.data.datasets[0].data = data.map(d => d.y);
+
+                    // 根據不同的顆粒度調整 X 軸
+                    if (groupBy === "day" || groupBy === "month" || groupBy === "year") {
+                        chart.options.scales.x.type = 'category';
+                    } else {
+                        chart.options.scales.x.type = 'category';
+                    }
+
+                    chart.update();
+                });
+        }
+
+        document.getElementById('timeRange').addEventListener('change', function () {
+            loadData(this.value);
+        });
+
+        // 預設載入「月報表」
+        loadData("month");
     </script>
 
     銷售報表

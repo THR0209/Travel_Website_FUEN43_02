@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 {
-    public class NewsIndexViewModel
+	
+	public class NewsIndexViewModel
     {
        
         public int NewsID { get; set; }

@@ -11,5 +11,16 @@
 		public double OrderGrowthRate { get; set; }
 		public double CustomerGrowthRate { get; set; }
 		public double TicketGrowthRate { get; set; }
+
+		// 銷售報表
+		public List<SalesReportDto> SalesReports { get; set; }
 	}
+
+	public class SalesReportDto
+	{
+		public string X { get; set; } // X 軸 (日期/月份/季度/年份)
+		public decimal Y { get; set; } // Y 軸 (銷售額)
+	}
+
+
 }

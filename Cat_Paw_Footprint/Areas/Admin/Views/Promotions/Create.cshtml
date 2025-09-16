@@ -1,7 +1,7 @@
 ﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.PromotionViewModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "新增優惠活動";
 }
 
 @section Styles {
@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
 
 }
-<h1>Create</h1>
+<h1>新增優惠活動</h1>
 
 <div class="row">
     <div class="col-md-8">
@@ -85,8 +85,8 @@
             </table>
 
             <div class="form-group mt-3">
-                <input type="submit" value="Create" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+                <input type="submit" value="儲存" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">回到上一頁</a>
             </div>
         </form>
     </div>
@@ -103,7 +103,7 @@
         $(document).ready(function () {
             $('.table').DataTable({
                 language: {
-                    url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json'
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/zh-HANT.json'
                 },
                 layout: {
                     topStart: {

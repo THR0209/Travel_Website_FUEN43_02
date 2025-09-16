@@ -17,30 +17,57 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 		public IActionResult Index()
 		{
 			var now = DateTime.Now;
-			var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
-			var nextMonth = firstDayOfMonth.AddMonths(1);
 
-			// 1. 本月訂單數 (CustomerOrders.CreateTime)
+			// 本月
+			var firstDayOfThisMonth = new DateTime(now.Year, now.Month, 1);
+			var firstDayOfNextMonth = firstDayOfThisMonth.AddMonths(1);
+
+			// 上月
+			var firstDayOfLastMonth = firstDayOfThisMonth.AddMonths(-1);
+
+			// 1. 本月訂單數
 			var thisMonthOrders = _context.CustomerOrders
-				.Count(o => o.CreateTime >= firstDayOfMonth && o.CreateTime < nextMonth);
+				.Count(o => o.CreateTime >= firstDayOfThisMonth && o.CreateTime < firstDayOfNextMonth);
 
-			// 2. 開放行程數 (Products)
+			var lastMonthOrders = _context.CustomerOrders
+				.Count(o => o.CreateTime >= firstDayOfLastMonth && o.CreateTime < firstDayOfThisMonth);
+
+			double orderGrowthRate = lastMonthOrders > 0
+				? ((double)(thisMonthOrders - lastMonthOrders) / lastMonthOrders) * 100
+				: 100;
+
+			// 2. 開放行程數 (Products.IsActive) → 不需要比較，因為是即時狀態
 			var openTrips = _context.Products
-				.Count(p => p.IsActive == true); // 假設 1 代表「開放中」
+				.Count(p => p.IsActive == true);
 
-			// 3. 客戶總數 (Customers)
+			// 3. 客戶總數
 			var customerCount = _context.Customers.Count();
+			var lastMonthCustomers = _context.Customers.Count(c => c.CreateDate < firstDayOfThisMonth);
 
-			// 4. 已解決案件數 (CustomerSupportTickets.StatusID 假設 3 = 已解決)
+			double customerGrowthRate = lastMonthCustomers > 0
+				? ((double)(customerCount - lastMonthCustomers) / lastMonthCustomers) * 100
+				: 100;
+
+			// 4. 已解決案件數
 			var resolvedTickets = _context.CustomerSupportTickets
 				.Count(t => t.StatusID == 3);
+
+			var lastMonthResolved = _context.CustomerSupportTickets
+				.Count(t => t.StatusID == 3 && t.UpdateTime < firstDayOfThisMonth);
+
+			double ticketGrowthRate = lastMonthResolved > 0
+				? ((double)(resolvedTickets - lastMonthResolved) / lastMonthResolved) * 100
+				: 100;
 
 			var vm = new DashboardViewModel
 			{
 				MonthlyOrders = thisMonthOrders,
 				OpenTrips = openTrips,
 				CustomerCount = customerCount,
-				ResolvedTickets = resolvedTickets
+				ResolvedTickets = resolvedTickets,
+				OrderGrowthRate = orderGrowthRate,
+				CustomerGrowthRate = customerGrowthRate,
+				TicketGrowthRate = ticketGrowthRate
 			};
 
 			return View(vm);
