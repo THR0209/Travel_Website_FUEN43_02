@@ -4,75 +4,230 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<div class="container">
+    <h1 class="mb-4">詳細行程檢視</h1>
+    <div class="row mb-3 align-items-stretch">
+        <!-- 左側：產品封面照 -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center d-flex justify-content-center align-items-center">
+                    @if (Model.ProductImage != null)
+                    {
+                        <img src="data:image/*;base64,@(Convert.ToBase64String(Model.ProductImage))"
+                             class="img-fluid rounded"
+                             style="w"
+                             alt="產品封面照" />
+                    }
+                    else
+                    {
+                        <img src="~/images/NoImage.png" class="img-fluid rounded" alt="無封面照" />
+                    }
+                </div>
+            </div>
+        </div>
 
-<div>
-    <h4>Products</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductDesc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductDesc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductNote)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductNote)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MaxPeople)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MaxPeople)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductImage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductImage)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Region)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Region.RegionID)
-        </dd>
-    </dl>
+        <!-- 右側：產品的基本資訊 -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h4 class="card-title">@Model.ProductName</h4>
+                    <p><strong>產品編號：</strong>@Model.ProductCode</p>
+                    <p><strong>價格：</strong>@Model.ProductPrice</p>
+                    <p><strong>區域：</strong>@Model.Region?.RegionName</p>
+                    <p><strong>出團時間：</strong>@Model.StartDate?.ToString("yyyy/MM/dd") ~ @Model.EndDate?.ToString("yyyy/MM/dd")</p>
+                    <p><strong>人數上限：</strong>@Model.MaxPeople</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 產品描述 + 行程內容 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">產品描述與行程內容</h4>
+                    <p>@Html.Raw(Model.ProductDesc)</p>
+
+                    <!-- 餐點 (依早/午/晚分群) -->
+                    <h5 class="mt-4">用餐地點</h5>
+                    <div class="row text-center">
+                        <!-- 早餐 -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 shadow-sm rounded-4">
+                                <div class="card-header bg-primary text-white fw-bold">早餐</div>
+                                <div class="card-body text-start">
+                                    @if (Model.ProductRestaurants != null && Model.ProductRestaurants.Any(r => r.MealType == "Breakfast"))
+                                    {
+                                        @foreach (var group in Model.ProductRestaurants
+                                                                            .Where(r => r.MealType == "Breakfast")
+                                                                            .GroupBy(r => r.OrderIndex)
+                                                                            .OrderBy(g => g.Key))
+                                        {
+                                            <div class="mb-3 mt-2">
+                                                <h6 class="fw-bold text-secondary mb-2">第 @group.Key 天</h6>
+                                                <ul class="list-unstyled ps-3">
+                                                    @foreach (var pr in group)
+                                                    {
+                                                        <li class="mb-1">
+                                                            <i class="bi bi-dot text-primary"></i>
+                                                            <span class="text-dark" style="font-size: 16px;">@pr.Restaurant?.RestaurantName</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無資料</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- 午餐 -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 shadow-sm rounded-4">
+                                <div class="card-header bg-success text-white fw-bold">午餐</div>
+                                <div class="card-body text-start">
+                                    @if (Model.ProductRestaurants != null && Model.ProductRestaurants.Any(r => r.MealType == "Lunch"))
+                                    {
+                                        @foreach (var group in Model.ProductRestaurants
+                                                                            .Where(r => r.MealType == "Lunch")
+                                                                            .GroupBy(r => r.OrderIndex)
+                                                                            .OrderBy(g => g.Key))
+                                        {
+                                            <div class="mb-3 mt-2">
+                                                <h6 class="fw-bold text-secondary mb-2">第 @group.Key 天</h6>
+                                                <ul class="list-unstyled ps-3">
+                                                    @foreach (var pr in group)
+                                                    {
+                                                        <li class="mb-1">
+                                                            <i class="bi bi-dot text-primary"></i>
+                                                            <span class="text-dark" style="font-size: 16px;">@pr.Restaurant?.RestaurantName</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無資料</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 晚餐 -->
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 shadow-sm rounded-4">
+                                <div class="card-header bg-warning text-white fw-bold">晚餐</div>
+                                <div class="card-body text-start">
+                                    @if (Model.ProductRestaurants != null && Model.ProductRestaurants.Any(r => r.MealType == "Dinner"))
+                                    {
+                                        @foreach (var group in Model.ProductRestaurants
+                                                                            .Where(r => r.MealType == "Dinner")
+                                                                            .GroupBy(r => r.OrderIndex)
+                                                                            .OrderBy(g => g.Key))
+                                        {
+                                            <div class="mb-3 mt-2">
+                                                <h6 class="fw-bold text-secondary mb-2">第 @group.Key 天</h6>
+                                                <ul class="list-unstyled ps-3">
+                                                    @foreach (var pr in group)
+                                                    {
+                                                        <li class="mb-1">
+                                                            <i class="bi bi-dot text-primary"></i>
+                                                            <span class="text-dark" style="font-size: 16px;">@pr.Restaurant?.RestaurantName</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無資料</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 住宿 (依天數分群) -->
+                    @if (Model.ProductHotels != null && Model.ProductHotels.Any())
+                    {
+                        <h5 class="mt-4"><i class="fa-solid fa-hotel"></i> 住宿</h5>
+                        @foreach (var group in Model.ProductHotels.GroupBy(h => h.OrderIndex).OrderBy(g => g.Key))
+                        {
+                            <h6 class="text-success">第 @group.Key 天</h6>
+                            <ul class="list-group mb-3">
+                                @foreach (var ph in group)
+                                {
+                                    <li class="list-group-item">
+                                        <i class="fa-solid fa-paw"></i> @ph.Hotel?.HotelName
+                                        <br> 地址：@ph.Hotel?.HotelAddr
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    }
+
+                    <!-- 景點 (依天數分群) -->
+                    @if (Model.ProductLocations != null && Model.ProductLocations.Any())
+                    {
+                        <h5 class="mt-4"><i class="fa-solid fa-archway"></i> 景點</h5>
+                        @foreach (var group in Model.ProductLocations.GroupBy(l => l.DayNumber).OrderBy(g => g.Key))
+                        {
+                            <h6 class="text-warning">第 @group.Key 天</h6>
+                            <ul class="list-group mb-3">
+                                @foreach (var pl in group)
+                                {
+                                    <li class="list-group-item">@pl.Location?.LocationName</li>
+                                }
+                            </ul>
+                        }
+                    }
+
+                    <!-- 交通 -->
+                    @if (Model.ProductsTransportations != null && Model.ProductsTransportations.Any())
+                    {
+                        <h5 class="mt-4"><i class="fa-solid fa-train-subway"></i> 交通方式</h5>
+                        <ul class="list-group mb-3">
+                            @foreach (var pt in Model.ProductsTransportations ?? new List<Products_Transportations>())
+                            {
+                                <li class="list-group-item">@pt.Transport?.TransportName</li>
+                            }
+                        </ul>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注意事項 -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">注意事項</h4>
+                    <p>@Html.Raw(Model.ProductNote)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="row">
+        <div class="col-12">
+            <a asp-action="Index" class="btn btn-secondary">返回列表</a>
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.ProductID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+
+
+
