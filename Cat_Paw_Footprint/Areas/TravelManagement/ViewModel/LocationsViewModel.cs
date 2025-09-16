@@ -26,8 +26,20 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		public int? LocationPrice { get; set; }
 
 		[Display(Name = "縣市")]
+		public virtual Districts? District { get; set; }
+
+		[Display(Name = "縣市")]
+		public int? DistrictID { get; set; }		
+
+		[Display(Name = "縣市")]
 		public string? DistrictName { get; set; }
 
+		[Display(Name = "地區")]
+		public virtual Regions? Region { get; set; }
+
+		[Display(Name = "地區")]
+		public int? RegionID { get; set; }
+		
 		[Display(Name = "地區")]
 		public string? RegionName { get; set; }
 
@@ -50,6 +62,5 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		// 多個關鍵字
 		[Display(Name = "關鍵字")]
 		public List<int> Keywords { get; set; } = new();
-
 	}
 }

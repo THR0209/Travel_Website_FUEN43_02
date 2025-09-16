@@ -4,6 +4,10 @@
 @{
     ViewData["Title"] = "Index";
 }
+@{
+    //ViewBag 下拉選單方法
+    var regions = ViewBag.Regions as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
+}
 
 <h1>住宿</h1>
 
@@ -26,14 +30,8 @@
                 @Html.DisplayNameFor(model => model.HotelLng)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.HotelDesc)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Rating)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Views)
-            </th>
+            </th>            
             <th>
                 @Html.DisplayNameFor(model => model.HotelCode)
             </th>
@@ -41,17 +39,11 @@
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DistrictName)
+                @Html.DisplayNameFor(model => model.DistrictID)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.RegionName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Keywords)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Picture)
-            </th>
+                @Html.DisplayNameFor(model => model.RegionID)
+            </th>            
         </tr>
     </thead>
     <tbody>
@@ -68,15 +60,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.HotelLng)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HotelDesc)
-            </td>
+            </td>            
             <td>
                 @Html.DisplayFor(modelItem => item.Rating)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Views)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.HotelCode)
@@ -89,24 +75,11 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.RegionName)
-            </td>           
+            </td>            
             <td>
-                @Html.DisplayFor(modelItem => item.Keywords)
-            </td>
-            <td>
-                @foreach (var pic in item.Picture) // Pictures 是 List<string> 或 List<byte[]>
-                {
-                    if (pic is byte[] bytes)
-                    {
-                        var base64 = "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
-                        <img src="@base64" alt="圖片" width="80" />
-                    }
-                }
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.HotelID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.HotelID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.HotelID">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.HotelID">修改</a>                 
+                <a asp-action="Details" asp-route-id="@item.HotelID">詳細資料</a>                 
+                <a asp-action="Delete" asp-route-id="@item.HotelID">刪除</a>
             </td>
         </tr>
 }

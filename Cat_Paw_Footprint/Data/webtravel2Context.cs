@@ -478,7 +478,7 @@ public partial class webtravel2Context : DbContext
         {
             entity.HasKey(e => e.KeywordID).HasName("PK__Keywords__37C135C138B67486");
 
-            entity.Property(e => e.KeywordID).ValueGeneratedNever();
+            //entity.Property(e => e.KeywordID).ValueGeneratedNever();
             entity.Property(e => e.Keyword).HasMaxLength(15);
         });
 

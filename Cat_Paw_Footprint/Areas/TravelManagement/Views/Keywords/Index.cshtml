@@ -1,0 +1,41 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Keywords>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>關鍵字</h1>
+
+<p>
+    <a asp-action="Create">新增資料</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Keyword)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Views)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Keyword)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Views)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.KeywordID">修改</a> |
+                @* <a asp-action="Details" asp-route-id="@item.KeywordID">Details</a> | *@
+                <a asp-action="Delete" asp-route-id="@item.KeywordID">刪除</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

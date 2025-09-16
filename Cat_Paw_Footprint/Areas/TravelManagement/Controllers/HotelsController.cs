@@ -31,7 +31,14 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 .Include(h => h.District)
                 .Include(h => h.Region);
 
-            var viewModel = await hotels.Select(h => new HotelsViewModel
+            ViewBag.Regions = _context.Regions
+                .Select(r => new SelectListItem
+                {
+                    Value = r.RegionID.ToString(),
+                    Text = r.RegionName
+                }).ToList();
+
+			var viewModel = await hotels.Select(h => new HotelsViewModel
             {
                 HotelID = h.HotelID,
                 HotelName = h.HotelName,
@@ -39,15 +46,15 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 HotelLat = h.HotelLat,
                 HotelLng = h.HotelLng,
                 HotelDesc = h.HotelDesc,
+                DistrictID = h.District.DistrictID,
                 DistrictName = h.District.DistrictName,
-                RegionName = h.Region.RegionName,
-                Rating = h.Rating,
+				District = h.District,
+				RegionID = h.Region.RegionID,
+				RegionName = h.Region.RegionName,
+				Rating = h.Rating,
                 Views = h.Views,
                 HotelCode = h.HotelCode,
-                IsActive = h.IsActive,
-                Picture = h.HotelPics.Select(p => p.Picture).ToList(),
-                Keywords = h.HotelKeywords.
-                    Select(k => k.Keyword.KeywordID).ToList()
+                IsActive = h.IsActive
             }).ToListAsync();
             
 			return View(viewModel);
@@ -61,69 +68,136 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
-			var hotels = await _context.Hotels
-		        .Include(h => h.HotelPics)
-		        .Include(h => h.HotelKeywords)
-			    .ThenInclude(hk => hk.Keyword)
-		        .Include(h => h.District)
-		        .Include(h => h.Region)
-		        .FirstOrDefaultAsync(h => h.HotelID == id);
+			var hotel = await _context.Hotels
+				.Include(h => h.HotelPics)
+				.Include(h => h.HotelKeywords)
+				.ThenInclude(hk => hk.Keyword)
+				.Include(h => h.District)
+				.Include(h => h.Region)
+				.FirstOrDefaultAsync(h => h.HotelID == id);
 
-			if (hotels == null)
+			ViewBag.Regions = _context.Regions
+				.Select(r => new SelectListItem
+				{
+					Value = r.RegionID.ToString(),
+					Text = r.RegionName
+				}).ToList();
+
+			if (hotel == null)
             {
                 return NotFound();
             }
 
-            var vm = new HotelsViewModel
-            {
-                HotelID = hotels.HotelID,
-                HotelName = hotels.HotelName,
-                HotelAddr = hotels.HotelAddr,
-                HotelLat = hotels.HotelLat,
-                HotelLng = hotels.HotelLng,
-                HotelDesc = hotels.HotelDesc,
-                DistrictName = hotels.District?.DistrictName,
-                RegionName = hotels.Region?.RegionName,
-                Rating = hotels.Rating,
-                Views = hotels.Views,
-                HotelCode = hotels.HotelCode,
-                IsActive = hotels.IsActive,
-                Picture = hotels.HotelPics.Select(p => p.Picture).ToList(),
-                Keywords = hotels.HotelKeywords.
-                    Select(k => k.Keyword.KeywordID).ToList()
-            };
+			var viewModel = new HotelsViewModel
+			{
+				HotelID = hotel.HotelID,
+				HotelName = hotel.HotelName,
+				HotelAddr = hotel.HotelAddr,
+				HotelLat = hotel.HotelLat,
+				HotelLng = hotel.HotelLng,
+				HotelDesc = hotel.HotelDesc,
+				DistrictID = hotel.DistrictID,
+				DistrictName = hotel.District.DistrictName,
+				District = hotel.District,
+				RegionID = hotel.RegionID,
+				RegionName = hotel.Region.RegionName,
+				Region = hotel.Region,
+				Rating = hotel.Rating,
+				Views = hotel.Views,
+				HotelCode = hotel.HotelCode,
+				IsActive = hotel.IsActive,
+				//Picture = hotel.HotelPics.Select(p => p.Picture).ToList(),
+				KeywordID = hotel.HotelKeywords.Select(k => k.Keyword.KeywordID).ToList(),
+				PictureBase64 = hotel.HotelPics.Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture)).ToList()
+			};
 
-            return View(hotels);
-        }
+			return View(viewModel);
+		}
 
         // GET: TravelManagement/Hotels/Create
         public IActionResult Create()
         {
-            ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictID");
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID");
+            ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName");
+            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
+            ViewBag.KeywordID = new SelectList(_context.Keywords, "KeywordID", "Keyword");
             return View();
         }
 
-        // POST: TravelManagement/Hotels/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("HotelID,HotelName,HotelAddr,HotelLat,HotelLng,HotelDesc,RegionID,DistrictID,Rating,Views,HotelCode,IsActive")] Hotels hotels)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(hotels);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictID", hotels.DistrictID);
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", hotels.RegionID);
-            return View(hotels);
-        }
+		// POST: TravelManagement/Hotels/Create
+		// To protect from overposting attacks, enable the specific properties you want to bind to.
+		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(HotelsViewModel model)
+		{
+			if (ModelState.IsValid)
+			{
+				var hotel = new Hotels
+				{
+					HotelName = model.HotelName,
+					HotelAddr = model.HotelAddr,
+					HotelLat = model.HotelLat,
+					HotelLng = model.HotelLng,
+					HotelDesc = model.HotelDesc,
+					RegionID = model.RegionID,
+					DistrictID = model.DistrictID,
+					Rating = model.Rating,
+					Views = model.Views,
+					HotelCode = model.HotelCode,
+					IsActive = model.IsActive
+				};
+				_context.Hotels.Add(hotel);
+				await _context.SaveChangesAsync();
 
-        // GET: TravelManagement/Hotels/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+				// 圖片處理				
+				if (model.Picture != null && model.Picture.Any())
+				{
+					foreach (var file in model.Picture)
+					{
+						if (file.Length > 0) // 確保有檔案
+						{
+							using var ms = new MemoryStream();
+							await file.CopyToAsync(ms);
+
+							var pic = new HotelPics
+							{
+								HotelID = hotel.HotelID,
+								Picture = ms.ToArray()
+							};
+
+							_context.HotelPics.Add(pic);
+						}
+					}
+
+					await _context.SaveChangesAsync(); // 一次存入所有圖片
+				}
+
+				// 關鍵字處理
+				if (model.KeywordID != null)
+				{
+					foreach (var keywordId in model.KeywordID)
+					{
+						_context.HotelKeywords.Add(new HotelKeywords
+						{
+							HotelID = hotel.HotelID,
+							KeywordID = keywordId
+						});
+					}
+				}
+				await _context.SaveChangesAsync();
+				return RedirectToAction(nameof(Index));
+			}
+
+			// 如果失敗，回傳表單內容
+			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", model.DistrictID);
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", model.RegionID);
+			ViewData["KeywordID"] = new MultiSelectList(_context.Keywords, "KeywordID", "KeywordName", model.KeywordID);
+			return View(model);
+		}
+
+
+		// GET: TravelManagement/Hotels/Edit/5
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {

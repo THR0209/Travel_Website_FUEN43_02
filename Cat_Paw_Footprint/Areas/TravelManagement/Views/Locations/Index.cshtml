@@ -44,10 +44,10 @@
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DistrictName)
+                @Html.DisplayNameFor(model => model.DistrictID)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.RegionName)
+                @Html.DisplayNameFor(model => model.RegionID)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Keywords)
@@ -110,9 +110,9 @@
                 }
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.LocationID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.LocationID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.LocationID">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.LocationID">修改</a> |
+                <a asp-action="Details" asp-route-id="@item.LocationID">詳細資料</a> |
+                <a asp-action="Delete" asp-route-id="@item.LocationID">刪除</a>
             </td>
         </tr>
 }
