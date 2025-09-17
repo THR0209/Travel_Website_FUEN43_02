@@ -1,0 +1,36 @@
+﻿@model Cat_Paw_Footprint.Areas.Order.Controllers.MailComposeVm
+@{
+    ViewData["Title"] = "發送 Email";
+}
+
+@if (TempData["MailOk"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<h3 class="mb-3">發送 Email</h3>
+
+<form asp-action="Send" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="OrderId" />
+
+    <div class="col-12 col-md-6">
+        <label class="form-label" for="To">收件者 Email</label>
+        <input asp-for="To" class="form-control" type="email" required />
+    </div>
+
+    <div class="col-12">
+        <label class="form-label" for="Subject">主旨</label>
+        <input asp-for="Subject" class="form-control" required />
+    </div>
+
+    <div class="col-12">
+        <label class="form-label" for="Body">內容（支援 HTML）</label>
+        <textarea asp-for="Body" class="form-control" rows="10"></textarea>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">送出</button>
+        <a asp-area="Order" asp-controller="CustomerOrders" asp-action="Index" class="btn btn-outline-secondary">返回訂單</a>
+    </div>
+</form>

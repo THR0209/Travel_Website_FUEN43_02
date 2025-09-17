@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Cat_Paw_Footprint.Models;
 using Cat_Paw_Footprint.Data;
+using System.Net;
+using System.Net.Mail;
 
 namespace Cat_Paw_Footprint.Areas.Order.Controllers
 {
@@ -107,7 +109,8 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
             {
                 try
                 {
-                    _context.Update(customerOrders);
+					customerOrders.UpdateTime = DateTime.Now;
+					_context.Update(customerOrders);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -189,7 +192,8 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
                 updateTime = o.UpdateTime,
                 customer = o.Customer != null? (o.Customer.CustomerName ?? o.Customer.CustomerID.ToString()) : "",
                 status = o.OrderStatus != null ? o.OrderStatus.StatusDesc : "",
-                product = o.Product != null ? o.Product.ProductID : 0
+				customerEmail = o.Customer != null ? o.Customer.Email : "",
+				product = o.Product != null ? o.Product.ProductID : 0
             }).ToListAsync();
 
             return Ok(new
@@ -221,10 +225,11 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
                 customerId = o.CustomerID,
                 productId = o.ProductID,
                 orderStatusId = o.OrderStatusID,
-                totalAmount = o.TotalAmount,
+				customerEmail = o.Customer?.Email,
+				totalAmount = o.TotalAmount,
                 createTime = o.CreateTime,
                 updateTime = o.UpdateTime,
             });
         }
-    }
+	}
 }

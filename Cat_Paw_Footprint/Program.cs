@@ -8,6 +8,8 @@ using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Cat_Paw_Footprint.Areas.Order.Models;
+using Cat_Paw_Footprint.Areas.Order.Services;
 
 namespace Cat_Paw_Footprint
 {
@@ -115,6 +117,8 @@ namespace Cat_Paw_Footprint
             app.MapRazorPages();
 
             app.Run();
-        }
+			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+			builder.Services.AddTransient<IEmailSender, EmailSender>();
+		}
     }
 }
