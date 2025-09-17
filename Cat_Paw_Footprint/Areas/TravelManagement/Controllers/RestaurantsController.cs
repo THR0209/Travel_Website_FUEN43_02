@@ -289,6 +289,16 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 restaurants.IsActive = model.IsActive;
                 restaurants.RestaurantCode = model.RestaurantCode;
 
+				// ---- 刪除舊圖片（等按確認才真正刪 DB）----
+				if (model.DeletedPictureIds != null && model.DeletedPictureIds.Any())
+				{
+					var picsToDelete = _context.RestaurantPics
+						.Where(p => model.DeletedPictureIds.Contains(p.RestaurantPicID))
+						.ToList();
+
+					_context.RestaurantPics.RemoveRange(picsToDelete);
+				}
+
 				// ---- 新增新圖片 ----
 				if (model.Picture != null && model.Picture.Any())
 				{

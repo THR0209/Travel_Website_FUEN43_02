@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="RestaurantID" />
             <div class="form-group">
@@ -112,12 +112,14 @@
                                 <img src="@Model.PictureBase64[i]" style="width:120px; height:auto;" />
                                 <button type="button" class="btn btn-sm btn-danger"
                                         style="position:absolute; top:0; right:0;"
-                                        onclick="removeImage(@Model.PictureIds[i])">
+                                        onclick="markImageForDelete(@Model.PictureIds[i])">
                                     X
                                 </button>
                             </div>
                         }
                     }
+                    <!-- ✅ 新的隱藏欄位容器 (動態產生) -->
+                    <div id="DeletedPictureIdsContainer"></div>
                 </div>
             </div>
 
@@ -147,26 +149,6 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         //圖片
-        // 刪除圖片的 JS (不刷新頁面)
-        function removeImage(picId) {
-            if (confirm("確定要刪除此圖片嗎？")) {
-                fetch('/TravelManagement/Restaurants/DeletePicture/' + picId, {
-                    method: 'POST'
-                }).then(response => {
-                    if (response.ok) {
-                        // 移除 DOM 節點，不刷新整頁
-                        let picDiv = document.getElementById("pic-" + picId);
-                        if (picDiv) picDiv.remove();
-
-                        // 顯示提示
-                        alert("圖片已刪除 ✅");
-                    } else {
-                        alert("刪除失敗 ❌");
-                    }
-                });
-            }
-        }
-
         // 存放暫存的檔案 (用來過濾哪些要送到後端)
         let selectedFiles = [];
 
@@ -183,7 +165,6 @@
 
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        // 包一個 div + img + 刪除按鈕
                         const wrapper = document.createElement("div");
                         wrapper.id = "new-pic-" + index;
                         wrapper.style.position = "relative";
@@ -214,7 +195,6 @@
                 }
             });
 
-            // 更新 input 的 FileList (避免刪除後還送到後端)
             updateInputFiles(event.target);
         }
 
@@ -225,7 +205,6 @@
             const elem = document.getElementById("new-pic-" + index);
             if (elem) elem.remove();
 
-            // 更新 input 的 FileList
             const input = document.querySelector("input[type='file'][name='Picture']");
             updateInputFiles(input);
         }
@@ -237,11 +216,35 @@
             input.files = dataTransfer.files;
         }
 
+        // 記錄刪除 ID，只刪 DOM (不直接呼叫後端)
+        let deletedIds = [];
+
+        function markImageForDelete(picId) {
+            if (!deletedIds.includes(picId)) {
+                deletedIds.push(picId);
+            }
+
+            // ✅ 重新建立 hidden inputs
+            let container = document.getElementById("DeletedPictureIdsContainer");
+            container.innerHTML = "";
+            deletedIds.forEach(id => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "DeletedPictureIds";
+                input.value = id;
+                container.appendChild(input);
+            });
+
+            // 移除 DOM
+            let picDiv = document.getElementById("pic-" + picId);
+            if (picDiv) picDiv.remove();
+        }
+
         //關鍵字
-        // ✅ 更新隱藏欄位 (輸出多個 <input type="hidden" name="KeywordID" />)
+        // 關鍵字 (維持原本的多選邏輯)
         function updateHiddenField() {
             const hiddenContainer = document.getElementById("KeywordIDsContainer");
-            hiddenContainer.innerHTML = ""; // 清空舊的
+            hiddenContainer.innerHTML = "";
 
             const ids = Array.from(document.querySelectorAll("#selectedKeywords span"))
                             .map(span => span.getAttribute("data-id"));
@@ -249,7 +252,7 @@
             ids.forEach(id => {
                 const input = document.createElement("input");
                 input.type = "hidden";
-                input.name = "KeywordID";  // ✅ 保持和 ViewModel 屬性名稱一致
+                input.name = "KeywordID";
                 input.value = id;
                 hiddenContainer.appendChild(input);
             });
@@ -262,13 +265,11 @@
 
             if (!selectedId) return;
 
-            // 檢查是否已經存在
             if (document.querySelector(`#selectedKeywords span[data-id="${selectedId}"]`)) {
                 alert("此關鍵字已選取");
                 return;
             }
 
-            // 新增一個 Tag
             const span = document.createElement("span");
             span.className = "badge bg-primary m-1";
             span.setAttribute("data-id", selectedId);
@@ -286,8 +287,7 @@
             updateHiddenField();
         }
 
-         // ✅ 頁面載入時同步一次 (確保 Model 初始資料能正確存回去)
+        // ✅ 頁面載入時同步一次 (確保 Model 初始資料能正確存回去)
         document.addEventListener("DOMContentLoaded", updateHiddenField);
-
     </script>
 }

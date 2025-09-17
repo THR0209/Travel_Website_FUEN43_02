@@ -270,7 +270,21 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+			//model.DeletedPictureIds = null;
+
+			// 把錯誤收集起來
+			var allErrors = ModelState
+			 .Where(ms => ms.Value.Errors.Any())
+			 .Select(ms => new
+			 {
+				 Key = ms.Key,
+				 Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToList()
+			 });
+
+			// 丟進 ViewBag（讓 Razor 頁面也能看到）
+			ViewBag.ModelErrors = allErrors;
+
+			if (ModelState.IsValid)
             {
 				var hotel = await _context.Hotels
 					.Include(h => h.HotelPics)
@@ -291,6 +305,16 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 				hotel.Views = model.Views;
 				hotel.HotelCode = model.HotelCode;
 				hotel.IsActive = model.IsActive;
+
+				//// ---- 刪除舊圖片（等按確認才真正刪 DB）----
+				if (model.DeletedPictureIds != null && model.DeletedPictureIds.Any())
+				{
+					var picsToDelete = _context.HotelPics
+						.Where(p => model.DeletedPictureIds.Contains(p.HotelPicID))
+						.ToList();
+
+					_context.HotelPics.RemoveRange(picsToDelete);
+				}
 
 				// ---- 新增新圖片 ----
 				if (model.Picture != null && model.Picture.Any())

@@ -41,6 +41,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		// 舊圖片的 ID，用來刪除對應圖片
 		public List<int>? PictureIds { get; set; }
 
+		//要刪掉的圖片 ID (在修改中使用)
+		[NotMapped]
+		public List<int> DeletedPictureIds { get; set; } = new();
+
 		// 多個關鍵字
 		[Display(Name = "關鍵字")]
 		public List<int> KeywordID { get; set; } = new();
