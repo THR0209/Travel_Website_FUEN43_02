@@ -5,18 +5,62 @@
     ViewData["Title"] = "訂單一覽";   
 }
 
-<h1 class="mb-3">行程 / 地點</h1>
-<div class="row g-2 align-items-center mb-3">
-    <div class="col-auto">
-        <input id="productSearch" type="search" class="form-control" placeholder="搜尋商品名稱或ID…">
+<h1 class="h4 mb-0">行程 / 地點</h1><br />
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group" role="group" aria-label="view switch">
+		<div class="col-auto">
+            <input id="globalSearch" type="search" class="form-control" placeholder="搜尋：訂單編號・客戶・商品">
+		</div>
+		<div class="col-auto">
+			<button id="btnClearSearch" type="button" class="btn btn-outline-secondary">清除</button>
+		</div>
+		<div class="col-auto text-muted">
+			<small id="searchResultHint"></small>
+		</div>
+	</div> 
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="get" action="@Url.Action("Export", "CustomerOrders", new { area = "Order" })" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-1">開始日期</label>
+                    <input type="date" name="start" class="form-control" />
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-1">結束日期</label>
+                    <input type="date" name="end" class="form-control" />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-success">
+                        下載 Excel
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <small class="text-muted">（不填表示不限制）</small>
+                </div>
+            </form>
+        </div>
     </div>
-    <div class="col-auto">
-        <button id="btnClearSearch" type="button" class="btn btn-outline-secondary">清除</button>
-    </div>
-    <div class="col-auto text-muted">
-        <small id="searchResultHint"></small>
+    <div class="btn-group" role="group" aria-label="view switch">
+        <button id="btnViewCard" type="button" class="btn btn-outline-secondary">圖卡</button>
+        <button id="btnViewTable" type="button" class="btn btn-outline-secondary">表單</button>
     </div>
 </div>
+<style>
+    .th-sort {
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .th-sort[aria-sort="ascending"]::after {
+            content: " ▲";
+            font-size: .8em;
+        }
+
+        .th-sort[aria-sort="descending"]::after {
+            content: " ▼";
+            font-size: .8em;
+        }
+</style>
 @{
     var groups = Model
         .Where(o => o.ProductID != 0)                    
@@ -38,30 +82,89 @@
 }
 else
 {
-    <div class="row g-3">
-        @foreach (var p in groups)
-        {           
-        <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-name="@p.Name" data-id="@p.ProductID">
-            <div class="card h-100 shadow-sm">
-                <img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">@p.Name</h5>
-                        <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
+    <!-- 卡片視圖 -->
+    <div id="viewCards">
+        <div class="row g-3">
+            @foreach (var p in groups)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-productname="@p.Name">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="card-title mb-0">@p.Name</h5>
+                                <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-primary mt-auto btn-open-orders"
+                                    data-productid="@p.ProductID"
+                                    data-productname="@p.Name"									
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#ordersModal">
+                                查看訂單
+                            </button>
+                        </div>
                     </div>
-                    <button type="button"
-                            class="btn btn-primary mt-auto btn-open-orders"
-                            data-productid="@p.ProductID"
-                            data-productname="@p.Name"
-                            data-bs-toggle="modal"
-                            data-bs-target="#ordersModal">
-                        查看訂單
-                    </button>
                 </div>
-            </div>
+            }
         </div>
-        }
     </div>
+
+    <!-- 表格視圖（逐筆訂單；預設隱藏） -->
+<div id="viewTable" class="d-none">
+  <div class="table-responsive">
+    <table id="ordersTable" class="table table-hover align-middle">
+        <thead class="table-light">
+        <tr>
+            <th data-sort="ordercode" class="th-sort">訂單編號</th>
+            <th data-sort="totalamount" class="th-sort text-end">總金額</th>
+            <th data-sort="createtime" class="th-sort">建立時間</th>
+            <th data-sort="updatetime" class="th-sort">更新時間</th>
+            <th data-sort="customer" class="th-sort">客戶</th>
+            <th data-sort="status" class="th-sort">狀態</th>
+            <th data-sort="product" class="th-sort">商品</th>
+            <th style="width:140px">操作</th>
+        </tr>
+      </thead>
+      <tbody id="ordersTableBody">
+        @foreach (var o in Model.OrderByDescending(x => x.CreateTime))
+        {						
+            var orderCode = "ORD-" + (o.CreateTime.HasValue ? o.CreateTime.Value.ToString("yyyyMMdd-HHmmss") : "NA") + "-" + o.OrderID;
+            var statusText = o.OrderStatus?.StatusDesc ?? "";
+            var statusClass = statusText == "已付款" ? "bg-success"
+                             : statusText == "未付款" ? "bg-warning"
+                             : statusText == "已取消" ? "bg-secondary"
+                             : "bg-danger";
+            var custName = o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString();
+            var prodName = o.Product?.ProductName ?? o.ProductID.ToString();
+            var amt = o.TotalAmount ?? 0;
+            var ct = o.CreateTime?.ToString("s") ?? "";  
+            var ut = o.UpdateTime?.ToString("s") ?? "";
+            <tr data-id="@o.OrderID"
+                data-ordercode="@orderCode"
+                data-customer="@custName"
+                data-product="@prodName"
+                data-status="@statusText"
+                data-amount="@amt"
+                data-createtime="@ct"
+                data-updatetime="@ut">
+            <td class="font-monospace">@orderCode</td>
+            <td class="text-end">@($"NT$ {(o.TotalAmount ?? 0):N0}")</td>
+            <td>@o.CreateTime?.ToString("yyyy/MM/dd HH:mm")</td>
+            <td>@o.UpdateTime?.ToString("yyyy/MM/dd HH:mm")</td>
+            <td>@(o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString())</td>
+            <td><span class="badge @statusClass">@statusText</span></td>
+            <td>@(o.Product?.ProductName ?? o.ProductID.ToString())</td>
+            <td class="d-flex gap-2">
+								<button type="button" class="btn btn-sm btn-primary btn-action" data-action="edit" data-id="@o.OrderID">編輯</button>
+                <button type="button" class="btn btn-sm btn-success btn-mail" data-id="@o.OrderID" data-email="@(o.CustomerProfile?.Email ?? "")">寄信</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
 }
 <div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -204,6 +307,75 @@ else
         const mailAjaxUrl = '@Url.Action("SendAjax", "Mail", new { area = "Order" })';
 
 
+
+        function getStatusClass(status) {
+          switch (status) {
+            case "已付款": return "bg-success";   
+            case "未付款": return "bg-warning";
+            case "已取消":   return "bg-secondary";
+            case "錯誤":   return "bg-danger";
+            default:       return "bg-secondary"; 
+          }
+        }
+
+        function fmt(v) {
+          if (!v) return '';
+          const d = new Date(v);
+          if (isNaN(d.getTime())) return v;
+          return d.toLocaleString('zh-TW');
+        }
+
+        function toLocalInput(dt) {
+          if (!dt) return "";
+          const d = new Date(dt);
+          if (isNaN(d.getTime())) return "";
+          const pad = n => n.toString().padStart(2, '0');
+          const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          return s;
+        }
+
+        function toLocal(dt) {
+          if (!dt) return "";
+          const d = new Date(dt);
+          return isNaN(d.getTime()) ? dt : d.toLocaleString('zh-TW');
+        }
+        //圖卡編輯
+        tbody?.addEventListener('click', async (e) => {
+          const btn = e.target.closest('.btn-edit');
+          if (!btn) return;
+
+          const id = btn.dataset.id;
+          const res = await fetch(`${getApiBase}/${id}`);
+          if (!res.ok) { alert('讀取訂單失敗'); return; }
+          const o = await res.json();
+
+          document.getElementById('e_OrderID').value       = o.id;
+          document.getElementById('e_CustomerID').value    = o.customerId ?? '';
+          document.getElementById('e_ProductID').value     = o.productId ?? '';
+          document.getElementById('e_OrderStatusID').value = o.orderStatusId ?? 1;
+          document.getElementById('e_TotalAmount').value   = o.totalAmount ?? 0;
+          document.getElementById('e_CreateTime').value    = toLocalInput(o.createTime);
+          document.getElementById('e_UpdateTime').value    = toLocalInput(o.updateTime);
+
+          const form = document.getElementById('editOrderForm');
+          form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
+
+          const ordersEl = document.getElementById('ordersModal');
+          const editEl   = document.getElementById('editOrderModal');
+
+          const ordersMD = ordersEl ? bootstrap.Modal.getOrCreateInstance(ordersEl) : null;
+          const editMD   = editEl   ? bootstrap.Modal.getOrCreateInstance(editEl)   : null;
+
+          if (!editMD) { alert('找不到編輯視窗'); return; }
+
+          ordersMD?.hide();
+
+          requestAnimationFrame(() => {
+            cleanupBackdrops();
+            editMD.show();
+          });
+        });
+        
         document.querySelectorAll('.btn-open-orders').forEach(btn => {
           btn.addEventListener('click', async () => {
             const productId = btn.dataset.productid;
@@ -242,82 +414,7 @@ else
             mUpdated.textContent = `更新時間：${new Date().toLocaleString('zh-TW')}`;
           });
         });
-        function getStatusClass(status) {
-          switch (status) {
-            case "已付款": return "bg-success";   
-            case "未付款": return "bg-warning";
-            case "已取消":   return "bg-secondary";
-            case "錯誤":   return "bg-danger";
-            default:       return "bg-secondary"; 
-          }
-        }
-        function fmt(v) {
-          if (!v) return '';
-          const d = new Date(v);
-          if (isNaN(d.getTime())) return v;
-          return d.toLocaleString('zh-TW');
-        }
-        function toLocalInput(dt) {
-          if (!dt) return "";
-          const d = new Date(dt);
-          if (isNaN(d.getTime())) return "";
-          const pad = n => n.toString().padStart(2, '0');
-          const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-          return s;
-        }
-         function toLocal(dt) {
-          if (!dt) return "";
-          const d = new Date(dt);
-          return isNaN(d.getTime()) ? dt : d.toLocaleString('zh-TW');
-        }
-
-        function badgeClass(statusText) {
-          switch (statusText) {
-            case "已確認": return "bg-success";
-            case "處理中": return "bg-warning text-dark";
-            case "取消":   return "bg-danger";
-            case "已付款": return "bg-success";
-            case "未付款": return "bg-secondary";
-            case "已退款": return "bg-info text-dark";
-            default:       return "bg-secondary";
-          }
-        }
-        tbody?.addEventListener('click', async (e) => {
-          const btn = e.target.closest('.btn-edit');
-          if (!btn) return;
-
-          const id = btn.dataset.id;
-          const res = await fetch(`${getApiBase}/${id}`);
-          if (!res.ok) { alert('讀取訂單失敗'); return; }
-          const o = await res.json();
-
-          document.getElementById('e_OrderID').value       = o.id;
-          document.getElementById('e_CustomerID').value    = o.customerId ?? '';
-          document.getElementById('e_ProductID').value     = o.productId ?? '';
-          document.getElementById('e_OrderStatusID').value = o.orderStatusId ?? 1;
-          document.getElementById('e_TotalAmount').value   = o.totalAmount ?? 0;
-          document.getElementById('e_CreateTime').value    = toLocalInput(o.createTime);
-          document.getElementById('e_UpdateTime').value    = toLocalInput(o.updateTime);
-
-          const form = document.getElementById('editOrderForm');
-          form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
-
-          const ordersEl = document.getElementById('ordersModal');
-          const editEl   = document.getElementById('editOrderModal');
-
-          const ordersMD = ordersEl ? bootstrap.Modal.getOrCreateInstance(ordersEl) : null;
-          const editMD   = editEl   ? bootstrap.Modal.getOrCreateInstance(editEl)   : null;
-
-          if (!editMD) { alert('找不到編輯視窗'); return; }
-
-          ordersMD?.hide();
-
-          requestAnimationFrame(() => {
-            cleanupBackdrops();
-            editMD.show();
-          });
-        });
-
+        //圖卡寄信
         tbody?.addEventListener('click', async (e) => {
           const mailBtn = e.target.closest('.btn-mail');
           if (!mailBtn) return;
@@ -332,7 +429,7 @@ else
           // 假如 ByProduct/Get 沒回傳 email，請在 ByProduct 的 Select/ Get 的 Ok(...) 補上 customerEmail 欄位
           // 這裡用備援：若沒有 email，就留空讓你手動輸入
           const to   = o.customerEmail ?? '';
-          const code = o.orderCode ?? `#${o.id}`;
+          const code = o.orderCode ?? `#${o.orderCode}`;
 
           // 預設主旨 / 內容（你可自行改模板）
           const subject = `【訂單通知】${code}`;
@@ -378,54 +475,7 @@ else
             ordersMD?.show();
           }, { once:true });
         });
-                function cleanupBackdrops(){
-          document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-          document.body.classList.remove('modal-open');
-          document.body.style.removeProperty('padding-right');
-        } 
         
-        document.addEventListener('DOMContentLoaded', () => {
-          const box   = document.getElementById('productSearch');
-          const clear = document.getElementById('btnClearSearch');
-          const hint  = document.getElementById('searchResultHint');
-
-          if (!box) {
-            return;
-          }
-
-          const cards = () => Array.from(document.querySelectorAll('.product-card'));
-
-          function norm(s){ return (s ?? '').toString().trim().toLowerCase(); }
-
-          function applyFilter(){
-            const q = norm(box.value);
-            let visible = 0;
-
-            cards().forEach(card => {
-              const name = norm(card.dataset.name || card.querySelector('.card-title')?.textContent);
-              const pid  = norm(card.dataset.id   || card.querySelector('.btn-open-orders')?.dataset.productid);
-              const hit  = !q || name.includes(q) || pid.includes(q);
-              card.style.display = hit ? '' : 'none';
-              if (hit) visible++;
-            });
-
-            if (hint){
-              hint.textContent = q ? `符合「${box.value}」的商品：${visible} 項` : '';
-            }
-          }
-
-          box.addEventListener('input', applyFilter);
-          clear?.addEventListener('click', () => { box.value = ''; applyFilter(); box.focus(); });
-
-          box.addEventListener('keydown', (e) => {
-            if (e.key !== 'Enter') return;
-            const vis = cards().filter(c => c.style.display !== 'none');
-            vis.length === 1 && vis[0].querySelector('.btn-open-orders')?.click();
-          });
-
-          applyFilter();
-        });
-
         document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
           ev.preventDefault();
           const form = ev.currentTarget;
@@ -454,6 +504,223 @@ else
             alert('寄送失敗（例外）');
           }
         });
+        //表單編輯
+        document.getElementById('ordersTableBody')?.addEventListener('click', async (e) => {
+          const btn = e.target.closest('.btn-action[data-action="edit"]');
+          if (!btn) return;
 
+          const id = btn.dataset.id;
+          const res = await fetch(`${getApiBase}/${id}`);
+          if (!res.ok) { alert('讀取訂單失敗'); return; }
+          const o = await res.json();
+
+          document.getElementById('e_OrderID').value       = o.id;
+          document.getElementById('e_CustomerID').value    = o.customerId ?? '';
+          document.getElementById('e_ProductID').value     = o.productId ?? '';
+          document.getElementById('e_OrderStatusID').value = o.orderStatusId ?? 1;
+          document.getElementById('e_TotalAmount').value   = o.totalAmount ?? 0;
+          document.getElementById('e_CreateTime').value    = toLocalInput(o.createTime);
+          document.getElementById('e_UpdateTime').value    = toLocalInput(o.updateTime);
+
+          const form = document.getElementById('editOrderForm');
+          form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
+
+          const editMD = bootstrap.Modal.getOrCreateInstance(document.getElementById('editOrderModal'));
+          editMD.show();
+        });
+        //表單寄信
+        document.getElementById('ordersTableBody')?.addEventListener('click', async (e) => {
+          const btn = e.target.closest('.btn-mail');
+          if (!btn) return;
+
+          const id = btn.dataset.id;
+          const email = btn.dataset.email || '';
+          const res = await fetch(`${getApiBase}/${id}`);
+          if (!res.ok) { alert('讀取訂單失敗'); return; }
+          const o = await res.json();
+
+          const to   = email || o.customerEmail || '';
+          const code = o.orderCode ?? `#${o.orderCode}`;
+          document.getElementById('mail_to').value      = to;
+          document.getElementById('mail_subject').value = `【訂單通知】${code}`;
+          document.getElementById('mail_body').value    = `親愛的客戶您好，
+
+        這是關於您的訂單 ${code} 的通知。
+        目前狀態：${o.status ?? '(未提供)'}
+        總金額：NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}
+        建立時間：${o.createTime ? new Date(o.createTime).toLocaleString('zh-TW') : ''}
+
+        如有任何問題，歡迎回信與我們聯繫。
+        貓爪足跡 敬上`;
+          document.getElementById('mail_hint').textContent = `訂單：${code}`;
+
+          const mailMD = bootstrap.Modal.getOrCreateInstance(document.getElementById('mailModal'));
+          mailMD.show();
+        });
+
+        function cleanupBackdrops(){
+          document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.removeProperty('padding-right');
+        } 
+        
+        //搜尋功能
+       
+        (function(){
+            const box   = document.getElementById('globalSearch');
+            const clear = document.getElementById('btnClearGlobalSearch');
+            const hint  = document.getElementById('globalSearchHint');
+
+            const viewCards = document.getElementById('viewCards');   // 卡片容器
+            const viewTable = document.getElementById('viewTable');   // 表格容器
+            const tbody     = document.getElementById('ordersTableBody');
+
+            if (!box) return;
+
+            const norm = s => (s ?? '').toString().trim().toLowerCase();
+            const cards = () => Array.from(document.querySelectorAll('.product-card'));
+            const rows  = () => Array.from(tbody?.querySelectorAll('tr') || []);
+
+            function isCardsMode(){
+            // 視你的切換實作而定：這裡以 .d-none 判斷
+            return viewCards && !viewCards.classList.contains('d-none');
+            }
+
+            function applyForCards(q){
+            let visible = 0;
+            cards().forEach(card=>{
+                const productName = norm(card.dataset.productname || card.querySelector('.card-title')?.textContent);
+                const hit = !q || productName.includes(q);
+                card.style.display = hit ? '' : 'none';
+                if (hit) visible++;
+            });
+            setHint(q, `符合「${box.value}」的商品：${visible} 項`);
+            }
+
+            function applyForTable(q){
+            let visible = 0;
+            rows().forEach(tr=>{
+                const code = norm(tr.dataset.ordercode);
+                const cust = norm(tr.dataset.customer);
+                const prod = norm(tr.dataset.product);
+                const hit = !q || code.includes(q) || cust.includes(q) || prod.includes(q);
+                tr.style.display = hit ? '' : 'none';
+                if (hit) visible++;
+            });
+            setHint(q, `符合「${box.value}」的訂單：${visible} 筆`);
+            }
+
+            function setHint(q, text){
+            if (!hint) return;
+            hint.textContent = q ? text : '';
+            }
+
+            function applyGlobal(){
+            const q = norm(box.value);
+            if (isCardsMode()) applyForCards(q);
+            else               applyForTable(q);
+            }
+
+            // 綁事件
+            box.addEventListener('input', applyGlobal);
+            clear?.addEventListener('click', ()=>{
+            box.value = '';
+            applyGlobal();
+            box.focus();
+            });
+
+            // 如果你有視圖切換按鈕（例如 #btnViewCard / #btnViewTable），切換時要重跑一次
+            document.getElementById('btnViewCard') ?.addEventListener('click', applyGlobal);
+            document.getElementById('btnViewTable')?.addEventListener('click', applyGlobal);
+
+            // 初次套用
+            applyGlobal();
+        })();
+
+
+        
+        (function setupViewSwitch(){
+          const btnCard  = document.getElementById('btnViewCard');
+          const btnTable = document.getElementById('btnViewTable');
+          const viewCards = document.getElementById('viewCards');
+          const viewTable = document.getElementById('viewTable');
+
+          // 從 localStorage 還原上次選擇
+          const key = 'ordersProductView';
+          const saved = localStorage.getItem(key) || 'card';
+          applyView(saved);
+
+          btnCard?.addEventListener('click', ()=> applyView('card'));
+          btnTable?.addEventListener('click', ()=> applyView('table'));
+
+          function applyView(v){
+            if(v==='table'){
+              viewCards?.classList.add('d-none');
+              viewTable?.classList.remove('d-none');
+              btnTable?.classList.add('active');
+              btnCard?.classList.remove('active');
+              localStorage.setItem(key,'table');
+            }else{
+              viewTable?.classList.add('d-none');
+              viewCards?.classList.remove('d-none');
+              btnCard?.classList.add('active');
+              btnTable?.classList.remove('active');
+              localStorage.setItem(key,'card');
+            }
+          }
+        })();
+                (function(){
+          const table = document.getElementById('ordersTable');
+          const tbody = document.getElementById('ordersTableBody');
+          const ths   = table?.querySelectorAll('thead th[data-sort]');
+          if (!table || !tbody || !ths?.length) return;
+
+          const collator = new Intl.Collator('zh-Hant', { numeric: true, sensitivity: 'base' });
+          let state = { key: null, dir: 1 }; // 1: asc, -1: desc
+
+          const getters = {
+            ordercode  : tr => tr.dataset.ordercode || '',
+            totalamount: tr => Number(tr.dataset.amount || '0'),
+            createtime : tr => Date.parse(tr.dataset.createtime || '') || 0,
+            updatetime : tr => Date.parse(tr.dataset.updatetime || '') || 0,
+            customer   : tr => tr.dataset.customer || '',
+            status     : tr => tr.dataset.status || '',
+            product    : tr => tr.dataset.product || ''
+          };
+
+          function sortBy(key){
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const get  = getters[key] || (tr => tr.textContent || '');
+            const dir  = (state.key === key) ? -state.dir : 1; // 同欄再點切換方向
+            state = { key, dir };
+
+            rows.sort((a,b)=>{
+              const va = get(a), vb = get(b);
+              if (typeof va === 'number' && typeof vb === 'number') {
+                return (va - vb) * dir;
+              }
+              // 文字/日期統一字串比較（日期已轉數字在上面處理）
+              return collator.compare(String(va), String(vb)) * dir;
+            });
+
+            // 重新插回 DOM
+            const frag = document.createDocumentFragment();
+            rows.forEach(r => frag.appendChild(r));
+            tbody.appendChild(frag);
+
+            // 更新表頭指示
+            ths.forEach(th => th.removeAttribute('aria-sort'));
+            const active = Array.from(ths).find(th => th.dataset.sort === key);
+            if (active) active.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
+          }
+
+          // 綁事件（點擊與鍵盤）
+          ths.forEach(th=>{
+            th.tabIndex = 0;
+            th.addEventListener('click',    () => sortBy(th.dataset.sort));
+            th.addEventListener('keydown',  e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sortBy(th.dataset.sort); }});
+          });
+        })();
 </script>
+
 }

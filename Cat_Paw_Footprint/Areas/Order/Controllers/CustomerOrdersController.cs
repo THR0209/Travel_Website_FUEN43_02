@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Models;
-using Cat_Paw_Footprint.Data;
-using System.Net;
-using System.Net.Mail;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 
 namespace Cat_Paw_Footprint.Areas.Order.Controllers
 {
@@ -25,147 +25,8 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
         // GET: Order/CustomerOrders
         public async Task<IActionResult> Index()
         {
-            var webtravel2Context = _context.CustomerOrders.Include(c => c.Customer).Include(c => c.OrderStatus).Include(c => c.Product);
+            var webtravel2Context = _context.CustomerOrders.Include(c => c.CustomerProfile).Include(c => c.CustomerProfile).Include(c => c.OrderStatus).Include(c => c.Product);
             return View(await webtravel2Context.ToListAsync());
-        }
-
-        // GET: Order/CustomerOrders/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customerOrders = await _context.CustomerOrders
-                .Include(c => c.Customer)
-                .Include(c => c.OrderStatus)
-                .Include(c => c.Product)
-                .FirstOrDefaultAsync(m => m.OrderID == id);
-            if (customerOrders == null)
-            {
-                return NotFound();
-            }
-
-            return View(customerOrders);
-        }
-
-        // GET: Order/CustomerOrders/Create
-        public IActionResult Create()
-        {
-            ViewData["CustomerID"] = new SelectList(_context.CustomerProfile, "CustomerID", "CustomerID");
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusID");
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID");
-            return View();
-        }
-
-        // POST: Order/CustomerOrders/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CustomerID,ProductID,OrderID,OrderStatusID,TotalAmount,CreateTime,UpdateTime")] CustomerOrders customerOrders)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(customerOrders);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CustomerID"] = new SelectList(_context.CustomerProfile, "CustomerID", "CustomerID", customerOrders.CustomerID);
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusID", customerOrders.OrderStatusID);
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", customerOrders.ProductID);
-            return View(customerOrders);
-        }
-
-        // GET: Order/CustomerOrders/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customerOrders = await _context.CustomerOrders.FindAsync(id);
-            if (customerOrders == null)
-            {
-                return NotFound();
-            }
-            ViewData["CustomerID"] = new SelectList(_context.CustomerProfile, "CustomerID", "CustomerID", customerOrders.CustomerID);
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusID", customerOrders.OrderStatusID);
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", customerOrders.ProductID);
-            return View(customerOrders);
-        }
-
-        // POST: Order/CustomerOrders/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CustomerID,ProductID,OrderID,OrderStatusID,TotalAmount,CreateTime,UpdateTime")] CustomerOrders customerOrders)
-        {
-            if (id != customerOrders.OrderID)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-					customerOrders.UpdateTime = DateTime.Now;
-					_context.Update(customerOrders);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CustomerOrdersExists(customerOrders.OrderID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["CustomerID"] = new SelectList(_context.CustomerProfile, "CustomerID", "CustomerID", customerOrders.CustomerID);
-            ViewData["OrderStatusID"] = new SelectList(_context.OrderStatus, "OrderStatusID", "OrderStatusID", customerOrders.OrderStatusID);
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", customerOrders.ProductID);
-            return View(customerOrders);
-        }
-
-        // GET: Order/CustomerOrders/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customerOrders = await _context.CustomerOrders
-                .Include(c => c.Customer)
-                .Include(c => c.OrderStatus)
-                .Include(c => c.Product)
-                .FirstOrDefaultAsync(m => m.OrderID == id);
-            if (customerOrders == null)
-            {
-                return NotFound();
-            }
-
-            return View(customerOrders);
-        }
-
-        // POST: Order/CustomerOrders/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var customerOrders = await _context.CustomerOrders.FindAsync(id);
-            if (customerOrders != null)
-            {
-                _context.CustomerOrders.Remove(customerOrders);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool CustomerOrdersExists(int id)
@@ -178,7 +39,7 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
         {
             var q = _context.CustomerOrders
                             .AsNoTracking()
-                            .Include(o => o.Customer)
+                            .Include(o => o.CustomerProfile)
                             .Include(o => o.OrderStatus)
                             .Include(o => o.Product)
                             .Where(o => o.ProductID == productId)
@@ -190,9 +51,9 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
                 totalAmount = o.TotalAmount,
                 createTime = o.CreateTime,
                 updateTime = o.UpdateTime,
-                customer = o.Customer != null? (o.Customer.CustomerName ?? o.Customer.CustomerID.ToString()) : "",
+                customer = o.CustomerProfile != null? (o.CustomerProfile.CustomerName ?? o.CustomerProfile.CustomerID.ToString()) : "",
                 status = o.OrderStatus != null ? o.OrderStatus.StatusDesc : "",
-				customerEmail = o.Customer != null ? o.Customer.Email : "",
+				customerEmail = o.CustomerProfile != null ? o.CustomerProfile.Email : "",
 				product = o.Product != null ? o.Product.ProductID : 0
             }).ToListAsync();
 
@@ -212,7 +73,7 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
         {
             var o = await _context.CustomerOrders
                 .AsNoTracking()
-                .Include(x => x.Customer)
+                .Include(x => x.CustomerProfile)
                 .Include(x => x.OrderStatus)
                 .Include(x => x.Product)
                 .FirstOrDefaultAsync(x => x.OrderID == id);
@@ -222,14 +83,64 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
             return Ok(new
             {
                 id = o.OrderID,
+                orderCode = "ORD-" + o.CreateTime.Value.ToString("yyyyMMdd" + "-" + $"{o.OrderID}"),
+                status = o.OrderStatus != null ? o.OrderStatus.StatusDesc : "",
                 customerId = o.CustomerID,
                 productId = o.ProductID,
                 orderStatusId = o.OrderStatusID,
-				customerEmail = o.Customer?.Email,
+				customerEmail = o.CustomerProfile?.Email,
 				totalAmount = o.TotalAmount,
                 createTime = o.CreateTime,
                 updateTime = o.UpdateTime,
             });
         }
-	}
+
+        [HttpGet("Order/CustomerOrders/Export")]
+        public async Task<IActionResult> Export(DateTime? start, DateTime? end)
+        {
+
+            // 基礎查詢（連同關聯）
+            var q = _context.CustomerOrders
+                .AsNoTracking()
+                .Include(x => x.CustomerProfile)
+                .Include(x => x.Product)
+                .Include(x => x.OrderStatus)
+                .AsQueryable();
+
+            // 時間範圍篩選（使用 CreateTime）
+            if (start.HasValue) q = q.Where(o => o.CreateTime >= start);
+            if (end.HasValue) q = q.Where(o => o.CreateTime <= end);
+
+
+            var data = await q
+                .OrderBy(o => o.CreateTime)
+                .Select(o => new
+                {
+                    訂單編號 = "ORD-" + (o.CreateTime.HasValue ? o.CreateTime.Value.ToString("yyyyMMdd") : "NA") + "-" + o.OrderID,
+                    建立時間 = o.CreateTime,
+                    更新時間 = o.UpdateTime,
+                    客戶 = o.CustomerProfile != null ? o.CustomerProfile.CustomerName : o.CustomerID.ToString(),
+                    客戶Email = o.CustomerProfile != null ? o.CustomerProfile.Email : "",
+                    商品 = o.Product != null ? o.Product.ProductName : o.ProductID.ToString(),
+                    狀態 = o.OrderStatus != null ? o.OrderStatus.StatusDesc : "",
+                    總金額 = o.TotalAmount ?? 0
+                })
+                .ToListAsync();
+
+            using var wb = new XLWorkbook();
+            var ws = wb.Worksheets.Add("Orders");
+            // 一行丟整個匿名型別清單會自動生表頭
+            ws.Cell(1, 1).InsertTable(data, "Orders", true);
+            ws.Columns().AdjustToContents();
+
+            using var ms = new MemoryStream();
+            wb.SaveAs(ms);
+            ms.Position = 0;
+
+            string fname = $"orders_{(start.HasValue ? start.Value.ToString("yyyyMMdd") : "all")}_{(end.HasValue ? end.Value.ToString("yyyyMMdd") : "all")}.xlsx";
+            return File(ms.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                fname);
+        }
+    }
 }

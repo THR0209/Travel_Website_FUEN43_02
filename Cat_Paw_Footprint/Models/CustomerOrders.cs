@@ -20,7 +20,7 @@ public partial class CustomerOrders
 
     public DateTime? UpdateTime { get; set; }
 
-    public virtual CustomerProfile? Customer { get; set; }
+    public virtual CustomerProfile? CustomerProfile { get; set; }
 
     public virtual ICollection<CustomerOrderFeedback> CustomerOrderFeedback { get; set; } = new List<CustomerOrderFeedback>();
 

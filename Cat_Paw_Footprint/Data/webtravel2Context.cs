@@ -225,7 +225,7 @@ public partial class webtravel2Context : DbContext
         {
             entity.HasKey(e => e.OrderID).HasName("PK__Customer__C3905BAFC1E5D4B0");
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.CustomerOrders)
+            entity.HasOne(d => d.CustomerProfile).WithMany(p => p.CustomerOrders)
                 .HasPrincipalKey(p => p.CustomerID)
                 .HasForeignKey(d => d.CustomerID)
                 .HasConstraintName("FK__CustomerO__Custo__1CBC4616");
