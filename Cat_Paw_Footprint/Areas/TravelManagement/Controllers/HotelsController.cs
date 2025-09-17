@@ -270,20 +270,6 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
-			//model.DeletedPictureIds = null;
-
-			// 把錯誤收集起來
-			var allErrors = ModelState
-			 .Where(ms => ms.Value.Errors.Any())
-			 .Select(ms => new
-			 {
-				 Key = ms.Key,
-				 Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToList()
-			 });
-
-			// 丟進 ViewBag（讓 Razor 頁面也能看到）
-			ViewBag.ModelErrors = allErrors;
-
 			if (ModelState.IsValid)
             {
 				var hotel = await _context.Hotels

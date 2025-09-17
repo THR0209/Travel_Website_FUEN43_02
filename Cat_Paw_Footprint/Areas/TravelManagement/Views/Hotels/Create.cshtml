@@ -4,98 +4,111 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>新增住宿</h1>
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">新增住宿</h2>
+        <h6 class="text-muted mb-4">住宿詳細資訊</h6>
 
-<h4>住宿詳細資訊</h4>
-<hr/>
-<div class="row">
-    <div class="col-md-4">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="HotelName" class="control-label"></label>
-                <input asp-for="HotelName" class="form-control" />
-                <span asp-validation-for="HotelName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HotelAddr" class="control-label"></label>
-                <input asp-for="HotelAddr" class="form-control" />
-                <span asp-validation-for="HotelAddr" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HotelLat" class="control-label"></label>
-                <input asp-for="HotelLat" class="form-control" />
-                <span asp-validation-for="HotelLat" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HotelLng" class="control-label"></label>
-                <input asp-for="HotelLng" class="form-control" />
-                <span asp-validation-for="HotelLng" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HotelDesc" class="control-label"></label>
-                <input asp-for="HotelDesc" class="form-control" />
-                <span asp-validation-for="HotelDesc" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RegionID" class="control-label"></label>
-                <select asp-for="RegionID" class="form-control" asp-items="ViewBag.RegionID"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="DistrictID" class="control-label"></label>
-                <select asp-for="DistrictID" class="form-control" asp-items="ViewBag.DistrictID"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="IsActive" class="control-label"></label>
-                <select asp-for="IsActive" class="form-control">
-                    <option value="true" selected="@(Model != null && Model.IsActive == true ? "selected" : null)">啟用</option>
-                    <option value="false" selected="@(Model != null && Model.IsActive == false ? "selected" : null)">停用</option>
-                </select>
-                <span asp-validation-for="IsActive" class="text-danger"></span>
-            </div>
-            <!-- ✅ 多選關鍵字 -->            
-            <div class="form-group">
-                <label asp-for="KeywordID" class="control-label">選擇關鍵字</label>
 
-                <!-- 一般下拉選單 -->
-                <select id="keywordSelect" class="form-control" asp-items="ViewBag.KeywordID">
-                    <option value="">請選擇</option>
-                </select>
+            <div class="row g-4">
+                <!-- 左半部 -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="HotelName" class="form-label"></label>
+                        <input asp-for="HotelName" class="form-control" />
+                        <span asp-validation-for="HotelName" class="text-danger"></span>
+                    </div>
 
-                <!-- 選擇結果顯示區 -->
-                <ul id="selectedKeywords" class="list-group mt-2"></ul>
+                    <div class="mb-3">
+                        <label asp-for="HotelAddr" class="form-label"></label>
+                        <input asp-for="HotelAddr" class="form-control" />
+                        <span asp-validation-for="HotelAddr" class="text-danger"></span>
+                    </div>
 
-                <!-- 隱藏欄位容器 (動態生成) -->
-                <div id="keywordHiddenInputs"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HotelLat" class="form-label"></label>
+                            <input asp-for="HotelLat" class="form-control" />
+                            <span asp-validation-for="HotelLat" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HotelLng" class="form-label"></label>
+                            <input asp-for="HotelLng" class="form-control" />
+                            <span asp-validation-for="HotelLng" class="text-danger"></span>
+                        </div>
+                    </div>
 
-                <span asp-validation-for="KeywordID" class="text-danger"></span>
-            </div>
-            <!-- ✅ 上傳圖片 + 預覽 -->
-            <div class="form-group">
-                <label asp-for="Picture" class="control-label"></label>
-                <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
-                <span asp-validation-for="Picture" class="text-danger"></span>
+                    <!-- ✅ 介紹放左下 -->
+                    <div class="mb-3">
+                        <label asp-for="HotelDesc" class="form-label"></label>
+                        <textarea asp-for="HotelDesc" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="HotelDesc" class="text-danger"></span>
+                    </div>
+                </div>
 
-                <!-- ✅ 預覽區 -->
-                <div id="previewArea" class="mt-2 d-flex flex-wrap"></div>
-            </div>           
-            <div class="form-group">
-                <input type="submit" value="確認" class="btn btn-primary" />
+                <!-- 右半部 -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="RegionID" class="form-label"></label>
+                        <select asp-for="RegionID" class="form-select" asp-items="ViewBag.RegionID"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="DistrictID" class="form-label"></label>
+                        <select asp-for="DistrictID" class="form-select" asp-items="ViewBag.DistrictID"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="IsActive" class="form-label"></label>
+                        <select asp-for="IsActive" class="form-select">
+                            <option value="true" selected="@(Model != null && Model.IsActive == true ? "selected" : null)">啟用</option>
+                            <option value="false" selected="@(Model != null && Model.IsActive == false ? "selected" : null)">停用</option>
+                        </select>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+
+                    <!-- ✅ 關鍵字放右上 -->
+                    <div class="mb-3">
+                        <label asp-for="KeywordID" class="form-label">選擇關鍵字</label>
+                        <!-- 一般下拉選單 -->
+                        <select id="keywordSelect" class="form-select" asp-items="ViewBag.KeywordID">
+                            <option value="">請選擇</option>
+                        </select>
+                        <!-- 選擇結果顯示區 -->
+                        <ul id="selectedKeywords" class="list-group mt-2"></ul>
+                        <!-- 隱藏欄位容器 (動態生成) -->
+                        <div id="keywordHiddenInputs"></div>
+                        <span asp-validation-for="KeywordID" class="text-danger"></span>
+                    </div>
+
+                    <!-- ✅ 圖片上傳放右下 -->
+                    <div class="mb-3">
+                        <label asp-for="Picture" class="form-label"></label>
+                        <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
+                        <span asp-validation-for="Picture" class="text-danger"></span>
+                        <!-- ✅ 預覽區 -->
+                        <div id="previewArea" class="mt-2 d-flex flex-wrap"></div>
+                    </div>
+                </div>
+
+                <!-- 按鈕區 -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">確認</button>
+                    <a asp-action="Index" class="btn btn-secondary">返回</a>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">返回</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
     <script>
         let selected = [];
-        
+
         // 下拉選單選擇事件
         $("#keywordSelect").change(function () {
             let val = $(this).val();
@@ -122,53 +135,38 @@
         // 點 X 移除
         $(document).on("click", ".remove-keyword", function () {
             let id = $(this).data("id").toString();
-
-            // 從陣列移除
             selected = selected.filter(x => x !== id);
-
-            // 移除清單 & 對應隱藏欄位
             $(this).closest("li").remove();
             $(`#hidden-${id}`).remove();
         });
 
-         
         // 限制檔案大小 (2MB)
         const MAX_SIZE = 2 * 1024 * 1024;
 
         function previewImages(event) {
             let files = event.target.files;
             let previewArea = document.getElementById("previewArea");
-
-            // 清空舊的預覽
             previewArea.innerHTML = "";
-
-            // 用來追蹤有效檔案
             let validFiles = [];
 
-            Array.from(files).forEach((file, index) => {
-                // 檢查檔案型別
+            Array.from(files).forEach((file) => {
                 if (!file.type.startsWith("image/")) {
                     alert(`${file.name} 不是圖片檔案，已跳過`);
                     return;
                 }
-
-                // 檢查檔案大小
                 if (file.size > MAX_SIZE) {
                     alert(`${file.name} 超過 2MB，已跳過`);
                     return;
                 }
 
                 validFiles.push(file);
-
                 let reader = new FileReader();
                 reader.onload = function(e) {
-                    // 圖片容器
                     let container = document.createElement("div");
                     container.style.position = "relative";
                     container.style.display = "inline-block";
                     container.style.margin = "5px";
 
-                    // 圖片
                     let img = document.createElement("img");
                     img.src = e.target.result;
                     img.style.width = "150px";
@@ -177,7 +175,6 @@
                     img.style.border = "1px solid #ccc";
                     img.style.borderRadius = "5px";
 
-                    // 刪除按鈕
                     let btn = document.createElement("button");
                     btn.innerText = "X";
                     btn.type = "button";
@@ -204,7 +201,6 @@
                 reader.readAsDataURL(file);
             });
 
-            // 更新 input files
             updateInputFiles(event.target, validFiles);
         }
 
@@ -214,8 +210,5 @@
             files.forEach(f => dataTransfer.items.add(f));
             input.files = dataTransfer.files;
         }
-
-
-        
-    </script>    
+    </script>
 }

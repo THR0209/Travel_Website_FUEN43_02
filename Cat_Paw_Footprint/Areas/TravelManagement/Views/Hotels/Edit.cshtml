@@ -4,23 +4,6 @@
     ViewData["Title"] = "Edit";
 }
 
-@if (ViewBag.ModelErrors != null)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var err in ViewBag.ModelErrors)
-            {
-                <li><strong>@err.Key</strong>:
-                    @foreach (var msg in err.Errors)
-                    {
-                        @msg <br />
-                    }
-                </li>
-            }
-        </ul>
-    </div>
-}
-
 <h1>修改</h1>
 
 <h4>住宿資訊</h4>
