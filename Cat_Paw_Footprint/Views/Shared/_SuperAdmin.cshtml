@@ -152,14 +152,14 @@
 <li class="menu-item">
     <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons fa-solid fa-magnifying-glass-chart"></i>
-        <div data-i18n="ReportsAndNews">報表分析/最新消息活動管理</div>
+        <div data-i18n="ReportsAndNews">最新消息/優惠活動活動管理</div>
     </a>
-    <ul class="menu-sub">
+    @* <ul class="menu-sub"> *@
         <!-- 最新消息活動管理 -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+        @* <li class="menu-item"> *@
+            @* <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="NewsAndPromotions">最新消息活動管理</div>
-            </a>
+            </a> *@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a class="menu-link" asp-area="Admin" asp-controller="NewsTables" asp-action="Index">
@@ -172,17 +172,25 @@
                     </a>
                 </li>
             </ul>
-        </li>
+    @*     </li>
+    </ul> *@
+   </li>
 
+   <li class="menu-item">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons fa-solid fa-magnifying-glass-chart"></i>
+        <div data-i18n="ReportsAndNews">報表分析</div>
+    </a>
+    @* <ul class="menu-sub">
         <!-- 報表分析 -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <li class="menu-item"> *@
+            @* <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <div data-i18n="Reports">報表分析</div>
-            </a>
+            </a> *@
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" asp-area="Admin" asp-controller="Reports" asp-action="Index">
-                        <div data-i18n="Dashboard">儀錶板</div>
+                    <a class="menu-link" asp-area="Admin" asp-controller="Reports" asp-action="Dashboard">
+                        <div data-i18n="Dashboard">儀表板</div>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -191,9 +199,9 @@
                     </a>
                 </li>
             </ul>
-        </li>
-    </ul>
-</li>
+    @*     </li>
+    </ul> *@
+   </li>
 
     <!-- 客服 / FAQ 管理 -->
     <li class="menu-item">

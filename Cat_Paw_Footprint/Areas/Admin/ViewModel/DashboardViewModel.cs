@@ -11,9 +11,6 @@
 		public double OrderGrowthRate { get; set; }
 		public double CustomerGrowthRate { get; set; }
 		public double TicketGrowthRate { get; set; }
-
-		// 銷售報表
-		public List<SalesReportDto> SalesReports { get; set; }
 	}
 
 	public class SalesReportDto

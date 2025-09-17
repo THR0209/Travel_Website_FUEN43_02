@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "儀表板";
+}
+@model Cat_Paw_Footprint.Areas.Admin.ViewModel.DashboardViewModel
+
+<h1>儀表板</h1>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>本月訂單</h5>
+            <h2>@Model.MonthlyOrders</h2>
+            <small class="@(Model.OrderGrowthRate >= 0 ? "text-success" : "text-danger")">
+                @(Model.OrderGrowthRate >= 0 ? "比上月新增" : "比上月減少") @Model.OrderGrowthRate.ToString("F1")%
+            </small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>開放行程</h5>
+            <h2>@Model.OpenTrips</h2>
+            <span class="badge bg-info">即時狀態</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>客戶總數</h5>
+            <h2>@Model.CustomerCount</h2>
+            <span class="@(Model.CustomerGrowthRate >= 0 ? "text-primary" : "text-danger")">
+                @(Model.CustomerGrowthRate >= 0 ? "比上月新增" : "比上月減少") @Model.CustomerGrowthRate.ToString("F1")%
+            </span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 rounded-5">
+            <h5>本月已解決案件數</h5>
+            <h2>@Model.ResolvedTickets</h2>
+            <span class="@(Model.TicketGrowthRate >= 0 ? "text-info" : "text-danger")">
+                @(Model.TicketGrowthRate >= 0 ? "比上月新增" : "比上月減少") @Model.TicketGrowthRate.ToString("F1")%
+            </span>
+        </div>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<h2>銷售報表</h2>
+
+<div class="d-flex mb-3" style="gap: 10px;">
+    <!-- 圖表類型選單 -->
+    <select id="chartType" class="form-select" style="width:200px;">
+        <option value="bar" selected>柱狀圖</option>
+        <option value="line">折線圖</option>
+        <option value="pie">圓餅圖</option>
+    </select>
+
+    <!-- 時間區間選單 -->
+    <select id="timeRange" class="form-select" style="width:200px;">
+        <option value="day">日報表</option>
+        <option value="month" selected>月報表</option>
+        <option value="quarter">季報表</option>
+        <option value="year">年報表</option>
+    </select>
+</div>
+
+<div class="container">
+    <h4>📊 銷售額趨勢</h4>
+    <canvas id="salesChart"></canvas>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let ctx = document.getElementById('salesChart').getContext('2d');
+        let chart;
+
+        // 初始化圖表
+        function initChart(type, labels = [], data = []) {
+            if (chart) chart.destroy();
+
+            let datasetConfig = {
+                label: '銷售額',
+                data: data,
+                borderWidth: 1
+            };
+
+            if (type === "pie") {
+                datasetConfig.backgroundColor = [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)'
+                ];
+            } else {
+                datasetConfig.backgroundColor = 'rgba(54, 162, 235, 0.7)';
+                datasetConfig.borderColor = 'rgba(54, 162, 235, 1)';
+            }
+
+            chart = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [datasetConfig]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: '銷售額統計' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let value = context.raw || 0;
+                                    return `銷售額: ${value.toLocaleString()} 元`;
+                                }
+                            }
+                        }
+                    },
+                    scales: type !== "pie" ? {
+                        x: { title: { display: true, text: '時間區間' } },
+                        y: { beginAtZero: true, title: { display: true, text: '銷售額 (元)' } }
+                    } : {}
+                }
+            });
+        }
+
+        // 載入資料
+        function loadData(groupBy) {
+            fetch(`/Admin/Reports/GetSalesReport?groupBy=${groupBy}`)
+                .then(r => r.json())
+                .then(data => {
+                    let labels = data.map(d => d.x);
+                    let values = data.map(d => d.y);
+                    let chartType = document.getElementById('chartType').value;
+                    initChart(chartType, labels, values);
+                })
+                .catch(err => console.error("載入銷售報表錯誤:", err));
+        }
+
+        // 綁定事件
+        document.getElementById('timeRange').addEventListener('change', function () {
+            loadData(this.value);
+        });
+
+        document.getElementById('chartType').addEventListener('change', function () {
+            loadData(document.getElementById('timeRange').value);
+        });
+
+        // 預設載入「月報表」
+        loadData("month");
+    </script>
+}
