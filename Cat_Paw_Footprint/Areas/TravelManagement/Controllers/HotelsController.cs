@@ -83,6 +83,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					Text = r.RegionName
 				}).ToList();
 
+			
 			if (hotel == null)
             {
                 return NotFound();
@@ -106,8 +107,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 				Views = hotel.Views,
 				HotelCode = hotel.HotelCode,
 				IsActive = hotel.IsActive,
-				//Picture = hotel.HotelPics.Select(p => p.Picture).ToList(),
 				KeywordID = hotel.HotelKeywords.Select(k => k.Keyword.KeywordID).ToList(),
+				KeywordNames = hotel.HotelKeywords.Select(k => k.Keyword.Keyword).ToList(),
 				PictureBase64 = hotel.HotelPics.Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture)).ToList()
 			};
 
@@ -195,7 +196,6 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			return View(model);
 		}
 
-
 		// GET: TravelManagement/Hotels/Edit/5
 		public async Task<IActionResult> Edit(int? id)
         {
@@ -204,55 +204,155 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
-            var hotels = await _context.Hotels.FindAsync(id);
-            if (hotels == null)
+			//var hotels = await _context.Hotels.FindAsync(id);
+			// 取出 Hotel 及其關聯資料
+			var hotels = await _context.Hotels
+				.Include(h => h.HotelPics)                // 包含圖片
+				.Include(h => h.HotelKeywords)            // 包含關鍵字
+				.ThenInclude(hk => hk.Keyword)        // 包含關鍵字詳細資料
+				.FirstOrDefaultAsync(h => h.HotelID == id);
+
+			if (hotels == null)
             {
                 return NotFound();
             }
-            ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictID", hotels.DistrictID);
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", hotels.RegionID);
-            return View(hotels);
-        }
+
+			// ✅ 關鍵字：一次投影，保證數量相同
+			var keywordList = hotels.HotelKeywords
+				.Where(k => k.Keyword != null && k.KeywordID != null)
+				.Select(k => new { Id = k.KeywordID.Value, Name = k.Keyword.Keyword })
+				.ToList();
+
+			// 塞進 ViewModel
+			var viewModel = new HotelsViewModel
+			{
+				HotelID = hotels.HotelID,
+				HotelName = hotels.HotelName,
+				HotelAddr = hotels.HotelAddr,
+				HotelLat = hotels.HotelLat,
+				HotelLng = hotels.HotelLng,
+				HotelDesc = hotels.HotelDesc,
+				RegionID = hotels.RegionID,
+				DistrictID = hotels.DistrictID,
+				Rating = hotels.Rating,
+				Views = hotels.Views,
+				HotelCode = hotels.HotelCode,
+				IsActive = hotels.IsActive,
+
+				// 關鍵字
+				KeywordID = hotels.HotelKeywords.Select(k => k.KeywordID ?? 0).ToList(),
+				KeywordNames = hotels.HotelKeywords.Select(k => k.Keyword.Keyword).ToList(),
+
+				// 圖片
+				PictureIds = hotels.HotelPics.Select(p => p.HotelPicID).ToList(),
+				PictureBase64 = hotels.HotelPics
+					   .Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture))
+					   .ToList()
+			};
+
+			// 下拉選單 / 多選清單
+			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", hotels.DistrictID);
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", hotels.RegionID);
+			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "KeywordID", "Keyword", viewModel.KeywordID);
+						
+			return View(viewModel);
+		}
 
         // POST: TravelManagement/Hotels/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("HotelID,HotelName,HotelAddr,HotelLat,HotelLng,HotelDesc,RegionID,DistrictID,Rating,Views,HotelCode,IsActive")] Hotels hotels)
+        public async Task<IActionResult> Edit(int id, HotelsViewModel model)
         {
-            if (id != hotels.HotelID)
+            if (id != model.HotelID)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(hotels);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!HotelsExists(hotels.HotelID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictID", hotels.DistrictID);
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", hotels.RegionID);
-            return View(hotels);
-        }
+				var hotel = await _context.Hotels
+					.Include(h => h.HotelPics)
+					.Include(h => h.HotelKeywords)
+					.FirstOrDefaultAsync(h => h.HotelID == id);
 
-        // GET: TravelManagement/Hotels/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+				if (hotel == null) return NotFound();
+
+				// ---- 更新主表資料 ----
+				hotel.HotelName = model.HotelName;
+				hotel.HotelAddr = model.HotelAddr;
+				hotel.HotelLat = model.HotelLat;
+				hotel.HotelLng = model.HotelLng;
+				hotel.HotelDesc = model.HotelDesc;
+				hotel.RegionID = model.RegionID;
+				hotel.DistrictID = model.DistrictID;
+				hotel.Rating = model.Rating;
+				hotel.Views = model.Views;
+				hotel.HotelCode = model.HotelCode;
+				hotel.IsActive = model.IsActive;
+
+				// ---- 新增新圖片 ----
+				if (model.Picture != null && model.Picture.Any())
+				{
+					foreach (var file in model.Picture)
+					{
+						if (file.Length > 0)
+						{
+							using var ms = new MemoryStream();
+							await file.CopyToAsync(ms);
+
+							var pic = new HotelPics
+							{
+								HotelID = hotel.HotelID,
+								Picture = ms.ToArray()
+							};
+							_context.HotelPics.Add(pic);
+						}
+					}
+					await _context.SaveChangesAsync();// 一次存入所有圖片
+				}				
+
+				// ---- 更新關鍵字 ---- (先清空再加新的)
+				hotel.HotelKeywords.Clear();
+				if (model.KeywordID != null && model.KeywordID.Any())
+				{
+					foreach (var keywordId in model.KeywordID)
+					{
+						hotel.HotelKeywords.Add(new HotelKeywords
+						{
+							HotelID = hotel.HotelID,
+							KeywordID = keywordId
+						});
+					}
+				}
+				await _context.SaveChangesAsync();
+				return RedirectToAction(nameof(Index));
+			}
+
+			// 驗證失敗回傳畫面
+			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", model.DistrictID);
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", model.RegionID);
+			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "Keyword", "Keyword", model.KeywordID);
+
+			return View(model);
+		}
+
+		// ---- 單張刪除圖片 API (AJAX 用) ----
+		[HttpPost]
+		public async Task<IActionResult> DeletePicture(int id)
+		{
+			var pic = await _context.HotelPics.FindAsync(id);
+			if (pic == null) return NotFound();
+
+			_context.HotelPics.Remove(pic);
+			await _context.SaveChangesAsync();
+
+			return Ok(); // 讓前端 JS 判斷成功
+		}
+
+		// GET: TravelManagement/Hotels/Delete/5
+		public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {

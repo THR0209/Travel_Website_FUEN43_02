@@ -1,5 +1,6 @@
 ﻿using Cat_Paw_Footprint.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 {
@@ -51,13 +52,26 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 
 		[Display(Name = "是否啟用")]
 		public bool? IsActive { get; set; }
-		
-		// 多張圖片
+
+		[NotMapped] // 不會影響資料庫
+		public string IsActiveText => (bool)IsActive ? "啟用" : "停用";
+
+		//多張圖片，用 IFormFile 來接收
 		[Display(Name = "美食圖片")]
-		public List<byte[]> Picture { get; set; } = new();
+		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
+
+		//多張圖片，轉成 Base64 字串，用於顯示圖片
+		public List<string> PictureBase64 { get; set; } = new();
+
+		// 舊圖片的 ID，用來刪除對應圖片
+		public List<int>? PictureIds { get; set; }
 
 		// 多個關鍵字
 		[Display(Name = "關鍵字")]
-		public List<int> Keywords { get; set; } = new();
+		public List<int> KeywordID { get; set; } = new();
+
+		// 關鍵字名稱清單（中文顯示用）
+		public List<string>? KeywordNames { get; set; } = new();
+
 	}
 }

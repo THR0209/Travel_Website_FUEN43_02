@@ -44,33 +44,15 @@
             <div class="form-group">
                 <label asp-for="DistrictID" class="control-label"></label>
                 <select asp-for="DistrictID" class="form-control" asp-items="ViewBag.DistrictID"></select>
-            </div>   
+            </div>
             <div class="form-group">
                 <label asp-for="IsActive" class="control-label"></label>
                 <select asp-for="IsActive" class="form-control">
-                    <option value="">請選擇</option>
-                    <option value="true">啟用</option>
-                    <option value="false">停用</option>
+                    <option value="true" selected="@(Model != null && Model.IsActive == true ? "selected" : null)">啟用</option>
+                    <option value="false" selected="@(Model != null && Model.IsActive == false ? "selected" : null)">停用</option>
                 </select>
                 <span asp-validation-for="IsActive" class="text-danger"></span>
             </div>
-            <!-- ✅ 上傳多張圖片 -->
-            @* <div class="form-group">
-                <label asp-for="Picture" class="control-label"></label>
-                <input asp-for="Picture" type="file" class="form-control" multiple />
-                <span asp-validation-for="Picture" class="text-danger"></span>
-            </div> *@
-            <!-- ✅ 上傳圖片 + 預覽 -->
-            <div class="form-group">
-                <label asp-for="Picture" class="control-label"></label>
-                <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
-                <span asp-validation-for="Picture" class="text-danger"></span>
-            </div>
-
-            <!-- ✅ 預覽區 -->
-            <div id="previewArea" class="mt-2 d-flex flex-wrap"></div>
-
-            
             <!-- ✅ 多選關鍵字 -->            
             <div class="form-group">
                 <label asp-for="KeywordID" class="control-label">選擇關鍵字</label>
@@ -88,6 +70,15 @@
 
                 <span asp-validation-for="KeywordID" class="text-danger"></span>
             </div>
+            <!-- ✅ 上傳圖片 + 預覽 -->
+            <div class="form-group">
+                <label asp-for="Picture" class="control-label"></label>
+                <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
+                <span asp-validation-for="Picture" class="text-danger"></span>
+
+                <!-- ✅ 預覽區 -->
+                <div id="previewArea" class="mt-2 d-flex flex-wrap"></div>
+            </div>           
             <div class="form-group">
                 <input type="submit" value="確認" class="btn btn-primary" />
             </div>

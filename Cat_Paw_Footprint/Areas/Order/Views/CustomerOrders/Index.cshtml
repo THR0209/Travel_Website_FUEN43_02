@@ -6,7 +6,17 @@
 }
 
 <h1 class="mb-3">行程 / 地點</h1>
-
+<div class="row g-2 align-items-center mb-3">
+    <div class="col-auto">
+        <input id="productSearch" type="search" class="form-control" placeholder="搜尋商品名稱或ID…">
+    </div>
+    <div class="col-auto">
+        <button id="btnClearSearch" type="button" class="btn btn-outline-secondary">清除</button>
+    </div>
+    <div class="col-auto text-muted">
+        <small id="searchResultHint"></small>
+    </div>
+</div>
 @{
     var groups = Model
         .Where(o => o.ProductID != 0)                    
@@ -15,7 +25,7 @@
         {
             ProductID = g.Key,
             Name = g.First().Product?.ProductName ?? $"商品 {g.Key}",                     
-            ImageUrl = g.First().Product?.ProductImage != null? "data:image/png;base64," + Convert.ToBase64String(g.First().Product.ProductImage) : $"https://placehold.co/600x400?text=Product+{g.Key}",
+            ImageUrl = g.First().Product?.ProductImage != null? "data:image/png;base64," + Convert.ToBase64String(g.First().Product.ProductImage) : $"https://placehold.co/600x400?text=Noimage",
             OrderCount = g.Count()
         })
         .OrderBy(x => x.ProductID)
@@ -30,26 +40,26 @@ else
 {
     <div class="row g-3">
         @foreach (var p in groups)
-        {
-            <div class="col-12 col-sm-6 col-md-4 col-xl-3">
-                <div class="card h-100 shadow-sm">
-                    <img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="card-title mb-0">@p.Name</h5>
-                            <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
-                        </div>
-                        <button type="button"
-                                class="btn btn-primary mt-auto btn-open-orders"
-                                data-productid="@p.ProductID"
-                                data-productname="@p.Name"
-                                data-bs-toggle="modal"
-                                data-bs-target="#ordersModal">
-                            查看訂單
-                        </button>
+        {           
+        <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-name="@p.Name" data-id="@p.ProductID">
+            <div class="card h-100 shadow-sm">
+                <img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">@p.Name</h5>
+                        <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
                     </div>
+                    <button type="button"
+                            class="btn btn-primary mt-auto btn-open-orders"
+                            data-productid="@p.ProductID"
+                            data-productname="@p.Name"
+                            data-bs-toggle="modal"
+                            data-bs-target="#ordersModal">
+                        查看訂單
+                    </button>
                 </div>
             </div>
+        </div>
         }
     </div>
 }
@@ -90,7 +100,7 @@ else
         </div>
     </div>
 </div>
-<div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderLabel" aria-hidden="true">
+<div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -105,7 +115,7 @@ else
 
                     <div class="mb-3">
                         <label class="form-label">客戶ID</label>
-                        <input type="number" class="form-control" name="CustomerID" id="e_CustomerID" />
+                        <input type="number" class="form-control" name="CustomerID" id="e_CustomerID" readonly/>
                     </div>
 
                     <div class="mb-3">
@@ -125,17 +135,17 @@ else
 
                     <div class="mb-3">
                         <label class="form-label">總金額</label>
-                        <input type="number" class="form-control" name="TotalAmount" id="e_TotalAmount" min="0" />
+                        <input type="number" class="form-control" name="TotalAmount" id="e_TotalAmount" min="0" autofocus/>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">建立時間</label>
-                        <input type="datetime-local" class="form-control" name="CreateTime" id="e_CreateTime" />
+                        <input type="datetime-local" class="form-control" name="CreateTime" id="e_CreateTime" readonly />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">更新時間</label>
-                        <input type="datetime-local" class="form-control" name="UpdateTime" id="e_UpdateTime" />
+                        <input type="datetime-local" class="form-control" name="UpdateTime" id="e_UpdateTime" readonly />
                     </div>
                 </div>
 
@@ -147,6 +157,42 @@ else
         </div>
     </div>
 </div>
+<!-- 寄信彈窗 -->
+<div class="modal fade" id="mailModal" tabindex="-1" aria-labelledby="mailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="mailModalLabel" class="modal-title">寄信給客戶</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+
+            <form id="sendMailForm" method="post" action="@Url.Action("SendAjax","Mail", new { area = "Order" })">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="mail_to">收件者</label>
+                        <input type="email" class="form-control" id="mail_to" name="to" placeholder="customer@example.com" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="mail_subject">主旨</label>
+                        <input type="text" class="form-control" id="mail_subject" name="subject" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="mail_body">內容</label>
+                        <textarea class="form-control" id="mail_body" name="body" rows="6" placeholder="輸入郵件內容…" required></textarea>
+                    </div>
+                    <div id="mail_hint" class="small text-muted"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">送出</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         const byProdBase  = '@Url.Action("ByProduct", "CustomerOrders", new { area = "Order" })';
@@ -155,6 +201,9 @@ else
         const mProdName = document.getElementById('m_product_name');
         const mSummary = document.getElementById('m_summary');
         const mUpdated = document.getElementById('m_updated');
+        const mailAjaxUrl = '@Url.Action("SendAjax", "Mail", new { area = "Order" })';
+
+
         document.querySelectorAll('.btn-open-orders').forEach(btn => {
           btn.addEventListener('click', async () => {
             const productId = btn.dataset.productid;
@@ -180,7 +229,10 @@ else
                   <td>${o.customer ?? ''}</td>
                   <td><span class="badge ${getStatusClass(o.status)}">${o.status}</span></td>
                   <td>${o.product ?? ''}</td>
-                  <td><button type="button" class="btn btn-sm btn-outline-primary btn-edit" data-id="${o.id}">編輯</button></td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-primary btn-edit" data-id="${o.id}">編輯</button>
+                    <button type="button" class="btn btn-sm btn-success btn-mail" data-id="${o.id}" data-email="${o.customerEmail ?? ''}">寄信</button>
+                  </td>
                 `;
                 tbody.appendChild(tr);
               });
@@ -235,8 +287,6 @@ else
           if (!btn) return;
 
           const id = btn.dataset.id;
-          const getApiBase = '@Url.Action("Get", "CustomerOrders", new { area = "Order" })';
-
           const res = await fetch(`${getApiBase}/${id}`);
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
@@ -252,8 +302,158 @@ else
           const form = document.getElementById('editOrderForm');
           form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
 
-          const editModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editOrderModal'));
-          editModal.show();
+          const ordersEl = document.getElementById('ordersModal');
+          const editEl   = document.getElementById('editOrderModal');
+
+          const ordersMD = ordersEl ? bootstrap.Modal.getOrCreateInstance(ordersEl) : null;
+          const editMD   = editEl   ? bootstrap.Modal.getOrCreateInstance(editEl)   : null;
+
+          if (!editMD) { alert('找不到編輯視窗'); return; }
+
+          ordersMD?.hide();
+
+          requestAnimationFrame(() => {
+            cleanupBackdrops();
+            editMD.show();
+          });
         });
-    </script>
+
+        tbody?.addEventListener('click', async (e) => {
+          const mailBtn = e.target.closest('.btn-mail');
+          if (!mailBtn) return;
+
+          const id = mailBtn.dataset.id;
+
+          // 先抓訂單資料，拿到 email、orderCode 等
+          const res = await fetch(`${getApiBase}/${id}`);
+          if (!res.ok) { alert('讀取訂單失敗'); return; }
+          const o = await res.json();
+
+          // 假如 ByProduct/Get 沒回傳 email，請在 ByProduct 的 Select/ Get 的 Ok(...) 補上 customerEmail 欄位
+          // 這裡用備援：若沒有 email，就留空讓你手動輸入
+          const to   = o.customerEmail ?? '';
+          const code = o.orderCode ?? `#${o.id}`;
+
+          // 預設主旨 / 內容（你可自行改模板）
+          const subject = `【訂單通知】${code}`;
+          const body    =
+        `親愛的客戶您好，
+
+        這是關於您的訂單 ${code} 的通知。
+        目前狀態：${o.status ?? '(未提供)'}
+        總金額：NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}
+        建立時間：${o.createTime ? new Date(o.createTime).toLocaleString('zh-TW') : ''}
+
+        如有任何問題，歡迎回信與我們聯繫。
+        貓爪足跡 敬上`;
+
+          // 填入寄信表單
+          document.getElementById('mail_to').value      = to;
+          document.getElementById('mail_subject').value = subject;
+          document.getElementById('mail_body').value    = body;
+          document.getElementById('mail_hint').textContent = `訂單：${code}`;
+
+          // 關閉「查看訂單」，打開「寄信」
+          const ordersEl = document.getElementById('ordersModal');
+          const mailEl   = document.getElementById('mailModal');
+          const ordersMD = ordersEl ? bootstrap.Modal.getOrCreateInstance(ordersEl) : null;
+          const mailMD   = mailEl   ? bootstrap.Modal.getOrCreateInstance(mailEl)   : null;
+
+          if (!mailMD) { alert('找不到寄信視窗'); return; }
+
+          ordersMD?.hide();
+          ordersEl?.addEventListener('hidden.bs.modal', () => {
+            // 清理殘留 backdrop，再開寄信
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            mailMD.show();
+          }, { once:true });
+
+          // 寄信關閉後回到查看訂單（可要可不要）
+          mailEl?.addEventListener('hidden.bs.modal', () => {
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            ordersMD?.show();
+          }, { once:true });
+        });
+                function cleanupBackdrops(){
+          document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+          document.body.classList.remove('modal-open');
+          document.body.style.removeProperty('padding-right');
+        } 
+        
+        document.addEventListener('DOMContentLoaded', () => {
+          const box   = document.getElementById('productSearch');
+          const clear = document.getElementById('btnClearSearch');
+          const hint  = document.getElementById('searchResultHint');
+
+          if (!box) {
+            return;
+          }
+
+          const cards = () => Array.from(document.querySelectorAll('.product-card'));
+
+          function norm(s){ return (s ?? '').toString().trim().toLowerCase(); }
+
+          function applyFilter(){
+            const q = norm(box.value);
+            let visible = 0;
+
+            cards().forEach(card => {
+              const name = norm(card.dataset.name || card.querySelector('.card-title')?.textContent);
+              const pid  = norm(card.dataset.id   || card.querySelector('.btn-open-orders')?.dataset.productid);
+              const hit  = !q || name.includes(q) || pid.includes(q);
+              card.style.display = hit ? '' : 'none';
+              if (hit) visible++;
+            });
+
+            if (hint){
+              hint.textContent = q ? `符合「${box.value}」的商品：${visible} 項` : '';
+            }
+          }
+
+          box.addEventListener('input', applyFilter);
+          clear?.addEventListener('click', () => { box.value = ''; applyFilter(); box.focus(); });
+
+          box.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+            const vis = cards().filter(c => c.style.display !== 'none');
+            vis.length === 1 && vis[0].querySelector('.btn-open-orders')?.click();
+          });
+
+          applyFilter();
+        });
+
+        document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const form = ev.currentTarget;
+          const fd   = new FormData(form);
+
+          try{
+            const res = await fetch(form.action || mailAjaxUrl, {
+              method: 'POST',
+              body: fd
+            });
+            const ok = res.ok;
+            if (!ok) {
+              const json = await res.json().catch(()=>null);
+              alert('寄送失敗：' + (json?.error || res.status));
+              return;
+            }
+            // 關閉寄信視窗
+            const mailEl = document.getElementById('mailModal');
+            const mailMD = mailEl ? bootstrap.Modal.getOrCreateInstance(mailEl) : null;
+            mailMD?.hide();
+
+            // 提示一下
+            setTimeout(()=> alert('郵件已送出！'), 100);
+          }catch(err){
+            console.error(err);
+            alert('寄送失敗（例外）');
+          }
+        });
+
+</script>
 }
