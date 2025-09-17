@@ -1,13 +1,13 @@
-﻿@model Cat_Paw_Footprint.Models.Restaurants
+﻿@model Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.RestaurantsViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>詳細資料</h1>
 
 <div>
-    <h4>Restaurants</h4>
+    <h4>美食資訊</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -56,7 +56,7 @@
             @Html.DisplayNameFor(model => model.IsActive)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
+            @Html.DisplayFor(model => model.IsActiveText)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.RestaurantCode)
@@ -68,17 +68,49 @@
             @Html.DisplayNameFor(model => model.District)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.District.DistrictID)
+            @Html.DisplayFor(model => model.District.DistrictName)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Region)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Region.RegionID)
+            @Html.DisplayFor(model => model.Region.RegionName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.KeywordID)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.KeywordNames != null && Model.KeywordNames.Any())
+            {
+                foreach (var keyword in Model.KeywordNames)
+                {
+                    <span class="badge bg-primary">@keyword</span>
+                }
+            }
+            else
+            {
+                <span>目前沒有關鍵字</span>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Picture)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+            {
+                foreach (var pic in Model.PictureBase64)
+                {
+                    <img src="@pic" alt="圖片載入失敗" style="max-width:200px; margin:5px;" />
+                }
+            }
+            else
+            {
+                <span>目前沒有圖片</span>
+            }
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.RestaurantID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.RestaurantID">修改</a> |
+    <a asp-action="Index">返回</a>
 </div>

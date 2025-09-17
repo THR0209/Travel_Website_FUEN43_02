@@ -1,5 +1,5 @@
 ﻿@* @model IEnumerable<Cat_Paw_Footprint.Models.Transportations> *@
-@model IEnumerable<Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.TransportationsViewMoled>
+@model IEnumerable<Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.TransportationsViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -8,7 +8,7 @@
 <h1>交通</h1>
 
 <p>
-    <a asp-action="Create">新增</a>
+    <a asp-action="Create">新增資料</a>
 </p>
 <table class="table">
     <thead>
@@ -33,13 +33,7 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Keywords)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Picture)
-            </th>
+            </th>           
         </tr>
     </thead>
     <tbody>
@@ -64,21 +58,8 @@
                 @Html.DisplayFor(modelItem => item.TransportCode)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Keywords)
-            </td>
-            <td>
-                @foreach (var pic in item.Picture) // Pictures 是 List<string> 或 List<byte[]>
-                {
-                    if (pic is byte[] bytes)
-                    {
-                        var base64 = "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
-                        <img src="@base64" alt="圖片" width="80" />
-                    }
-                }
-            </td>
+                @Html.DisplayFor(modelItem => item.IsActiveText)
+            </td>            
             <td>
                 <a asp-action="Edit" asp-route-id="@item.TransportID">修改</a> |
                 <a asp-action="Details" asp-route-id="@item.TransportID">詳細資料</a> |

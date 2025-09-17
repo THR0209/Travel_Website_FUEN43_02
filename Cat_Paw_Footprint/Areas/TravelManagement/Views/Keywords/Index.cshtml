@@ -31,9 +31,9 @@
                 @Html.DisplayFor(modelItem => item.Views)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.KeywordID">修改</a> |
+                <a asp-action="Edit" asp-route-id="@item.KeywordID">修改</a> 
                 @* <a asp-action="Details" asp-route-id="@item.KeywordID">Details</a> | *@
-                <a asp-action="Delete" asp-route-id="@item.KeywordID">刪除</a>
+                @* <a asp-action="Delete" asp-route-id="@item.KeywordID">刪除</a> *@
             </td>
         </tr>
 }
