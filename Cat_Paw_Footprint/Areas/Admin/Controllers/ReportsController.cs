@@ -123,5 +123,16 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 		{
 			return View();
 		}
-	}
+        public IActionResult MemberSubscriptionRatio()
+        {
+            //查資料庫
+            var data = new
+            {
+                Subscribed = 350,
+                NotSubscribed = 150
+            };
+            return View(data);
+        }
+
+    }
 }
