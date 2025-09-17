@@ -33,6 +33,17 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
         {
             return _context.CustomerOrders.Any(e => e.OrderID == id);
         }
+        [HttpPost("Order/CustomerOrders/Edit/{id:int}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("CustomerID,ProductID,OrderID,OrderStatusID,TotalAmount,CreateTime,UpdateTime")] CustomerOrders customerOrders)
+        {
+            if (id != customerOrders.OrderID) return NotFound();
+            if (!ModelState.IsValid) return View(customerOrders);
+
+            _context.Update(customerOrders);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
         [HttpGet]
         [Route("Order/CustomerOrders/by-product/{productId:int}")]
         public async Task<IActionResult> ByProduct(int productId)
@@ -66,7 +77,8 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
                     totalAmount = orders.Sum(x => (decimal?)x.totalAmount ?? 0m)
                 }
             });
-        }
+        }       
+
         [HttpGet]
         [Route("Order/CustomerOrders/get/{id:int}")]
         public async Task<IActionResult> Get(int id)
