@@ -31,7 +31,13 @@
                 <td>@Html.DisplayFor(modelItem => item.TransportPrice)</td>
                 <td>@Html.DisplayFor(modelItem => item.Rating)</td>
                 <td>@Html.DisplayFor(modelItem => item.Views)</td>
-                <td>@Html.DisplayFor(modelItem => item.IsActiveText)</td>
+                <td>
+                    <button class="btn btn-sm toggle-active @(item.IsActive == true ? "btn-success" : "btn-secondary")"
+                            data-id="@item.TransportID"
+                            data-status="@(item.IsActive)">
+                        @(item.IsActive == true ? "啟用" : "停用")
+                    </button>
+                </td>
                 
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.TransportID" class="btn btn-sm btn-primary">修改</a>
@@ -96,7 +102,36 @@
                 language: { //載入中文語系
                     url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"
                 }
-            });          
+            });
+
+            // 綁定啟用/停用按鈕點擊事件
+            $('#example').on('click', '.toggle-active', function () {
+                var button = $(this);
+                var id = button.data('id');
+                var currentStatus = button.data('status');
+
+                $.ajax({
+                    url: '@Url.Action("ToggleActive", "Transportations")', // 會去呼叫 Controller
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            // 更新按鈕樣式與文字
+                            button.data('status', res.newStatus);
+                            if (res.newStatus) {
+                                button.removeClass("btn-secondary").addClass("btn-success").text("啟用");
+                            } else {
+                                button.removeClass("btn-success").addClass("btn-secondary").text("停用");
+                            }
+                        } else {
+                            alert("更新失敗");
+                        }
+                    },
+                    error: function () {
+                        alert("發生錯誤，請稍後再試");
+                    }
+                });
+            });
            
         });
     </script>            

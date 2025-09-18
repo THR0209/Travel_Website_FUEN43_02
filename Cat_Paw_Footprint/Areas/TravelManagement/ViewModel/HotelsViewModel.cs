@@ -78,9 +78,6 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		// 關鍵字名稱清單（中文顯示用）
 		public List<string>? KeywordNames { get; set; } = new();
 
-		public List<Keywords> Keywords { get; set; }
-
-		
 
 	}
 }
