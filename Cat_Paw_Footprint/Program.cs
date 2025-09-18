@@ -131,6 +131,9 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
 
+			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+			builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -186,8 +189,6 @@ namespace Cat_Paw_Footprint
             app.MapRazorPages();
 
             app.Run();
-			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
-			builder.Services.AddTransient<IEmailSender, EmailSender>();
 		}
     }
 }
