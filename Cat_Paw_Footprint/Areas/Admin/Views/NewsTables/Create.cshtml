@@ -25,12 +25,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="PublishTime" class="control-label"></label>
-                <input asp-for="PublishTime" class="form-control" />
+                <input asp-for="PublishTime" class="form-control" min="2000-01-01T00:00" max="2099-12-31T23:59"/>
                 <span asp-validation-for="PublishTime" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="ExpireTime" class="control-label"></label>
-                <input asp-for="ExpireTime" class="form-control" />
+                <input asp-for="ExpireTime" class="form-control" min="2000-01-01T00:00" max="2099-12-31T23:59"/>
                 <span asp-validation-for="ExpireTime" class="text-danger"></span>
             </div>
             <div class="form-group">

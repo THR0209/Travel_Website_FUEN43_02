@@ -82,11 +82,9 @@
 					@Html.DisplayFor(modelItem => item.EndTime)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.DiscountType)
+					@Html.DisplayFor(modelItem => item.DiscountTypeName)
 				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.DiscountValue)
-				</td>
+				<td>@Html.DisplayFor(modelItem => item.DiscountValueDisplay)</td>
 				<td class="text-center">
 					@Html.ActiveBadge(item.IsActive)
 				</td>

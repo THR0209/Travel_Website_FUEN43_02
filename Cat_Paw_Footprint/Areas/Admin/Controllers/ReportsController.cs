@@ -357,7 +357,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
         //    return Json(result);
         //}
 
-        // --- 2. 熱門行程排行 ---
+      
         // --- 2. 熱門行程排行 ---
         [HttpGet]
         public IActionResult HotProducts()
