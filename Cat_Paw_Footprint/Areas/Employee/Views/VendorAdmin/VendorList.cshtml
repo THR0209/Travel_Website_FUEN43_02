@@ -1,14 +1,26 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.VendorAdminViewModel>
+@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.VendorAdminViewModel>
 @using Microsoft.AspNetCore.Mvc.Rendering
 
-<h2 class="mb-3">廠商管理</h2>
+@{
+    ViewData["Title"] = "廠商管理";// 設定頁面標題
+}
+
+@section Styles {
+    <link href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" />
+
+}
+<h2 class="mb-3 text-center">廠商管理</h2>
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+   
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
 }
+                    <th class="text-center" style="width:15%;">聯絡人</th>
 
 <div class="table-responsive">
     <table class="table table-striped align-middle" id="productsTable">
@@ -37,36 +49,37 @@
                         </div>
                     </td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-info btn-sm js-detail">詳細資訊</button>
+                        <button type="button" class="btn btn-secondary btn-sm js-detail">詳細資訊</button>
                         <button type="button" class="btn btn-info btn-sm js-history">登入紀錄</button>
                         <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
                     </td>
                 </tr>
             }
+            
         </tbody>
     </table>
 </div>
 
-<form id="anti-form" method="post">
-    @Html.AntiForgeryToken()
-</form>
+    <form id="anti-form" method="post">
+        @Html.AntiForgeryToken()
+    </form>
 
-<div class="modal fade" id="venDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">廠商詳細資料</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <!-- 這裡會被 Script 填資料 -->
-            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+    <div class="modal fade" id="venDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">廠商詳細資料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <!-- 這裡會被 Script 填資料 -->
+                <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
 
 @section Scripts{
     <script>

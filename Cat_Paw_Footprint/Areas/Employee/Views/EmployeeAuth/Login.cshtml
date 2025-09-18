@@ -1,6 +1,8 @@
-﻿@using Cat_Paw_Footprint.Areas.Employee.ViewModel
+@using Cat_Paw_Footprint.Areas.Employee.ViewModel
 @model Cat_Paw_Footprint.Areas.Employee.ViewModel.LoginViewModel
-
+@{
+    ViewData["Title"] = "登入";
+}
 
 
 @* @if (Model != null)
@@ -22,7 +24,7 @@ else
         <form asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Login" method="post">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            
+
             <div class="form-floating mb-3">
                 <input asp-for="Account" class="form-control" placeholder="請輸入帳號" name="Account" />
                 <label asp-for="Account">帳號</label>

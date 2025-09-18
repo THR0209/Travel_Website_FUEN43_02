@@ -73,7 +73,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 				StatusID = vm.StatusID,
 				PriorityID = vm.PriorityID,
 				CreateTime = DateTime.Now,
-				UpdateTime = DateTime.Now
+				UpdateTime = DateTime.Now,
+				TicketCode = vm.TicketCode
 			};
 			await _repo.AddAsync(entity);
 		}
@@ -90,6 +91,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 			entity.StatusID = vm.StatusID;
 			entity.PriorityID = vm.PriorityID;
 			entity.UpdateTime = DateTime.Now;
+
 			await _repo.UpdateAsync(entity);
 		}
 

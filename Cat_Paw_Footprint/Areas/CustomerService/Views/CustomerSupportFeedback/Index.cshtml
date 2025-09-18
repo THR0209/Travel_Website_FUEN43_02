@@ -8,21 +8,15 @@
 @section Styles {
     <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
     <link href="~/css/feedback.css" rel="stylesheet" asp-append-version="true" />
-
-
 }
 
 <div class="row">
     <div class="col-md-12">
         <div class="card">
-            @* <div class="card-header">
-                <h3>評價列表</h3>
-            </div> *@
             <div class="card-body">
                 <table id="feedbackTable" class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>工單編號</th>
                             <th>評分</th>
                             <th>留言</th>
@@ -38,11 +32,12 @@
 </div>
 
 <!-- Feedback Modal -->
-<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">評價詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p><b>工單編號：</b> <span id="detailTicket"></span></p>
@@ -59,8 +54,7 @@
     </div>
 </div>
 
-<!-- 回到頂部按鈕 -->
-<button id="backToTop" title="回到頂部"><i class="fa-solid fa-circle-up"></i></button>
+
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>

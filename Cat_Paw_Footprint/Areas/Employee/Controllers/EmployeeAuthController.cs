@@ -1,9 +1,8 @@
-﻿using Cat_Paw_Footprint.Areas.Employee.Services;
+using Cat_Paw_Footprint.Areas.Employee.Services;
 using Cat_Paw_Footprint.Areas.Employee.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +13,7 @@ using System.Security.Claims;
 namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 {
 	[Area("Employee")]
-	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "Emp.AdminOnly")]
-	public class EmployeeAuthController: Controller//這邊搞登入與註冊功能
+	public class EmployeeAuthController : Controller//這邊搞登入與註冊功能
 	{
 		private readonly EmployeeDbContext _context;
 		private readonly IEmployeeService _svc;
@@ -28,7 +26,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		#region 登入註冊基礎功能邏輯一次放這就好不傳到Service
 		// 登入
 		[HttpGet]
-		[AllowAnonymous]
 		public IActionResult Login()
 		{
 			var model = new LoginViewModel(); // ✅ 傳入空模型
@@ -36,10 +33,9 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 		// 登入
 		[HttpPost]
-		[AllowAnonymous]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Login([Bind("Account,Password")] LoginViewModel vm)
-		
+
 		{
 			if (string.IsNullOrWhiteSpace(vm.Account))
 				ModelState.AddModelError(nameof(vm.Account), "請輸入帳號");
@@ -51,7 +47,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			}
 			// ❗ 改成只用帳號找，先不要比對密碼
 			var emp = _context.Employees.FirstOrDefault(e => e.Account == vm.Account);
-			
+
 			// ❗ 沒找到帳號
 			if (emp == null)
 			{
@@ -79,7 +75,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				.FirstOrDefault() ?? string.Empty;
 
 
-			if (emp.Status!= true)
+			if (emp.Status != true)
 			{
 				vm.ErrorMessage = "帳號被停用，請聯絡管理員";
 				return View(vm);
@@ -94,14 +90,14 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			HttpContext.Session.SetString("Login", "True");
 
 			var claims = new List<Claim>
-	{
-		new Claim("EmployeeID", emp.EmployeeID.ToString()),
-		new Claim("EmployeeName", empName),
-		new Claim("RoleID", emp.RoleID.ToString()),
-		new Claim("RoleName", roleName),
-		new Claim("Status", emp.Status.ToString()),
-		new Claim(ClaimTypes.Name, emp.Account),
-	};
+			{
+				new Claim("EmployeeID", emp.EmployeeID.ToString()),
+				new Claim("EmployeeName", empName),
+				new Claim("RoleID", emp.RoleID.ToString()),
+				new Claim("RoleName", roleName),
+				new Claim("Status", emp.Status.ToString()),
+				new Claim(ClaimTypes.Name, emp.Account),
+			};
 			var identity = new ClaimsIdentity(claims, "EmployeeAuth");
 			var principal = new ClaimsPrincipal(identity);
 			await HttpContext.SignInAsync("EmployeeAuth", principal);
@@ -130,7 +126,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		public IActionResult Register(RegisterViewModel model)
 		{
 			PopulateRoleList();
-			
+
 			if (!ModelState.IsValid)
 			{
 				return View(model);
@@ -138,26 +134,26 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			if (_context.Employees.Any(e => e.Account == model.Account))
 			{
 				ModelState.AddModelError(nameof(model.Account), "此帳號已被註冊");
-				
+
 				return View(model);
 			}
 			// 產生員工代號
 			var newEmpCode = _svc.GetNewEmployeeCodeAsync().Result;//預存程序產生的字串
 			var emp = new Cat_Paw_Footprint.Models.Employees//註冊員工帳號
 			{
-				EmployeeCode=newEmpCode,//員工代號
-				Account =model.Account,
-				Password=BCrypt.Net.BCrypt.HashPassword(model.Password),
-				RoleID=model.RoleId,
-				CreateDate=DateTime.Now,
-				Status= true,
+				EmployeeCode = newEmpCode,//員工代號
+				Account = model.Account,
+				Password = BCrypt.Net.BCrypt.HashPassword(model.Password),
+				RoleID = model.RoleId,
+				CreateDate = DateTime.Now,
+				Status = true,
 				EmployeeProfile = new EmployeeProfile
 				{
 					EmployeeName = model.EmployeeName
 				}
 			};
 			_context.Employees.Add(emp);
-	
+
 			_context.SaveChanges();
 
 
@@ -166,6 +162,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		// 登出
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[AllowAnonymous]
 		public async Task<IActionResult> Logout()
 		{
 			// 1) 清 Session
@@ -180,7 +177,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			Response.Cookies.Delete(".CatPaw.Auth");
 
 			// 4) 回登入頁
-			return RedirectToAction("Index", "Home", new { area = "" });
+			return RedirectToAction("Login", "EmployeeAuth", new { area = "Employee" });
 		}
 		#endregion
 		#region 這邊開始用service
@@ -252,7 +249,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 
 		[HttpGet]
-		[AllowAnonymous]
 		public async Task<IActionResult> Profile()
 		{
 			var idStr = HttpContext.Session.GetString("EmpId");
@@ -277,7 +273,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 
 		[HttpPost]//單獨帳號個人資料頁更新
-		[AllowAnonymous]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Profile(ProfileEditInput input)
 		{
@@ -303,7 +298,8 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				input.IDNumber
 			);
 
-			if (success) {
+			if (success)
+			{
 				if (success && !string.IsNullOrEmpty(input.NewPassword))
 				{ // 1) 清 Session
 					HttpContext.Session.Clear();
@@ -321,7 +317,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				}
 
 
-				return Json(new { ok = true, message = "更新成功" }); 
+				return Json(new { ok = true, message = "更新成功" });
 			}
 
 			else

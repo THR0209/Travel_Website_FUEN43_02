@@ -1,73 +1,56 @@
-﻿(() => {
-    // ==== DOM 快速選取 (不用覆蓋 $，保留 jQuery) ====
-    const qs = (q, r = document) => r.querySelector(q);
-    const qsa = (q, r = document) => Array.from(r.querySelectorAll(q));
+﻿// FAQ 管理 JS（純 jQuery + Bootstrap Modal 控制）
+// -----------------------------------------------
 
-    // ==== 所有用到的元素 ====
-    const els = {
-        faqTableBody: qs("#faqTable tbody"),
-        faqSearch: qs("#faqSearch"),
-        faqClear: qs("#btnFaqClear"),
-        faqCategoryFilter: qs("#faqCategoryFilter"),
-        btnFaqNew: qs("#btnFaqNew"),
-        faqModal: qs("#faqModal"),
-        faqModalTitle: qs("#faqModalTitle"),
-        faqModalCancel: qs("#faqModalCancel"),
-        faqModalSave: qs("#faqModalSave"),
-        faqFormCategory: qs("#faqFormCategory"),
-        faqFormStatus: qs("#faqFormStatus"),
-        faqFormQuestion: qs("#faqFormQuestion"),
-        faqFormAnswer: qs("#faqFormAnswer"),
-        categoryTableBody: qs("#categoryTable tbody"),
-        btnAddCategory: qs("#btnAddCategory"),
-        categoryModal: qs("#categoryModal"),
-        categoryModalCancel: qs("#categoryModalCancel"),
-        categoryModalSave: qs("#categoryModalSave"),
-        categoryFormName: qs("#categoryFormName"),
-    };
+$(function () {
+    // ==== Bootstrap Modal 實例化 ====
+    var faqModal = new bootstrap.Modal(document.getElementById('faqModal'), { focus: false });
+    var categoryModal = new bootstrap.Modal(document.getElementById('categoryModal'), { focus: false });
 
-    // ==== 狀態 ====
-    let state = { categories: [], faqs: [] };
-    let editingFaqId = null;
-    let editingCategoryId = null;
+    // ==== 狀態資料 ====
+    var state = { categories: [], faqs: [] };
+    var editingFaqId = null;
+    var editingCategoryId = null;
 
-    // ==== API 方法 ====
-    const api = {
-        getCategories: async () => (await fetch("/CustomerService/FAQs/api/categories")).json(),
-        getFAQs: async () => (await fetch("/CustomerService/FAQs/api")).json(),
-        createFAQ: async (vm) => fetch("/CustomerService/FAQs/api", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(vm) }).then(r => r.json()),
-        updateFAQ: async (id, vm) => fetch(`/CustomerService/FAQs/api/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(vm) }).then(r => r.json()),
-        deleteFAQ: async (id) => fetch(`/CustomerService/FAQs/api/${id}`, { method: "DELETE" }).then(r => r.json()),
-        createCategory: async (vm) => fetch("/CustomerService/FAQs/api/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(vm) }).then(r => r.json()),
-        updateCategory: async (id, vm) => fetch(`/CustomerService/FAQs/api/categories/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(vm) }).then(r => r.json()),
-        deleteCategory: async (id) => fetch(`/CustomerService/FAQs/api/categories/${id}`, { method: "DELETE" }).then(r => r.json())
+    // ==== API 方法 ==== 
+    var api = {
+        getCategories: function () { return $.getJSON("/CustomerService/FAQs/api/categories"); },
+        getFAQs: function () { return $.getJSON("/CustomerService/FAQs/api"); },
+        createFAQ: function (vm) { return $.ajax({ url: "/CustomerService/FAQs/api", type: "POST", contentType: "application/json", data: JSON.stringify(vm) }); },
+        updateFAQ: function (id, vm) { return $.ajax({ url: `/CustomerService/FAQs/api/${id}`, type: "PUT", contentType: "application/json", data: JSON.stringify(vm) }); },
+        deleteFAQ: function (id) { return $.ajax({ url: `/CustomerService/FAQs/api/${id}`, type: "DELETE" }); },
+        createCategory: function (vm) { return $.ajax({ url: "/CustomerService/FAQs/api/categories", type: "POST", contentType: "application/json", data: JSON.stringify(vm) }); },
+        updateCategory: function (id, vm) { return $.ajax({ url: `/CustomerService/FAQs/api/categories/${id}`, type: "PUT", contentType: "application/json", data: JSON.stringify(vm) }); },
+        deleteCategory: function (id) { return $.ajax({ url: `/CustomerService/FAQs/api/categories/${id}`, type: "DELETE" }); }
     };
 
     // ==== XSS 防護 ====
-    function escapeHtml(s) { if (!s) return ''; return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+    function escapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, function (m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+    }
 
     // ==== 下拉分類選項渲染 ====
     function renderCategoryOptions() {
-        els.faqCategoryFilter.innerHTML = ['<option value="">全部分類</option>']
-            .concat(state.categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`))
-            .join('');
-
-        els.faqFormCategory.innerHTML = ['<option value="">請選擇</option>']
-            .concat(state.categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`))
-            .join('');
-
-        els.faqFormStatus.innerHTML = `
+        var catOpts = '<option value="">全部分類</option>';
+        var formOpts = '<option value="">請選擇</option>';
+        $.each(state.categories, function (_, c) {
+            catOpts += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
+            formOpts += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
+        });
+        $('#faqCategoryFilter').html(catOpts);
+        $('#faqFormCategory').html(formOpts);
+        $('#faqFormStatus').html(`
             <option value="">請選擇</option>
             <option value="上架">上架</option>
             <option value="下架">下架</option>
-        `;
+        `);
     }
 
     // ==== FAQ DataTable 初始化 ====
     function initFaqDataTable() {
-        if (typeof jQuery === 'undefined' || !$.fn.DataTable) return console.error('DataTable 尚未載入');
         if ($.fn.DataTable.isDataTable('#faqTable')) $('#faqTable').DataTable().destroy();
-
         $('#faqTable').DataTable({
             paging: true,
             searching: false,
@@ -89,176 +72,220 @@
         });
     }
 
-    // ==== FAQ 表格渲染 (高亮最新) ====
-    function renderFaqTable(highlightId = null) {
+    // ==== FAQ 表格渲染 ====
+    function renderFaqTable(highlightId) {
         if (!$.fn.DataTable.isDataTable('#faqTable')) initFaqDataTable();
-        const table = $('#faqTable').DataTable();
+        var table = $('#faqTable').DataTable();
         table.clear();
 
-        const kw = els.faqSearch.value.trim().toLowerCase();
-        const cat = els.faqCategoryFilter.value;
+        var kw = $('#faqSearch').val().trim().toLowerCase();
+        var cat = $('#faqCategoryFilter').val();
 
-        state.faqs
-            .filter(f => {
-                const hay = ((f.question || "") + " " + (f.answer || "")).toLowerCase();
-                const catMatch = !cat || String(f.categoryID) === cat;
-                return catMatch && (!kw || hay.includes(kw));
-            })
-            .forEach(f => {
-                const catName = (state.categories.find(c => String(c.id) === String(f.categoryID)) || {}).name || "-";
-                const statusHtml = f.isActive ? '<span class="status done">上架</span>' : '<span class="status pending">下架</span>';
-                table.row.add([
+        $.each(state.faqs, function (_, f) {
+            var hay = ((f.question || "") + " " + (f.answer || "")).toLowerCase();
+            var catMatch = !cat || String(f.categoryID) === cat;
+            if (catMatch && (!kw || hay.includes(kw))) {
+                var catName = (state.categories.find(function (c) { return String(c.id) === String(f.categoryID); }) || {}).name || "-";
+                var statusHtml = f.isActive ? '<span class="status done">上架</span>' : '<span class="status pending">下架</span>';
+                var ops = `<div class="btn-group-right">
+                    <button class="btn btn-primary" data-act="edit" data-id="${f.faqID}">編輯</button>
+                    <button class="btn btn-danger" data-act="del" data-id="${f.faqID}">刪除</button>
+                </div>`;
+                var row = table.row.add([
                     catName,
-                    f.question,
-                    f.answer,
+                    escapeHtml(f.question),
+                    escapeHtml(f.answer),
                     statusHtml,
-                    `<button class="btn btn-secondary" data-act="edit" data-id="${f.faqID}">編輯</button>
-                     <button class="btn btn-danger" data-act="del" data-id="${f.faqID}">刪除</button>`
-                ]).node().dataset.id = f.faqID;
-            });
+                    ops
+                ]).node();
+                $(row).attr('data-id', f.faqID);
+            }
+        });
 
         table.draw();
 
+        // 高亮新行
         if (highlightId) {
-            const rowNode = table.rows().nodes().to$().filter(`[data-id='${highlightId}']`);
+            var rowNode = $(table.rows().nodes()).filter(`[data-id='${highlightId}']`);
             rowNode.addClass('highlight');
             $('html, body').animate({ scrollTop: rowNode.offset().top - 100 }, 300);
         }
     }
 
     // ==== 分類表格渲染 ====
-    function renderCategoryTable(highlightId = null) {
-        els.categoryTableBody.innerHTML = state.categories.map((c, i) => `<tr data-id="${c.id}">
-            <td>${i + 1}</td>
-            <td>${escapeHtml(c.name)}</td>
-            <td>
-                <button class="btn btn-secondary" data-act="rename" data-id="${c.id}">編輯</button>
-                <button class="btn btn-danger" data-act="c-del" data-id="${c.id}">刪除</button>
-            </td>
-        </tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:#888">無分類</td></tr>';
+    function renderCategoryTable(highlightId) {
+        var html = '';
+        $.each(state.categories, function (i, c) {
+            html += `<tr data-id="${c.id}">
+                <td>${i + 1}</td>
+                <td>${escapeHtml(c.name)}</td>
+                <td>
+                    <div class="btn-group-right">
+                        <button class="btn btn-primary" data-act="rename" data-id="${c.id}">編輯</button>
+                        <button class="btn btn-danger" data-act="c-del" data-id="${c.id}">刪除</button>
+                    </div>
+                </td>
+            </tr>`;
+        });
+        if (!html) html = '<tr><td colspan="3" style="text-align:center;color:#888">無分類</td></tr>';
+        $('#categoryTable tbody').html(html);
 
+        // 高亮新行
         if (highlightId) {
-            const row = els.categoryTableBody.querySelector(`tr[data-id='${highlightId}']`);
-            if (row) {
-                row.classList.add('highlight');
-                $('html, body').animate({ scrollTop: $(row).offset().top - 100 }, 300);
+            var row = $(`#categoryTable tbody tr[data-id='${highlightId}']`);
+            if (row.length) {
+                row.addClass('highlight');
+                $('html, body').animate({ scrollTop: row.offset().top - 100 }, 300);
             }
         }
     }
 
-    // ==== Modal 管理 ====
-    function showModal(modal) { modal.classList.add('show'); }
-    function hideModal(modal) { modal.classList.remove('show'); }
-
-    // ==== 初次載入 ====
-    async function fetchAndRenderAll() {
-        try {
-            const [cats, faqs] = await Promise.all([api.getCategories(), api.getFAQs()]);
-            state.categories = cats.map(c => ({ id: String(c.id), name: c.name }));
-            state.faqs = faqs.map(f => ({
-                faqID: f.faqid,
-                question: f.question,
-                answer: f.answer,
-                categoryID: String(f.categoryID),
-                isActive: f.isActive,
-                createTime: f.createTime,
-                updateTime: f.updateTime,
-                categoryName: f.categoryName
-            }));
+    // ==== FAQ/分類 資料載入 ====
+    function fetchAndRenderAll() {
+        $.when(api.getCategories(), api.getFAQs()).done(function (cats, faqs) {
+            state.categories = $.map(cats[0], function (c) { return { id: String(c.id), name: c.name }; });
+            state.faqs = $.map(faqs[0], function (f) {
+                return {
+                    faqID: f.faqid,
+                    question: f.question,
+                    answer: f.answer,
+                    categoryID: String(f.categoryID),
+                    isActive: f.isActive,
+                    createTime: f.createTime,
+                    updateTime: f.updateTime,
+                    categoryName: f.categoryName
+                };
+            });
             renderCategoryOptions();
             renderFaqTable();
             renderCategoryTable();
-        } catch (err) {
-            console.error('載入 FAQ/分類失敗', err);
-            alert('載入資料失敗');
-        }
+        }).fail(function () {
+            alert('載入 FAQ/分類失敗');
+        });
     }
 
-    // ==== FAQ 事件綁定 ====
-    els.btnFaqNew.addEventListener('click', () => openFaqModal(null));
-    els.faqSearch.addEventListener('input', () => renderFaqTable());
-    els.faqCategoryFilter.addEventListener('change', () => renderFaqTable());
-    els.faqClear.addEventListener('click', () => { els.faqSearch.value = ''; els.faqCategoryFilter.value = ''; renderFaqTable(); });
-
+    // ==== FAQ Modal 開啟 ====
     function openFaqModal(faq) {
         editingFaqId = faq ? faq.faqID : null;
-        els.faqModalTitle.textContent = editingFaqId ? '編輯 FAQ' : '新增 FAQ';
-        els.faqFormCategory.value = faq ? faq.categoryID : '';
-        els.faqFormStatus.value = faq ? (faq.isActive ? '上架' : '下架') : '';
-        els.faqFormQuestion.value = faq ? faq.question : '';
-        els.faqFormAnswer.value = faq ? faq.answer : '';
-        showModal(els.faqModal);
+        $('#faqID').val(faq ? faq.faqID : '');
+        $('#faqFormCategory').val(faq ? faq.categoryID : '');
+        $('#faqFormStatus').val(faq ? (faq.isActive ? '上架' : '下架') : '');
+        $('#faqFormQuestion').val(faq ? faq.question : '');
+        $('#faqFormAnswer').val(faq ? faq.answer : '');
+        faqModal.show();
     }
-    function closeFaqModal() { hideModal(els.faqModal); editingFaqId = null; els.faqFormQuestion.value = ''; els.faqFormAnswer.value = ''; }
-    els.faqModalCancel.addEventListener('click', closeFaqModal);
 
-    els.faqModalSave.addEventListener('click', async () => {
-        const categoryID = els.faqFormCategory.value;
-        const isActive = els.faqFormStatus.value === '上架';
-        const question = els.faqFormQuestion.value.trim();
-        const answer = els.faqFormAnswer.value.trim();
+    // ==== FAQ Modal 儲存 ====
+    $('#faqModalSave').on('click', function () {
+        var categoryID = $('#faqFormCategory').val();
+        var status = $('#faqFormStatus').val();
+        var question = $('#faqFormQuestion').val().trim();
+        var answer = $('#faqFormAnswer').val().trim();
+
+        if (!categoryID) return alert('請選擇分類');
+        if (!status) return alert('請選擇狀態');
         if (!question) return alert('請輸入問題');
         if (!answer) return alert('請輸入答案');
-        if (!categoryID) return alert('請選擇分類');
-        if (!els.faqFormStatus.value) return alert('請選擇狀態');
 
-        const vm = { FAQID: editingFaqId ?? 0, CategoryID: Number(categoryID), IsActive: isActive, Question: question, Answer: answer };
-        try {
-            const result = editingFaqId ? await api.updateFAQ(editingFaqId, vm) : await api.createFAQ(vm);
-            if (result && result.message) alert(result.message);
-            closeFaqModal();
-            await fetchAndRenderAll();
-            if (!editingFaqId) renderFaqTable(result.faqID); // 新增時高亮最新
-        } catch { alert('儲存失敗'); }
+        var $btn = $(this).prop('disabled', true);
+        var vm = {
+            FAQID: $('#faqID').val() ? parseInt($('#faqID').val()) : 0,
+            CategoryID: Number(categoryID),
+            IsActive: status === '上架',
+            Question: question,
+            Answer: answer
+        };
+        var ajax = vm.FAQID > 0 ? api.updateFAQ(vm.FAQID, vm) : api.createFAQ(vm);
+
+        ajax.done(function (result) {
+            faqModal.hide();
+            fetchAndRenderAll();
+        }).fail(function () {
+            alert('儲存失敗');
+        }).always(function () {
+            $btn.prop('disabled', false);
+        });
     });
 
-    els.faqTableBody.addEventListener('click', async e => {
-        const act = e.target.dataset.act, id = e.target.dataset.id;
+    // ==== FAQ Modal 開啟/搜尋/清除 ====
+    $('#btnFaqNew').on('click', function () { openFaqModal(null); });
+    $('#faqSearch').on('input', function () { renderFaqTable(); });
+    $('#faqCategoryFilter').on('change', function () { renderFaqTable(); });
+    $('#btnFaqClear').on('click', function () {
+        $('#faqSearch').val('');
+        $('#faqCategoryFilter').val('');
+        renderFaqTable();
+    });
+
+    // ==== FAQ 編輯/刪除 ====
+    $('#faqTable tbody').on('click', 'button', function () {
+        var act = $(this).data('act'), id = $(this).data('id');
         if (!act || !id) return;
-        if (act === 'edit') { const faq = state.faqs.find(f => String(f.faqID) === String(id)); openFaqModal(faq); }
-        else if (act === 'del') { if (!confirm('確定要刪除？')) return; try { const r = await api.deleteFAQ(id); if (r && r.message) alert(r.message); await fetchAndRenderAll(); } catch { alert('刪除失敗'); } }
+        if (act === 'edit') {
+            var faq = state.faqs.find(function (f) { return String(f.faqID) === String(id); });
+            openFaqModal(faq);
+        }
+        else if (act === 'del') {
+            if (!confirm('確定要刪除？')) return;
+            api.deleteFAQ(id).done(function () {
+                fetchAndRenderAll();
+            }).fail(function () {
+                alert('刪除失敗');
+            });
+        }
     });
 
-    // ==== 分類 Modal ====
-    function openCategoryModal(cat) { editingCategoryId = cat ? cat.id : null; els.categoryFormName.value = cat ? cat.name : ''; showModal(els.categoryModal); }
-    function closeCategoryModal() { hideModal(els.categoryModal); editingCategoryId = null; els.categoryFormName.value = ''; }
-    els.categoryModalCancel.addEventListener('click', closeCategoryModal);
+    // ==== 分類 Modal 開啟 ====
+    function openCategoryModal(cat) {
+        editingCategoryId = cat ? cat.id : null;
+        $('#categoryID').val(cat ? cat.id : "");
+        $('#categoryFormName').val(cat ? cat.name : '');
+        categoryModal.show();
+    }
+    $('#btnAddCategory').on('click', function () { openCategoryModal(null); });
 
-    els.btnAddCategory.addEventListener('click', () => openCategoryModal(null));
-    els.categoryModalSave.addEventListener('click', async () => {
-        const name = els.categoryFormName.value.trim();
+    // ==== 分類 Modal 儲存 ====
+    $('#categoryModalSave').on('click', function () {
+        var name = $('#categoryFormName').val().trim();
         if (!name) return alert('請輸入分類名稱');
-        try {
-            const result = editingCategoryId ? await api.updateCategory(editingCategoryId, { categoryID: editingCategoryId, categoryName: name }) : await api.createCategory({ categoryName: name });
-            if (result && result.message) alert(result.message);
-            closeCategoryModal();
-            await fetchAndRenderAll();
-        } catch { alert('儲存分類失敗'); }
+        var $btn = $(this).prop('disabled', true);
+
+        var vm = {
+            categoryID: $('#categoryID').val() ? $('#categoryID').val() : undefined,
+            categoryName: name
+        };
+        var ajax, url, method;
+        if (editingCategoryId) {
+            ajax = api.updateCategory(editingCategoryId, vm);
+        } else {
+            ajax = api.createCategory(vm);
+        }
+        ajax.done(function (result) {
+            categoryModal.hide();
+            fetchAndRenderAll();
+        }).fail(function () {
+            alert('儲存分類失敗');
+        }).always(function () {
+            $btn.prop('disabled', false);
+        });
     });
 
-    els.categoryTableBody.addEventListener('click', async e => {
-        const act = e.target.dataset.act, id = e.target.dataset.id;
+    // ==== 分類 編輯/刪除 ====
+    $('#categoryTable tbody').on('click', 'button', function () {
+        var act = $(this).data('act'), id = $(this).data('id');
         if (!act || !id) return;
-        const cat = state.categories.find(c => String(c.id) === String(id));
+        var cat = state.categories.find(function (c) { return String(c.id) === String(id); });
         if (act === 'rename') openCategoryModal(cat);
-        else if (act === 'c-del') { if (!confirm('確定要刪除此分類？')) return; try { const r = await api.deleteCategory(id); if (r && r.message) alert(r.message); await fetchAndRenderAll(); } catch { alert('刪除分類失敗'); } }
-    });
-
-    // ===============================
-    // 顯示/隱藏按鈕
-    // ===============================
-    $(window).scroll(function () {
-        if ($(this).scrollTop() > 300) { $('#backToTop').fadeIn(); }
-        else { $('#backToTop').fadeOut(); }
-    });
-
-    // ===============================
-    // 點擊回到頂部
-    // ===============================
-    $('#backToTop').click(function () {
-        $('html, body').animate({ scrollTop: 0 }, 200);
+        else if (act === 'c-del') {
+            if (!confirm('確定要刪除此分類？')) return;
+            api.deleteCategory(id).done(function () {
+                fetchAndRenderAll();
+            }).fail(function () {
+                alert('刪除分類失敗');
+            });
+        }
     });
 
     // ==== 初次載入 ====
     fetchAndRenderAll();
-})();
+});
