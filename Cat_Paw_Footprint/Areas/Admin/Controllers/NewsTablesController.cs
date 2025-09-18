@@ -130,10 +130,11 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 					UpdateTime = DateTime.Now,
 					EmployeeID = currentEmpId,
 				};
-
-				_context.Add(entity);
+                
+                _context.Add(entity);
 				await _context.SaveChangesAsync();
-				return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = "新增成功！";
+                return RedirectToAction(nameof(Index));
 			}
 
 			// ❗ 除錯：把所有錯誤列出來
@@ -236,7 +237,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 
 					_context.Update(newsTable);
 					await _context.SaveChangesAsync();
-				}
+                    TempData["SuccessMessage"] = "更新成功！";
+                }
 				catch (DbUpdateConcurrencyException)
 				{
 					if (!_context.NewsTable.Any(e => e.NewsID == viewModel.NewsID))
@@ -306,7 +308,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 			{
 				_context.NewsTable.Remove(newsTable);
 				await _context.SaveChangesAsync();
-			}
+                TempData["SuccessMessage"] = "刪除成功！";
+            }
 			return RedirectToAction(nameof(Index));
 		}
 

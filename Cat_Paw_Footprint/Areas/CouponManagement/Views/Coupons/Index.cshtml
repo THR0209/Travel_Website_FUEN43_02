@@ -30,28 +30,28 @@
 <p>
     <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> 新增優惠券</a>
 </p>
-<table class="table">
+<table class="table table-bordered table-striped table-hover">
     <thead>
         <tr>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.CouponCode)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.DiscountType)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.DiscountValue)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.StartDate)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.EndTime)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
-            <th></th>
+            <th class="fs-5" style="width:15%">操作</th>
         </tr>
     </thead>
     <tbody>
@@ -80,13 +80,20 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.EndTime)
                 </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsActive)
+                <td class="text-center">
+                    @if (item.IsActive == true)
+                    {
+                        <span class="badge bg-success text-center justify-content-between">啟用中</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger text-center justify-content-between">已下架</span>
+                    }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.CouponID">編輯</a> |
-                    <a asp-action="Details" asp-route-id="@item.CouponID">檢視</a> |
-                    <a asp-action="Delete" asp-route-id="@item.CouponID">下架</a>
+                    <a asp-action="Edit" asp-route-id="@item.CouponID" class="btn btn-primary btn-sm mb-1 ms-auto" >編輯</a>
+                    <a asp-action="Details" asp-route-id="@item.CouponID" class="btn btn-info btn-sm mb-1 ms-auto" >檢視</a>
+                    <a asp-action="Delete" asp-route-id="@item.CouponID" class="btn btn-danger btn-sm mb-1 ms-auto" >下架</a>
                 </td>
             </tr>
         }
@@ -113,9 +120,7 @@
                     url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json',
                 },
                 layout: {
-                    bottomEnd: {
-                        buttons: ['copy', 'csv', 'pdf', 'print']
-                    }
+
                 }
             });
         });

@@ -295,20 +295,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 			return View(model);
 		}
-
-		// ---- 單張刪除圖片 API (AJAX 用) ----
-		[HttpPost]
-		public async Task<IActionResult> DeletePicture(int id)
-		{
-			var pic = await _context.TransportPics.FindAsync(id);
-			if (pic == null) return NotFound();
-
-			_context.TransportPics.Remove(pic);
-			await _context.SaveChangesAsync();
-
-			return Ok(); // 讓前端 JS 判斷成功
-		}
-
+		
 		// GET: TravelManagement/Transportations/Delete/5
 		public async Task<IActionResult> Delete(int? id)
         {
@@ -346,5 +333,37 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         {
             return _context.Transportations.Any(e => e.TransportID == id);
         }
-    }
+
+		// ---- 單張刪除圖片 API (AJAX 用) ----
+		[HttpPost]
+		public async Task<IActionResult> DeletePicture(int id)
+		{
+			var pic = await _context.TransportPics.FindAsync(id);
+			if (pic == null) return NotFound();
+
+			_context.TransportPics.Remove(pic);
+			await _context.SaveChangesAsync();
+
+			return Ok(); // 讓前端 JS 判斷成功
+		}
+
+		// ---- 切換啟用狀態 API (AJAX 用) ----
+		[HttpPost]
+		public JsonResult ToggleActive(int id)
+		{
+			var transportations = _context.Transportations.FirstOrDefault(h => h.TransportID == id);
+			if (transportations == null)
+			{
+				return Json(new { success = false });
+			}
+
+			// 切換啟用狀態
+			transportations.IsActive = !transportations.IsActive;
+			_context.SaveChanges();
+
+			return Json(new { success = true, newStatus = transportations.IsActive });
+		}
+
+
+	}
 }

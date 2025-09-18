@@ -134,7 +134,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 						});
 					}
 					await _context.SaveChangesAsync();
-				}
+                    TempData["SuccessMessage"] = "新增成功！";
+                }
 
 				return RedirectToAction(nameof(Index));
 			}
@@ -227,7 +228,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 						});
 					}
 					await _context.SaveChangesAsync();
-				}
+                    TempData["SuccessMessage"] = "更新成功！";
+                }
 
 				return RedirectToAction(nameof(Index));
 			}
@@ -297,7 +299,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				// 🔹 再刪 Promotion
 				_context.Promotions.Remove(promo);
 				await _context.SaveChangesAsync();
-			}
+                TempData["SuccessMessage"] = "刪除成功！";
+            }
 
 			return RedirectToAction(nameof(Index));
 		}

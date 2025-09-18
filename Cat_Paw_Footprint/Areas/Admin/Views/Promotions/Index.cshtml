@@ -14,15 +14,10 @@
 			text-align: center;
 		}
 
-		.operation-btn {
-			display: inline-block;
-			min-width: 80px; /* 統一最小寬度 */
-			max-width: 120px; /* 避免太大 */
-			height: 32px; /* 統一高度 */
-			font-size: 0.85rem;
-			padding: 2px 8px; /* 控制間距 */
-			text-align: center;
-			margin: 0 auto; /* 在儲存格置中 */
+		.btn-action {
+			min-width: 80px;   /* 最小不要比這個小 */
+			max-width: 120px;  /* 最大不要比這個大 */
+			width: 80%;       /* 在父容器內自動撐滿 */
 		}
 
 		#PromotionsTable_filter {
@@ -67,7 +62,7 @@
 			<th class="fs-5" style="width: 10%;">
 				@Html.DisplayNameFor(model => model.UpdateTime)
 			</th>
-			<th class="fs-5">操作</th>
+			<th class="fs-5" style="width: 10%;">操作</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -87,13 +82,11 @@
 					@Html.DisplayFor(modelItem => item.EndTime)
 				</td>
 				<td>
-					@Html.DisplayFor(modelItem => item.DiscountType)
+					@Html.DisplayFor(modelItem => item.DiscountTypeName)
 				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.DiscountValue)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.IsActive)
+				<td>@Html.DisplayFor(modelItem => item.DiscountValueDisplay)</td>
+				<td class="text-center">
+					@Html.ActiveBadge(item.IsActive)
 				</td>
 				<td>
 					@Html.DisplayFor(modelItem => item.CreateTime)
@@ -102,9 +95,9 @@
 					@Html.DisplayFor(modelItem => item.UpdateTime)
 				</td>
 				<td class="text-center">
-					<a asp-action="Edit" asp-route-id="@item.PromoID" class="btn btn-primary btn-sm mb-1">編輯</a>
-					<a asp-action="Details" asp-route-id="@item.PromoID" class="btn btn-info btn-sm mb-1">詳細資訊</a> 
-					<a asp-action="Delete" asp-route-id="@item.PromoID" class="btn btn-danger btn-sm mb-1">刪除</a>
+					<a asp-action="Edit" asp-route-id="@item.PromoID" class="btn btn-primary btn-sm mb-1 btn-action">編輯</a>
+					<a asp-action="Details" asp-route-id="@item.PromoID" class="btn btn-info btn-sm mb-1 btn-action">詳細資訊</a> 
+					<a asp-action="Delete" asp-route-id="@item.PromoID" class="btn btn-danger btn-sm mb-1 btn-action">刪除</a>
 				</td>
 			</tr>
 		}
@@ -127,6 +120,17 @@
 				},
 				fixedHeader: true
 			});
+
+			// 顯示成功訊息（延遲一點點，讓 DataTable 先完成）
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+                setTimeout(function () {
+                    alert('@Html.Raw(TempData["SuccessMessage"])');
+                }, 300); // 0.3 秒後顯示
+            </text>
+
+		}
 		});
 
 	</script>

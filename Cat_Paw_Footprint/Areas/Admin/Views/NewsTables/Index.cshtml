@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsIndexViewModel>
+@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsIndexViewModel>
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
 	ViewData["Title"] = "最新消息";
@@ -9,26 +9,16 @@
 	<link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
 
 	<style>
-		/* .action-btn {
-			min-width: 50%;
-			text-align: center;
-		} */
-
 		.table.dataTable thead tr th {
 			background-color: #22B3C1; /* 這裡放你側邊欄的顏色 */
 			color: white;
 			text-align: center;
 		}
 
-		.operation-btn {
-			display: inline-block;
-			min-width: 80px; /* 統一最小寬度 */
-			max-width: 120px; /* 避免太大 */
-			height: 32px; /* 統一高度 */
-			font-size: 0.85rem;
-			padding: 2px 8px; /* 控制間距 */
-			text-align: center;
-			margin: 0 auto; /* 在儲存格置中 */
+		.btn-action {
+			min-width: 80px;   /* 最小不要比這個小 */
+			max-width: 120px;  /* 最大不要比這個大 */
+			width: 80%;       /* 在父容器內自動撐滿 */
 		}
 
 		#newsTable_filter {
@@ -83,16 +73,9 @@
 				<td>
 					@Html.DisplayFor(modelItem => item.ExpireTime)
 				</td>
-				<td>
-					@* <div class="form-check form-switch">
-                     <input class="form-check-input" type="checkbox" disabled @(item.IsActive == true ? "checked" : "") />
-                    </div> *@
-
-
-					<div class="form-check">
-						<input class="form-check-input" type="checkbox" @(item.IsActive == true ? "checked" : "") disabled />
-					</div>
-				</td>
+				 <td class="text-center">
+					@Html.ActiveBadge(item.IsActive)
+				 </td>
 				<td>
 					@Html.DisplayFor(modelItem => item.UpdateTime)
 				</td>
@@ -100,10 +83,9 @@
 					@Html.DisplayFor(modelItem => item.EmployeeName)
 				</td>
 				<td class="text-center">
-					
-						<a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID" class="btn btn-primary btn-sm mb-1">編輯</a>
-					<a asp-action="Details" asp-route-id="@item.NewsID" class="btn btn-info btn-sm mb-1">詳細資訊</a>
-					<a asp-action="Delete" asp-route-id="@item.NewsID" class="btn btn-danger btn-sm mb-1">刪除</a>
+						<a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID" class="btn btn-primary btn-sm mb-1 btn-action">編輯</a>
+						<a asp-action="Details" asp-route-id="@item.NewsID" class="btn btn-info btn-sm mb-1 btn-action">詳細資訊</a>
+						<a asp-action="Delete" asp-route-id="@item.NewsID" class="btn btn-danger btn-sm mb-1 btn-action">刪除</a>
 					
 				</td>
 			</tr>
@@ -128,7 +110,19 @@
 				},
 				fixedHeader: true
 			});
+
+		// 顯示成功訊息（延遲一點點，讓 DataTable 先完成）
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+                setTimeout(function () {
+                    alert('@Html.Raw(TempData["SuccessMessage"])');
+                }, 300); // 0.3 秒後顯示
+            </text>
+
+		}
 		});
 
 	</script>
+
 }

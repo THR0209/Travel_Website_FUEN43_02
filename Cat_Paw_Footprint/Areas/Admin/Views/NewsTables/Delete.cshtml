@@ -8,7 +8,7 @@
 
 <h3>你確定要刪除嗎?</h3>
 <div>
-    <h4>NewsTable</h4>
+   
     <hr />
     <dl class="row">
         <dt class="col-sm-2 fs-5">
@@ -38,9 +38,11 @@
         <dt class="col-sm-2 fs-5">
             @Html.DisplayNameFor(model => model.IsActive)
         </dt>
+        @* <dd class = "col-sm-10"> *@
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
+             @Html.ActiveBadge(Model.IsActive)
+        </dd>   
+        @* </dd> *@
         <dt class="col-sm-2 fs-5">
             @Html.DisplayNameFor(model => model.CreateTime)
         </dt>

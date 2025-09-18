@@ -25,7 +25,7 @@
                         <span asp-validation-for="TransportPrice" class="text-danger"></span>
                     </div>
 
-                    <!-- ✅ 介紹放左下 -->
+                    <!-- 介紹放左下 -->
                     <div class="mb-3">
                         <label asp-for="TransportDesc" class="control-label"></label>
                         <textarea asp-for="TransportDesc" class="form-control" rows="6"></textarea>
@@ -44,7 +44,7 @@
                         <span asp-validation-for="IsActive" class="text-danger"></span>
                     </div>
 
-                    <!-- ✅ 關鍵字放右上 -->
+                    <!-- 關鍵字放右上 -->
                     <div class="mb-3">
                         <label asp-for="KeywordID" class="control-label">選擇關鍵字</label>
                         <!-- 一般下拉選單 -->
@@ -58,12 +58,12 @@
                         <span asp-validation-for="KeywordID" class="text-danger"></span>
                     </div>
 
-                    <!-- ✅ 圖片上傳放右下 -->
+                    <!-- 圖片上傳放右下 -->
                     <div class="mb-3">
                         <label asp-for="Picture" class="control-label"></label>
                         <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
                         <span asp-validation-for="Picture" class="text-danger"></span>
-                        <!-- ✅ 預覽區 -->
+                        <!-- 預覽區 -->
                         <div id="previewArea" class="mt-2 d-flex flex-wrap"></div>
                     </div>
                 </div>

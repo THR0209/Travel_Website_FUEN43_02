@@ -32,7 +32,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 		[Required(ErrorMessage = "折扣數值不可為空")]
 		public decimal? DiscountValue { get; set; }
 
-		[Display(Name = "是否啟用")]
+		[Display(Name = "狀態")]
 		public bool IsActive { get; set; }
 
 		[Display(Name = "建立時間")]
@@ -47,5 +47,17 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 
 		// 🔹 選取產品用（新增/編輯時選 checkbox / multiselect）
 		public List<int> SelectedProductIDs { get; set; } = new();
-	}
+
+        // 額外加一個只讀屬性，專門用來顯示中文
+        public string DiscountTypeName =>
+            DiscountType == 1 ? "百分比折扣" :
+            DiscountType == 2 ? "固定金額折扣" :
+            "未知";
+
+        // ✅ 顯示折扣值（加上 % 或 元）
+        public string DiscountValueDisplay =>
+            DiscountType == 1 ? $"{DiscountValue}%" :
+            DiscountType == 2 ? $"{DiscountValue} 元" :
+            DiscountValue.ToString();
+    }
 }
