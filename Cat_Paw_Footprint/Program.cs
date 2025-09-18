@@ -58,9 +58,48 @@ namespace Cat_Paw_Footprint
 	}).AddCookie("EmployeeAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Employee.Auth";
-		options.LoginPath = "/Employee/Auth/Login";       // 員工登入頁
-		options.AccessDeniedPath = "/Employee/Auth/Denied";
+		options.LoginPath = "/Employee/EmployeeAuth/Login";       // 員工登入頁
+		options.AccessDeniedPath = "/Home/Index";
 	});
+
+			builder.Services.AddAuthorization(options =>
+			{
+				options.AddPolicy("Emp.AdminOnly", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
+
+				options.AddPolicy("AreaAdmin", policy =>//報表 最新消息 優惠活動
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
+
+				options.AddPolicy("AreaCouponManagement", policy =>//優惠券
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "Sales"));
+
+				options.AddPolicy("AreaCustomerService", policy =>//客服
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "CustomerService", "SuperAdmin"));
+
+				options.AddPolicy("AreaOrder", policy =>//訂單
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
+
+
+				options.AddPolicy("AreaProductManagement", policy =>//產品
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "TourGuide"));
+
+				options.AddPolicy("AreaTravelManagement", policy =>//旅遊
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
+			});
 
 			builder.Services.AddSession(options =>
 			{
