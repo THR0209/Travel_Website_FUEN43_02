@@ -6,23 +6,29 @@
 }
 <h2 class="mb-3">客戶管理</h2>
 
+<div class="mb-3">
+    <button type="button" class="btn btn-success" id="btn-save-all">全部儲存</button>
+</div>
+
 <div class="table-responsive">
     <table class="table table-striped align-middle" id="productsTable">
         <thead>
             <tr>
+
                 <th class="text-center" style="width:10%;">編號</th>
-                <th class="text-center" style="width:15%;">姓名</th>
-                <th class="text-center" style="width:10%;">等級</th>
+                <th class="text-center" style="width:10%;">姓名</th>
+                <th class="text-center" style="width:15%;">等級</th>
                 <th style="width:8%;">啟用</th>
                 <th style="width:10%;">黑名單</th>
-                <th class="text-center" style="width:28%;">信箱</th>
-                <th class="text-center" style="width:28%;">操作</th>
+                <th class="text-center" style="width:25%;">信箱</th>
+                <th class="text-center" style="width:31%;">操作</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var cus in Model)
             {
                 <tr data-id="@cus.CustomerID">
+
                     <td class="text-center">@cus.CustomerID</td>
                     <td class="text-center">@cus.CustomerName</td>
                     <td class="text-center">
@@ -48,7 +54,7 @@
                     <td class="text-center">@cus.Email</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-info btn-sm js-detail">客戶資訊</button>
-                        <button type="button" class="btn btn-info btn-sm js-history">登陸紀錄</button>
+                        <button type="button" class="btn btn-info btn-sm js-history">登入紀錄</button>
                         <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
                     </td>
                 </tr>
@@ -78,6 +84,7 @@
         </div>
     </div>
 </div>
+
 
 @section Scripts{
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -177,5 +184,52 @@
                 });
                                            
             });
+
+                    let cart = [];
+
+                document.getElementById("btn-save-all").addEventListener("click", async () => {
+            const buttons = document.querySelectorAll("#productsTable .js-save");
+            const results = [];
+
+            let index = 1;
+
+            for (const btn of buttons) {
+                const tr = btn.closest("tr");
+                const id = tr.dataset.id;
+                const level = tr.querySelector(".js-leavel").value;
+                const status = tr.querySelector(".js-status").checked;
+                const isBlacklisted = tr.querySelector(".js-isblacklisted").checked;
+
+                const form = new FormData();
+                form.append("customerId", id);
+                form.append("levelId", level);
+                form.append("status", status ? "true" : "false");
+                form.append("isBlacklisted", isBlacklisted ? "true" : "false");
+
+                const token = document.querySelector("#anti-form input[name=__RequestVerificationToken]").value;
+                if (token) form.append("__RequestVerificationToken", token);
+
+                try {
+                    const res = await fetch('@Url.Action("UpdateCustomer", "CustomerAdmin", new { area = "Employee" })', {
+                        method: "POST",
+                        body: form,
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        results.push(`第 ${index} 筆 (客戶ID=${id}) ✅ 更新成功`);
+                    } else {
+                        results.push(`第 ${index} 筆 (客戶ID=${id}) ❌ 更新失敗: ${data.message || "未知錯誤"}`);
+                    }
+                } catch (err) {
+                    results.push(`第 ${index} 筆 (客戶ID=${id}) ❌ 發生錯誤: ${err.message}`);
+                }
+
+                index++;
+                await new Promise(r => setTimeout(r, 200)); // 避免同時打爆伺服器
+            }
+
+            alert(results.join("\n"));
+        });
     </script>
 }

@@ -87,5 +87,27 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			}
 		}
 
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> BatchSaveCustomers([FromBody] List<CustomerUpdateDto> updates)//批次更新
+		{
+			if (updates == null || !updates.Any())
+			{
+				return Json(new { ok = false, message = "沒有收到更新資料" });
+			}
+
+			try
+			{
+				await _svc.BatchSaveCustomersAsync(updates);
+				return Json(new { ok = true, message = "批次更新成功" });
+			}
+			catch (Exception ex)
+			{
+				// 你可以記 Log
+				return Json(new { ok = false, message = "批次更新失敗：" + ex.Message });
+			}
+		}
+
+
 	} 
 }

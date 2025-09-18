@@ -68,7 +68,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 					Account = newAccount,
 					CompanyName = model.CompanyName,
 					Email = model.Email,
-					Status = false,//預設停用，廠商第一次改密碼後才會順便開啟
+					Status = true,//預設啟用，但廠商第一次登入後會先搜尋角色表有沒有缺漏資料才能用之後的功能
 					CreateDate = DateTime.Now
 				};
 

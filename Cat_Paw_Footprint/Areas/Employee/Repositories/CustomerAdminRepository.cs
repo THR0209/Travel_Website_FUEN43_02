@@ -65,6 +65,13 @@ namespace Cat_Paw_Footprint.Areas.Employee.Repositories
 				}).FirstOrDefaultAsync();
 			return Cus;
 		}
+		public async Task<List<Customers>> GetCustomersByIdsAsync(List<int> ids)//根據多個客戶編號取得客戶資料(批次更新用)
+		{
+			return await _db.Customers
+				.Where(c => ids.Contains(c.CustomerID))
+				.ToListAsync();
+		}
+
 
 		public async Task<IEnumerable<CustomerAdminViewModel?>> GetLoginHistoryAsync(int? customerId)//根據客戶編號取得該客戶的登入紀錄
 		{

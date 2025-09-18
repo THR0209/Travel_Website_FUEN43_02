@@ -1,6 +1,8 @@
 ﻿using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.ViewModel;
+using Cat_Paw_Footprint.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.Employee.Services
 {
@@ -9,13 +11,16 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 		private readonly ICustomerAdminRepository _repo;
 		private readonly UserManager<IdentityUser> _userManager;      // 用 Identity 管帳號
 		private readonly RoleManager<IdentityRole> _roleManager;      // 如果要加角色
+		private readonly EmployeeDbContext _context; // 用來存取資料庫
 		public CustomerAdminService(ICustomerAdminRepository repo,
 								UserManager<IdentityUser> userManager,
-								RoleManager<IdentityRole> roleManager)
+								RoleManager<IdentityRole> roleManager, 
+								EmployeeDbContext context)
 		{
 			_userManager = userManager;
 			_roleManager = roleManager;
 			_repo = repo;
+			_context = context;
 		}
 
 		public async Task<IEnumerable<CustomerAdminViewModel>> GetAllCustomersAsync()
@@ -67,5 +72,31 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 		{
 			return await _repo.GetCustomerIdByEmailAsync(email);
 		}
+		public async Task BatchSaveCustomersAsync(List<CustomerUpdateDto> updates)//批次更新
+		{
+			using var transaction = await _context.Database.BeginTransactionAsync();//開始交易
+			try
+			{
+				var ids = updates.Select(x => x.CustomerId).ToList();
+			var customers = await _repo.GetCustomersByIdsAsync(ids);
+
+			foreach (var c in customers)
+			{
+				var u = updates.First(x => x.CustomerId == c.CustomerID);
+				c.Level = u.LevelId;
+				c.Status = u.Status;
+				c.IsBlacklisted = u.IsBlacklisted;
+			}
+
+			await _context.SaveChangesAsync();
+				await transaction.CommitAsync();//成功後交易結束
+			}
+			catch
+			{
+				await transaction.RollbackAsync();//失敗後交易回復
+				throw;
+			}
+		}
+
 	}
 }

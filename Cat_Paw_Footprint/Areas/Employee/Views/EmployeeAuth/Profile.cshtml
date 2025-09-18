@@ -91,11 +91,16 @@
 
           const data = await res.json();
           if (data.ok) {
-            alert(data.message || '更新成功');
-            // 需要的話：location.reload();  // 重整页面
-          } else {
+            if (data.needRelogin) {
+                alert(data.message || '更新成功，請重新登入');
+                window.location.href = "/Home/Index"; // 強制跳轉登入頁
+            } else {
+                alert(data.message || '更新成功');
+                // 需要的話：location.reload();  // 或更新部分區塊
+            }
+        } else {
             alert(data.message || '更新失敗');
-          }
+        }
         });
     </script>
 }

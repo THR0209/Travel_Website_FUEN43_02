@@ -55,6 +55,11 @@ namespace Cat_Paw_Footprint
 		options.Cookie.Name = ".CatPaw.Customer.Auth";
 		options.LoginPath = "/Customer/Account/Login"; // 客戶登入頁
 		options.AccessDeniedPath = "/Customer/Account/Denied";
+	}).AddCookie("EmployeeAuth", options =>
+	{
+		options.Cookie.Name = ".CatPaw.Employee.Auth";
+		options.LoginPath = "/Employee/Auth/Login";       // 員工登入頁
+		options.AccessDeniedPath = "/Employee/Auth/Denied";
 	});
 
 			builder.Services.AddSession(options =>
@@ -106,6 +111,31 @@ namespace Cat_Paw_Footprint
 
             app.UseRouting();
 			app.UseSession(); // 啟用 Session 中介軟體
+			app.Use(async (context, next) =>
+			{
+				var path = context.Request.Path.Value ?? "";
+
+				if (path.StartsWith("/Employee", StringComparison.OrdinalIgnoreCase) ||
+					path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase) ||
+					path.StartsWith("/CouponManagement", StringComparison.OrdinalIgnoreCase) ||
+					path.StartsWith("/ProductManagement", StringComparison.OrdinalIgnoreCase))
+				{
+					if (context.User?.Identity?.IsAuthenticated == true &&
+						context.User.Identity.AuthenticationType == "EmployeeAuth" &&
+						string.IsNullOrEmpty(context.Session.GetString("EmpId")))
+					{
+						var claims = context.User.Claims;
+						context.Session.SetString("EmpId", claims.FirstOrDefault(c => c.Type == "EmployeeID")?.Value ?? "");
+						context.Session.SetString("EmpRoleId", claims.FirstOrDefault(c => c.Type == "RoleID")?.Value ?? "");
+						context.Session.SetString("EmpRoleName", claims.FirstOrDefault(c => c.Type == "RoleName")?.Value ?? "");
+						context.Session.SetString("EmpName", claims.FirstOrDefault(c => c.Type == "EmployeeName")?.Value ?? "");
+						context.Session.SetString("Status", claims.FirstOrDefault(c => c.Type == "Status")?.Value ?? "");
+						context.Session.SetString("Login", "True");
+					}
+				}
+
+				await next();
+			});
 			app.UseAuthentication();// 在 Authorization 之前
 			app.UseAuthorization();
 			app.MapControllerRoute(
