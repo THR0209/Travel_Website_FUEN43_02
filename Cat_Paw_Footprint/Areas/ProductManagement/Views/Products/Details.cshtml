@@ -1,967 +1,619 @@
-﻿@using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
-@model Cat_Paw_Footprint.Areas.ProductManagement.ViewModel.ProductEditViewModel
+﻿@model Cat_Paw_Footprint.Areas.ProductManagement.ViewModel.ProductDetailsViewModel
 
 @{
-    ViewData["Title"] = "Edit";
-}
-
-@if (ViewBag.ModelErrors != null)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var err in ViewBag.ModelErrors)
-            {
-                <li><strong>@err.Key</strong>:
-                    @foreach (var msg in err.Errors)
-                    {
-                        @msg <br />
-                    }
-                </li>
-            }
-        </ul>
-    </div>
+    ViewData["Title"] = "Details";
 }
 
 @section Styles {
-    <!-- DataTables (統一 1.13.7) -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" />
-
-    <!-- CKEditor -->
-    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
-    <link href="~/css/myckeditor.css" rel="stylesheet" />
-
-    <!-- jQuery UI -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-
     <style>
-        label {
-            font-size: 18px;
+        body {
+            background-color: white;
         }
+
+        .meal-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+            .meal-card:hover {
+                transform: scale(1.03);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+
+        .meal-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 1rem;
+            border-radius: 0.75rem 0.75rem 0 0;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .meal-body {
+            padding: 1rem;
+        }
+
+        .bg-breakfast {
+            background: linear-gradient(135deg, #6a11cb, #2575fc); /* 紫藍漸層 */
+        }
+
+        .bg-lunch {
+            background: linear-gradient(135deg, #56ab2f, #a8e063); /* 綠色漸層 */
+        }
+
+        .bg-dinner {
+            background: linear-gradient(135deg, #f7971e, #ffd200); /* 橘黃漸層 */
+        }
+
+        .day-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .info-tag {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .tag-breakfast {
+            background: #6a11cb;
+            color: white;
+        }
+
+        .tag-lunch {
+            background: #56ab2f;
+            color: white;
+        }
+
+        .tag-dinner {
+            background: #f7971e;
+            color: white;
+        }
+
+        .tag-hotel {
+            background: #2b5876;
+            color: white;
+        }
+
+        .tag-transport {
+            background: #0f9b0f;
+            color: white;
+        }
+
+        /* Timeline 外框 */
+        .timeline {
+            position: relative;
+            margin: 2rem 0;
+            padding-left: 2rem;
+            border-left: 3px solid #ddd;
+        }
+
+            /* Timeline 節點 */
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: -7px;
+                width: 14px;
+                height: 14px;
+                background: #4facfe;
+                border-radius: 50%;
+                top: 0;
+            }
+
+        /* Timeline 卡片 */
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1rem;
+        }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -10px;
+                top: 0.5rem;
+                width: 14px;
+                height: 14px;
+                background: #00f2fe;
+                border-radius: 50%;
+            }
+
+        .timeline-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .timeline-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            }
+
+        .day-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #4facfe;
+        }
+
+        .carousel-item img {
+            height: 250px; /* 固定高度 */
+            object-fit: contain; /* 圖片填滿容器，超出部分裁切 */
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            filter: invert(100%); /* 把白色變黑色 */
+        }
+
+        /* 浮動標題效果 */
+        .section-title {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .day-timeline h5 {
+            position: relative;
+            padding-left: 20px;
+        }
+
+            .day-timeline h5::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 6px;
+                width: 10px;
+                height: 10px;
+                background: #4facfe;
+                border-radius: 50%;
+            }
     </style>
 }
 
-<a asp-action="Index" class="btn btn-primary float-end">返回上頁</a>
-<h1 class="ms-3">更新行程內容</h1>
-<hr />
+<div class="container">
+    @* <h1 class="mb-4">詳細行程檢視</h1> *@
 
-<form asp-action="Edit" enctype="multipart/form-data">
-    <!-- 🔑 ProductID 必須隱藏送出 -->
-    <input type="hidden" asp-for="Product.ProductID" />
-
-    <!-- 左右欄位（跟 Create.cshtml 一樣，這裡省略） -->
-    <div class="row">
+    <!-- 上方左右區塊 -->
+    <div class="row mb-3 align-items-stretch">
+        <!-- 左：產品封面照 -->
         <div class="col-md-4">
-            <!-- 基本資料 (圖片, 名稱, 代碼...) -->
-            <div class="card p-3 ms-3 h-100">
-                <label class="mb-1">產品封面照： </label>
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                @* <div class="form-group mb-3">
-                    @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
+            <div class="card h-100">
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    @if (Model.Product.ProductImage != null)
                     {
-                        <!-- 把 byte[] 轉成 base64 並顯示 -->
-                        var base64 = "data:image/png;base64," + Convert.ToBase64String(Model.Product.ProductImage);
-                        <img src="@base64" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
+                        <img src="data:image/*;base64,@(Convert.ToBase64String(Model.Product.ProductImage))"
+                             class="img-fluid rounded w-100 h-100"
+                             alt="產品封面照" />
                     }
                     else
                     {
-                        <!-- 沒有圖片就顯示預設圖 -->
-                        <img src="@Url.Content("~/images/NoImage.png")" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
+                        <img src="~/images/NoImage.png" class="img-fluid rounded" alt="無封面照" />
                     }
-                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" />
-                    <!-- 使用asp-for同時會使 id 和 name 兩個成為asp-for的值，且如果asp-for的值有.的話，在轉換成id時會被轉成_ ，name不會影響 -->
-                </div> *@
-
-                <div class="form-group mb-3">
-                    @if (Model.Product.ProductID > 0)
-                    {
-                        <img src="@Url.Action("GetProductImage", "Products", new { area = "ProductManagement", id = Model.Product.ProductID })"
-                             style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
-                    }
-                    else
-                    {
-                        <img src="@Url.Content("~/images/NoImage.png")"
-                             style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
-                    }
-                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" />
-                </div>
-
-                @* <div class="form-group mb-3">
-                    <label asp-for="Product.ProductCode" class="control-label mb-1">產品編號：</label>
-                    <input asp-for="Product.ProductCode" class="form-control" />
-                    <span asp-validation-for="Product.ProductCode" class="text-danger"></span>
-                </div> *@
-
-                <div class="form-group mb-3">
-                    <label asp-for="Product.ProductName" class="control-label mb-1">產品名稱：</label>
-                    <input asp-for="Product.ProductName" class="form-control" />
-                    <span asp-validation-for="Product.ProductName" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Product.RegionID" class="control-label mb-1">出團地區：</label>
-                    <select asp-for="Product.RegionID" class="form-select" asp-items="ViewBag.RegionID">
-                        <option value="">請選擇地區</option>
-                    </select>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Product.ProductPrice" class="control-label mb-1">產品價格：</label>
-                    <input asp-for="Product.ProductPrice" class="form-control" />
-                    <span asp-validation-for="Product.ProductPrice" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Product.StartDate" class="control-label mb-1">出發時間：</label>
-                    <input asp-for="Product.StartDate" class="form-control" />
-                    <span asp-validation-for="Product.StartDate" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Product.EndDate" class="control-label mb-1">返程時間：</label>
-                    <input asp-for="Product.EndDate" class="form-control" />
-                    <span asp-validation-for="Product.EndDate" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="ProductAnalysis.ReleaseDate" class="control-label mb-1">預計上架時間：</label>
-                    <input type="datetime-local" asp-for="ProductAnalysis.ReleaseDate" class="form-control" value="@Model.ProductAnalysis?.ReleaseDate?.ToString("yyyy-MM-ddTHH:mm")" />
-                    <span asp-validation-for="ProductAnalysis.ReleaseDate" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label asp-for="Product.MaxPeople" class="control-label mb-1">人數上限：</label>
-                    <input asp-for="Product.MaxPeople" class="form-control" />
-                    <span asp-validation-for="Product.MaxPeople" class="text-danger"></span>
                 </div>
             </div>
         </div>
+
+        <!-- 右：產品基本資料 -->
         <div class="col-md-8">
-            <!-- 描述 / 注意事項 -->
-            <div class="card p-3 ms-3 d-flex flex-column h-100">
-                <div class="form-group mb-3">
-                    <label asp-for="Product.ProductDesc" class="control-label mb-1">產品描述：</label>
-                    <textarea asp-for="Product.ProductDesc" class="form-control" id="editor"></textarea>
-                    <span asp-validation-for="Product.ProductDesc" class="text-danger"></span>
-                </div>
-
-                <div class="form-group mb-3 mt-2">
-                    <label asp-for="Product.ProductNote" class="control-label mb-1">注意事項：</label>
-                    <textarea asp-for="Product.ProductNote" class="form-control" id="editor2"></textarea>
-                    <span asp-validation-for="Product.ProductNote" class="text-danger"></span>
+            <div class="card h-100">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold mb-4">產品名稱：@Model.Product.ProductName</h3>
+                    <h5><strong>產品編號：</strong>@Model.Product.ProductCode</h5>
+                    <h5><strong>價格：</strong>@Model.Product.ProductPrice / 人</h5>
+                    <h5><strong>出團時間：</strong>@Model.Product.StartDate?.ToString("yyyy/MM/dd") ~ @Model.Product.EndDate?.ToString("yyyy/MM/dd")</h5>
+                    <h5><strong>人數上限：</strong>@Model.Product.MaxPeople</h5>
                 </div>
             </div>
         </div>
     </div>
 
-    <hr />
+    <!-- Tabs 區塊 -->
+    <ul class="nav nav-tabs mb-3 mt-5 border-bottom justify-content-center" id="detailsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab">
+                <i class="fa-solid fa-file-lines me-1"></i> 產品描述
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="meal-hotel-transport-tab" data-bs-toggle="tab" data-bs-target="#meal-hotel-transport" type="button" role="tab">
+                <i class="fa-solid fa-hotel me-1"></i>
+                行程介紹
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="note-tab" data-bs-toggle="tab" data-bs-target="#note" type="button" role="tab">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> 注意事項
+            </button>
+        </li>
+    </ul>
 
-    <!-- 四大區塊 -->
-    <div class="row">
-        <div class="col-md-6">
-            <!-- 🏨 住宿資訊 (Hotel Modal) -->
-            <div class="card p-3 ms-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4><i class="fa fa-hotel"></i> 住宿資訊</h4>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#hotelModal">新增住宿</button>
+    <!-- Tabs 內容區 -->
+    <div class="tab-content" id="detailsTabsContent">
+        <!-- Tab1: 產品描述 -->
+        <div class="tab-pane fade show active" id="desc" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4"><i class="fa-solid fa-pen me-2"></i>產品描述</h4>
+                    <hr />
+                    <p>@Html.Raw(Model.Product.ProductDesc)</p>
                 </div>
-                <div id="selectedHotels" class="mb-3 mt-3">
-                    <h6 class="text-danger">目前尚未新增住宿資訊</h6>
-                </div>
-                <input type="hidden" name="SelectedHotelIds" />
             </div>
         </div>
-        <div class="col-md-6">
-            <!-- 🚉 交通資訊 -->
-            <div class="card p-3 ms-3">
-                @* Card Header *@
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0"><i class="fa-solid fa-train-subway"></i> 交通資訊</h4>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transportModal"><i class="fa-solid fa-square-plus"></i> 新增交通</button>
+
+        <!-- Tab2: 食宿交通 -->
+        <div class="tab-pane fade" id="meal-hotel-transport" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+
+                    <!-- ================= 景點 ================= -->
+                    <div class="card mb-5 position-relative border border-primary rounded-4">
+                        <div class="section-title bg-primary text-white px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-archway me-2"></i> 景點
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側：文字內容 -->
+                                <div class="col-md-7">
+                                    @if (Model.Product.ProductLocations != null && Model.Product.ProductLocations.Any())
+                                    {
+                                        @foreach (var group in Model.Product.ProductLocations
+                                                                            .GroupBy(l => l.DayNumber)
+                                                                            .OrderBy(g => g.Key))
+                                        {
+                                            <div class="day-timeline mb-4">
+                                                <h5 class="fw-bold text-secondary">第 @group.Key 天</h5>
+                                                <ul class="list-unstyled ps-3 mb-3">
+                                                    @foreach (var loc in group)
+                                                    {
+                                                        <li class="mb-2">
+                                                            <i class="fa-solid fa-location-dot text-danger me-2"></i>
+                                                            <span>@loc.Location?.LocationName</span><br />
+                                                            <span class="text-muted">@loc.Location?.LocationDesc</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無景點資料</p>
+                                    }
+                                </div>
+
+                                <!-- 右側：圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselSpots" class="carousel slide mt-3" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var spotImages = Model.Product.ProductLocations?
+                                                .Where(l => l.Location != null && l.Location.LocationPics != null)
+                                                .SelectMany(l => l.Location.LocationPics)
+                                                .ToList();
+
+                                                if (spotImages != null && spotImages.Any())
+                                                {
+                                                    for (int i = 0; i < spotImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(spotImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="景點圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無景點照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselSpots" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselSpots" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ================= 餐點 ================= -->
+                    <div class="card mb-5 position-relative border border-warning rounded-4">
+                        <div class="section-title bg-warning text-dark px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-utensils me-2"></i> 餐點
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側：文字內容 -->
+                                <div class="col-md-7">
+                                    @if (Model.Product.ProductRestaurants != null && Model.Product.ProductRestaurants.Any())
+                                    {
+                                        @foreach (var dayGroup in Model.Product.ProductRestaurants
+                                                                            .GroupBy(r => r.OrderIndex)
+                                                                            .OrderBy(g => g.Key))
+                                        {
+                                            <div class="day-timeline mb-4">
+                                                <h5 class="fw-bold text-secondary">第 @dayGroup.Key 天</h5>
+                                                <ul class="list-unstyled ps-3 mb-3">
+                                                    <li class="mb-2" style="font-size: 16px;">
+                                                        ☕ 早餐：
+                                                        @(dayGroup.Any(r => r.MealType == "Breakfast")
+                                                                                                        ? string.Join("、", dayGroup.Where(r => r.MealType == "Breakfast").Select(r => r.Restaurant?.RestaurantName))
+                                                                                                        : "尚無資料")
+                                                                                                                 <br />
+                                                                                                                 <span class="text-muted">
+                                                            @(dayGroup.Any(r => r.MealType == "Breakfast")
+                                                                                                                ? string.Join("、", dayGroup.Where(r => r.MealType == "Breakfast").Select(r => r.Restaurant?.RestaurantDesc))
+                                                                                                                : "尚無資料")
+                                                                                                                     </span>
+                                                                                                                 </li>
+                                                                                                                 <li class="mb-2" style="font-size: 16px;">
+                                                                                                                     🍲 午餐：
+                                                        @(dayGroup.Any(r => r.MealType == "Lunch")
+                                                                                                        ? string.Join("、", dayGroup.Where(r => r.MealType == "Lunch").Select(r => r.Restaurant?.RestaurantName))
+                                                                                                        : "尚無資料")
+                                                                                                                 <br />
+                                                                                                                 <span class="text-muted">
+                                                            @(dayGroup.Any(r => r.MealType == "Lunch")
+                                                                                                                ? string.Join("、", dayGroup.Where(r => r.MealType == "Lunch").Select(r => r.Restaurant?.RestaurantDesc))
+                                                                                                                : "尚無資料")
+                                                                                                                     </span>
+                                                                                                                 </li>
+                                                                                                                 <li class="mb-2" style="font-size: 16px;">
+                                                                                                                     🍴 晚餐：
+                                                        @(dayGroup.Any(r => r.MealType == "Dinner")
+                                                                                                        ? string.Join("、", dayGroup.Where(r => r.MealType == "Dinner").Select(r => r.Restaurant?.RestaurantName))
+                                                                                                        : "尚無資料")
+                                                                                                                 <br />
+                                                                                                                 <span class="text-muted">
+                                                            @(dayGroup.Any(r => r.MealType == "Dinner")
+                                                                                                                ? string.Join("、", dayGroup.Where(r => r.MealType == "Dinner").Select(r => r.Restaurant?.RestaurantDesc))
+                                                                                                                : "尚無資料")
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無餐點資料</p>
+                                    }
+                                </div>
+
+                                <!-- 右側：圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselMeals" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var mealImages = Model.Product.ProductRestaurants?
+                                                .Where(r => r.Restaurant != null && r.Restaurant.RestaurantPics != null)
+                                                .SelectMany(r => r.Restaurant.RestaurantPics)
+                                                .ToList();
+
+                                                if (mealImages != null && mealImages.Any())
+                                                {
+                                                    for (int i = 0; i < mealImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(mealImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="餐點圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無餐點照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselMeals" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselMeals" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ================= 住宿 ================= -->
+                    <div class="card mb-5 position-relative border border-success rounded-4">
+                        <div class="section-title bg-success text-white px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-hotel me-2"></i> 住宿
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側文字區 -->
+                                <div class="col-md-7">
+                                    @if (Model.Product.ProductHotels != null && Model.Product.ProductHotels.Any())
+                                    {
+                                        @foreach (var group in Model.Product.ProductHotels.GroupBy(h => h.OrderIndex).OrderBy(g => g.Key))
+                                        {
+                                            <div class="day-timeline mb-4">
+                                                <h5 class="fw-bold text-secondary">第 @group.Key 天</h5>
+                                                <ul class="list-unstyled ps-3 mb-3">
+                                                    @foreach (var ph in group)
+                                                    {
+                                                        <li class="" style="font-size: 17px;">
+                                                            <i class="fa-solid fa-bed me-2"></i>
+                                                            @ph.Hotel?.HotelName <br />
+                                                            <span class="text-muted"><strong>地址：</strong>@ph.Hotel?.HotelAddr</span><br />
+                                                            <span class="text-muted">@ph.Hotel?.HotelDesc</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無住宿資料</p>
+                                    }
+                                </div>
+
+                                <!-- 右側圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselHotels" class="carousel slide mt-3" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var hotelImages = Model.Product.ProductHotels?
+                                                .Where(h => h.Hotel != null && h.Hotel.HotelPics != null)
+                                                .SelectMany(h => h.Hotel.HotelPics)
+                                                .ToList();
+
+                                                if (hotelImages != null && hotelImages.Any())
+                                                {
+                                                    for (int i = 0; i < hotelImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(hotelImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="住宿圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無住宿照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselHotels" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselHotels" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ================= 交通 ================= -->
+                    <div class="card mb-5 position-relative border border-info rounded-4">
+                        <div class="section-title bg-info text-dark px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-bus me-2"></i> 交通
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側：文字內容 -->
+                                <div class="col-md-7">
+                                    <h4>交通方式：</h4>
+                                    @if (Model.Product.ProductsTransportations != null && Model.Product.ProductsTransportations.Any())
+                                    {
+                                        <ul class="list-unstyled ps-3 mb-3">
+                                            @foreach (var t in Model.Product.ProductsTransportations.ToList())
+                                            {
+                                                <li class="mb-2" style="font-size: 19px;"><i class="fa-solid fa-train-subway me-2"></i>@t.Transport?.TransportName<br /><span class="text-muted">@t.Transport?.TransportDesc</span></li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無交通資料</p>
+                                    }
+                                </div>
+
+                                <!-- 右側：圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselTransports" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var transportImages = Model.Product.ProductsTransportations?
+                                                .Where(t => t.Transport != null && t.Transport.TransportPics != null)
+                                                .SelectMany(t => t.Transport.TransportPics)
+                                                .ToList();
+
+                                                if (transportImages != null && transportImages.Any())
+                                                {
+                                                    for (int i = 0; i < transportImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(transportImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="交通圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無交通照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselTransports" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselTransports" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                @* 顯示已選內容的區塊 *@
-                <div id="selectedTransports" class="mb-3 mt-3">
-                    <h6 class="text-danger">目前尚未新增交通資訊</h6>
+            </div>
+        </div>
+
+
+        <!-- Tab3: 注意事項 -->
+        <div class="tab-pane fade" id="note" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4"><i class="fa-solid fa-triangle-exclamation me-2"></i> 注意事項</h4>
+                    <hr />
+                    <p>@Html.Raw(Model.Product.ProductNote)</p>
                 </div>
-                <input type="hidden" name="SelectedTransportIds" />
             </div>
         </div>
     </div>
 
-    <hr />
-
-    <!-- 🍽️ 餐廳 / 景點區塊 (同 Create.cshtml) -->
+    <!-- 操作按鈕 -->
     <div class="row mt-3">
-        <!-- 左側 Card -->
-        <div class="col-md-6">
-            <div class="card p-3 ms-3">
-                @* Card Header *@
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0"><i class="fa-solid fa-utensils"></i> 餐點資訊</h4>
-                </div>
-
-                @* 早餐 *@
-                <div class="border rounded p-2 mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0"><i class="fa-solid fa-mug-saucer"></i> 早餐</h5>
-                        <button type="button" class="btn btn-sm btn-primary open-restaurant-modal" data-meal="breakfast" data-bs-toggle="modal" data-bs-target="#restaurantModal">
-                            <i class="fa-solid fa-square-plus"></i> 新增早餐餐廳
-                        </button>
-                    </div>
-                    <div id="selectedRestaurantsBreakfast" class="mb-2">
-                        <h6 class="text-danger">目前尚未新增早餐</h6>
-                    </div>
-                    <input type="hidden" name="SelectedRestaurantsBreakfast" />
-                </div>
-
-                @* 午餐 *@
-                <div class="border rounded p-2 mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0"><i class="fa-solid fa-burger"></i> 午餐</h5>
-                        <button type="button" class="btn btn-sm btn-primary open-restaurant-modal" data-meal="lunch" data-bs-toggle="modal" data-bs-target="#restaurantModal">
-                            <i class="fa-solid fa-square-plus"></i> 新增午餐餐廳
-                        </button>
-                    </div>
-                    <div id="selectedRestaurantsLunch" class="mb-2">
-                        <h6 class="text-danger">目前尚未新增午餐</h6>
-                    </div>
-                    <input type="hidden" name="SelectedRestaurantsLunch" />
-                </div>
-
-                @* 晚餐 *@
-                <div class="border rounded p-2 mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0"><i class="fa-solid fa-bowl-food"></i> 晚餐</h5>
-                        <button type="button" class="btn btn-sm btn-primary open-restaurant-modal" data-meal="dinner" data-bs-toggle="modal" data-bs-target="#restaurantModal">
-                            <i class="fa-solid fa-square-plus"></i> 新增晚餐餐廳
-                        </button>
-                    </div>
-                    <div id="selectedRestaurantsDinner" class="mb-2">
-                        <h6 class="text-danger">目前尚未新增晚餐</h6>
-                    </div>
-                    <input type="hidden" name="SelectedRestaurantsDinner" />
-                </div>
-            </div>
-        </div>
-
-        <!-- 右側 Card -->
-        <div class="col-md-6">
-            <div class="card p-3 ms-3">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0"><i class="fa-solid fa-archway"></i> 景點資訊</h4>
-                    <button type="button" id="addDayBtn" class="btn btn-primary">
-                        <i class="fa-solid fa-square-plus"></i> 新增天數
-                    </button>
-                </div>
-
-                <!-- 這裡放所有天數 -->
-                <div id="daysContainer">
-                    <h4 class="text-danger">目前尚未新增景點資訊</h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- 把送出按鈕放這裡 -->
-        <div class="d-flex justify-content-end align-items-center mt-3">
-            <div class="form-check form-switch me-5">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="Product.IsActive"
-                       value="true"
-                       @(Model.Product.IsActive ?? false ? "checked" : "") />
-                <input type="hidden" name="Product.IsActive" value="false" />
-                <label class="form-check-label">上架</label>
-            </div>
-            <input type="submit" value="更新資料" class="btn btn-primary" />
-        </div>
-
-    </div>
-</form>
-
-<!-- Hotel Modal -->
-<div class="modal fade" id="hotelModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">選擇飯店</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table id="hotelsTable" class="table table-striped" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>ID</th>
-                            <th>名稱</th>
-                            <th>地址</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="confirmHotels" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-            </div>
+        <div class="col-12">
+            <a asp-action="Index" class="btn btn-secondary">返回列表</a>
         </div>
     </div>
 </div>
-
-<!-- Location Modal -->
-<div class="modal fade" id="locationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">選擇景點</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table id="locationsTable" class="table table-striped" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>ID</th>
-                            <th>名稱</th>
-                            <th>地址</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="confirmLocations" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Restaurant Modal -->
-<div class="modal fade" id="restaurantModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">選擇餐廳</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table id="restaurantsTable" class="table table-striped" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>ID</th>
-                            <th>名稱</th>
-                            <th>地址</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="clearRestaurants" class="btn btn-danger">清空全部</button>
-                <button type="button" id="confirmRestaurants" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Transportation Modal -->
-<div class="modal fade" id="transportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">選擇交通方式</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table id="transportsTable" class="table table-striped" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>ID</th>
-                            <th>名稱</th>
-                            <th>描述</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="confirmTransports" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <!-- DataTables -->
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-    <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
-
-    <!-- Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- jQuery UI (Sortable) -->
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-
-    <!-- CKEditor -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
-    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
-    <script src="~/js/myckeditor.js"></script>
-
-    <script>
-        // ====== 後端帶入的初始資料，統一轉成 { id, orderIndex } ======
-        let selectedHotels = JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedHotelIds ?? new List<OrderedItem>()))')
-                                .map(x => ({ id: x.id, orderIndex: x.orderIndex }));
-
-        let selectedTransports = JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedTransportationIds ?? new List<int>()))');
-
-        let selectedRestaurants = {
-            breakfast: JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedRestaurantsBreakfast ?? new List<OrderedItem>()))')
-                        .map(x => ({ id: x.id, orderIndex: x.orderIndex })),
-            lunch: JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedRestaurantsLunch ?? new List<OrderedItem>()))')
-                        .map(x => ({ id: x.id, orderIndex: x.orderIndex })),
-            dinner: JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedRestaurantsDinner ?? new List<OrderedItem>()))')
-                        .map(x => ({ id: x.id, orderIndex: x.orderIndex }))
-        };
-
-        let currentMealType = null;
-
-        let selectedLocations = JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedLocations ?? new List<DayLocations>()))')
-                                .map(day => ({
-                                    dayNumber: day.dayNumber,  // ✅ 改成 dayNumber
-                                    locations: (day.locations || []).map(x => ({ id: x.id, orderIndex: x.orderIndex }))
-                                }));
-
-
-
-
-        let dayCount = 0;
-        let currentDay = null;
-        let selectedLocationsByDay = {};
-
-        // ===== 全域變數 =====
-        let hotelTable = null;
-        let transportTable = null;
-        let restaurantTable = null;
-        let locationTable = null;
-
-        // ===== Lazy Init DataTables =====
-        // 🏨 飯店
-        // $('#hotelModal').on('shown.bs.modal', function () {
-        //     if (!hotelTable) {
-        //         hotelTable = $('#hotelsTable').DataTable({
-        //             ajax: { url: '/ProductManagement/Products/GetHotels', type: 'GET', dataSrc: 'data' },
-        //             columns: [
-        //                 { data: "hotelID", render: d => `<input type="checkbox" class="hotel-checkbox" value="${d}">` },
-        //                 { data: "hotelID" }, { data: "hotelName" }, { data: "hotelAddr" }
-        //             ]
-        //         }).on('draw.dt', function () { renderHotels(hotelTable); });
-        //     } else {
-        //         hotelTable.draw();
-        //     }
-        // });
-
-        // 🚉 交通
-        // $('#transportModal').on('shown.bs.modal', function () {
-        //     if (!transportTable) {
-        //         transportTable = $('#transportsTable').DataTable({
-        //             ajax: { url: '/ProductManagement/Products/GetTransportations', type: 'GET', dataSrc: 'data' },
-        //             columns: [
-        //                 { data: "transportID", render: d => `<input type="checkbox" class="transport-checkbox" value="${d}">` },
-        //                 { data: "transportID" }, { data: "transportName" }, { data: "transportDesc" }
-        //             ]
-        //         }).on('draw.dt', function () { renderTransports(transportTable); });
-        //     } else {
-        //         transportTable.draw();
-        //     }
-        // });
-
-        // 🍽️ 餐廳
-        // $('#restaurantModal').on('shown.bs.modal', function () {
-        //     if (!restaurantTable) {
-        //         restaurantTable = $('#restaurantsTable').DataTable({
-        //             ajax: { url: '/ProductManagement/Products/GetRestaurants', type: 'GET', dataSrc: 'data' },
-        //             columns: [
-        //                 { data: "restaurantID", render: d => `<input type="checkbox" class="restaurant-checkbox" value="${d}">` },
-        //                 { data: "restaurantID" }, { data: "restaurantName" }, { data: "restaurantAddr" }
-        //             ]
-        //         }).on('draw.dt', function () {
-        //             ["breakfast","lunch","dinner"].forEach(m => renderRestaurants(m, restaurantTable));
-        //         });
-        //     } else {
-        //         restaurantTable.draw();
-        //     }
-        // });
-
-        // 🏞 景點
-        // $('#locationModal').on('shown.bs.modal', function () {
-        //     if (!locationTable) {
-        //         locationTable = $('#locationsTable').DataTable({
-        //             ajax: { url: '/ProductManagement/Products/GetLocations', type: 'GET', dataSrc: 'data' },
-        //             columns: [
-        //                 { data: "locationID", render: d => `<input type="checkbox" class="location-checkbox" value="${d}">` },
-        //                 { data: "locationID" }, { data: "locationName" }, { data: "locationAddr" }
-        //             ]
-        //         }).on('draw.dt', function () {
-        //             if (selectedLocations.length > 0) {
-        //                 selectedLocations.forEach(day => {
-        //                     addDayBlock(day.dayNumber);
-        //                     renderLocations(day.dayNumber, locationTable, day.locations);
-        //                     dayCount = Math.max(dayCount, day.dayNumber);
-        //                 });
-        //             }
-        //         });
-        //     } else {
-        //         locationTable.draw();
-        //     }
-        // });
-
-        // ====== 共用 Hidden Inputs 方法 ======
-        function updateOrderedHiddenField(name, items) {
-            $(`input[name^="${name}"]`).remove();
-            items.forEach((item, index) => {
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: `${name}[${index}].ID`,
-                    value: item.id
-                }).appendTo('form');
-
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: `${name}[${index}].OrderIndex`,
-                    value: item.orderIndex ?? (index + 1)
-                }).appendTo('form');
-            });
-        }
-
-        function updateIntListHiddenField(name, items) {
-            $(`input[name^="${name}"]`).remove();
-            items.forEach((id, index) => {
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: `${name}[${index}]`,
-                    value: id
-                }).appendTo('form');
-            });
-        }
-
-        function updateLocationsHiddenField(dayNum, items) {
-            // 先刪除舊的 input
-            $(`input[name^="SelectedLocations[${dayNum - 1}]"]`).remove();
-
-            // DayNumber
-            $('<input>').attr({
-                type: 'hidden',
-                name: `SelectedLocations[${dayNum - 1}].DayNumber`,
-                value: dayNum
-            }).appendTo('form');
-
-            // Locations
-            items.forEach((item, index) => {
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: `SelectedLocations[${dayNum - 1}].Locations[${index}].ID`,
-                    value: item.id
-                }).appendTo('form');
-
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: `SelectedLocations[${dayNum - 1}].Locations[${index}].OrderIndex`,
-                    value: item.orderIndex
-                }).appendTo('form');
-            });
-        }
-
-
-        // ====== Render Functions ======
-        function renderHotels(table) {
-            $('#selectedHotels').empty();
-            if (!selectedHotels || selectedHotels.length === 0) {
-                $('#selectedHotels').html('<h4 class="text-danger">目前尚未新增住宿資訊</h4>');
-                return;
-            }
-            let arr = [];
-            selectedHotels.sort((a, b) => a.orderIndex - b.orderIndex)
-                .forEach((item, i) => {
-                    let hotel = table.rows().data().toArray().find(r => r.hotelID == item.id);
-                    if (hotel) {
-                        $('#selectedHotels').append(`
-                            <div class="list-group-item p-2 border rounded mb-1" data-id="${hotel.hotelID}">
-                                <strong class="item-index">第 ${i + 1} 天</strong><br/>
-                                <strong>名稱：</strong>${hotel.hotelName}<br/>
-                                <strong>地址：</strong>${hotel.hotelAddr}
-                            </div>`);
-                        arr.push({ id: hotel.hotelID, orderIndex: i + 1 });
-                    }
-                });
-            updateOrderedHiddenField("SelectedHotelIds", arr);
-            $('#selectedHotels').sortable({
-                update: function () {
-                    let arr = [];
-                    $('#selectedHotels .list-group-item').each(function (i) {
-                        arr.push({ id: $(this).data('id'), orderIndex: i + 1 });
-                        $(this).find(".item-index").text(`第 ${i + 1} 天`);
-                    });
-                    updateOrderedHiddenField("SelectedHotelIds", arr);
-                }
-            });
-        }
-
-        function renderTransports(table) {
-            $('#selectedTransports').empty();
-            if (!selectedTransports || selectedTransports.length === 0) {
-                $('#selectedTransports').html('<h4 class="text-danger">目前尚未新增交通資訊</h4>');
-                return;
-            }
-            updateIntListHiddenField("SelectedTransportationIds", selectedTransports);
-            selectedTransports.forEach((id, index) => {
-                let transport = table.rows().data().toArray().find(r => r.transportID == id);
-                if (transport) {
-                    $('#selectedTransports').append(`
-                        <div class="p-2 border rounded mb-1" data-id="${transport.transportID}">
-                            <strong>第 ${index + 1} 種</strong><br/>
-                            <strong>名稱：</strong>${transport.transportName}<br/>
-                            <strong>描述：</strong>${transport.transportDesc}
-                        </div>`);
-                }
-            });
-        }
-
-        function renderRestaurants(mealType, table) {
-            let mealLabel = { breakfast: "早餐", lunch: "午餐", dinner: "晚餐" };
-            let $container = $(`#selectedRestaurants${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`);
-            $container.empty();
-            let arr = selectedRestaurants[mealType] || [];
-            if (arr.length === 0) {
-                $container.html(`<h6 class="text-danger">目前尚未新增${mealLabel[mealType]}</h6>`);
-                return;
-            }
-            let items = [];
-            arr.sort((a, b) => a.orderIndex - b.orderIndex)
-                .forEach((item, i) => {
-                    let restaurant = table.rows().data().toArray().find(r => r.restaurantID == item.id);
-                    if (restaurant) {
-                        $container.append(`
-                            <div class="restaurant-item p-2 border rounded mb-1" data-id="${restaurant.restaurantID}">
-                                <strong class="item-index">第 ${i + 1} 天</strong><br/>
-                                <strong>名稱：</strong>${restaurant.restaurantName}<br/>
-                                <strong>地址：</strong>${restaurant.restaurantAddr}
-                            </div>`);
-                        items.push({ id: restaurant.restaurantID, orderIndex: i + 1 });
-                    }
-                });
-            updateOrderedHiddenField(`SelectedRestaurants${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`, items);
-            $container.sortable({
-                update: function () {
-                    let arr = [];
-                    $container.find(".restaurant-item").each(function (i) {
-                        arr.push({ id: $(this).data('id'), orderIndex: i + 1 });
-                        $(this).find('.item-index').text(`第 ${i + 1} 天`);
-                    });
-                    updateOrderedHiddenField(`SelectedRestaurants${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`, arr);
-                }
-            });
-        }
-
-        function addDayBlock(dayNum) {
-            let dayHtml = `
-                <div class="day-block border rounded p-2 mb-3" data-day="${dayNum}">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0"><i class="fa-solid fa-sun"></i> 第 <span class="day-index">${dayNum}</span> 天</h5>
-                        <button type="button" class="btn btn-sm btn-danger remove-day ms-auto me-2">
-                                <i class="fa-solid fa-trash"></i> 刪除
-                        </button>
-                        <button type="button" class="btn btn-sm btn-primary open-location-modal"
-                                data-day="${dayNum}" data-bs-toggle="modal" data-bs-target="#locationModal">
-                            <i class="fa-solid fa-square-plus"></i> 新增景點
-                        </button>
-                    </div>
-                    <div id="selectedLocationsDay${dayNum}" class="mb-2">
-                        <h6 class="text-danger">目前尚未新增景點</h6>
-                    </div>
-                </div>`;
-            if (dayNum === 1) $('#daysContainer').empty();
-            $('#daysContainer').append(dayHtml);
-        }
-
-        function renderLocations(dayNum, table, arr) {
-            let $container = $(`#selectedLocationsDay${dayNum}`);
-            $container.empty();
-            if (!arr || arr.length === 0) {
-                $container.html(`<h6 class="text-danger">目前尚未新增景點</h6>`);
-                return;
-            }
-            arr.forEach((item, i) => {
-                let location = table.rows().data().toArray().find(r => r.locationID == item.id);
-                if (location) {
-                    $container.append(`
-                        <div class="location-item p-2 border rounded mb-1" data-id="${location.locationID}">
-                            <strong class="item-index">第 ${i + 1} 個景點</strong><br/>
-                            <strong>名稱：</strong>${location.locationName}<br/>
-                            <strong>地址：</strong>${location.locationAddr}
-                        </div>`);
-                }
-            });
-            updateLocationsHiddenField(dayNum, arr);
-            $container.sortable({
-                update: function () {
-                    let items = [];
-                    $container.find(".location-item").each(function (i) {
-                        items.push({ id: $(this).data("id"), orderIndex: i + 1 });
-                        $(this).find(".item-index").text(`第 ${i + 1} 個景點`);
-                    });
-                    updateLocationsHiddenField(dayNum, items);
-                }
-            });
-        }
-
-        // ➕ 新增天數
-        $('#addDayBtn').on('click', function () {
-            dayCount++;
-            addDayBlock(dayCount);
-        });
-
-        // 🗑️ 刪除天數
-        $(document).on('click', '.remove-day', function () {
-            $(this).closest('.day-block').remove();
-            $('#daysContainer .day-block').each(function (index) {
-                $(this).find('.day-index').text(index + 1);
-                $(this).attr('data-day', index + 1);
-                $(this).find('input[type="hidden"]').attr('name', `SelectedLocationsDay${index + 1}`);
-                $(this).find('div[id^="selectedLocationsDay"]').attr('id', `selectedLocationsDay${index + 1}`);
-            });
-            dayCount = $('#daysContainer .day-block').length;
-
-            if (dayCount === 0) {
-                $('#daysContainer').html(`<h4 class="text-danger">目前尚未新增景點資訊</h4>`);
-            }
-        });
-
-        // ====== 初始化 ======
-        $(document).ready(function () {
-            // Hotels
-            var hotelTable = $('#hotelsTable').DataTable({
-                ajax: { url: '/ProductManagement/Products/GetHotels', type: 'GET', dataSrc: 'data' },
-                columns: [
-                    { data: "hotelID", render: d => `<input type="checkbox" class="hotel-checkbox" value="${d}">` },
-                    { data: "hotelID" }, { data: "hotelName" }, { data: "hotelAddr" }
-                ]
-            }).on('draw.dt', function () { renderHotels(hotelTable); });
-
-            // Transports
-            var transportTable = $('#transportsTable').DataTable({
-                ajax: { url: '/ProductManagement/Products/GetTransportations', type: 'GET', dataSrc: 'data' },
-                columns: [
-                    { data: "transportID", render: d => `<input type="checkbox" class="transport-checkbox" value="${d}">` },
-                    { data: "transportID" }, { data: "transportName" }, { data: "transportDesc" }
-                ]
-            }).on('draw.dt', function () { renderTransports(transportTable); });
-
-            // Restaurants
-            var restaurantTable = $('#restaurantsTable').DataTable({
-                ajax: { url: '/ProductManagement/Products/GetRestaurants', type: 'GET', dataSrc: 'data' },
-                columns: [
-                    { data: "restaurantID", render: d => `<input type="checkbox" class="restaurant-checkbox" value="${d}">` },
-                    { data: "restaurantID" }, { data: "restaurantName" }, { data: "restaurantAddr" }
-                ]
-            }).on('draw.dt', function () {
-                ["breakfast","lunch","dinner"].forEach(m => renderRestaurants(m, restaurantTable));
-            });
-
-            // Locations
-            var locationTable = $('#locationsTable').DataTable({
-                ajax: { url: '/ProductManagement/Products/GetLocations', type: 'GET', dataSrc: 'data' },
-                columns: [
-                    { data: "locationID", render: d => `<input type="checkbox" class="location-checkbox" value="${d}">` },
-                    { data: "locationID" }, { data: "locationName" }, { data: "locationAddr" }
-                ]
-            }).on('draw.dt', function () {
-                console.log("DataTable rows:", locationTable.rows().data().toArray());
-                console.log("selectedLocations:", selectedLocations);
-                if (selectedLocations.length > 0) {
-                    selectedLocations.forEach(day => {
-                        addDayBlock(day.dayNumber);
-                        renderLocations(day.dayNumber, locationTable, day.locations);
-                        dayCount = Math.max(dayCount, day.dayNumber);
-                    });
-                }
-            });
-
-            // ====== Modal 確認事件 ======
-
-        // 住宿
-        $('#confirmHotels').on('click', function () {
-            selectedHotels = [];
-            $('#hotelsTable .hotel-checkbox:checked').each(function (i) {
-                selectedHotels.push({ id: parseInt($(this).val()), orderIndex: i + 1 });
-            });
-
-            // 更新 hidden inputs
-            updateOrderedHiddenField("SelectedHotelIds", selectedHotels);
-
-            renderHotels(hotelTable);  // ✅ 重新渲染
-            $('#hotelModal').modal('hide');
-        });
-
-
-        // 交通
-        $('#confirmTransports').on('click', function () {
-            selectedTransports = [];
-            $('#transportsTable .transport-checkbox:checked').each(function () {
-                selectedTransports.push(parseInt($(this).val()));
-            });
-
-            // 更新 hidden inputs (單純 int 陣列)
-            updateIntListHiddenField("SelectedTransportationIds", selectedTransports);
-
-            renderTransports(transportTable);  // ✅ 重新渲染
-            $('#transportModal').modal('hide');
-        });
-
-        // 餐廳
-        $('.open-restaurant-modal').on('click', function () {
-            currentMealType = $(this).data('meal');
-            $('#restaurantsTable .restaurant-checkbox').prop('checked', false);
-            selectedRestaurants[currentMealType].forEach(id => {
-                $('#restaurantsTable .restaurant-checkbox[value="' + id + '"]').prop('checked', true);
-            });
-        });
-
-        $('#confirmRestaurants').on('click', function () {
-            let mealType = currentMealType; // 例如 "breakfast", "lunch", "dinner"
-            selectedRestaurants[mealType] = [];
-            $('#restaurantsTable .restaurant-checkbox:checked').each(function (i) {
-                selectedRestaurants[mealType].push({ id: parseInt($(this).val()), orderIndex: i + 1 });
-            });
-
-            // 更新 hidden inputs
-            updateOrderedHiddenField(`SelectedRestaurants${mealType}`, selectedRestaurants[mealType]);
-
-            renderRestaurants(mealType, restaurantTable);  // ✅ 重新渲染
-            $('#restaurantModal').modal('hide');
-        });
-
-        // 景點
-        // 打開景點選單
-        $(document).on('click', '.open-location-modal', function () {
-            currentDay = $(this).data('day');
-            $('#locationsTable .location-checkbox').prop('checked', false);
-
-            if (selectedLocationsByDay[currentDay]) {
-                let selectedIds = selectedLocationsByDay[currentDay].map(x => String(x.id));
-                $('#locationsTable .location-checkbox').each(function () {
-                    if (selectedIds.includes($(this).val())) {
-                        $(this).prop('checked', true);
-                    }
-                });
-            }
-        });
-
-        $('#confirmLocations').on('click', function () {
-            let dayNum = currentDay;
-            let arr = [];
-            $('#locationsTable .location-checkbox:checked').each(function (i) {
-                arr.push({ id: parseInt($(this).val()), orderIndex: i + 1 });
-            });
-
-            // 檢查是否已有該天的物件
-            let dayObj = selectedLocations.find(d => d.dayNumber == dayNum);
-            if (dayObj) {
-                dayObj.locations = arr;
-            } else {
-                selectedLocations.push({ dayNumber: dayNum, locations: arr });
-            }
-
-            renderLocations(dayNum, locationTable, arr);  // ✅ 重新渲染
-            $('#locationModal').modal('hide');
-        });
-
-        // 🏨 飯店 Modal 打開時 → 勾選已選飯店
-        $('#hotelModal').on('shown.bs.modal', function () {
-            $('#hotelsTable .hotel-checkbox').each(function () {
-                let id = parseInt($(this).val());
-                if (selectedHotels.some(h => h.id === id)) {
-                    $(this).prop('checked', true);
-                } else {
-                    $(this).prop('checked', false);
-                }
-            });
-        });
-
-        // 🚌 交通 Modal 打開時 → 勾選已選交通
-        $('#transportModal').on('shown.bs.modal', function () {
-            $('#transportsTable .transport-checkbox').each(function () {
-                let id = parseInt($(this).val());
-                if (selectedTransports.includes(id)) {
-                    $(this).prop('checked', true);
-                } else {
-                    $(this).prop('checked', false);
-                }
-            });
-        });
-
-        // 🍴 餐廳 Modal 打開時 → 勾選已選餐廳
-        // ⚠️ 需要一個全域變數 currentMeal 來記錄目前是 breakfast / lunch / dinner
-        $('#restaurantModal').on('shown.bs.modal', function () {
-            $('#restaurantsTable .restaurant-checkbox').each(function () {
-                let id = parseInt($(this).val());
-                if (selectedRestaurants[currentMealType].some(r => r.id === id)) {
-                    $(this).prop('checked', true);
-                } else {
-                    $(this).prop('checked', false);
-                }
-            });
-        });
-
-        // 🏞 景點 Modal 打開時 → 勾選已選景點
-        // ⚠️ 需要一個全域變數 currentDay 來記錄目前操作的天數
-        $('#locationModal').on('shown.bs.modal', function () {
-            let dayObj = selectedLocations.find(d => d.dayNumber == currentDay);
-            let ids = dayObj ? dayObj.locations.map(l => l.id) : [];
-
-            $('#locationsTable .location-checkbox').each(function () {
-                let id = parseInt($(this).val());
-                if (ids.includes(id)) {
-                    $(this).prop('checked', true);
-                } else {
-                    $(this).prop('checked', false);
-                }
-            });
-        });
-
-        $('#locationsTable').on('change', '.location-checkbox', function () {
-            let dayNum = currentDay; // 你當前選擇的天數
-            let selected = [];
-
-            $('#locationsTable .location-checkbox:checked').each(function (i) {
-                selected.push({ id: parseInt($(this).val()), orderIndex: i + 1 });
-            });
-
-            updateLocationsHiddenField(dayNum, selected);
-        });
-        });
-
-
-
-    </script>
-}
-
-
