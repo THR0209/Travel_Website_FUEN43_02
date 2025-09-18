@@ -38,16 +38,9 @@
         </tr>
         <tr>
             <th>@Html.DisplayNameFor(m => m.IsActive)</th>
-            <td>
-                @if (Model.IsActive == true)
-                {
-                    <span class="text-success">啟用</span>
-                }
-                else
-                {
-                    <span class="text-danger">停用</span>
-                }
-            </td>
+         <td>
+             @Html.ActiveBadge(Model.IsActive)
+        </td>
         </tr>
     </tbody>
 </table>

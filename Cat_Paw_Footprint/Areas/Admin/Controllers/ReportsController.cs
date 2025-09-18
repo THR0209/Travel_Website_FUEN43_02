@@ -48,23 +48,33 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
                 ? ((double)(customerCount - lastMonthCustomers) / lastMonthCustomers) * 100
                 : 100;
 
-            // 4. 已解決案件數
-            var resolvedTickets = _context.CustomerSupportTickets
-                .Count(t => t.StatusID == 3);
+            // 4. 本月已解決案件數
+            // 這個月的第一天 & 下個月的第一天
 
-            var lastMonthResolved = _context.CustomerSupportTickets
-                .Count(t => t.StatusID == 3 && t.UpdateTime < firstDayOfThisMonth);
+            // 本月已解決案件數
+            var resolvedThisMonth = _context.CustomerSupportTickets
+                .Count(t => t.StatusID == 2
+                         && t.UpdateTime >= firstDayOfThisMonth
+                         && t.UpdateTime < firstDayOfNextMonth);
 
-            double ticketGrowthRate = lastMonthResolved > 0
-                ? ((double)(resolvedTickets - lastMonthResolved) / lastMonthResolved) * 100
+            // 上月已解決案件數
+            var resolvedLastMonth = _context.CustomerSupportTickets
+                .Count(t => t.StatusID == 2
+                         && t.UpdateTime >= firstDayOfLastMonth
+                         && t.UpdateTime < firstDayOfThisMonth);
+
+            // 成長率計算
+            double ticketGrowthRate = resolvedLastMonth > 0
+                ? ((double)(resolvedThisMonth - resolvedLastMonth) / resolvedLastMonth) * 100
                 : 100;
+
 
             var vm = new DashboardViewModel
             {
                 MonthlyOrders = thisMonthOrders,
                 OpenTrips = openTrips,
                 CustomerCount = customerCount,
-                ResolvedTickets = resolvedTickets,
+                ResolvedThisMonth = resolvedThisMonth,
                 OrderGrowthRate = orderGrowthRate,
                 CustomerGrowthRate = customerGrowthRate,
                 TicketGrowthRate = ticketGrowthRate
@@ -271,6 +281,157 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
             }
 
             return Json(result);
+        }
+
+        // --- 1. 銷售趨勢圖 ---
+        [HttpGet]
+        public IActionResult SalesReport()
+        {
+            return View();
+        }
+
+        //// 提供給 SalesTrend 的 JSON 資料
+        //[HttpGet]
+        //public IActionResult GetSalesReport(string groupBy = "month")
+        //{
+        //    var query = _context.CustomerOrders.AsQueryable();
+
+        //    List<object> result;
+
+        //    switch (groupBy.ToLower())
+        //    {
+        //        case "day":
+        //            result = query
+        //                .Where(o => o.CreateTime.HasValue)
+        //                .GroupBy(o => o.CreateTime.Value.Date)
+        //                .Select(g => new {
+        //                    x = g.Key.ToString("yyyy-MM-dd"),
+        //                    y = g.Sum(o => o.TotalAmount)
+        //                })
+        //                .OrderBy(r => r.x)
+        //                .ToList<object>();
+        //            break;
+
+        //        case "month":
+        //            result = query
+        //                .Where(o => o.CreateTime.HasValue)
+        //                .GroupBy(o => new { o.CreateTime.Value.Year, o.CreateTime.Value.Month })
+        //                .Select(g => new {
+        //                    x = $"{g.Key.Year}-{g.Key.Month:D2}",
+        //                    y = g.Sum(o => o.TotalAmount)
+        //                })
+        //                .OrderBy(r => r.x)
+        //                .ToList<object>();
+        //            break;
+
+        //        case "quarter":
+        //            result = query
+        //                .Where(o => o.CreateTime.HasValue)
+        //                .GroupBy(o => new { o.CreateTime.Value.Year, Quarter = (o.CreateTime.Value.Month - 1) / 3 + 1 })
+        //                .Select(g => new {
+        //                    x = $"{g.Key.Year} Q{g.Key.Quarter}",
+        //                    y = g.Sum(o => o.TotalAmount)
+        //                })
+        //                .OrderBy(r => r.x)
+        //                .ToList<object>();
+        //            break;
+
+        //        case "year":
+        //            result = query
+        //                .Where(o => o.CreateTime.HasValue)
+        //                .GroupBy(o => o.CreateTime.Value.Year)
+        //                .Select(g => new {
+        //                    x = g.Key.ToString(),
+        //                    y = g.Sum(o => o.TotalAmount)
+        //                })
+        //                .OrderBy(r => r.x)
+        //                .ToList<object>();
+        //            break;
+
+        //        default:
+        //            return BadRequest("Invalid groupBy value. Use day, month, quarter, or year.");
+        //    }
+
+        //    return Json(result);
+        //}
+
+        // --- 2. 熱門行程排行 ---
+        // --- 2. 熱門行程排行 ---
+        [HttpGet]
+        public IActionResult HotProducts()
+        {
+            var hotProducts = _context.CustomerOrders
+                .Where(o => o.ProductID != null)
+                .GroupBy(o => o.ProductID)
+                .Select(g => new
+                {
+                    ProductID = g.Key,
+                    OrderCount = g.Count()
+                })
+                .Join(_context.Products,
+                     g => g.ProductID,
+                     p => p.ProductID,
+                     (g, p) => new HotProductViewModel
+                     {
+                         ProductName = p.ProductName,
+                         OrderCount = g.OrderCount,
+                         Views = p.Views ?? 0 // ✅ 保證不是 null
+                     })
+                .OrderByDescending(x => x.OrderCount)
+                .Take(10)
+                .ToList();
+
+            return View(hotProducts); // ✅ 給 Razor 表格用
+        }
+
+        // 專門給 Chart.js 用的 API
+        [HttpGet]
+        public IActionResult GetHotProducts()
+        {
+            var hotProducts = _context.CustomerOrders
+                .Where(o => o.ProductID != null)
+                .GroupBy(o => o.ProductID)
+                .Select(g => new
+                {
+                    ProductID = g.Key,
+                    OrderCount = g.Count()
+                })
+                .Join(_context.Products,
+                     g => g.ProductID,
+                     p => p.ProductID,
+                     (g, p) => new
+                     {
+                         ProductName = p.ProductName,
+                         OrderCount = g.OrderCount,
+                         Views = p.Views ?? 0 // ✅ 保證不是 null
+                     })
+                .OrderByDescending(x => x.OrderCount)
+                .Take(10)
+                .ToList();
+
+            return Json(hotProducts); // ✅ 給 Chart.js 使用
+        }
+
+
+
+        // --- 3. 客服分析表 ---
+        [HttpGet]
+        public IActionResult CustomerServiceAnalysis()
+        {
+            var result = _context.CustomerSupportTickets
+                .Join(_context.TicketStatus,
+                    t => t.StatusID,
+                    s => s.StatusID,
+                    (t, s) => new { t, s })
+                .GroupBy(x => x.s.StatusID)
+                .Select(g => new
+                {
+                    StatusName = g.Key,
+                    Count = g.Count()
+                })
+                .ToList();
+
+            return View(result);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 		[Required(ErrorMessage = "折扣數值不可為空")]
 		public decimal? DiscountValue { get; set; }
 
-		[Display(Name = "是否啟用")]
+		[Display(Name = "狀態")]
 		public bool IsActive { get; set; }
 
 		[Display(Name = "建立時間")]

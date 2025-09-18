@@ -1,10 +1,10 @@
 ﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsCreateViewModel
 
 @{
-    ViewData["Title"] = "新增消息";
+    ViewData["Title"] = "新增最新消息";
 }
 
-<h1>新增消息</h1>
+<h1>新增最新消息</h1>
 
 
 <hr />
@@ -36,7 +36,7 @@
             <div class="form-group">
                 <div class="form-check form-switch">
                     <input asp-for="IsActive" class="form-check-input" type="checkbox" role="switch" />
-                    <label asp-for="IsActive" class="form-check-label"></label>
+                    <label asp-for="IsActive" class="form-check-label">上架</label>
                 </div>
                     <span asp-validation-for="IsActive" class="text-danger"></span>
             </div>

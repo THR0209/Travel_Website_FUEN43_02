@@ -16,8 +16,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
         [Display(Name = "到期時間")]
         public DateTime? ExpireTime { get; set; }
 
-        [Display(Name = "啟用")]
-        public bool? IsActive { get; set; }
+        [Display(Name = "狀態")]
+        public bool IsActive { get; set; }
 
         [Display(Name = "更新時間")]
         public DateTime? UpdateTime { get; set; }
