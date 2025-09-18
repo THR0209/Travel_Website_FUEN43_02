@@ -91,6 +91,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
+
+			// 空值會導致掛掉，待處理
 			var viewModel = new LocationsViewModel
 			{
 				LocationID = locations.LocationID,
@@ -101,10 +103,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 				LocationDesc = locations.LocationDesc,
 				LocationPrice = locations.LocationPrice,
 				DistrictID = locations.DistrictID,
-				DistrictName = locations.District.DistrictName,
+				DistrictName = (locations.District.DistrictName != null) ? (locations.District.DistrictName) : "" ,
 				District = locations.District,
 				RegionID = locations.RegionID,
-				RegionName = locations.Region.RegionName,
+				RegionName = (locations.Region.RegionName != null) ? (locations.Region.RegionName) : "",
 				Region = locations.Region,
 				Rating = locations.Rating,
 				Views = locations.Views,
