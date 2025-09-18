@@ -60,7 +60,7 @@
         <div class="row">
             <!-- 左側 Card -->
             <div class="col-md-4">
-                <div class="card p-3 ms-3">
+                <div class="card p-3 ms-3 h-100">
                     <label class="mb-1">產品封面照： </label>
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -123,7 +123,7 @@
 
             <!-- 右側 Card -->
             <div class="col-md-8">
-                <div class="card p-3 ms-3 d-flex flex-column">
+                <div class="card p-3 ms-3 d-flex flex-column h-100">
                     <div class="form-group mb-3">
                         <label asp-for="Product.ProductDesc" class="control-label mb-1">產品描述：</label>
                         <textarea asp-for="Product.ProductDesc" class="form-control" id="editor"></textarea>
@@ -380,6 +380,29 @@
     </div>
 </div>
 
+<!-- 通用刪除確認 Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteConfirmModalLabel">
+          <i class="fa-solid fa-triangle-exclamation me-2"></i> 確認刪除
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="關閉"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-0">確定要刪除這筆資料嗎？</p>
+        <p class="fw-bold text-danger mt-2" id="deleteItemName"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">刪除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
@@ -593,7 +616,7 @@
                     if (restaurant) {
                         $container.append(`
                             <div class="restaurant-item p-2 border rounded mb-1" data-id="${restaurant.restaurantID}">
-                                <strong class="item-index">第 ${index + 1} 筆</strong><br/>
+                                <strong class="item-index">第 ${index + 1} 天</strong><br/>
                                 <strong>名稱：</strong>${restaurant.restaurantName}<br/>
                                 <strong>地址：</strong>${restaurant.restaurantAddr}
                             </div>
@@ -612,7 +635,7 @@
                         let arr = [];
                         $(`#selectedRestaurants${meal} .restaurant-item`).each(function (i) {
                             arr.push({ id: $(this).data('id'), orderIndex: i + 1 });
-                            $(this).find('.item-index').text(`第 ${i + 1} 筆`);
+                            $(this).find('.item-index').text(`第 ${i + 1} 天`);
                         });
                         updateOrderedHiddenField(`SelectedRestaurants${meal}`, arr);
                     }
@@ -732,20 +755,6 @@
                 }
             });
 
-            // 打開景點選單(錯誤版)
-            // $(document).on('click', '.open-location-modal', function () {
-            //     currentDay = $(this).data('day');
-            //     $('#locationsTable .location-checkbox').prop('checked', false);
-
-            //     if (selectedLocationsByDay[currentDay]) {
-            //         $('#locationsTable .location-checkbox').each(function () {
-            //             if (selectedLocationsByDay[currentDay].has($(this).val())) {
-            //                 $(this).prop('checked', true);
-            //             }
-            //         });
-            //     }
-            // });
-
             // 打開景點選單
             $(document).on('click', '.open-location-modal', function () {
                 currentDay = $(this).data('day');
@@ -816,6 +825,5 @@
 
         });
     </script>
-
 }
 
