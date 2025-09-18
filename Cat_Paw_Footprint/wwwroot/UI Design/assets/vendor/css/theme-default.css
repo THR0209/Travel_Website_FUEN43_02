@@ -335,8 +335,8 @@ button.list-group-item-primary {
 }
 
 .form-check-input:checked, .form-check-input[type=checkbox]:indeterminate {
-    background-color: #696cff;
-    border-color: #696cff;
+    background-color: #22b3C1;
+    border-color: #22b3C1;
     box-shadow: 0 2px 4px 0 rgba(105, 108, 255, 0.4);
 }
 

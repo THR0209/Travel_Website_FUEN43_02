@@ -32,77 +32,79 @@
 <p>
 	<a asp-action="Create" class="btn btn-primary mt-2 mb-2"><i class="fa-solid fa-square-plus"></i> 新增優惠活動</a>
 </p>
-<table id="PromotionsTable" class="table table-striped table-hover table-bordered mb-3">
-	<thead class="table-primary">
-		<tr>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.PromoName)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.PromoDesc)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.StartTime)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.EndTime)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.DiscountType)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.DiscountValue)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.IsActive)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.CreateTime)
-			</th>
-			<th class="fs-5" style="width: 10%;">
-				@Html.DisplayNameFor(model => model.UpdateTime)
-			</th>
-			<th class="fs-5" style="width: 10%;">操作</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model)
-		{
+<div class="card">
+	<table id="PromotionsTable" class="table table-striped table-hover table-bordered mb-3">
+		<thead class="table-primary">
 			<tr>
-				<td>
-					@Html.DisplayFor(modelItem => item.PromoName)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.PromoDesc)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.StartTime)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.EndTime)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.DiscountTypeName)
-				</td>
-				<td>@Html.DisplayFor(modelItem => item.DiscountValueDisplay)</td>
-				<td class="text-center">
-					@Html.ActiveBadge(item.IsActive)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.CreateTime)
-				</td>
-				<td>
-					@Html.DisplayFor(modelItem => item.UpdateTime)
-				</td>
-				<td class="text-center">
-					<a asp-action="Edit" asp-route-id="@item.PromoID" class="btn btn-primary btn-sm mb-1 btn-action">編輯</a>
-					<a asp-action="Details" asp-route-id="@item.PromoID" class="btn btn-info btn-sm mb-1 btn-action">詳細資訊</a> 
-					<a asp-action="Delete" asp-route-id="@item.PromoID" class="btn btn-danger btn-sm mb-1 btn-action">刪除</a>
-				</td>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.PromoName)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.PromoDesc)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.StartTime)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.EndTime)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.DiscountType)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.DiscountValue)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.IsActive)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.CreateTime)
+				</th>
+				<th class="fs-5" style="width: 10%;">
+					@Html.DisplayNameFor(model => model.UpdateTime)
+				</th>
+				<th class="fs-5" style="width: 10%;">操作</th>
 			</tr>
-		}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			@foreach (var item in Model)
+			{
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.PromoName)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.PromoDesc)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.StartTime)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.EndTime)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.DiscountTypeName)
+					</td>
+					<td>@Html.DisplayFor(modelItem => item.DiscountValueDisplay)</td>
+					<td class="text-center">
+						@Html.ActiveBadge(item.IsActive)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.CreateTime)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.UpdateTime)
+					</td>
+					<td class="text-center">
+						<a asp-action="Edit" asp-route-id="@item.PromoID" class="btn btn-primary btn-sm mb-1 btn-action">編輯</a>
+						<a asp-action="Details" asp-route-id="@item.PromoID" class="btn btn-info btn-sm mb-1 btn-action">詳細資訊</a> 
+						<a asp-action="Delete" asp-route-id="@item.PromoID" class="btn btn-danger btn-sm mb-1 btn-action">刪除</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
 
 @section Scripts {
 	<script src="~/lib/datatables/js/jquery.datatables.min.js"></script>

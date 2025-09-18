@@ -5,54 +5,55 @@
 }
 <h2 class="mb-3">員工管理</h2>
 <div class="mb-3">
-    <button type="button" class="btn btn-success" id="btn-save-all">全部儲存</button>
+    <button type="button" class="btn btn-success" id="btn-save-all"><i class="fa-solid fa-square-plus"></i>全部儲存</button>
 </div>
-<div class="table-responsive">
-    <table class="table table-striped align-middle" id="emp-table">
-        <thead>
-            <tr>
-                <th style="width:90px;">員編</th>
-                <th style="width:160px;">帳號</th>
-                <th style="width:160px;">姓名</th>
-                <th style="width:220px;">角色</th>
-                <th style="width:90px;">啟用</th>
-                <th style="width:220px;">新密碼</th>
-                <th style="width:120px;">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var emp in Model)
-            {
-                <tr data-id="@emp.EmployeeID">
-                    <td>@emp.EmployeeID</td>
-                    <td>@emp.Account</td>
-                    <td>@emp.EmployeeName</td>
-                    <td>
-                        <select class="form-select js-role">
-                            @foreach (var role in roles)
-                            {
-                                <option value="@role.Value" selected="@(emp.RoleID.HasValue && emp.RoleID.Value.ToString() == role.Value)">
-                                    @role.Text
-                                </option>
-                            }
-                        </select>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="form-check-input js-status" @(emp.Status == true ? "checked" : "") />
-                    </td>
-                    <td>
-                        <input type="password" class="form-control js-password" placeholder="留空不變" />
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-info btn-sm js-detail">詳細</button>
-                        <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
-                    </td>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle" id="emp-table">
+            <thead>
+                <tr>
+                    <th style="width:90px;">員編</th>
+                    <th style="width:160px;">帳號</th>
+                    <th style="width:160px;">姓名</th>
+                    <th style="width:220px;">角色</th>
+                    <th style="width:90px;">啟用</th>
+                    <th style="width:220px;">新密碼</th>
+                    <th style="width:120px;">操作</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model)
+                {
+                    <tr data-id="@emp.EmployeeID">
+                        <td>@emp.EmployeeID</td>
+                        <td>@emp.Account</td>
+                        <td>@emp.EmployeeName</td>
+                        <td>
+                            <select class="form-select js-role">
+                                @foreach (var role in roles)
+                                {
+                                    <option value="@role.Value" selected="@(emp.RoleID.HasValue && emp.RoleID.Value.ToString() == role.Value)">
+                                        @role.Text
+                                    </option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="form-check-input js-status" @(emp.Status == true ? "checked" : "") />
+                        </td>
+                        <td>
+                            <input type="password" class="form-control js-password" placeholder="留空不變" />
+                        </td>
+                        <td style="text-align:center">
+                            <button type="button" class="btn btn-info btn-sm js-detail">詳細</button>
+                            <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
-
 <!-- 只用來取 Anti-Forgery Token -->
 <form id="anti-form" method="post">
     @Html.AntiForgeryToken()

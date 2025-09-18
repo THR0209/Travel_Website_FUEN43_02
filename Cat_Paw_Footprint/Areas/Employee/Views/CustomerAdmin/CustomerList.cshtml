@@ -9,60 +9,60 @@
 <div class="mb-3">
     <button type="button" class="btn btn-primary" id="btn-save-all"><i class="fa-solid fa-square-plus"></i>全部儲存</button>
 </div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-striped align-middle" id="productsTable">
+            <thead>
+                <tr>
 
-<div class="table-responsive">
-    <table class="table table-striped align-middle" id="productsTable">
-        <thead>
-            <tr>
-
-                <th class="text-center" style="width:10%;">編號</th>
-                <th class="text-center" style="width:10%;">姓名</th>
-                <th class="text-center" style="width:15%;">等級</th>
-                <th style="width:8%;">啟用</th>
-                <th style="width:10%;">黑名單</th>
-                <th class="text-center" style="width:25%;">信箱</th>
-                <th class="text-center" style="width:31%;">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cus in Model)
-            {
-                <tr data-id="@cus.CustomerID">
-
-                    <td class="text-center">@cus.CustomerID</td>
-                    <td class="text-center">@cus.CustomerName</td>
-                    <td class="text-center">
-                        <select class="form-select js-leavel">
-                            @foreach (var Levels in Level)
-                            {
-                                <option value="@Levels.Value" selected="@(cus.Level.HasValue && cus.Level.Value.ToString() == Levels.Value)">
-                                    @Levels.Text
-                                </option>
-                            }
-                        </select>
-
-                    </td>
-                    <td>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input js-status" type="checkbox" role="switch"
-                                   @(cus.Status == true ? "checked" : "") />
-                        </div>
-                    </td>
-                    <td>
-                        <input type="checkbox" class="form-check-input js-isblacklisted" @(cus.IsBlacklisted == true ? "checked" : "") />
-                    </td>
-                    <td class="text-center">@cus.Email</td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-secondary btn-sm js-detail">客戶資訊</button>
-                        <button type="button" class="btn btn-info btn-sm js-history">登入紀錄</button>
-                        <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
-                    </td>
+                    <th class="text-center" style="width:10%;">編號</th>
+                    <th class="text-center" style="width:10%;">姓名</th>
+                    <th class="text-center" style="width:15%;">等級</th>
+                    <th style="width:8%;">啟用</th>
+                    <th style="width:10%;">黑名單</th>
+                    <th class="text-center" style="width:25%;">信箱</th>
+                    <th class="text-center" style="width:31%;">操作</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var cus in Model)
+                {
+                    <tr data-id="@cus.CustomerID">
 
+                        <td class="text-center">@cus.CustomerID</td>
+                        <td class="text-center">@cus.CustomerName</td>
+                        <td class="text-center">
+                            <select class="form-select js-leavel">
+                                @foreach (var Levels in Level)
+                                {
+                                    <option value="@Levels.Value" selected="@(cus.Level.HasValue && cus.Level.Value.ToString() == Levels.Value)">
+                                        @Levels.Text
+                                    </option>
+                                }
+                            </select>
+
+                        </td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input js-status" type="checkbox" role="switch"
+                                       @(cus.Status == true ? "checked" : "") />
+                            </div>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="form-check-input js-isblacklisted" @(cus.IsBlacklisted == true ? "checked" : "") />
+                        </td>
+                        <td class="text-center">@cus.Email</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-secondary btn-sm js-detail">客戶資訊</button>
+                            <button type="button" class="btn btn-info btn-sm js-history">登入紀錄</button>
+                            <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 <!-- ✅ 跟 Script 有關 -->
 <form id="anti-form" method="post">
     @Html.AntiForgeryToken()

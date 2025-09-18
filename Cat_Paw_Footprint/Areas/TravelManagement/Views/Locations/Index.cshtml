@@ -8,53 +8,54 @@
 <h1>景點一覽</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">新增資料</a>
+    <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i>新增資料</a>
 </p>
-
-<table id="example" class="display table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.LocationName)</th>
-            <th>@Html.DisplayNameFor(model => model.LocationAddr)</th>
-            <th>@Html.DisplayNameFor(model => model.LocationDesc)</th>
-            <th>@Html.DisplayNameFor(model => model.LocationPrice)</th>
-            <th>@Html.DisplayNameFor(model => model.Rating)</th>
-            <th>@Html.DisplayNameFor(model => model.Views)</th>
-            <th>@Html.DisplayNameFor(model => model.IsActive)</th>
-            <th>@Html.DisplayNameFor(model => model.DistrictID)</th>
-            <th>@Html.DisplayNameFor(model => model.RegionID)</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="card">
+    <table id="example" class="display table table-striped table-bordered">
+        <thead>
             <tr>
-                <td>@item.LocationName</td>
-                <td>@item.LocationAddr</td>
-                <td>@item.LocationDesc</td>
-                <td>@item.LocationPrice</td> <!-- ⭐ 這裡會用 render 改成 NT$ 格式 -->
-                <td>@item.Rating</td>        <!-- ⭐ 這裡會用 render 改成星星 -->
-                <td>@item.Views</td>
-                <td>
-                    <button class="btn btn-sm toggle-active @(item.IsActive == true ? "btn-success" : "btn-secondary")"
-                            data-id="@item.LocationID"
-                            data-status="@(item.IsActive)">
-                        @(item.IsActive == true ? "啟用" : "停用")
-                    </button>
-                </td>
-                <td>@item.DistrictName</td>
-                <td>@item.RegionName</td>
-
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.LocationID" class="btn btn-sm btn-primary">修改</a>
-                    @* <a asp-action="Details" asp-route-id="@item.LocationID" class="btn btn-sm btn-success">詳細資料</a> *@
-                    <a asp-action="Delete" asp-route-id="@item.LocationID" class="btn btn-sm btn-danger">刪除</a>
-                </td>
+                <th>@Html.DisplayNameFor(model => model.LocationName)</th>
+                <th>@Html.DisplayNameFor(model => model.LocationAddr)</th>
+                <th>@Html.DisplayNameFor(model => model.LocationDesc)</th>
+                <th>@Html.DisplayNameFor(model => model.LocationPrice)</th>
+                <th>@Html.DisplayNameFor(model => model.Rating)</th>
+                <th>@Html.DisplayNameFor(model => model.Views)</th>
+                <th>@Html.DisplayNameFor(model => model.IsActive)</th>
+                <th>@Html.DisplayNameFor(model => model.DistrictID)</th>
+                <th>@Html.DisplayNameFor(model => model.RegionID)</th>
+                <th>操作</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.LocationName</td>
+                    <td>@item.LocationAddr</td>
+                    <td>@item.LocationDesc</td>
+                    <td>@item.LocationPrice</td> <!-- ⭐ 這裡會用 render 改成 NT$ 格式 -->
+                    <td>@item.Rating</td>        <!-- ⭐ 這裡會用 render 改成星星 -->
+                    <td>@item.Views</td>
+                    <td>
+                        <button class="btn btn-sm toggle-active @(item.IsActive == true ? "btn-success" : "btn-secondary")"
+                                data-id="@item.LocationID"
+                                data-status="@(item.IsActive)">
+                            @(item.IsActive == true ? "啟用" : "停用")
+                        </button>
+                    </td>
+                    <td>@item.DistrictName</td>
+                    <td>@item.RegionName</td>
+
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.LocationID" class="btn btn-sm btn-primary">修改</a>
+                        @* <a asp-action="Details" asp-route-id="@item.LocationID" class="btn btn-sm btn-success">詳細資料</a> *@
+                        <a asp-action="Delete" asp-route-id="@item.LocationID" class="btn btn-sm btn-danger">刪除</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @section Scripts {
     <!-- DataTables CSS & JS -->

@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "首頁";
+    var login = Context.Session.GetString("Login"); // "True" 或 "False"
     bool isLogin = User.Identity.IsAuthenticated; // 判斷是否已登入
     var empName = User.FindFirst("EmployeeName")?.Value
                   ?? User.Identity.Name
@@ -7,14 +8,14 @@
     var empID = User.FindFirst("EmployeeID")?.Value ?? "";
 }
 
-<!-- Debug 區塊，協助檢查登入狀態（可移除） -->
+@* <!-- Debug 區塊，協助檢查登入狀態（可移除） -->
 <div style="border:1px solid #aaa; padding:8px; margin-bottom:8px;">
     <b>IsAuthenticated:</b> @isLogin <br />
     <b>empName:</b> @empName <br />
     <b>empID:</b> @empID <br />
     <b>User.Identity.Name:</b> @User.Identity.Name
     <b>AuthenticationType:</b> @User.Identity.AuthenticationType
-</div>
+</div> *@
 
 <!-- 外層容器 -->
 <div class="d-flex flex-column align-items-center justify-content-start flex-grow-1 p-4">
@@ -22,15 +23,13 @@
     <div class="w-100 d-flex justify-content-center mt-3">
         <div class="card shadow-sm border-0 rounded-3" style="max-width: 500px; width: 100%;">
             <div class="card-body text-center p-4">
-                @if (isLogin && !string.IsNullOrEmpty(empName) && empName != "未登入")
+                @if (login == "True")
                 {
-                    <h2 class="h4 text-primary mb-2">@empName, Welcome!</h2>
-                    <p class="text-muted mb-0">旅途的掌舵者，歡迎您再次登入！</p>
+                    @:旅途的掌舵者，歡迎您再次登入！
                 }
                 else
                 {
-                    <h2 class="h5 text-danger mb-2">未登入</h2>
-                    <p class="text-muted mb-0">請登入以獲取完整權限，或聯絡主管申請帳號。</p>
+                    @:未登入
                 }
             </div>
         </div>

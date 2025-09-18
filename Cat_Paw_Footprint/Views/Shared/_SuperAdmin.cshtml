@@ -124,62 +124,7 @@
         </ul>
     </li>
 
-<!-- 報表分析/最新消息活動管理 -->
-<li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon fa-solid fa-newspaper"></i>
-        <div data-i18n="ReportsAndNews">最新消息/優惠活動管理</div>
-    </a>
-    @* <ul class="menu-sub"> *@
-        <!-- 最新消息活動管理 -->
-        @* <li class="menu-item"> *@
-            @* <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="NewsAndPromotions">最新消息活動管理</div>
-            </a> *@
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a class="menu-link" asp-area="Admin" asp-controller="NewsTables" asp-action="Index">
-                        <div data-i18n="News">最新消息</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" asp-area="Admin" asp-controller="Promotions" asp-action="Index">
-                        <div data-i18n="Promotions">優惠活動</div>
-                    </a>
-                </li>
-            </ul>
-    @*     </li>
-    </ul> *@
-   </li>
-
-   <li class="menu-item">
-    <a href="javascript:void(0);" class="menu-link menu-toggle">
-        <i class="menu-icon fa-solid fa-chart-pie"></i>
-        <div data-i18n="ReportsAndNews">報表分析</div>
-    </a>
-    @* <ul class="menu-sub">
-        <!-- 報表分析 -->
-        <li class="menu-item"> *@
-            @* <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <div data-i18n="Reports">報表分析</div>
-            </a> *@
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a class="menu-link" asp-area="Admin" asp-controller="Reports" asp-action="Dashboard">
-                        <div data-i18n="Dashboard">儀表板</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                        <a class="menu-link" asp-area="Admin" asp-controller="Reports" asp-action="MemberSubscriptionRatio">
-                        <div data-i18n="SubscriptionRatio">訂閱會員比例</div>
-                    </a>
-                </li>
-            </ul>
-    @*     </li>
-    </ul> *@
-   </li>
-
-    <!-- 客服 / FAQ 管理 -->
+    <!-- 客服管理 -->
     <li class="menu-item">
         <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons fa-solid fa-envelope-open-text"></i>
@@ -191,7 +136,7 @@
             <li class="menu-item"><a class="menu-link" asp-area="CustomerService" asp-controller="CustomerSupportFeedback" asp-action="Index"><div>客服評價維護</div></a></li>
         </ul>
         <!-- 登出 -->
-            @await Html.PartialAsync("_Logout")
+        @await Html.PartialAsync("_Logout")
     </li>
 
 
