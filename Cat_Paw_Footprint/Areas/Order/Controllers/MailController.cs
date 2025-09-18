@@ -1,11 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.Order.Models;
 using Cat_Paw_Footprint.Areas.Order.Services;
-using Cat_Paw_Footprint.Areas.Order.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.Order.Controllers
 {
 	[Area("Order")]
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaOrder")]
 	public class MailController : Controller
 	{
 		private readonly IEmailSender _sender;

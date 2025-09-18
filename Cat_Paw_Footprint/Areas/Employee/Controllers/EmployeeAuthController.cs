@@ -3,14 +3,18 @@ using Cat_Paw_Footprint.Areas.Employee.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.Scripting;
+using System.Security.Claims;
 
 namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 {
 	[Area("Employee")]
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "Emp.AdminOnly")]
 	public class EmployeeAuthController: Controller//這邊搞登入與註冊功能
 	{
 		private readonly EmployeeDbContext _context;
@@ -24,6 +28,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		#region 登入註冊基礎功能邏輯一次放這就好不傳到Service
 		// 登入
 		[HttpGet]
+		[AllowAnonymous]
 		public IActionResult Login()
 		{
 			var model = new LoginViewModel(); // ✅ 傳入空模型
@@ -31,8 +36,9 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 		// 登入
 		[HttpPost]
+		[AllowAnonymous]
 		[ValidateAntiForgeryToken]
-		public IActionResult Login([Bind("Account,Password")] LoginViewModel vm)
+		public async Task<IActionResult> Login([Bind("Account,Password")] LoginViewModel vm)
 		
 		{
 			if (string.IsNullOrWhiteSpace(vm.Account))
@@ -86,6 +92,20 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			HttpContext.Session.SetString("EmpName", empName);
 			HttpContext.Session.SetString("Status", emp.Status.ToString());
 			HttpContext.Session.SetString("Login", "True");
+
+			var claims = new List<Claim>
+	{
+		new Claim("EmployeeID", emp.EmployeeID.ToString()),
+		new Claim("EmployeeName", empName),
+		new Claim("RoleID", emp.RoleID.ToString()),
+		new Claim("RoleName", roleName),
+		new Claim("Status", emp.Status.ToString()),
+		new Claim(ClaimTypes.Name, emp.Account),
+	};
+			var identity = new ClaimsIdentity(claims, "EmployeeAuth");
+			var principal = new ClaimsPrincipal(identity);
+			await HttpContext.SignInAsync("EmployeeAuth", principal);
+
 			return RedirectToAction("Index", "Home", new { area = "" });
 		}
 
@@ -93,7 +113,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		private void PopulateRoleList()
 		{
 			var roles = _context.EmployeeRoles
-				.Select(r => new { r.RoleID, r.RoleName })
+				.Where(r => r.RoleName != "superadmin")
 				.ToList();
 
 			ViewBag.RoleList = new SelectList(roles, "RoleID", "RoleName");
@@ -146,13 +166,14 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		// 登出
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult Logout()
+		public async Task<IActionResult> Logout()
 		{
 			// 1) 清 Session
 			HttpContext.Session.Clear();
 
 			// 2) 刪 Session Cookie（下次發新 SessionId，防 fixation）
 			Response.Cookies.Delete(".AspNetCore.Session");
+			await HttpContext.SignOutAsync("EmployeeAuth");
 
 			// 3) 如果你有自訂 cookie 名稱也一併刪掉（有就留、沒有就刪掉這兩行）
 			Response.Cookies.Delete(".CatPaw.Session");
@@ -181,12 +202,32 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> UpdateRow(int id, bool status, string? password, int roleId)
 		{
-			// 空字串 / 只空白 → 視為不改密碼
-			var newPwd = string.IsNullOrWhiteSpace(password) ? null : password;
-
-			await _svc.UpdateAccountAsync(id, status, newPwd, roleId);
-			return Json(new { ok = true, message = "更新成功" });
+			var idStr = HttpContext.Session.GetString("EmpId");
+			try
+			{
+				await _svc.UpdateAccountAsync(id, status, password, roleId, idStr);
+				return Json(new { ok = true, message = "更新成功" });
+			}
+			catch (ArgumentException ex)
+			{
+				return Json(new { ok = false, message = ex.Message });
+			}
+			catch (InvalidOperationException ex)
+			{
+				return Json(new { ok = false, message = ex.Message });
+			}
+			catch (Exception)
+			{
+				return Json(new { ok = false, message = "發生未知錯誤" });
+			}
 		}
+		//[HttpPost]
+		//[ValidateAntiForgeryToken]
+		//public async Task<IActionResult> UpdateRow(int id, bool status, string? password, int roleId)
+		//{
+		//	var result = await _svc.UpdateAccountAsync(id, status, password, roleId);
+		//	return Json(result);
+		//}
 		[HttpGet]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> EmployeeListNotUpdate()//彈出子視窗用但不確定是不是這樣寫
@@ -211,6 +252,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 
 		[HttpGet]
+		[AllowAnonymous]
 		public async Task<IActionResult> Profile()
 		{
 			var idStr = HttpContext.Session.GetString("EmpId");
@@ -235,6 +277,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 
 		[HttpPost]//單獨帳號個人資料頁更新
+		[AllowAnonymous]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Profile(ProfileEditInput input)
 		{
@@ -260,10 +303,29 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				input.IDNumber
 			);
 
-			if (success)
-				return Json(new { ok = true, message = "更新成功" });
+			if (success) {
+				if (success && !string.IsNullOrEmpty(input.NewPassword))
+				{ // 1) 清 Session
+					HttpContext.Session.Clear();
+
+					// 2) 刪 Session Cookie（下次發新 SessionId，防 fixation）
+					Response.Cookies.Delete(".AspNetCore.Session");
+					await HttpContext.SignOutAsync("EmployeeAuth");
+
+					// 3) 如果你有自訂 cookie 名稱也一併刪掉（有就留、沒有就刪掉這兩行）
+					Response.Cookies.Delete(".CatPaw.Session");
+					Response.Cookies.Delete(".CatPaw.Auth");
+
+					// 4) 回登入頁
+					return Json(new { ok = true, needRelogin = true, message = "密碼更新成功，請重新登入" });
+				}
+
+
+				return Json(new { ok = true, message = "更新成功" }); 
+			}
+
 			else
-				return Json(new { ok = false, message = "更新失敗" });
+			{ return Json(new { ok = false, message = "更新失敗" }); }
 		}
 
 		#endregion

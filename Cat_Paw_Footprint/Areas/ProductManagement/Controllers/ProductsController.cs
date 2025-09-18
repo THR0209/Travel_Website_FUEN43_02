@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
@@ -15,7 +16,8 @@ using System.Threading.Tasks;
 namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 {
     [Area("ProductManagement")]
-    public class ProductsController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaProductManagement")]
+	public class ProductsController : Controller
     {
         private readonly webtravel2Context _context;
 

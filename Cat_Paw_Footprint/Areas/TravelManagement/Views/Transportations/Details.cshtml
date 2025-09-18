@@ -3,90 +3,94 @@
 @{
     ViewData["Title"] = "Details";
 }
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">詳細資料</h2>
+        <h6 class="text-muted mb-4">交通資訊</h6>
+    
+        <!-- ✅ 方格化區塊 -->
+        <div class="row g-0 border">
+            <!-- 名稱 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.TransportName)
+            </div>
+            <div class="col-md-9 border p-2">@Model.TransportName</div>
 
-<h1>詳細資料</h1>
+            <!-- 介紹 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.TransportDesc)
+            </div>
+            <div class="col-md-9 border p-2">@Model.TransportDesc</div>
+                        
+            <!-- 評分 -->
+            <div class="col-md-2 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Rating)
+            </div>
+            <div class="col-md-2 border p-2">@Model.Rating</div>
+            <!-- 瀏覽數 -->
+            <div class="col-md-2 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Views)
+            </div>
+            <div class="col-md-2 border p-2">@Model.Views</div>
+            <!-- 交通價位 -->
+            <div class="col-md-2 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.TransportPrice)
+            </div>
+            <div class="col-md-2 border p-2">@Model.TransportPrice</div>
 
-<div>
-    <h4>交通資訊</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TransportName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TransportName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TransportDesc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TransportDesc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TransportPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TransportPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Views)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Views)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TransportCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TransportCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActiveText)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.KeywordID)
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.KeywordNames != null && Model.KeywordNames.Any())
-            {
-                foreach (var keyword in Model.KeywordNames)
+            <!-- 代碼 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.TransportCode)
+            </div>
+            <div class="col-md-3 border p-2">@Model.TransportCode</div>
+            <!-- 是否啟用 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.IsActive)
+            </div>
+            <div class="col-md-3 border p-2">@Model.IsActiveText</div>
+
+            <!-- 關鍵字 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.KeywordID)
+            </div>
+            <div class="col-md-9 border p-2">
+                @if (Model.KeywordNames != null && Model.KeywordNames.Any())
                 {
-                    <span class="badge bg-primary">@keyword</span>
+                    foreach (var keyword in Model.KeywordNames)
+                    {
+                        <span class="badge bg-primary me-1">@keyword</span>
+                    }
                 }
-            }
-            else
-            {
-                <span>目前沒有關鍵字</span>
-            }
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Picture)
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
-            {
-                foreach (var pic in Model.PictureBase64)
+                else
                 {
-                    <img src="@pic" alt="圖片載入失敗" style="max-width:200px; margin:5px;" />
+                    <span class="text-muted">目前沒有關鍵字</span>
                 }
-            }
-            else
-            {
-                <span>目前沒有圖片</span>
-            }
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.TransportID">修改</a> |
-    <a asp-action="Index">返回</a>
+            </div>
+
+            <!-- 圖片 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Picture)
+            </div>
+            <div class="col-md-9 border p-2">
+                @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+                {
+                    foreach (var pic in Model.PictureBase64)
+                    {
+                        <img src="@pic" alt="圖片載入失敗" class="img-thumbnail me-2 mb-2" style="max-width:200px;" />
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">目前沒有圖片</span>
+                }
+            </div>
+
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="mt-4 text-end">
+        <a asp-action="Edit" asp-route-id="@Model?.TransportID" class="btn btn-warning">修改</a> 
+        <a asp-action="Index" class="btn btn-secondary">返回</a>
+    </div>
+    </div>
 </div>

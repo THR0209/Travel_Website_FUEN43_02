@@ -7,35 +7,56 @@
 <h1>關鍵字</h1>
 
 <p>
-    <a asp-action="Create">新增資料</a>
+    <a asp-action="Create" class="btn btn-primary">新增資料</a>
 </p>
-<table class="table">
+
+<table id="example" class="display table table-striped table-bordered">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Keyword)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Views)
-            </th>
-            <th></th>
+            <th>@Html.DisplayNameFor(model => model.Keyword)</th>
+            <th>@Html.DisplayNameFor(model => model.Views)</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model) {
         <tr>
+            <td>@Html.DisplayFor(modelItem => item.Keyword)</td>
+            <td>@Html.DisplayFor(modelItem => item.Views)</td>
             <td>
-                @Html.DisplayFor(modelItem => item.Keyword)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Views)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.KeywordID">修改</a> 
-                @* <a asp-action="Details" asp-route-id="@item.KeywordID">Details</a> | *@
-                @* <a asp-action="Delete" asp-route-id="@item.KeywordID">刪除</a> *@
+                <a asp-action="Edit" asp-route-id="@item.KeywordID" class="btn btn-sm btn-primary">修改</a>
+                @* 
+                <a asp-action="Details" asp-route-id="@item.KeywordID" class="btn btn-sm btn-success">詳細資訊</a>  
+                <a asp-action="Delete" asp-route-id="@item.KeywordID" class="btn btn-sm btn-danger">刪除</a> 
+                *@
             </td>
         </tr>
 }
     </tbody>
 </table>
+
+@section Scripts{
+    <!-- DataTables CSS & JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+
+    <!-- FixedHeader 套件 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+                lengthMenu: [5, 10, 25, 50],   // 每頁顯示筆數
+                pageLength: 10,                // 預設顯示 10 筆
+                fixedHeader: true,  // 固定表頭
+
+                language: { //載入中文語系
+                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"
+                }
+            });            
+        });
+    </script>
+
+}

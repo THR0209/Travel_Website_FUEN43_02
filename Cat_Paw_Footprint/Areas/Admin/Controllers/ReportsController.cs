@@ -1,12 +1,14 @@
 ﻿using Cat_Paw_Footprint.Areas.Admin.ViewModel;
 using Cat_Paw_Footprint.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class ReportsController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaAdmin")]
+	public class ReportsController : Controller
     {
         private readonly webtravel2Context _context;
 

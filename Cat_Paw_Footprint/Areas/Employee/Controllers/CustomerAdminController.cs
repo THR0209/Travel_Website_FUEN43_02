@@ -3,6 +3,7 @@ using Cat_Paw_Footprint.Areas.Employee.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis.Scripting;
 namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 {
 	[Area("Employee")]
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "Emp.AdminOnly")]
 	public class CustomerAdminController : Controller
 	{
 		private readonly EmployeeDbContext _context;
@@ -86,6 +88,28 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 				return Json(new { ok = false, message = "更新失敗" });
 			}
 		}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> BatchSaveCustomers([FromBody] List<CustomerUpdateDto> updates)//批次更新
+		{
+			if (updates == null || !updates.Any())
+			{
+				return Json(new { ok = false, message = "沒有收到更新資料" });
+			}
+
+			try
+			{
+				await _svc.BatchSaveCustomersAsync(updates);
+				return Json(new { ok = true, message = "批次更新成功" });
+			}
+			catch (Exception ex)
+			{
+				// 你可以記 Log
+				return Json(new { ok = false, message = "批次更新失敗：" + ex.Message });
+			}
+		}
+
 
 	} 
 }

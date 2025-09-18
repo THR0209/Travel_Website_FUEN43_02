@@ -1,7 +1,9 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomerService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [Area("CustomerService")]
+[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaCustomerService")]
 [Route("CustomerService/[controller]")]
 public class CustomerSupportFeedbackController : Controller
 {

@@ -1,4 +1,5 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomerService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Cat_Paw_Footprint.Areas.CustomerService.ViewModel.FAQServiceDashboardViewModel;
 
@@ -8,6 +9,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 	/// FAQ 與 FAQ 分類管理 Controller，包含 Razor 頁面與 API
 	/// </summary>
 	[Area("CustomerService")]
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaCustomerService")]
 	[Route("[area]/[controller]")]
 	public class FAQsController : Controller
 	{

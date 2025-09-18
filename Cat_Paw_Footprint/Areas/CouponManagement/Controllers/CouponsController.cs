@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Models;
-using Cat_Paw_Footprint.Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 {
     [Area("CouponManagement")]
-    public class CouponsController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaCouponManagement")]
+	public class CouponsController : Controller
     {
         private readonly webtravel2Context _context;
 

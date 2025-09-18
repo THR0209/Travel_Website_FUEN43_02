@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ using System.Threading.Tasks;
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
     [Area("TravelManagement")]
-    public class RestaurantsController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaTravelManagement")]
+	public class RestaurantsController : Controller
     {
         private readonly webtravel2Context _context;
 

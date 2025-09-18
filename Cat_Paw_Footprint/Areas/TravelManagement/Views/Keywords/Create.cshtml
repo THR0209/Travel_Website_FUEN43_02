@@ -4,34 +4,39 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>新增關鍵字</h1>
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">新增關鍵字</h2>
+        <h6 class="text-muted mb-4">關鍵字詳細資訊</h6>
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <div class="form-group">
-                <label asp-for="Keyword" class="control-label"></label>
-                <input asp-for="Keyword" class="form-control" />
-                <span asp-validation-for="Keyword" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Views" class="control-label"></label>
-                <input asp-for="Views" class="form-control" />
-                <span asp-validation-for="Views" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="確認" class="btn btn-primary" />
+            <div class="row g-4">
+
+                <div class="form-group">
+                    <label asp-for="Keyword" class="control-label"></label>
+                    <input asp-for="Keyword" class="form-control" />
+                    <span asp-validation-for="Keyword" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Views" class="control-label"></label>
+                    <input asp-for="Views" class="form-control" />
+                    <span asp-validation-for="Views" class="text-danger"></span>
+                </div>
+
+                <!-- 按鈕區 -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">確認</button>
+                    <a asp-action="Index" class="btn btn-secondary">返回</a>
+                </div>
+
             </div>
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">返回</a>
-</div>
+
+
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

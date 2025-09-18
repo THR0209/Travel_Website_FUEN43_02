@@ -4,7 +4,9 @@
     var roles = ViewBag.Roles as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
 }
 <h2 class="mb-3">員工管理</h2>
-
+<div class="mb-3">
+    <button type="button" class="btn btn-success" id="btn-save-all">全部儲存</button>
+</div>
 <div class="table-responsive">
     <table class="table table-striped align-middle" id="emp-table">
         <thead>
@@ -158,6 +160,50 @@
             }
           });
         })();
+                document.getElementById("btn-save-all").addEventListener("click", async () => {
+            const buttons = document.querySelectorAll("#emp-table .js-save");
+            const results = [];
+
+            let index = 1; // 用來標記第 n 筆
+
+            for (const btn of buttons) {
+                const tr = btn.closest("tr");
+                const id = tr.dataset.id;
+                const roleId = tr.querySelector(".js-role").value;
+                const status = tr.querySelector(".js-status").checked;
+                const password = tr.querySelector(".js-password").value;
+
+                const form = new FormData();
+                form.append("id", id);
+                form.append("roleId", roleId);
+                form.append("status", status ? "true" : "false");
+                if (password && password.trim().length > 0) form.append("password", password);
+                const token = document.querySelector('#anti-form input[name="__RequestVerificationToken"]').value;
+                if (token) form.append("__RequestVerificationToken", token);
+
+                try {
+                    const res = await fetch('@Url.Action("UpdateRow", "EmployeeAuth", new { area = "Employee" })', {
+                        method: "POST",
+                        body: form,
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        results.push(`第 ${index} 筆資料 (員工ID=${id}) ✅ 更新成功`);
+                        tr.querySelector(".js-password").value = "";
+                    } else {
+                        results.push(`第 ${index} 筆資料 (員工ID=${id}) ❌ 更新失敗: ${data.message || "未知錯誤"}`);
+                    }
+                } catch (err) {
+                    results.push(`第 ${index} 筆資料 (員工ID=${id}) ❌ 發生錯誤: ${err.message}`);
+                }
+
+                index++;
+                await new Promise(r => setTimeout(r, 200)); // 避免同時打太多請求
+            }
+
+            alert(results.join("\n"));
+        });
     </script>
 
 }

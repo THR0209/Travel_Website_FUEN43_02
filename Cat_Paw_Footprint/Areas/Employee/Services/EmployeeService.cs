@@ -36,12 +36,34 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 
 			return await _repo.UpdateSelfAsync(empId, name, phone, email, address, photo, newPasswordHash, idNumber);
 		}
-		public async Task UpdateAccountAsync(int id, bool status, string? password, int roleId)
+		public async Task UpdateAccountAsync(int id, bool status, string? password, int roleId,string idStr)
 		{
-			// 正規化：空白或空字串一律視為不改密碼（傳 null）
+
+			if (int.TryParse(idStr, out var empId) && id == empId)
+				throw new InvalidOperationException("不可變更自己帳號資訊");
+			if (id == 1)
+				throw new InvalidOperationException("此帳號不可變更");  // 🚨 這裡就跳出，不會繼續跑下面
+
+			if (roleId == 0)
+				throw new ArgumentException("請選擇角色");              // 只會在 id != 1 時才檢查到這裡
+
+			if (roleId == 6)
+				throw new InvalidOperationException("需要主管特別申請"); // 只會在前兩個都沒拋錯時檢查到這裡
+																 // 空白或空字串一律視為不改密碼（傳 null）
 			var newPwd = string.IsNullOrWhiteSpace(password) ? null : password;
 			await _repo.UpdateStatusAndPasswordAndRoleAsync(id, status, newPwd, roleId);
 		}
+		//public async Task<object> UpdateAccountAsync(int id, bool status, string? password, int roleId)
+		//{
+		//	if (id == 1) return new { ok = false, message = "此帳號不可變更" };
+		//	if (roleId == 0) return new { ok = false, message = "請選擇角色" };
+		//	if (roleId == 6) return new { ok = false, message = "需要主管特別申請" };
+
+		//	var newPwd = string.IsNullOrWhiteSpace(password) ? null : password;
+		//	await _repo.UpdateStatusAndPasswordAndRoleAsync(id, status, newPwd, roleId);
+
+		//	return new { ok = true, message = "更新成功" };
+		//}
 		public async Task<string> GetNewEmployeeCodeAsync()
 		{
 			var outputParam = new SqlParameter
