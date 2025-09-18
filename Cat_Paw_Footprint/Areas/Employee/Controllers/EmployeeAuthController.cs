@@ -163,26 +163,26 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 
 			return RedirectToAction("Privacy", "Home", new { area = "" });
 		}
-		// 登出
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		[AllowAnonymous]
-		public async Task<IActionResult> Logout()
-		{
-			// 1) 清 Session
-			HttpContext.Session.Clear();
+		//// 登出(已廢棄)
+		//[HttpPost]
+		//[ValidateAntiForgeryToken]
+		//[AllowAnonymous]
+		//public async Task<IActionResult> Logout()
+		//{
+		//	// 1) 清 Session
+		//	HttpContext.Session.Clear();
 
-			// 2) 刪 Session Cookie（下次發新 SessionId，防 fixation）
-			Response.Cookies.Delete(".AspNetCore.Session");
-			await HttpContext.SignOutAsync("EmployeeAuth");
+		//	// 2) 刪 Session Cookie（下次發新 SessionId，防 fixation）
+		//	Response.Cookies.Delete(".AspNetCore.Session");
+		//	await HttpContext.SignOutAsync("EmployeeAuth");
 
-			// 3) 如果你有自訂 cookie 名稱也一併刪掉（有就留、沒有就刪掉這兩行）
-			Response.Cookies.Delete(".CatPaw.Session");
-			Response.Cookies.Delete(".CatPaw.Auth");
+		//	// 3) 如果你有自訂 cookie 名稱也一併刪掉（有就留、沒有就刪掉這兩行）
+		//	Response.Cookies.Delete(".CatPaw.Session");
+		//	Response.Cookies.Delete(".CatPaw.Auth");
 
-			// 4) 回登入頁
-			return RedirectToAction("Login", "EmployeeAuth", new { area = "Employee" });
-		}
+		//	// 4) 回登入頁
+		//	return RedirectToAction("Login", "EmployeeAuth", new { area = "Employee" });
+		//}
 		#endregion
 		#region 這邊開始用service
 		[HttpGet]

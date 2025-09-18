@@ -26,8 +26,8 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 
 		[HttpPost]
-		[ValidateAntiForgeryToken]
 		[AllowAnonymous]
+		[IgnoreAntiforgeryToken]
 		public async Task<IActionResult> Logout()
 		{
 			// 1) 清 Session
