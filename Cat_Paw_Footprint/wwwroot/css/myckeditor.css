@@ -49,3 +49,9 @@
 .ck-editor__editable_inline {
     min-height: 45vh; /* 高度佔視窗 40% */
 }
+
+.ck-editor__editable {
+    /*min-height: 200px;*/ /* 編輯器最小高度 */
+    max-height: 45vh; /* 編輯器最大高度，超過就捲動 */
+    overflow-y: auto; /* 超出時出現捲軸 */
+}
