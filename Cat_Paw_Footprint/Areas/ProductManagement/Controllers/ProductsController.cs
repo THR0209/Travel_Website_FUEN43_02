@@ -4,6 +4,11 @@ using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -15,109 +20,150 @@ using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 {
-    [Area("ProductManagement")]
+	[Area("ProductManagement")]
 	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaProductManagement")]
 	public class ProductsController : Controller
-    {
-        private readonly webtravel2Context _context;
+	{
+		private readonly webtravel2Context _context;
 
-        public ProductsController(webtravel2Context context)
-        {
-            _context = context;
-        }
+		public ProductsController(webtravel2Context context)
+		{
+			_context = context;
+		}
 
-        // GET: ProductManagement/Products
-        public async Task<IActionResult> Index()
-        {
-            var webtravel2Context = _context.Products.Include(p => p.Region);
-            return View(await webtravel2Context.ToListAsync());
-        }
+		// GET: ProductManagement/Products
+		public async Task<IActionResult> Index()
+		{
+			var webtravel2Context = _context.Products.Include(p => p.Region);
+			return View(await webtravel2Context.ToListAsync());
+		}
 
-        [HttpPost]
-        //[Route("Products/Index/Json")]
-        [Route("ProductManagement/Products/Index/Json")]
-        public async Task<IActionResult> IndexJson()
-        {
-            var data = await _context.Products
-            .Include(p => p.Region)
-            .Include(p => p.ProductAnalyses) // 更新912
-            .OrderByDescending(p => p.ProductCode)
-            .Select(p => new {
+		[HttpPost]
+		//[Route("Products/Index/Json")]
+		[Route("ProductManagement/Products/Index/Json")]
+		public async Task<IActionResult> IndexJson()
+		{
+			var data = await _context.Products
+			.Include(p => p.Region)
+			.Include(p => p.ProductAnalyses) // 更新912
+			.OrderByDescending(p => p.ProductCode)
+			.Select(p => new {
 				p.ProductID,
-                p.ProductCode,
-                p.ProductImage,
-                p.ProductName,
-                p.ProductPrice,
-                StartDate = p.StartDate.HasValue ? p.StartDate.Value.ToString("yyyy-MM-dd") : "",
-                EndDate = p.EndDate.HasValue ? p.EndDate.Value.ToString("yyyy-MM-dd") : "",
-                p.MaxPeople,
-                p.RegionID,
-                p.IsActive,
+				p.ProductCode,
+				p.ProductImage,
+				p.ProductName,
+				p.ProductPrice,
+				StartDate = p.StartDate.HasValue ? p.StartDate.Value.ToString() : "",
+				EndDate = p.EndDate.HasValue ? p.EndDate.Value.ToString() : "",
+				p.MaxPeople,
+				p.RegionID,
+				p.IsActive,
 				RegionName = p.Region == null ? null : p.Region.RegionName,
-                Analyses = p.ProductAnalyses.Select(a => new {
-					releaseDate =  a.ReleaseDate.HasValue ? a.ReleaseDate.Value.ToString("yyyy-MM-dd") : "",
-					removalDate = a.RemovalDate.HasValue ? a.RemovalDate.Value.ToString("yyyy-MM-dd") : ""
+				Analyses = p.ProductAnalyses.Select(a => new {
+					releaseDate = a.ReleaseDate.HasValue ? a.ReleaseDate.Value.ToString() : "",
+					removalDate = a.RemovalDate.HasValue ? a.RemovalDate.Value.ToString() : ""
 				})
-            })
-            .ToListAsync();
+			})
+			.ToListAsync();
 
-            return Json(data);
-        }
+			return Json(data);
+		}
 
-        // GET: ProductManagement/Products/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		// GET: ProductManagement/Products/Details/5
+		public async Task<IActionResult> Details(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-            var products = await _context.Products
-                .Include(p => p.Region)
-				.Include(p => p.ProductHotels)
-					.ThenInclude(ph => ph.Hotel)
-				.Include(p => p.ProductRestaurants)
-					.ThenInclude(pr => pr.Restaurant)
-				.Include(p => p.ProductsTransportations)
-					.ThenInclude(pt => pt.Transport)
-				.Include(p => p.ProductLocations)
-					.ThenInclude(pl => pl.Location)
-				.Include(p => p.ProductAnalyses)
-                .FirstOrDefaultAsync(m => m.ProductID == id);
-            if (products == null)
-            {
-                return NotFound();
-            }
+			var product = await _context.Products
+				.Where(p => p.ProductID == id)
+				//.Join(_context.Regions, p => p.RegionID, r => r.RegionID, (p, r) => new {p,r})
+				//.Include(p => p.Region)
+				//.Include(p => p.ProductHotels)
+				//	.ThenInclude(ph => ph.Hotel)
+				//.Include(p => p.ProductRestaurants)
+				//	.ThenInclude(pr => pr.Restaurant)
+				//.Include(p => p.ProductsTransportations)
+				//	.ThenInclude(pt => pt.Transport)
+				//.Include(p => p.ProductLocations)
+				//	.ThenInclude(pl => pl.Location)
+				//.Include(p => p.ProductAnalyses)
+				.FirstOrDefaultAsync();
 
-            return View(products);
-        }
+			if (product == null)
+			{
+				return NotFound();
+			}
 
-        // GET: ProductManagement/Products/Create
-        public IActionResult Create()
-        {
+			// 其他關聯分開查
+			var hotels = await _context.Products_Hotels
+				.Where(ph => ph.ProductID == id)
+				.Include(ph => ph.Hotel)
+				.OrderBy(ph => ph.OrderIndex)
+				.ToListAsync();
+
+			var restaurants = await _context.Products_Restaurants
+				.Where(pr => pr.ProductID == id)
+				.Include(pr => pr.Restaurant)
+				.OrderBy(pr => pr.OrderIndex)
+				.ToListAsync();
+
+			var transports = await _context.Products_Transportations
+				.Where(pt => pt.ProductID == id)
+				.Include(pt => pt.Transport)
+				.ToListAsync();
+
+			var locations = await _context.Products_Locations
+				.Where(pl => pl.ProductID == id)
+				.Include(pl => pl.Location)
+				.OrderBy(pl => pl.OrderIndex)
+				.ToListAsync();
+
+			var analyses = await _context.ProductAnalysis
+				.Where(pa => pa.ProductID == id)
+				.ToListAsync();
+
+			var vm = new ProductDetailsViewModel
+			{
+				Product = product,
+				Hotels = hotels,
+				Restaurants = restaurants,
+				Transports = transports,
+				Locations = locations,
+				Analyses = analyses
+			};
+
+			return View(vm);
+		}
+
+		// GET: ProductManagement/Products/Create
+		public IActionResult Create()
+		{
 			Console.WriteLine("=== [DEBUG] Create POST ===");
 
 			var vm = new ProductCreateViewModel()
-            {
-                Product = new Products(),
-                ProductAnalysis = new ProductAnalysis()
-            };
+			{
+				Product = new Products(),
+				ProductAnalysis = new ProductAnalysis()
+			};
 
 
-            /* 取得流水號 */
-            //model.ProductCode = GetCodeWithDate("Products", "PRO");
+			/* 取得流水號 */
+			//model.ProductCode = GetCodeWithDate("Products", "PRO");
 
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
-            return View(vm);
-        }
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
+			return View(vm);
+		}
 
 		// POST: ProductManagement/Products/Create
 		// To protect from overposting attacks, enable the specific properties you want to bind to.
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductCreateViewModel vm)
-        {
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(ProductCreateViewModel vm)
+		{
 			Console.WriteLine("=== [DEBUG] Create POST ===");
 			Console.WriteLine("ModelState.IsValid = " + ModelState.IsValid);
 
@@ -143,7 +189,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 			}
 
 			if (ModelState.IsValid)
-            {
+			{
 				/* 取得流水號 */
 				//products.ProductCode = GetCodeWithDate("Products", "PRO");
 
@@ -155,8 +201,10 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 				}
 				// ===== 1. 存主表Products並產生ProductID =====
 
+				vm.Product.ProductCode = await GenerateProductCodeAsync();
+
 				_context.Add(vm.Product);
-                await _context.SaveChangesAsync();
+				await _context.SaveChangesAsync();
 
 				int productId = vm.Product.ProductID;
 
@@ -264,11 +312,11 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 				await _context.SaveChangesAsync();
 
 				return RedirectToAction(nameof(Index));
-            }
+			}
 
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", vm.Product.RegionID);
 			return View(vm);
-        }
+		}
 
 		// GET: ProductManagement/Products/Edit/5
 		[HttpGet]
@@ -276,26 +324,45 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 		public async Task<IActionResult> Edit(int id)
 		{
 			var product = await _context.Products
-				.Include(p => p.ProductHotels)
-				.Include(p => p.ProductsTransportations)
-				.Include(p => p.ProductRestaurants)
-				.Include(p => p.ProductLocations)
 				.FirstOrDefaultAsync(p => p.ProductID == id);
 
 			if (product == null) return NotFound();
 
-			var vm = new ProductCreateViewModel
+			// 分開查關聯資料，可以加速讀取
+			var hotels = await _context.Products_Hotels
+				.Where(h => h.ProductID == id)
+				.OrderBy(h => h.OrderIndex)
+				.ToListAsync();
+
+			var transports = await _context.Products_Transportations
+				.Where(t => t.ProductID == id)
+				.ToListAsync();
+
+			var restaurants = await _context.Products_Restaurants
+				.Where(r => r.ProductID == id)
+				.OrderBy(r => r.OrderIndex)
+				.ToListAsync();
+
+			var locations = await _context.Products_Locations
+				.Where(l => l.ProductID == id)
+				.OrderBy(l => l.OrderIndex)
+				.ToListAsync();
+
+			var vm = new ProductEditViewModel
 			{
 				Product = product,
 
-				ProductAnalysis = product.ProductAnalyses
+				//ReleaseDate = product.ProductAnalyses
+				//	.Select(p => p.ReleaseDate)
+				//	.FirstOrDefault(),
+
+				ProductAnalysis = _context.ProductAnalysis
+					.Where(p => p.ProductID == id)
 					.Select(t => new ProductAnalysis
 					{
 						ProductID = t.ProductID,
 						ReleaseDate = t.ReleaseDate,
-						RemovalDate = t.RemovalDate
-					})
-					.FirstOrDefault(),
+					}).FirstOrDefault(),
 
 				// 已選飯店
 				SelectedHotelIds = product.ProductHotels
@@ -351,7 +418,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 											 OrderIndex = l.OrderIndex
 										 }).ToList()
 					})
-						.ToList()
+					.ToList()
 			};
 
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", product.RegionID);
@@ -364,11 +431,12 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		[Route("ProductManagement/Products/Edit/{pid?}")]
-		public async Task<IActionResult> Edit(int pid, ProductCreateViewModel vm)
+		public async Task<IActionResult> Edit(int pid, ProductEditViewModel vm)
 		{
 			if (!ModelState.IsValid)
 			{
 				ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", vm.Product.RegionID);
+				TempData["ErrorMessage"] = "修改失敗，請再試一次！";
 				return View(vm);
 			}
 
@@ -515,11 +583,24 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 					}
 				}
 
-				_context.ProductAnalysis.Add(new ProductAnalysis
+				var analysis = await _context.ProductAnalysis
+					.FirstOrDefaultAsync(p => p.ProductID == id);
+
+				if (analysis != null)
 				{
-					ProductID = id,
-					ReleaseDate = vm.ProductAnalysis.ReleaseDate
-				});
+					analysis.ReleaseDate = vm.ProductAnalysis.ReleaseDate;
+					// 其他要更新的欄位...
+					_context.ProductAnalysis.Update(analysis);
+				}
+				else
+				{
+					// 如果真的沒有才新增
+					_context.ProductAnalysis.Add(new ProductAnalysis
+					{
+						ProductID = id,
+						ReleaseDate = vm.ProductAnalysis.ReleaseDate
+					});
+				}
 
 				// ================= 寫入 DB =================
 				var changes = await _context.SaveChangesAsync();
@@ -530,7 +611,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 
 				// 提交交易
 				await tx.CommitAsync();
-
+				TempData["SuccessMessage"] = "修改成功！";
 				return RedirectToAction(nameof(Index));
 			}
 			catch (Exception ex)
@@ -546,22 +627,22 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 		[HttpGet]
 		[Route("ProductManagement/Products/Delete/{id?}")]
 		public async Task<IActionResult> Delete(int? id)
-        {
+		{
 			if (id == null)
-            {
-                return NotFound();
-            }
+			{
+				return NotFound();
+			}
 
-            var products = await _context.Products
-                .Include(p => p.Region)
-                .FirstOrDefaultAsync(m => m.ProductID == id);
-            if (products == null)
-            {
-                return NotFound();
-            }
+			var products = await _context.Products
+				.Include(p => p.Region)
+				.FirstOrDefaultAsync(m => m.ProductID == id);
+			if (products == null)
+			{
+				return NotFound();
+			}
 
-            return View(products);
-        }
+			return View(products);
+		}
 
 
 
@@ -569,22 +650,22 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 		[HttpPost, ActionName("Delete")]
 		[Route("ProductManagement/Products/Delete/{id?}")]
 		[ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int? id)
-        {
+		public async Task<IActionResult> DeleteConfirmed(int? id)
+		{
 			var products = await _context.Products.FirstOrDefaultAsync(p => p.ProductID == id);
-            if (products != null)
-            {
-                _context.Products.Remove(products);
-            }
+			if (products != null)
+			{
+				_context.Products.Remove(products);
+			}
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index));
+		}
 
-        private bool ProductsExists(string id)
-        {
-            return _context.Products.Any(e => e.ProductCode == id);
-        }
+		private bool ProductsExists(string id)
+		{
+			return _context.Products.Any(e => e.ProductCode == id);
+		}
 
 
 		// 提供 DataTables 用的 API (取得Hotels內所有的資料)
@@ -629,5 +710,64 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 
 			return Json(new { data = transportations });
 		}
+
+		// === 新增圖片端點 ===
+		[HttpGet]
+		[Route("ProductManagement/Products/GetProductImage/{id}")]
+		public IActionResult GetProductImage(int id)
+		{
+			var product = _context.Products.FirstOrDefault(p => p.ProductID == id);
+			if (product == null || product.ProductImage == null)
+			{
+				var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/NoImage.png");
+				var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
+				return File(defaultImage, "image/png");
+			}
+			return File(product.ProductImage, "image/png");
+		}
+
+
+		// 執行軟刪除
+		[HttpPost]
+		public async Task<IActionResult> Deactivate(int id)
+		{
+			var product = await _context.Products.FindAsync(id);
+			if (product == null)
+			{
+				return NotFound();
+			}
+
+			// 將 IsActive 設為 false (軟刪除)
+			product.IsActive = false;
+			await _context.SaveChangesAsync();
+
+			return Json(new { success = true });
+		}
+
+		private async Task<string> GenerateProductCodeAsync()
+		{
+			var now = await GetDatabaseNowAsync(); // ← 用資料庫時間
+			var today = now.Date;
+
+			// 計算今天已有幾筆
+			var dailyCount = await _context.Products
+				.CountAsync(p => EF.Functions.DateDiffDay(p.CreateTime, today) == 0);
+
+			var serial = (dailyCount + 1).ToString("D4"); // 四位數補 0
+			return $"PRO{now:yyMMdd}{serial}";
+		}
+
+		private async Task<DateTime> GetDatabaseNowAsync()
+		{
+			// 直接從 DB 取 GETDATE()
+			var conn = _context.Database.GetDbConnection();
+			await conn.OpenAsync();
+			using var cmd = conn.CreateCommand();
+			cmd.CommandText = "SELECT GETDATE()";
+			var result = await cmd.ExecuteScalarAsync();
+			return Convert.ToDateTime(result);
+		}
+
+
 	}
 }

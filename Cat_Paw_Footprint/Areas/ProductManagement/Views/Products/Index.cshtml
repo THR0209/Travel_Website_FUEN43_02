@@ -41,6 +41,15 @@
             width: 80%;
             text-align: center;
         }
+
+        table.dataTable thead th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        table.dataTable thead th:last-child {
+            border-top-right-radius: 8px;
+        }
+
     </style>
 }
 
@@ -61,9 +70,38 @@
             <th>上架時間</th>
             <th>狀態</th>
             <th>人數上限</th>
-        </tr>    
+        </tr>
     </thead>
 </table>
+
+<!-- Bootstrap Toast 容器 -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        @TempData["SuccessMessage"]
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        @TempData["ErrorMessage"]
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
 
 @section Scripts {
     <script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
@@ -73,13 +111,26 @@
     <script src="https://cdn.datatables.net/fixedheader/4.0.2/js/dataTables.fixedHeader.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
     @* <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script> *@
-    <link href="~/lib/datatables/css/buttons.datatables.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.print.min.js"></script>
 
-    
+    <!-- dayjs 核心 -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+    <script>
+        // 自動顯示所有 Toast
+        document.addEventListener("DOMContentLoaded", function () {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            var toastList = toastElList.map(function (toastEl) {
+                var t = new bootstrap.Toast(toastEl);
+                t.show(); // 顯示
+                return t;
+            });
+        });
+    </script>
+
 
     <script>
         DataTable.type('num', 'className', 'dt-body-right');
@@ -97,26 +148,43 @@
                 columns: [
                     { data: "productID", visible: false },
                     { data: "productCode", title: "產品編號", "width": "5%" },
-                    { data: "productImage", title: "產品封面照", "width": "10%", className: 'text-center align-middle', render: imgRender, defaultContent: ''},
-                    { data: "productName", title: "產品名稱", "width": "10%" },
-                    { data: "isActive", title: "狀態", width: "6%", render: statusRender, className:"dt-center" },
+                    {
+                        data: "productID",
+                        title: "產品封面照", "width": "10%",
+                        className: 'text-center align-middle',
+                        render: imgRender
+                    },
+                    { data: "productName", title: "產品名稱", "width": "15%" },
+                    { data: "isActive", title: "狀態", width: "8%", render: statusRender, className:"dt-center" },
                     { data: "productPrice", title: "價格", "width": "10%" },
-                    { data: "startDate", title: "出團時間", "width": "10%" },
-                    { data: "analyses[0].releaseDate", title: "上架時間", "width": "10%", defaultContent: '' },
-                    // { data: "endDate", title: "下架時間", "width": "10%" },
+                    {
+                        data: "startDate",
+                        title: "出團時間",
+                        width: "10%",
+                        render: function (data) {
+                            return data ? dayjs(data).format("YYYY-MM-DD A hh:mm").replace("AM", "上午").replace("PM", "下午") : "";
+                        }
+                    },
+                    {
+                        data: "analyses[0].releaseDate",
+                        title: "上架時間",
+                        width: "10%",
+                        render: function (data) {
+                            return data ? dayjs(data).format("YYYY-MM-DD A hh:mm").replace("AM", "上午").replace("PM", "下午") : "";
+                        }
+                    },
                     { data: "maxPeople", title: "人數上限", "width": "10%" },
-                    // { data: "regionName", title: "出團區域", "width": "10%" },
                     {
                         data: null,
                         title: "操作",
                         orderable: false,
                         searchable: false,
-                        width: "9%",
+                        width: "10%",
                         render: function (data, type, row) {
                             return `
                                <a href="/ProductManagement/Products/Edit/${row.productID}" class="btn btn-sm btn-primary ms-2 mb-2 btn-size">編輯</a>
                                <a href="/ProductManagement/Products/Details/${row.productID}" class="btn btn-sm btn-secondary ms-2 mb-2 btn-size">詳細內容</a>
-                               <a href="/ProductManagement/Products/Delete/${row.productID}" class="btn btn-sm btn-danger ms-2 mb-2 btn-size">刪除</a>
+                               <button onclick="deactivateProduct(${row.productID})" class="btn btn-sm btn-danger ms-2 mb-2 btn-size">刪除</button>
                             `;
                         }
                     }
@@ -151,11 +219,19 @@
             });
          });
 
-        function imgRender(b64) {  // 二進位轉回圖片
-            if (!b64) return '';
-            // byte[] 會被序列化成 base64 字串
-            return `<img class="d-block mx-auto rounded-2" src="data:image/*;base64,${b64}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;">`;
-        };
+        // function imgRender(b64) {  二進位轉回圖片
+        //     if (!b64) return '';
+        //     byte[] 會被序列化成 base64 字串
+        //     return `<img class="d-block mx-auto rounded-2" src="data:image/*;base64,${b64}" style="width:120px;height:80px;object-fit:cover;border-radius:6px;">`;
+        // };
+
+        function imgRender(productID) {
+            if (!productID) return '';
+            // 透過後端提供的 URL 載入圖片
+            const imageUrl = `/ProductManagement/Products/GetProductImage/${productID}`;
+            return `<img class="d-block mx-auto rounded-2" src="${imageUrl}"
+                        style="width:160px;height:120px;object-fit:contain;border-radius:6px;">`;
+        }
 
         function statusRender(status) {
             if (status) {
@@ -165,5 +241,27 @@
                 return  `<span class="badge bg-danger text-center">下架</span>`;
             }
         }
+
+        function deactivateProduct(id) {
+            if (confirm("確定要下架這個產品嗎？")) {
+                $.ajax({
+                    url: '@Url.Action("Deactivate", "Products", new { area = "ProductManagement" })',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            alert("已成功下架！");
+                            $('#test').DataTable().ajax.reload(); // 重新載入 DataTable
+                        } else {
+                            alert("操作失敗！");
+                        }
+                    },
+                    error: function () {
+                        alert("發生錯誤，請稍後再試。");
+                    }
+                });
+            }
+        }
+
     </script>
 }

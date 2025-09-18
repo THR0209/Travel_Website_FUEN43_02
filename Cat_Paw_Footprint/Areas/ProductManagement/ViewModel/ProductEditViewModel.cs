@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 {
-	public class ProductCreateViewModel
+	public class ProductEditViewModel
 	{
 		// 基本欄位（對應 Products）
 		//public int? ProductID { get; set; }            // 編輯時用
@@ -26,10 +26,10 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 
 		public Products Product { get; set; } = new Products();
 
-		public ProductAnalysis ProductAnalysis { get; set; } = new ProductAnalysis();
+		public ProductAnalysis? ProductAnalysis { get; set; }
 
 
-		public DateTime? ReleaseDate { get; set; }
+		public DateTime? ReleaseDate { get; set; } 
 
 		[NotMapped] //不進資料庫
 		public IFormFile? UploadImage { get; set; }    // 上傳用
@@ -47,25 +47,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 		public Dictionary<int, List<OrderedItem>> SelectedLocationsByDay { get; set; } = new();
 
 		public List<DayLocations> SelectedLocations { get; set; } = new();
+
+
 	}
-
-	public class RestaurantSelection
-	{
-		public int? RestaurantID { get; set; }
-		public string? MealType { get; set; }
-	}
-
-	public class OrderedItem
-	{
-		public int? ID { get; set; }
-		public int? OrderIndex { get; set; }
-	}
-
-	public class DayLocations
-	{
-		public int DayNumber { get; set; }
-		public List<OrderedItem> Locations { get; set; } = new();
-	}
-
-
 }
