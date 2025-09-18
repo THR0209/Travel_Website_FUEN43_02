@@ -62,22 +62,15 @@
                 </dvi>
                 <!-- 右半部 -->
                 <dvi class="col-md-6">
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="LocationCode" class="control-label"></label>
-                            <input asp-for="LocationCode" class="form-control" />
-                            <span asp-validation-for="LocationCode" class="text-danger"></span>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="IsActive" class="control-label"></label>
-                            <select asp-for="IsActive" class="form-control">
-                                <option value="">請選擇</option>
-                                <option value="true">啟用</option>
-                                <option value="false">停用</option>
-                            </select>
-                            <span asp-validation-for="IsActive" class="text-danger"></span>
-                        </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="IsActive" class="control-label"></label>
+                        <select asp-for="IsActive" class="form-control">
+                            <option value="">請選擇</option>
+                            <option value="true">啟用</option>
+                            <option value="false">停用</option>
+                        </select>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
                     </div>
 
                     <div class="row">

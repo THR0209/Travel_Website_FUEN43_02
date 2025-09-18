@@ -16,13 +16,10 @@
         <tr>
             <th>@Html.DisplayNameFor(model => model.LocationName)</th>
             <th>@Html.DisplayNameFor(model => model.LocationAddr)</th>
-            @* <th>@Html.DisplayNameFor(model => model.LocationLat)</th> *@
-            @* <th>@Html.DisplayNameFor(model => model.LocationLng)</th> *@
             <th>@Html.DisplayNameFor(model => model.LocationDesc)</th>
             <th>@Html.DisplayNameFor(model => model.LocationPrice)</th>
             <th>@Html.DisplayNameFor(model => model.Rating)</th>
             <th>@Html.DisplayNameFor(model => model.Views)</th>
-            <th>@Html.DisplayNameFor(model => model.LocationCode)</th>
             <th>@Html.DisplayNameFor(model => model.IsActive)</th>
             <th>@Html.DisplayNameFor(model => model.DistrictID)</th>
             <th>@Html.DisplayNameFor(model => model.RegionID)</th>
@@ -35,13 +32,10 @@
             <tr>
                 <td>@item.LocationName</td>
                 <td>@item.LocationAddr</td>
-                @* <td>@item.LocationLat</td> *@
-                @* <td>@item.LocationLng</td> *@
                 <td>@item.LocationDesc</td>
                 <td>@item.LocationPrice</td> <!-- ⭐ 這裡會用 render 改成 NT$ 格式 -->
                 <td>@item.Rating</td>        <!-- ⭐ 這裡會用 render 改成星星 -->
                 <td>@item.Views</td>
-                <td>@item.LocationCode</td>
                 <td>@item.IsActiveText</td>
                 <td>@item.DistrictName</td>
                 <td>@item.RegionName</td>
