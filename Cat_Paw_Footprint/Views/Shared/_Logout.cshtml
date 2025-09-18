@@ -1,8 +1,12 @@
 ﻿@* Views/Shared/_Logout.cshtml *@
 <li class="menu-item">
-    <a href="#" class="menu-link"
-       onclick="document.getElementById('logoutForm').submit(); return false;">
+    <a href="javascript:void(0);" class="menu-link"
+       onclick="console.log('✅ 點到 logout'); var f=document.getElementById('logoutForm'); console.log(f); f.submit(); return false;"">
         <i class="menu-icon tf-icons fa-solid fa-right-from-bracket"></i>
         <div data-i18n="Logout">登出</div>
     </a>
 </li>
+
+<form id="logoutForm" asp-area="Employee" asp-controller="EmployeeLogout" asp-action="Logout" method="post" class="d-none">
+    @Html.AntiForgeryToken()
+</form>

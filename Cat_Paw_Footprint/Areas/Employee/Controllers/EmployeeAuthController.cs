@@ -166,6 +166,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		// 登出
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[AllowAnonymous]
 		public async Task<IActionResult> Logout()
 		{
 			// 1) 清 Session
@@ -180,7 +181,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			Response.Cookies.Delete(".CatPaw.Auth");
 
 			// 4) 回登入頁
-			return RedirectToAction("Index", "Home", new { area = "" });
+			return RedirectToAction("Login", "EmployeeAuth", new { area = "Employee" });
 		}
 		#endregion
 		#region 這邊開始用service
