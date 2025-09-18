@@ -135,7 +135,11 @@
         // 點 X 移除
         $(document).on("click", ".remove-keyword", function () {
             let id = $(this).data("id").toString();
+
+            // 從陣列移除
             selected = selected.filter(x => x !== id);
+
+            // 移除清單 & 對應隱藏欄位
             $(this).closest("li").remove();
             $(`#hidden-${id}`).remove();
         });
@@ -146,14 +150,20 @@
         function previewImages(event) {
             let files = event.target.files;
             let previewArea = document.getElementById("previewArea");
+            
+            // 清空舊的預覽
             previewArea.innerHTML = "";
+
+            // 用來追蹤有效檔案
             let validFiles = [];
 
             Array.from(files).forEach((file) => {
+                // 檢查檔案型別
                 if (!file.type.startsWith("image/")) {
                     alert(`${file.name} 不是圖片檔案，已跳過`);
                     return;
                 }
+                // 檢查檔案大小
                 if (file.size > MAX_SIZE) {
                     alert(`${file.name} 超過 2MB，已跳過`);
                     return;
@@ -162,11 +172,13 @@
                 validFiles.push(file);
                 let reader = new FileReader();
                 reader.onload = function(e) {
+                    // 圖片容器
                     let container = document.createElement("div");
                     container.style.position = "relative";
                     container.style.display = "inline-block";
                     container.style.margin = "5px";
 
+                    // 圖片
                     let img = document.createElement("img");
                     img.src = e.target.result;
                     img.style.width = "150px";
@@ -175,6 +187,7 @@
                     img.style.border = "1px solid #ccc";
                     img.style.borderRadius = "5px";
 
+                    // 刪除按鈕
                     let btn = document.createElement("button");
                     btn.innerText = "X";
                     btn.type = "button";
@@ -201,6 +214,7 @@
                 reader.readAsDataURL(file);
             });
 
+            // 更新 input files
             updateInputFiles(event.target, validFiles);
         }
 
