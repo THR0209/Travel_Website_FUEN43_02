@@ -15,8 +15,8 @@
         <tr>
             <th>@Html.DisplayNameFor(model=>model.HotelName)</th>
             <th>@Html.DisplayNameFor(model=>model.HotelAddr)</th>
-            <th>@Html.DisplayNameFor(model => model.HotelLat)</th>
-            <th>@Html.DisplayNameFor(model => model.HotelLng)</th>
+            @* <th>@Html.DisplayNameFor(model => model.HotelLat)</th> *@
+            @* <th>@Html.DisplayNameFor(model => model.HotelLng)</th> *@
             <th>@Html.DisplayNameFor(model => model.Rating)</th>
             <th>@Html.DisplayNameFor(model => model.HotelCode)</th>
             <th>@Html.DisplayNameFor(model => model.IsActive)</th>
@@ -31,8 +31,8 @@
             <tr>
                 <td>@item.HotelName</td>
                 <td>@item.HotelAddr</td>
-                <td>@item.HotelLat</td>
-                <td>@item.HotelLng</td>
+                @* <td>@item.HotelLat</td> *@
+                @* <td>@item.HotelLng</td> *@
                 <td>@item.Rating</td>
                 <td>@item.HotelCode</td>
                 <td>@item.IsActiveText</td>
@@ -40,7 +40,7 @@
                 <td>@item.RegionName</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.HotelID" class="btn btn-sm btn-primary">修改</a>
-                    <a asp-action="Details" asp-route-id="@item.HotelID" class="btn btn-sm btn-success">詳細資料</a>
+                    @* <a asp-action="Details" asp-route-id="@item.HotelID" class="btn btn-sm btn-success">詳細資料</a> *@
                     <a asp-action="Delete" asp-route-id="@item.HotelID" class="btn btn-sm btn-danger">刪除</a>
                 </td>
             </tr>
@@ -67,7 +67,7 @@
                 fixedHeader: true,  // 固定表頭
 
                 columnDefs: [{   //評分
-                    targets: 4, // 第 5 欄
+                    targets: 2, // 第 3 欄
                     render: function (data, type, row) {
                         if (type === 'display') {
                             var score = parseFloat(data) || 0;

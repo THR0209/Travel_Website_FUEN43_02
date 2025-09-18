@@ -4,145 +4,165 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>修改</h1>
-
-<h4>美食資訊</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">修改</h2>
+        <h6 class="text-muted mb-4">美食資訊</h6>
         <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="RestaurantID" />
-            <div class="form-group">
-                <label asp-for="RestaurantName" class="control-label"></label>
-                <input asp-for="RestaurantName" class="form-control" />
-                <span asp-validation-for="RestaurantName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RestaurantAddr" class="control-label"></label>
-                <input asp-for="RestaurantAddr" class="form-control" />
-                <span asp-validation-for="RestaurantAddr" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RestaurantLat" class="control-label"></label>
-                <input asp-for="RestaurantLat" class="form-control" />
-                <span asp-validation-for="RestaurantLat" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RestaurantLng" class="control-label"></label>
-                <input asp-for="RestaurantLng" class="form-control" />
-                <span asp-validation-for="RestaurantLng" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RestaurantDesc" class="control-label"></label>
-                <input asp-for="RestaurantDesc" class="form-control" />
-                <span asp-validation-for="RestaurantDesc" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RegionID" class="control-label"></label>
-                <select asp-for="RegionID" class="form-control" asp-items="ViewBag.RegionID"></select>
-                <span asp-validation-for="RegionID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DistrictID" class="control-label"></label>
-                <select asp-for="DistrictID" class="form-control" asp-items="ViewBag.DistrictID"></select>
-                <span asp-validation-for="DistrictID" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Rating" class="control-label"></label>
-                <input asp-for="Rating" class="form-control" />
-                <span asp-validation-for="Rating" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Views" class="control-label"></label>
-                <input asp-for="Views" class="form-control" />
-                <span asp-validation-for="Views" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IsActive" class="control-label"></label>
-                <select asp-for="IsActive" class="form-control">
-                    <option value="">請選擇</option>
-                    <option value="true">啟用</option>
-                    <option value="false">停用</option>
-                </select>
-                <span asp-validation-for="IsActive" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RestaurantCode" class="control-label"></label>
-                <input asp-for="RestaurantCode" class="form-control" />
-                <span asp-validation-for="RestaurantCode" class="text-danger"></span>
-            </div>
-            <!-- 多選關鍵字 -->
-            <div class="form-group">
-                <label>關鍵字</label>
-                <select id="keywordSelect" class="form-control" asp-items="ViewBag.Keywords">
-                    <option value="">請選擇</option>
-                </select>
 
-                <!-- 顯示已選關鍵字的區域 -->
-                <label>已選關鍵字</label>
-                <div id="selectedKeywords" style="margin-top:10px;">
-                    @if (Model.KeywordID != null && Model.KeywordNames != null)
-                    {
-                        var keywordPairs = Model.KeywordID.Zip(Model.KeywordNames, (id, name) => new { Id = id, Name = name });
-                        foreach (var kw in keywordPairs)
-                        {
-                            <span class="badge bg-primary m-1" data-id="@kw.Id">
-                                @kw.Name
-                                <button type="button" class="btn-close btn-sm text-white ms-2" onclick="removeKeyword(@kw.Id)"></button>
-                            </span>
-                        }
-                    }
+            <div class="row g-4">
+                <!-- 左半部 -->
+                <dvi class="col-md-6">
+
+                    <div class="mb-3">
+                        <label asp-for="RestaurantName" class="control-label"></label>
+                        <input asp-for="RestaurantName" class="form-control" />
+                        <span asp-validation-for="RestaurantName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RestaurantAddr" class="control-label"></label>
+                        <input asp-for="RestaurantAddr" class="form-control" />
+                        <span asp-validation-for="RestaurantAddr" class="text-danger"></span>
+                    </div>                    
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RegionID" class="control-label"></label>
+                            <select asp-for="RegionID" class="form-control" asp-items="ViewBag.RegionID"></select>
+                            <span asp-validation-for="RegionID" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DistrictID" class="control-label"></label>
+                            <select asp-for="DistrictID" class="form-control" asp-items="ViewBag.DistrictID"></select>
+                            <span asp-validation-for="DistrictID" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Rating" class="control-label"></label>
+                            <input asp-for="Rating" class="form-control" />
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Views" class="control-label"></label>
+                            <input asp-for="Views" class="form-control" />
+                            <span asp-validation-for="Views" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RestaurantDesc" class="control-label"></label>
+                        <textarea asp-for="RestaurantDesc" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="RestaurantDesc" class="text-danger"></span>
+                    </div>
+                </dvi>
+                <!-- 右半部 -->
+                <dvi class="col-md-6">
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RestaurantCode" class="control-label"></label>
+                            <input asp-for="RestaurantCode" class="form-control" />
+                            <span asp-validation-for="RestaurantCode" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IsActive" class="control-label"></label>
+                            <select asp-for="IsActive" class="form-control">
+                                <option value="">請選擇</option>
+                                <option value="true">啟用</option>
+                                <option value="false">停用</option>
+                            </select>
+                            <span asp-validation-for="IsActive" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RestaurantLat" class="control-label"></label>
+                            <input asp-for="RestaurantLat" class="form-control" />
+                            <span asp-validation-for="RestaurantLat" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RestaurantLng" class="control-label"></label>
+                            <input asp-for="RestaurantLng" class="form-control" />
+                            <span asp-validation-for="RestaurantLng" class="text-danger"></span>
+                        </div>
+                    </div>
+                   
+                    <!-- 多選關鍵字 -->
+                    <div class="mb-3">
+                        <label class="control-label">關鍵字</label>
+                        <select id="keywordSelect" class="form-control" asp-items="ViewBag.Keywords">
+                            <option value="">請選擇</option>
+                        </select>
+
+                        <!-- ✅ 隱藏欄位容器 (這裡會動態放多個 hidden input) -->
+                        <div id="KeywordIDsContainer"></div>
+                    </div>
+
+                    <!-- 已選關鍵字 -->
+                    <div class="mb-3">
+                        <label class="control-label">已選關鍵字</label>
+                        <div id="selectedKeywords" style="margin-top:10px;">
+                            @if (Model.KeywordID != null && Model.KeywordNames != null)
+                            {
+                                var keywordPairs = Model.KeywordID.Zip(Model.KeywordNames, (id, name) => new { Id = id, Name = name });
+                                foreach (var kw in keywordPairs)
+                                {
+                                    <span class="badge bg-primary m-1" data-id="@kw.Id">
+                                        @kw.Name
+                                        <button type="button" class="btn-close btn-sm text-white ms-2" onclick="removeKeyword(@kw.Id)"></button>
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 上傳新圖片 -->
+                    <div class="mb-3">
+                        <label asp-for="Picture"></label>
+                        <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
+                        <span asp-validation-for="Picture" class="text-danger"></span>
+
+                        <!-- 預覽區 -->
+                        <div id="preview" style="margin-top:10px; display:flex; flex-wrap:wrap;"></div>
+                    </div>
+
+                    <!-- 現有圖片 (含刪除按鈕) -->
+                    <div class="mb-3">
+                        <div>
+                            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+                            {
+                                for (int i = 0; i < Model.PictureBase64.Count; i++)
+                                {
+                                    <div id="pic-@Model.PictureIds[i]"
+                                         style="display:inline-block; margin:10px; position:relative;">
+                                        <img src="@Model.PictureBase64[i]" style="width:120px; height:auto;" />
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                style="position:absolute; top:0; right:0;"
+                                                onclick="markImageForDelete(@Model.PictureIds[i])">
+                                            X
+                                        </button>
+                                    </div>
+                                }
+                            }
+                            <!-- ✅ 新的隱藏欄位容器 (動態產生) -->
+                            <div id="DeletedPictureIdsContainer"></div>
+                        </div>
+                    </div>
+                </dvi>
+                <!-- 按鈕區 -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">確認</button>
+                    <a asp-action="Index" class="btn btn-secondary">返回</a>
                 </div>
-
-                <!-- ✅ 隱藏欄位容器 (這裡會動態放多個 hidden input) -->
-                <div id="KeywordIDsContainer"></div>
-            </div>
-
-            <!-- 現有圖片 (含刪除按鈕) -->
-            <div class="form-group">
-                <label>現有圖片</label>
-                <div>
-                    @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
-                    {
-                        for (int i = 0; i < Model.PictureBase64.Count; i++)
-                        {
-                            <div id="pic-@Model.PictureIds[i]"
-                                 style="display:inline-block; margin:10px; position:relative;">
-                                <img src="@Model.PictureBase64[i]" style="width:120px; height:auto;" />
-                                <button type="button" class="btn btn-sm btn-danger"
-                                        style="position:absolute; top:0; right:0;"
-                                        onclick="markImageForDelete(@Model.PictureIds[i])">
-                                    X
-                                </button>
-                            </div>
-                        }
-                    }
-                    <!-- ✅ 新的隱藏欄位容器 (動態產生) -->
-                    <div id="DeletedPictureIdsContainer"></div>
-                </div>
-            </div>
-
-            <!-- 上傳新圖片 -->
-            <div class="form-group">
-                <label asp-for="Picture"></label>
-                <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
-                <span asp-validation-for="Picture" class="text-danger"></span>
-
-                <!-- 預覽區 -->
-                <div id="preview" style="margin-top:10px; display:flex; flex-wrap:wrap;"></div>
-
-            </div>
-            
-            <div class="form-group">
-                <input type="submit" value="確認" class="btn btn-primary" />
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">返回</a>
 </div>
 
 @section Scripts {

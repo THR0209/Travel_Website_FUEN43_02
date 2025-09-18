@@ -36,7 +36,7 @@
                 <!-- 右半部 -->
                 <div class="col-md-6">                    
                     <div class="mb-3">
-                        <label asp-for="IsActive" class="form-label"></label>
+                        <label asp-for="IsActive" class="control-label"></label>
                         <select asp-for="IsActive" class="form-select">
                             <option value="true" selected="@(Model != null && Model.IsActive == true ? "selected" : null)">啟用</option>
                             <option value="false" selected="@(Model != null && Model.IsActive == false ? "selected" : null)">停用</option>
@@ -46,13 +46,13 @@
 
                     <!-- ✅ 關鍵字放右上 -->
                     <div class="mb-3">
-                        <label asp-for="KeywordID" class="form-label">選擇關鍵字</label>
+                        <label asp-for="KeywordID" class="control-label">選擇關鍵字</label>
                         <!-- 一般下拉選單 -->
                         <select id="keywordSelect" class="form-select" asp-items="ViewBag.KeywordID">
                             <option value="">請選擇</option>
                         </select>
                         <!-- 選擇結果顯示區 -->
-                        <ul id="selectedKeywords" class="list-group mt-2"></ul>
+                        <ul id="selectedKeywords" class="mt-2"></ul>
                         <!-- 隱藏欄位容器 (動態生成) -->
                         <div id="keywordHiddenInputs"></div>
                         <span asp-validation-for="KeywordID" class="text-danger"></span>
@@ -60,7 +60,7 @@
 
                     <!-- ✅ 圖片上傳放右下 -->
                     <div class="mb-3">
-                        <label asp-for="Picture" class="form-label"></label>
+                        <label asp-for="Picture" class="control-label"></label>
                         <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
                         <span asp-validation-for="Picture" class="text-danger"></span>
                         <!-- ✅ 預覽區 -->
@@ -95,10 +95,10 @@
 
                 // 加到顯示清單
                 $("#selectedKeywords").append(
-                    `<li class="list-group-item d-flex justify-content-between align-items-center">
+                     `<span class="badge bg-primary me-2 p-2 d-inline-flex align-items-center" data-id="${val}">
                         ${text}
-                        <button type="button" class="btn btn-sm btn-danger remove-keyword" data-id="${val}">X</button>
-                    </li>`
+                        <button type="button" class="btn-close btn-close-white ms-2 remove-keyword" data-id="${val}" style="font-size:0.6rem;"></button>
+                    </span>`
                 );
 
                 // 生成隱藏欄位
@@ -116,7 +116,7 @@
             selected = selected.filter(x => x !== id);
 
             // 移除清單 & 對應隱藏欄位
-            $(this).closest("li").remove();
+            $(this).closest("span").remove();
             $(`#hidden-${id}`).remove();
         });
 
