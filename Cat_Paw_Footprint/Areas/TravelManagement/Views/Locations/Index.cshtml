@@ -16,8 +16,8 @@
         <tr>
             <th>@Html.DisplayNameFor(model => model.LocationName)</th>
             <th>@Html.DisplayNameFor(model => model.LocationAddr)</th>
-            <th>@Html.DisplayNameFor(model => model.LocationLat)</th>
-            <th>@Html.DisplayNameFor(model => model.LocationLng)</th>
+            @* <th>@Html.DisplayNameFor(model => model.LocationLat)</th> *@
+            @* <th>@Html.DisplayNameFor(model => model.LocationLng)</th> *@
             <th>@Html.DisplayNameFor(model => model.LocationDesc)</th>
             <th>@Html.DisplayNameFor(model => model.LocationPrice)</th>
             <th>@Html.DisplayNameFor(model => model.Rating)</th>
@@ -35,8 +35,8 @@
             <tr>
                 <td>@item.LocationName</td>
                 <td>@item.LocationAddr</td>
-                <td>@item.LocationLat</td>
-                <td>@item.LocationLng</td>
+                @* <td>@item.LocationLat</td> *@
+                @* <td>@item.LocationLng</td> *@
                 <td>@item.LocationDesc</td>
                 <td>@item.LocationPrice</td> <!-- ⭐ 這裡會用 render 改成 NT$ 格式 -->
                 <td>@item.Rating</td>        <!-- ⭐ 這裡會用 render 改成星星 -->
@@ -48,7 +48,7 @@
 
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.LocationID" class="btn btn-sm btn-primary">修改</a>
-                    <a asp-action="Details" asp-route-id="@item.LocationID" class="btn btn-sm btn-success">詳細資料</a>
+                    @* <a asp-action="Details" asp-route-id="@item.LocationID" class="btn btn-sm btn-success">詳細資料</a> *@
                     <a asp-action="Delete" asp-route-id="@item.LocationID" class="btn btn-sm btn-danger">刪除</a>
                 </td>
             </tr>
@@ -74,7 +74,7 @@
                 fixedHeader: true,
                 columnDefs: [
                     {
-                        targets: 5, // 第 6 欄 (價格)
+                        targets: 3, // 第 4 欄 (價格)
                         render: function (data, type, row) {
                             if (type === 'display') {
                                 let price = parseFloat(data) || 0;
@@ -84,7 +84,7 @@
                         }
                     },
                     {
-                        targets: 6, // 第 7 欄 (評分)
+                        targets: 4, // 第 5 欄 (評分)
                         render: function (data, type, row) {
                             if (type === 'display') {
                                 var score = parseFloat(data) || 0;

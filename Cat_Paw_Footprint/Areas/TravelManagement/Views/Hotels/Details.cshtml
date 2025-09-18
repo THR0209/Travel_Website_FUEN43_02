@@ -48,10 +48,14 @@
 
             <!-- 縣市 -->
             <div class="col-md-3 border p-2 fw-bold bg-light">縣市</div>
-            <div class="col-md-3 border p-2">@Model.District?.DistrictName</div>
+            <div class="col-md-3 border p-2">
+                @(Model.District != null ? Model.District.DistrictName : "未設定")
+            </div>
             <!-- 地區 -->
             <div class="col-md-3 border p-2 fw-bold bg-light">地區</div>
-            <div class="col-md-3 border p-2">@Model.Region?.RegionName</div>
+            <div class="col-md-3 border p-2">
+                @(Model.Region != null ? Model.Region.RegionName : "未設定")
+            </div>
 
             <!-- 關鍵字 -->
             <div class="col-md-3 border p-2 fw-bold bg-light">關鍵字</div>
