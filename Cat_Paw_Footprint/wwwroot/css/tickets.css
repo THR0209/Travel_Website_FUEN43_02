@@ -1,27 +1,12 @@
 ﻿.card {
     background: #fff;
-    border: 1px solid #e6e6e6;
+    border: 1px solid #ddd;
     border-radius: 10px;
     padding: 14px;
     margin-bottom: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-}
-
-th, td {
-    padding: 10px 12px;
-    border: 1px solid #e6e6e6;
-    text-align: left;
-}
-
-th {
-    background: #22b3C1;
-    color: #fff;
-}
 #ticketTable {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -29,22 +14,15 @@ th {
     font-size: 15px;
 }
 
-#ticketTable th,
+/*#ticketTable th,
 #ticketTable td {
     padding: 10px 12px !important;
     border: 1px solid #bbb !important;
     text-align: left;
     vertical-align: middle;
     font-size: 15px !important;
-}
+}*/
 
-/* 將 zeroRecords / info / processing 文字置中 */
-#ticketTable .dataTables_empty {
-    text-align: center !important;
-    font-size: 15px;
-    color: #555;
-    padding: 20px 0;
-}
 /* 表格外框 */
 #ticketTable {
     border-collapse: collapse;
@@ -53,15 +31,19 @@ th {
 
 /* 表頭 */
 #ticketTable th {
-    background: #22b3C1;
-    color: #fff;
-    border: 1px solid #bbb;
+    background: #22b3C1 !important;
+    color: #fff !important;
+    font-weight: bold;
+    text-align: center !important;
+        
 }
 
-/* 表格內格線 */
-#ticketTable td {
-    border: 1px solid #bbb;
-    padding: 10px 12px;
+#ticketTable td:last-child {
+    display: flex !important; /* 直接讓 td 變 flex */
+    justify-content: center !important; /* 置中 */
+    gap: 6px; /* 按鈕間距 */
+    align-items: center; /* 垂直置中 */
+    text-align: center;
 }
 
 /* 偶數列底色 */
@@ -69,37 +51,14 @@ th {
     background-color: #f9f9f9 !important;
 }
 
-/* 滑鼠移入效果 */
-#ticketTable tbody tr:hover {
-    background-color: #e6f7f9 !important;
-}
-
 
 .btn {
     padding: 6px 10px;
-    border: 0;
     border-radius: 8px;
     cursor: pointer;
 }
 
-.btn-primary {
-    background: #22b3C1;
-    color: #fff;
-}
 
-.btn-secondary {
-    background: #22b3C1;
-    color: #fff;
-}
-
-.btn-danger {
-    background: #e84118;
-    color: #fff;
-}
-
-.btn-ghost {
-    background: #ecf0f1;
-}
 
 input[type="text"], input[type="number"], textarea {
     width: 100%;
@@ -132,37 +91,11 @@ textarea {
     background: #fff;
 }
 
-/* 分頁按鈕 */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    border: 1px solid #22b3C1 !important;
-    border-radius: 6px;
-    padding: 4px 10px;
-    margin: 2px;
-    color: #22b3C1 !important;
-    background: #fff;
-    cursor: pointer;
+
+/* 確保 autocomplete 下拉在 modal 之上 */
+.ui-autocomplete {
+    z-index: 9999 !important;
+    max-height: 250px; /* 可選，防止太長 */
+    overflow-y: auto;
 }
 
-.dataTables_wrapper .dataTables_filter input {
-    border: 1px solid #22b3C1;
-}
-
-#backToTop {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 100;
-    background-color: #fff; /* 黑底 */
-    color: #333; /* 白字 */
-    border: none;
-    border-radius: 50%;
-    padding: 10px 14px;
-    font-size: 18px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    display: none; /* 預設隱藏 */
-}
-
-    #backToTop:hover {
-        background-color: #555;
-    }

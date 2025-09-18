@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.EmployeeViewModel>
+@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.EmployeeViewModel>
 @using Microsoft.AspNetCore.Mvc.Rendering
 @{
     var roles = ViewBag.Roles as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
@@ -21,34 +21,34 @@
             </tr>
         </thead>
         <tbody>
-        @foreach (var emp in Model)
-        {
-            <tr data-id="@emp.EmployeeID">
-                <td>@emp.EmployeeID</td>
-                <td>@emp.Account</td>
-                <td>@emp.EmployeeName</td>
-                <td>
-                    <select class="form-select js-role">
+            @foreach (var emp in Model)
+            {
+                <tr data-id="@emp.EmployeeID">
+                    <td>@emp.EmployeeID</td>
+                    <td>@emp.Account</td>
+                    <td>@emp.EmployeeName</td>
+                    <td>
+                        <select class="form-select js-role">
                             @foreach (var role in roles)
                             {
                                 <option value="@role.Value" selected="@(emp.RoleID.HasValue && emp.RoleID.Value.ToString() == role.Value)">
                                     @role.Text
                                 </option>
                             }
-                    </select>
-                </td>
-                <td>
-                    <input type="checkbox" class="form-check-input js-status" @(emp.Status == true ? "checked" : "") />
-                </td>
-                <td>
-                    <input type="password" class="form-control js-password" placeholder="留空不變" />
-                </td>
-                <td>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="checkbox" class="form-check-input js-status" @(emp.Status == true ? "checked" : "") />
+                    </td>
+                    <td>
+                        <input type="password" class="form-control js-password" placeholder="留空不變" />
+                    </td>
+                    <td>
                         <button type="button" class="btn btn-info btn-sm js-detail">詳細</button>
-                    <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
-                </td>
-            </tr>
-        }
+                        <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
