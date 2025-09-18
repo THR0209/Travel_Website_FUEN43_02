@@ -1,36 +1,48 @@
-﻿
-<h2>銷售報表</h2>
+﻿<h1 class="d-flex justify-content-between align-items-center">
+    銷售報表
+    <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard" 
+       class="btn btn-outline-primary btn-sm">
+        <i class="fa-solid fa-chart-line"></i> 回到儀表板
+    </a>
+</h1>
 
-<div class="d-flex mb-3" style="gap: 10px;">
-    <!-- 圖表類型選單 -->
-    <select id="chartType" class="form-select" style="width:200px;">
-        <option value="bar" selected>柱狀圖</option>
-        <option value="line">折線圖</option>
-        <option value="pie">圓餅圖</option>
-    </select>
-
-    <!-- 時間區間選單 -->
-    <select id="timeRange" class="form-select" style="width:200px;">
-        <option value="day">日報表</option>
-        <option value="month" selected>月報表</option>
-        <option value="quarter">季報表</option>
-        <option value="year">年報表</option>
-    </select>
-</div>
-
-<div class="container">
+<div class="container mt-5">
     <h4>📊 銷售額趨勢</h4>
+
+    <div class="d-flex mb-3" style="gap: 10px;">
+        <!-- 圖表類型選單 -->
+        <select id="chartType" class="form-select" style="width:200px;">
+            <option value="bar" selected>柱狀圖</option>
+            <option value="line">折線圖</option>
+            <option value="pie">圓餅圖</option>
+        </select>
+
+        <!-- 時間區間選單 -->
+        <select id="timeRange" class="form-select" style="width:200px;">
+            <option value="day">日報表</option>
+            <option value="month" selected>月報表</option>
+            <option value="quarter">季報表</option>
+            <option value="year">年報表</option>
+        </select>
+    </div>
+
+    <!-- 銷售額圖表 -->
     <canvas id="salesChart"></canvas>
+    <br />
+
+    <h4>🛒 訂單數趨勢</h4>
+    <canvas id="orderCountChart"></canvas>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let ctx = document.getElementById('salesChart').getContext('2d');
-        let chart;
+        // === 銷售額圖表 ===
+        let ctxSales = document.getElementById('salesChart').getContext('2d');
+        let salesChart;
 
-        function initChart(type, labels = [], data = []) {
-            if (chart) chart.destroy();
+        function initSalesChart(type, labels = [], data = []) {
+            if (salesChart) salesChart.destroy();
 
             let datasetConfig = {
                 label: '銷售額',
@@ -52,7 +64,7 @@
                 datasetConfig.borderColor = 'rgba(54, 162, 235, 1)';
             }
 
-            chart = new Chart(ctx, {
+            salesChart = new Chart(ctxSales, {
                 type: type,
                 data: {
                     labels: labels,
@@ -80,26 +92,85 @@
             });
         }
 
-        function loadData(groupBy) {
+        function loadSalesData(groupBy) {
             fetch(`/Admin/Reports/GetSalesReport?groupBy=${groupBy}`)
                 .then(r => r.json())
                 .then(data => {
                     let labels = data.map(d => d.x);
                     let values = data.map(d => d.y);
                     let chartType = document.getElementById('chartType').value;
-                    initChart(chartType, labels, values);
+                    initSalesChart(chartType, labels, values);
                 })
                 .catch(err => console.error("載入銷售報表錯誤:", err));
         }
 
+        // === 訂單數圖表 ===
+        let ctxOrders = document.getElementById('orderCountChart').getContext('2d');
+        let orderChart;
+
+        function initOrderChart(type, labels = [], data = []) {
+            if (orderChart) orderChart.destroy();
+
+            orderChart = new Chart(ctxOrders, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '訂單數',
+                        data: data,
+                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: '訂單數統計' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let value = context.raw || 0;
+                                    return `訂單數: ${value}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: type !== "pie" ? {
+                        x: { title: { display: true, text: '時間區間' } },
+                        y: { beginAtZero: true, title: { display: true, text: '訂單數' } }
+                    } : {}
+                }
+            });
+        }
+
+        function loadOrderData(groupBy) {
+            fetch(`/Admin/Reports/GetOrderCountReport?groupBy=${groupBy}`)
+                .then(r => r.json())
+                .then(data => {
+                    let labels = data.map(d => d.x);
+                    let values = data.map(d => d.y);
+                    let chartType = document.getElementById('chartType').value;
+                    initOrderChart(chartType, labels, values);
+                })
+                .catch(err => console.error("載入訂單數報表錯誤:", err));
+        }
+
+        // === 綁定事件 ===
         document.getElementById('timeRange').addEventListener('change', function () {
-            loadData(this.value);
+            loadSalesData(this.value);
+            loadOrderData(this.value);
         });
 
         document.getElementById('chartType').addEventListener('change', function () {
-            loadData(document.getElementById('timeRange').value);
+            let range = document.getElementById('timeRange').value;
+            loadSalesData(range);
+            loadOrderData(range);
         });
 
-        loadData("month");
+        // 預設載入月報表
+        loadSalesData("month");
+        loadOrderData("month");
     </script>
 }

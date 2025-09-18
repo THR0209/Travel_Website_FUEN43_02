@@ -85,50 +85,108 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
             return View(vm);
         }
 
-        // 1️⃣ 訂閱 vs 非訂閱比例
+        // 1️⃣ 訂閱 vs 非訂閱比例（本月 + 上月）
         [HttpGet]
         public IActionResult GetMemberSubscriptionRatio()
         {
-            var result = _context.Customers
+            var now = DateTime.Now;
+            var firstDayThisMonth = new DateTime(now.Year, now.Month, 1);
+            var firstDayNextMonth = firstDayThisMonth.AddMonths(1);
+            var firstDayLastMonth = firstDayThisMonth.AddMonths(-1);
+
+            // 本月
+            var thisMonthData = _context.Customers
+                .Where(c => c.CreateDate < firstDayNextMonth) // 本月以前註冊的
                 .GroupBy(c => c.Level == null || c.Level == 0 ? "非訂閱會員" : "訂閱會員")
-                .Select(g => new
-                {
-                    Label = g.Key,
-                    Count = g.Count()
-                })
+                .Select(g => new { Label = g.Key, Count = g.Count() })
                 .ToList();
 
-            // 保證有兩個群組
-            if (!result.Any(r => r.Label == "非訂閱會員"))
-                result.Add(new { Label = "非訂閱會員", Count = 0 });
+            // 確保本月有兩個群組
+            if (!thisMonthData.Any(r => r.Label == "非訂閱會員"))
+                thisMonthData.Add(new { Label = "非訂閱會員", Count = 0 });
+            if (!thisMonthData.Any(r => r.Label == "訂閱會員"))
+                thisMonthData.Add(new { Label = "訂閱會員", Count = 0 });
 
-            if (!result.Any(r => r.Label == "訂閱會員"))
-                result.Add(new { Label = "訂閱會員", Count = 0 });
+            // 上月
+            var lastMonthData = _context.Customers
+                .Where(c => c.CreateDate < firstDayThisMonth) // 上月以前註冊的
+                .GroupBy(c => c.Level == null || c.Level == 0 ? "非訂閱會員" : "訂閱會員")
+                .Select(g => new { Label = g.Key, Count = g.Count() })
+                .ToList();
 
-            return Json(result);
+            // 確保上月有兩個群組
+            if (!lastMonthData.Any(r => r.Label == "非訂閱會員"))
+                lastMonthData.Add(new { Label = "非訂閱會員", Count = 0 });
+            if (!lastMonthData.Any(r => r.Label == "訂閱會員"))
+                lastMonthData.Add(new { Label = "訂閱會員", Count = 0 });
+
+            return Json(new
+            {
+                ThisMonth = thisMonthData.OrderBy(r => r.Label).ToList(),
+                LastMonth = lastMonthData.OrderBy(r => r.Label).ToList()
+            });
         }
 
-        // 2️⃣ 銅 / 銀 / 金比例
+
+        // 2️⃣ 銅 / 銀 / 金比例（本月 + 上月）
         [HttpGet]
         public IActionResult GetMemberLevelRatio()
         {
-            var result = _context.Customers
-        .Where(c => c.Level != null && c.Level != 0)
-        .Join(_context.CustomerLevels,
-              c => c.Level,
-              l => l.Level,
-              (c, l) => new { l.LevelName })
-        .GroupBy(x => x.LevelName)
-        .Select(g => new
-        {
-            Label = g.Key,
-            Count = g.Count()
-        })
-        .ToList();
+            var now = DateTime.Now;
+            var firstDayThisMonth = new DateTime(now.Year, now.Month, 1);
+            var firstDayLastMonth = firstDayThisMonth.AddMonths(-1);
 
-            return Json(result);
+            // 本月 (所有會員現況)
+            var thisMonthData = _context.Customers
+                .Where(c => c.Level != null && c.Level != 0) // 排除未訂閱
+                .Join(_context.CustomerLevels,
+                      c => c.Level,
+                      l => l.Level,
+                      (c, l) => new { l.LevelName })
+                .GroupBy(x => x.LevelName)
+                .Select(g => new { label = g.Key, count = g.Count() })
+                .ToList();
 
+            // 上月 (只取「上個月之前就已存在」的會員)
+            var lastMonthData = _context.Customers
+                .Where(c => c.Level != null && c.Level != 0 &&
+                            c.CreateDate < firstDayThisMonth) // 在本月之前就已經存在
+                .Join(_context.CustomerLevels,
+                      c => c.Level,
+                      l => l.Level,
+                      (c, l) => new { l.LevelName })
+                .GroupBy(x => x.LevelName)
+                .Select(g => new { label = g.Key, count = g.Count() })
+                .ToList();
+
+            // 確保銅/銀/金都有值（避免缺資料）
+            var allLevels = _context.CustomerLevels.Select(l => l.LevelName).ToList();
+
+            foreach (var level in allLevels)
+            {
+                if (!thisMonthData.Any(r => r.label == level))
+                    thisMonthData.Add(new { label = level, count = 0 });
+
+                if (!lastMonthData.Any(r => r.label == level))
+                    lastMonthData.Add(new { label = level, count = 0 });
+            }
+
+            // 固定順序：Bronze → Silver → Gold
+            var order = new List<string> { "Bronze", "Silver", "Gold" };
+
+            return Json(new
+            {
+                thisMonth = thisMonthData.OrderBy(r => order.IndexOf(r.label)).ToList(),
+                lastMonth = lastMonthData.OrderBy(r => order.IndexOf(r.label)).ToList()
+            });
         }
+
+
+
+
+
+
+
 
         [HttpGet]
         public IActionResult MemberSubscriptionRatio()
@@ -285,12 +343,164 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
             return Json(result);
         }
 
+        [HttpGet]
+        public IActionResult GetOrderCountReport(string groupBy = "month")
+        {
+            var query = _context.CustomerOrders
+                .Where(o => o.CreateTime.HasValue)
+                .AsQueryable();
+
+            List<object> result;
+
+            switch (groupBy.ToLower())
+            {
+                case "day":
+                    var dailyData = query
+                        .GroupBy(o => o.CreateTime.Value.Date)
+                        .AsEnumerable()
+                        .Select(g => new
+                        {
+                            x = g.Key,
+                            y = g.Count()
+                        })
+                        .OrderBy(r => r.x)
+                        .ToList();
+
+                    var today = DateTime.Today;
+                    var last7Days = Enumerable.Range(0, 7)
+                        .Select(i => today.AddDays(-6 + i));
+
+                    result = last7Days
+                        .GroupJoin(
+                            dailyData,
+                            d => d,
+                            g => g.x,
+                            (d, g) => new
+                            {
+                                x = d.ToString("yyyy-MM-dd"),
+                                y = g.Sum(x => x.y)
+                            }
+                        )
+                        .ToList<object>();
+                    break;
+
+                case "month":
+                    var monthlyData = query
+                        .GroupBy(o => new { o.CreateTime.Value.Year, o.CreateTime.Value.Month })
+                        .AsEnumerable()
+                        .Select(g => new
+                        {
+                            x = new DateTime(g.Key.Year, g.Key.Month, 1),
+                            y = g.Count()
+                        })
+                        .OrderBy(r => r.x)
+                        .ToList();
+
+                    var startMonth = DateTime.Today.AddMonths(-11);
+                    var allMonths = Enumerable.Range(0, 12)
+                        .Select(i => new DateTime(startMonth.Year, startMonth.Month, 1).AddMonths(i));
+
+                    result = allMonths
+                        .GroupJoin(
+                            monthlyData,
+                            m => new { m.Year, m.Month },
+                            d => new { d.x.Year, d.x.Month },
+                            (m, g) => new
+                            {
+                                x = m.ToString("yyyy-MM"),
+                                y = g.Sum(x => x.y)
+                            }
+                        )
+                        .ToList<object>();
+                    break;
+
+                case "quarter":
+                    var quarterlyData = query
+                        .GroupBy(o => new { o.CreateTime.Value.Year, Quarter = (o.CreateTime.Value.Month - 1) / 3 + 1 })
+                        .AsEnumerable()
+                        .Select(g => new
+                        {
+                            x = new { g.Key.Year, g.Key.Quarter },
+                            y = g.Count()
+                        })
+                        .OrderBy(r => r.x.Year).ThenBy(r => r.x.Quarter)
+                        .ToList();
+
+                    var now = DateTime.Today;
+                    var currentQuarter = (now.Month - 1) / 3 + 1;
+                    var currentYear = now.Year;
+
+                    var quarters = new List<(int Year, int Quarter)>();
+                    for (int i = 3; i >= 0; i--)
+                    {
+                        int year = currentYear;
+                        int quarter = currentQuarter - i;
+                        if (quarter <= 0)
+                        {
+                            quarter += 4;
+                            year -= 1;
+                        }
+                        quarters.Add((year, quarter));
+                    }
+
+                    result = quarters
+                        .GroupJoin(
+                            quarterlyData,
+                            q => new { q.Year, q.Quarter },
+                            d => new { d.x.Year, d.x.Quarter },
+                            (q, g) => new
+                            {
+                                x = $"{q.Year} Q{q.Quarter}",
+                                y = g.Sum(x => x.y)
+                            }
+                        )
+                        .OrderBy(r => r.x)
+                        .ToList<object>();
+                    break;
+
+                case "year":
+                    var yearlyData = query
+                        .GroupBy(o => o.CreateTime.Value.Year)
+                        .AsEnumerable()
+                        .Select(g => new
+                        {
+                            x = g.Key,
+                            y = g.Count()
+                        })
+                        .OrderBy(r => r.x)
+                        .ToList();
+
+                    result = yearlyData
+                        .Select(d => new
+                        {
+                            x = d.x.ToString(),
+                            y = d.y
+                        })
+                        .ToList<object>();
+                    break;
+
+                default:
+                    return BadRequest("Invalid groupBy value. Use day, month, quarter, or year.");
+            }
+
+            return Json(result);
+        }
+
+
+
+
         // --- 1. 銷售趨勢圖 ---
         [HttpGet]
         public IActionResult SalesReport()
         {
             return View();
         }
+
+
+
+
+
+
 
         //// 提供給 SalesTrend 的 JSON 資料
         //[HttpGet]

@@ -20,6 +20,8 @@ public partial class Customers
 
     public DateTime? CreateDate { get; set; }
 
+    public DateTime? LevelUpdatedAt { get; set; }
+
     public bool? Status { get; set; }
 
     public bool? IsBlacklisted { get; set; }

@@ -3,7 +3,16 @@
     ViewData["Title"] = "熱門行程排行";
 }
 
-<h1>🔥 熱門行程排行</h1>
+
+
+
+<h1 class="d-flex justify-content-between align-items-center">
+    🔥 熱門行程排行
+    <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard" 
+       class="btn btn-outline-primary btn-sm">
+        <i class="fa-solid fa-chart-line"></i> 回到儀表板
+    </a>
+</h1>
 
 <!-- 表格 -->
 <div class="container mt-4">
@@ -38,6 +47,15 @@
 <div class="container mt-4">
     <h4>📊 訂單數 vs 瀏覽次數</h4>
     <canvas id="hotProductsChart"></canvas>
+</div>
+
+<!-- 行程管理按鈕 -->
+<div class="row mt-4">
+    <div class="col text-center">
+        <a asp-area="ProductManagement" asp-controller="Products" asp-action="Index" class="btn btn-primary">
+            行程管理
+        </a>
+    </div>
 </div>
 
 @section Scripts {
