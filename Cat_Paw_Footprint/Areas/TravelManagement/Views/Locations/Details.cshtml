@@ -4,120 +4,125 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>詳細資料</h1>
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">詳細資料</h2>
+        <h6 class="text-muted mb-4">景點資訊</h6>
+    
 
-<div>
-    <h4>景點資訊</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationAddr)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationAddr)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationLat)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationLat)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationLng)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationLng)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationDesc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationDesc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Views)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Views)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LocationCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LocationCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActiveText)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.District)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.District.DistrictName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Region)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Region.RegionName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.KeywordID)
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.KeywordNames != null && Model.KeywordNames.Any())
-            {
-                foreach (var keyword in Model.KeywordNames)
-                {
-                    <span class="badge bg-primary">@keyword</span>
-                }
-            }
-            else
-            {
-                <span>目前沒有關鍵字</span>
-            }
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Picture)
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
-            {
-                foreach (var pic in Model.PictureBase64)
-                {
-                    <img src="@pic" alt="圖片載入失敗" style="max-width:200px; margin:5px;" />
-                }
-            }
-            else
-            {
-                <span>目前沒有圖片</span>
-            }
-        </dd>
+        <!-- ✅ 方格化區塊 -->
+        <div class="row g-0 border">
+            <!-- 名稱 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationName)
+            </div>
+            <div class="col-md-9 border p-2">@Model.LocationName</div>
 
-    </dl>
+            <!-- 介紹 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationDesc)
+            </div>
+            <div class="col-md-9 border p-2">@Model.LocationDesc</div>
+        
+            <!-- 地址 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationAddr)
+            </div>
+            <div class="col-md-9 border p-2">@Model.LocationAddr</div>
+        
+            <!-- 經度 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationLat)
+            </div>
+            <div class="col-md-3 border p-2">@Model.LocationLat</div>
+            <!-- 緯度 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationLng)
+            </div>
+            <div class="col-md-3 border p-2">@Model.LocationLng</div>
+
+            <!-- 評分 -->
+            <div class="col-md-2 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Rating)
+            </div>
+            <div class="col-md-2 border p-2">@Model.Rating</div>
+            <!-- 瀏覽數 -->
+            <div class="col-md-2 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Views)
+            </div>
+            <div class="col-md-2 border p-2">@Model.Views</div>
+            <!-- 門票錢 -->
+            <div class="col-md-2 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationPrice)
+            </div>
+            <div class="col-md-2 border p-2">@Model.LocationPrice</div>
+
+            <!-- 代碼 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.LocationCode)
+            </div>
+            <div class="col-md-3 border p-2">@Model.LocationCode</div>
+            <!-- 是否啟用 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.IsActive)
+            </div>
+            <div class="col-md-3 border p-2">@Model.IsActiveText</div>
+
+            <!-- 縣市 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.District)
+            </div>
+            <div class="col-md-3 border p-2">@Model.District?.DistrictName</div>
+            <!-- 地區 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Region)
+            </div>
+            <div class="col-md-3 border p-2">@Model.Region?.RegionName</div>
+
+            <!-- 關鍵字 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.KeywordID)
+            </div>
+            <div class="col-md-9 border p-2">
+                @if (Model.KeywordNames != null && Model.KeywordNames.Any())
+                {
+                    foreach (var keyword in Model.KeywordNames)
+                    {
+                        <span class="badge bg-primary me-1">@keyword</span>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">目前沒有關鍵字</span>
+                }
+            </div>
+
+            <!-- 圖片 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.Picture)
+            </div>
+            <div class="col-md-9 border p-2">
+                @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+                {
+                    foreach (var pic in Model.PictureBase64)
+                    {
+                        <img src="@pic" alt="圖片載入失敗" class="img-thumbnail me-2 mb-2" style="max-width:200px;" />
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">目前沒有圖片</span>
+                }
+            </div>
+
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="mt-4 text-end">
+        <a asp-action="Edit" asp-route-id="@Model?.LocationID" class="btn btn-warning">修改</a> 
+        <a asp-action="Index" class="btn btn-secondary">返回</a>
+    </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.LocationID">修改</a> |
-    <a asp-action="Index">返回</a>
-</div>
+        
+       

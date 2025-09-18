@@ -4,115 +4,92 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>詳細資料</h1>
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">詳細資料</h2>
+        <h6 class="text-muted mb-4">住宿資訊</h6>
 
-<div>
-    <h4>住宿資訊</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HotelName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HotelName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HotelAddr)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HotelAddr)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HotelLat)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HotelLat)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HotelLng)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HotelLng)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HotelDesc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HotelDesc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Rating)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Rating)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Views)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Views)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HotelCode)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HotelCode)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActiveText)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.District)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.District.DistrictName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Region)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Region.RegionName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.KeywordID)
-        </dt>
-        <dd class = "col-sm-10">
-            @if (Model.KeywordNames != null && Model.KeywordNames.Any())
-            {
-                foreach (var keyword in Model.KeywordNames)
+        <!-- ✅ 方格化區塊 -->
+        <div class="row g-0 border">
+            <!-- 名稱 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">
+                @Html.DisplayNameFor(model => model.HotelName)
+            </div>
+            <div class="col-md-9 border p-2">@Model.HotelName</div>
+
+            <!-- 地址 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">住宿地址</div>
+            <div class="col-md-9 border p-2">@Model.HotelAddr</div>
+
+            <!-- 經度 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">經度</div>
+            <div class="col-md-3 border p-2">@Model.HotelLat</div>
+            <!-- 緯度 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">緯度</div>
+            <div class="col-md-3 border p-2">@Model.HotelLng</div>
+
+            <!-- 介紹 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">住宿介紹</div>
+            <div class="col-md-9 border p-2">@Model.HotelDesc</div>
+
+            <!-- 評分 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">評分</div>
+            <div class="col-md-3 border p-2">@Model.Rating</div>
+            <!-- 瀏覽數 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">瀏覽數</div>
+            <div class="col-md-3 border p-2">@Model.Views</div>
+
+            <!-- 代碼 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">住宿代碼</div>
+            <div class="col-md-3 border p-2">@Model.HotelCode</div>
+            <!-- 是否啟用 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">是否啟用</div>
+            <div class="col-md-3 border p-2">@Model.IsActiveText</div>
+
+            <!-- 縣市 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">縣市</div>
+            <div class="col-md-3 border p-2">@Model.District?.DistrictName</div>
+            <!-- 地區 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">地區</div>
+            <div class="col-md-3 border p-2">@Model.Region?.RegionName</div>
+
+            <!-- 關鍵字 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">關鍵字</div>
+            <div class="col-md-9 border p-2">
+                @if (Model.KeywordNames != null && Model.KeywordNames.Any())
                 {
-                    <span class="badge bg-primary">@keyword</span>
+                    foreach (var keyword in Model.KeywordNames)
+                    {
+                        <span class="badge bg-primary me-1">@keyword</span>
+                    }
                 }
-            }
-            else
-            {
-                <span>目前沒有關鍵字</span>
-            }
-        </dd>
-
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Picture)
-        </dt>
-        <dd class = "col-sm-10">
-            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
-            {
-                foreach (var pic in Model.PictureBase64)
+                else
                 {
-                    <img src="@pic" alt="圖片載入失敗" style="max-width:200px; margin:5px;" />
+                    <span class="text-muted">目前沒有關鍵字</span>
                 }
-            }
-            else
-            {
-                <span>目前沒有圖片</span>
-            }
-        </dd>
+            </div>
 
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.HotelID">修改</a> |
-    <a asp-action="Index">返回</a>
+            <!-- 圖片 -->
+            <div class="col-md-3 border p-2 fw-bold bg-light">圖片</div>
+            <div class="col-md-9 border p-2">
+                @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+                {
+                    foreach (var pic in Model.PictureBase64)
+                    {
+                        <img src="@pic" alt="圖片載入失敗" class="img-thumbnail me-2 mb-2" style="max-width:200px;" />
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">目前沒有圖片</span>
+                }
+            </div>
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="mt-4 text-end">
+            <a asp-action="Edit" asp-route-id="@Model?.HotelID" class="btn btn-warning">修改</a>
+            <a asp-action="Index" class="btn btn-secondary">返回</a>
+        </div>
+    </div>
 </div>
