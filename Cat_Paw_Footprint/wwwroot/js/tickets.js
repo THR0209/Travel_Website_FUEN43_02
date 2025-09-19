@@ -45,7 +45,7 @@
                         data: 'ticketID',
                         render: function (data) {
                             if (typeof data === "undefined" || data === null) return '';
-                            return '<button class="btn btn-primary btn-edit" data-id="' + data + '">編輯</button>' +
+                            return '<button class="btn btn-primary btn-edit" data-id="' + data + '">檢視</button>' +
                                 '<button class="btn btn-danger btn-delete" data-id="' + data + '">刪除</button>';
                         }
                     }

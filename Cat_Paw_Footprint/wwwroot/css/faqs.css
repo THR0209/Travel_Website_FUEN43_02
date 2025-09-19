@@ -15,8 +15,7 @@
     margin: 10px 0;
 }
 
-
-
+/* DataTable 奇偶列顏色 */
 #faqTable tbody tr.odd,
 #categoryTable tbody tr.odd {
     background-color: #f9f9f9;
@@ -32,33 +31,45 @@
     background-color: #e6f7f9;
 }
 
-
-/* FAQ 與分類表格：所有欄位文字置中，但操作欄靠右 */
-#faqTable th,#categoryTable th {
+/* FAQ 與分類表格：文字置中，操作欄靠右 */
+#faqTable th,
+#categoryTable th {
     text-align: center;
     vertical-align: middle;
 }
 
-/* 針對 DataTable 操作欄位的 td */
-#faqTable td:last-child,
-#categoryTable td:last-child {
-    display: flex !important; /* 直接讓 td 變 flex */
-    justify-content: center !important; /* 置中 */
-    gap: 6px; /* 按鈕間距 */
-    align-items: center; /* 垂直置中 */
-    text-align:center;
+/* 操作欄 td */
+#faqTable td:last-child {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px;
+    align-items: center;
+    text-align: center;
+    vertical-align: middle !important;
+    height: 100%;
+    min-height: 90px;
+    padding: 8px;
 }
 
-/* 針對 DataTable 狀態欄位的 td */
+/* 狀態欄 td */
 #faqTable td:nth-last-child(2) {
-    align-items: center; /* 垂直置中 */
+    align-items: center;
     text-align: center;
 }
-/* 按鈕基本樣式：內距、圓角、無邊框、指標 */
+
+
+/* 按鈕基本樣式 */
 .btn {
     padding: 6px 10px;
     border-radius: 8px;
     cursor: pointer;
+}
+.btn-group-right {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }
 
 /* 分頁按鈕 */
@@ -72,6 +83,7 @@
     cursor: pointer;
 }
 
+/* 危險按鈕 */
 .btn-danger {
     color: #ff3e1d;
     border: 2px solid #ff3e1d;
@@ -82,32 +94,32 @@
         color: #fff;
         background-color: #e6381a;
         border-color: #e6381a;
-        box-shadow: 0 0.125rem 0.25rem 0 rgba(255, 62, 29, 0.4);
+        box-shadow: 0 0.125rem 0.25rem rgba(255, 62, 29, 0.4);
         transform: translateY(-1px);
     }
 
-/* 幽靈按鈕：灰色背景 */
+/* 幽靈按鈕 */
 .btn-ghost {
     background: #ecf0f1;
 }
 
-/* 狀態標籤：內距、圓角、白字、小字 */
+/* 狀態標籤 */
 .status {
     padding: 4px 8px;
     border-radius: 999px;
     color: #fff;
     font-size: 15px;
 }
-    /* 狀態：等待中（黃底） */
+
     .status.pending {
         background: #e1b12c;
     }
-    /* 狀態：完成（綠底） */
+
     .status.done {
         background: #44bd32;
     }
 
-/* 輸入框與下拉選單：全寬、內距、圓角、灰色邊框、無外框、白底 */
+/* 輸入框/下拉選單 */
 input[type="text"], select {
     width: 100%;
     padding: 10px;
@@ -117,9 +129,9 @@ input[type="text"], select {
     background: #fff;
 }
 
-/* 彈窗（modal）：預設隱藏、全螢幕覆蓋、置中、半透明黑背景、置頂 */
+/* 彈窗 */
 .modal {
-    display: none; /* 預設隱藏 */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -131,51 +143,47 @@ input[type="text"], select {
     z-index: 9998;
 }
 
-    /* 彈窗內容：白底、內距、圓角、固定寬度 */
     .modal .modal-content {
         background: #fff;
         padding: 20px;
         border-radius: 8px;
-/*        width: 400px;*/
     }
+
 .modal-content {
     max-width: 400px;
     margin: auto;
 }
 
-    /* 彈窗內 label 標籤：上方留白 */
-    .modal label {
-        display: block;
-        margin-top: 10px;
-    }
-    /* 彈窗內輸入框、下拉選單、文字區域：全寬、上方留白 */
-    .modal input, .modal select, .modal textarea {
-        width: 100%;
-        margin-top: 4px;
-    }
-    /* 彈窗內文字區域：固定高度、不可調整 */
-    .modal textarea {
-        height: 80px;
-        resize: none;
+.modal label {
+    display: block;
+    margin-top: 10px;
+}
+
+.modal input, .modal select, .modal textarea {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.modal textarea {
+    height: 80px;
+    resize: none;
+}
+
+.modal .modal-footer {
+    margin-top: 12px;
+    text-align: right;
+}
+
+    .modal .modal-footer .btn {
+        margin-left: 6px;
     }
 
-    /* 彈窗底部：上方留白、靠右排列按鈕 */
-    .modal .modal-footer {
-        margin-top: 12px;
-        text-align: right;
-    }
+.modal.show {
+    display: flex;
+}
 
-        .modal .modal-footer .btn {
-            margin-left: 6px;
-        }
-
-    /* 顯示彈窗用 class（由 js 切換）：顯示時改為 flex 置中 */
-    .modal.show {
-        display: flex;
-    }
-
+/* DataTables info */
 .dataTables_info {
     display: inline-block;
     margin-left: 10px;
 }
-

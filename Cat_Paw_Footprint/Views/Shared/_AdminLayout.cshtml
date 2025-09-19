@@ -64,6 +64,11 @@
                         <img src="/images/Logo.png" alt="TravelPaws Logo" style="height:60px;">
                     </span>
                     <span class="app-brand-text demo menu-text fw-bolder ms-3 mt-3" style="">貓爪足跡</span>
+                    <div class="layout-menu-toggle d-block d-xl-none mt-1">
+                        <a id="menuToggleBtn" class="nav-item nav-link px-0" href="javascript:void(0)">
+                            <i class="bx bx-menu bx-sm"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="menu-inner-shadow"></div>
@@ -111,7 +116,6 @@
                         </a>
                     </div>
                 </nav>
-
 
                 <!-- / Navbar -->
                 <!-- Content wrapper -->
@@ -171,3 +175,16 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<script>
+    $(function () {
+        $('#menuToggleBtn').click(function () {
+            $('#layout-menu').toggleClass('close-menu');
+        });
+    });
+</script>
+
+/* 隱藏側邊選單 */
+.close-menu {
+    display: none !important;
+}
