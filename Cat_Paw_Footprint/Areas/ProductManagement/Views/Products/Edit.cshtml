@@ -59,7 +59,7 @@
                 <label class="mb-1">產品封面照： </label>
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                @* <div class="form-group mb-3">
+                <div class="form-group mb-3">
                     @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
                     {
                         <!-- 把 byte[] 轉成 base64 並顯示 -->
@@ -71,12 +71,12 @@
                         <!-- 沒有圖片就顯示預設圖 -->
                         <img src="@Url.Content("~/images/NoImage.png")" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
                     }
-                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" />
+                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" id="uploadImage" />
                     <!-- 使用asp-for同時會使 id 和 name 兩個成為asp-for的值，且如果asp-for的值有.的話，在轉換成id時會被轉成_ ，name不會影響 -->
-                </div> *@
+                </div>
 
-                <div class="form-group mb-3">
-                    @if (Model.Product.ProductID > 0)
+                @* <div class="form-group mb-3">
+                    @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
                     {
                         <img src="@Url.Action("GetProductImage", "Products", new { area = "ProductManagement", id = Model.Product.ProductID })"
                              style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
@@ -87,7 +87,7 @@
                              style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
                     }
                     <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" />
-                </div>
+                </div> *@
 
                 @* <div class="form-group mb-3">
                     <label asp-for="Product.ProductCode" class="control-label mb-1">產品編號：</label>
@@ -959,7 +959,18 @@
         });
         });
 
-
+        // 綁定檔案上傳 input 的 change 事件
+        document.getElementById('uploadImage').addEventListener('change', function (event) {
+            const file = event.target.files[0]; // 取得使用者選的檔案
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // 將讀取結果設定到 <img> 的 src
+                    document.getElementById('previewImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file); // 轉成 base64
+            }
+        });
 
     </script>
 }

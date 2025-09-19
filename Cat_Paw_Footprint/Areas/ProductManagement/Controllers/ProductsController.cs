@@ -451,7 +451,6 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 
 				// 2. 更新基本欄位
 				entity.ProductName = vm.Product.ProductName;
-				entity.ProductCode = vm.Product.ProductCode;
 				entity.RegionID = vm.Product.RegionID;
 				entity.ProductPrice = vm.Product.ProductPrice;
 				entity.StartDate = vm.Product.StartDate;
