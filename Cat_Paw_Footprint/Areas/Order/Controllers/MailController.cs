@@ -41,7 +41,7 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
 			return RedirectToAction("Index", "CustomerOrders", new { area = "Order" });
 		}
 		[HttpPost]
-		[IgnoreAntiforgeryToken]
+		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> SendAjax([FromForm] string to, [FromForm] string subject, [FromForm] string body)
 		{
 			foreach (var key in Request.Form.Keys)

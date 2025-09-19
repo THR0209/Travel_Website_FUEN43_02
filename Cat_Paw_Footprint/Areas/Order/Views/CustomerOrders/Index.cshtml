@@ -272,7 +272,7 @@ else
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
             </div>
 
-            <form id="sendMailForm" method="post" action="@Url.Action("SendAjax","Mail", new { area = "Order" })">
+            <form id="sendMailForm" method="post" action="@Url.Action("SendAjax","CustomerOrders", new { area = "Order" })">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <div class="mb-3">
