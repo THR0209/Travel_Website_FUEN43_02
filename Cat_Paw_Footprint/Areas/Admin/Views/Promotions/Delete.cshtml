@@ -30,24 +30,17 @@
         </tr>
         <tr>
             <th>@Html.DisplayNameFor(m => m.DiscountType)</th>
-            <td>@Html.DisplayFor(m => m.DiscountType)</td>
+            <td>@Html.DisplayFor(m => m.DiscountTypeName)</td>
         </tr>
         <tr>
             <th>@Html.DisplayNameFor(m => m.DiscountValue)</th>
-            <td>@Html.DisplayFor(m => m.DiscountValue)</td>
+            <td>@Html.DisplayFor(m => m.DiscountValueDisplay)</td>
         </tr>
         <tr>
             <th>@Html.DisplayNameFor(m => m.IsActive)</th>
-            <td>
-                @if (Model.IsActive == true)
-                {
-                    <span class="text-success">啟用</span>
-                }
-                else
-                {
-                    <span class="text-danger">停用</span>
-                }
-            </td>
+         <td>
+             @Html.ActiveBadge(Model.IsActive)
+        </td>
         </tr>
     </tbody>
 </table>

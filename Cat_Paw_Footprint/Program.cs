@@ -33,7 +33,7 @@ namespace Cat_Paw_Footprint
 
 			builder.Services
 				.AddIdentity<IdentityUser, IdentityRole>(opt => {
-					opt.SignIn.RequireConfirmedAccount = false; // ´ú¸Õ¥ýÃö±¼«H½cÅçÃÒ
+					opt.SignIn.RequireConfirmedAccount = false; // ï¿½ï¿½ï¿½Õ¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Hï¿½cï¿½ï¿½ï¿½ï¿½
 					opt.Password.RequiredLength = 6;
 				})
 				.AddEntityFrameworkStores<ApplicationDbContext>()
@@ -41,28 +41,72 @@ namespace Cat_Paw_Footprint
 				.AddDefaultUI();
 			builder.Services.AddAuthentication(options =>
 			{
-				options.DefaultScheme = "VendorAuth"; // ¹w³]¨Ï¥Î VendorAuth
+				options.DefaultScheme = "VendorAuth"; // ï¿½wï¿½]ï¿½Ï¥ï¿½ VendorAuth
 				options.DefaultChallengeScheme = "VendorAuth";
 			})
 	.AddCookie("VendorAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Vendor.Auth";
-		options.LoginPath = "/Vendor/VendorHome/Login";   // ¼t°Óµn¤J­¶
+		options.LoginPath = "/Vendor/VendorHome/Login";   // ï¿½tï¿½Óµnï¿½Jï¿½ï¿½
 		options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
 	})
 	.AddCookie("CustomerAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/Customer/Account/Login"; // «È¤áµn¤J­¶
+		options.LoginPath = "/Customer/Account/Login"; // ï¿½È¤ï¿½nï¿½Jï¿½ï¿½
 		options.AccessDeniedPath = "/Customer/Account/Denied";
+	}).AddCookie("EmployeeAuth", options =>
+	{
+		options.Cookie.Name = ".CatPaw.Employee.Auth";
+		options.LoginPath = "/Employee/EmployeeAuth/Login";       // ï¿½ï¿½ï¿½uï¿½nï¿½Jï¿½ï¿½
+		options.AccessDeniedPath = "/Home/Index";
 	});
+
+			builder.Services.AddAuthorization(options =>
+			{
+				options.AddPolicy("Emp.AdminOnly", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
+
+				options.AddPolicy("AreaAdmin", policy =>//ï¿½ï¿½ï¿½ï¿½ ï¿½Ì·sï¿½ï¿½ï¿½ï¿½ ï¿½uï¿½fï¿½ï¿½ï¿½ï¿½
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
+
+				options.AddPolicy("AreaCouponManagement", policy =>//ï¿½uï¿½fï¿½ï¿½
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "Sales"));
+
+				options.AddPolicy("AreaCustomerService", policy =>//ï¿½ÈªA
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "CustomerService", "SuperAdmin"));
+
+				options.AddPolicy("AreaOrder", policy =>//ï¿½qï¿½ï¿½
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
+
+
+				options.AddPolicy("AreaProductManagement", policy =>//ï¿½ï¿½ï¿½~
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "TourGuide"));
+
+				options.AddPolicy("AreaTravelManagement", policy =>//ï¿½È¹C
+		policy.AddAuthenticationSchemes("EmployeeAuth")
+			  .RequireAuthenticatedUser()
+			  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
+			});
 
 			builder.Services.AddSession(options =>
 			{
-				options.Cookie.Name = ".CatPaw.Employee.Session"; // ¦Û­q­û¤u Session ¦WºÙ
-				options.IdleTimeout = TimeSpan.FromHours(9);   // ¦Û­q¹O®É®É¶¡
-				options.Cookie.HttpOnly = true;                   // ªý¤î JS ¦s¨ú¡A¨¾¤î XSS
-				options.Cookie.IsEssential = true;                // Á×§K³QÂsÄý¾¹ªý¾×
+				options.Cookie.Name = ".CatPaw.Employee.Session"; // ï¿½Û­qï¿½ï¿½ï¿½u Session ï¿½Wï¿½ï¿½
+				options.IdleTimeout = TimeSpan.FromHours(9);   // ï¿½Û­qï¿½Oï¿½É®É¶ï¿½
+				options.Cookie.HttpOnly = true;                   // ï¿½ï¿½ï¿½ï¿½ JS ï¿½sï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ XSS
+				options.Cookie.IsEssential = true;                // ï¿½×§Kï¿½Qï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			});
 
 			builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -87,6 +131,9 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
 
+			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+			builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -105,8 +152,33 @@ namespace Cat_Paw_Footprint
             app.UseStaticFiles();
 
             app.UseRouting();
-			app.UseSession(); // ±Ò¥Î Session ¤¤¤¶³nÅé
-			app.UseAuthentication();// ¦b Authorization ¤§«e
+			app.UseSession(); // ï¿½Ò¥ï¿½ Session ï¿½ï¿½ï¿½ï¿½ï¿½nï¿½ï¿½
+			app.Use(async (context, next) =>
+			{
+				var path = context.Request.Path.Value ?? "";
+
+				if (path.StartsWith("/Employee", StringComparison.OrdinalIgnoreCase) ||
+					path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase) ||
+					path.StartsWith("/CouponManagement", StringComparison.OrdinalIgnoreCase) ||
+					path.StartsWith("/ProductManagement", StringComparison.OrdinalIgnoreCase))
+				{
+					if (context.User?.Identity?.IsAuthenticated == true &&
+						context.User.Identity.AuthenticationType == "EmployeeAuth" &&
+						string.IsNullOrEmpty(context.Session.GetString("EmpId")))
+					{
+						var claims = context.User.Claims;
+						context.Session.SetString("EmpId", claims.FirstOrDefault(c => c.Type == "EmployeeID")?.Value ?? "");
+						context.Session.SetString("EmpRoleId", claims.FirstOrDefault(c => c.Type == "RoleID")?.Value ?? "");
+						context.Session.SetString("EmpRoleName", claims.FirstOrDefault(c => c.Type == "RoleName")?.Value ?? "");
+						context.Session.SetString("EmpName", claims.FirstOrDefault(c => c.Type == "EmployeeName")?.Value ?? "");
+						context.Session.SetString("Status", claims.FirstOrDefault(c => c.Type == "Status")?.Value ?? "");
+						context.Session.SetString("Login", "True");
+					}
+				}
+
+				await next();
+			});
+			app.UseAuthentication();// ï¿½b Authorization ï¿½ï¿½ï¿½e
 			app.UseAuthorization();
 			app.MapControllerRoute(
 				name: "areas",
@@ -117,8 +189,6 @@ namespace Cat_Paw_Footprint
             app.MapRazorPages();
 
             app.Run();
-			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
-			builder.Services.AddTransient<IEmailSender, EmailSender>();
 		}
     }
 }

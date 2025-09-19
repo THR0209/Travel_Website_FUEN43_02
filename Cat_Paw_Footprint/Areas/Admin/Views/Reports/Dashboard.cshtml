@@ -5,41 +5,57 @@
 
 <h1>儀表板</h1>
 
-<div class="row">
+<div class="row g-3">
+
+    <!-- 本月訂單 -->
     <div class="col-md-3">
-        <div class="card p-3 rounded-5">
+        <div class="card p-3 rounded-5 position-relative shadow-sm">
             <h5>本月訂單</h5>
             <h2>@Model.MonthlyOrders</h2>
             <small class="@(Model.OrderGrowthRate >= 0 ? "text-success" : "text-danger")">
-                @(Model.OrderGrowthRate >= 0 ? "比上月新增" : "比上月減少") @Model.OrderGrowthRate.ToString("F1")%
+                @(Model.OrderGrowthRate >= 0 ? "比上月新增" : "比上月減少")
+                @Model.OrderGrowthRate.ToString("F1")%
             </small>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="SalesReport" class="stretched-link"></a>
         </div>
     </div>
+
+    <!-- 開放行程 -->
     <div class="col-md-3">
-        <div class="card p-3 rounded-5">
+        <div class="card p-3 rounded-5 position-relative shadow-sm">
             <h5>開放行程</h5>
             <h2>@Model.OpenTrips</h2>
             <span class="badge bg-info">即時狀態</span>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="HotProducts" class="stretched-link"></a>
         </div>
     </div>
+
+    <!-- 客戶總數 -->
     <div class="col-md-3">
-        <div class="card p-3 rounded-5">
+        <div class="card p-3 rounded-5 position-relative shadow-sm">
             <h5>客戶總數</h5>
             <h2>@Model.CustomerCount</h2>
             <span class="@(Model.CustomerGrowthRate >= 0 ? "text-primary" : "text-danger")">
-                @(Model.CustomerGrowthRate >= 0 ? "比上月新增" : "比上月減少") @Model.CustomerGrowthRate.ToString("F1")%
+                @(Model.CustomerGrowthRate >= 0 ? "比上月新增" : "比上月減少")
+                @Model.CustomerGrowthRate.ToString("F1")%
             </span>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="MemberSubscriptionRatio" class="stretched-link"></a>
         </div>
     </div>
+
+    <!-- 本月已解決案件數 -->
     <div class="col-md-3">
-        <div class="card p-3 rounded-5">
+        <div class="card p-3 rounded-5 position-relative shadow-sm">
             <h5>本月已解決案件數</h5>
-            <h2>@Model.ResolvedTickets</h2>
+            <h2>@Model.ResolvedThisMonth</h2>
             <span class="@(Model.TicketGrowthRate >= 0 ? "text-info" : "text-danger")">
-                @(Model.TicketGrowthRate >= 0 ? "比上月新增" : "比上月減少") @Model.TicketGrowthRate.ToString("F1")%
+                @(Model.TicketGrowthRate >= 0 ? "比上月新增" : "比上月減少")
+                @Model.TicketGrowthRate.ToString("F1")%
             </span>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="CustomerServiceAnalysis" class="stretched-link"></a>
         </div>
     </div>
+
 </div>
 
 <hr class="my-4" />
@@ -63,7 +79,7 @@
     </select>
 </div>
 
-<div class="container">
+<div class="container" style="height:800px; width:800px; margin:0 auto;">
     <h4>📊 銷售額趨勢</h4>
     <canvas id="salesChart"></canvas>
 </div>
@@ -74,7 +90,6 @@
         let ctx = document.getElementById('salesChart').getContext('2d');
         let chart;
 
-        // 初始化圖表
         function initChart(type, labels = [], data = []) {
             if (chart) chart.destroy();
 
@@ -126,7 +141,6 @@
             });
         }
 
-        // 載入資料
         function loadData(groupBy) {
             fetch(`/Admin/Reports/GetSalesReport?groupBy=${groupBy}`)
                 .then(r => r.json())
@@ -139,7 +153,6 @@
                 .catch(err => console.error("載入銷售報表錯誤:", err));
         }
 
-        // 綁定事件
         document.getElementById('timeRange').addEventListener('change', function () {
             loadData(this.value);
         });
@@ -148,7 +161,6 @@
             loadData(document.getElementById('timeRange').value);
         });
 
-        // 預設載入「月報表」
         loadData("month");
     </script>
 }

@@ -1,47 +1,55 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.TransportationsViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "交通一覽";
 }
 
-<h1>交通</h1>
+<h1>交通一覽</h1>
+
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">新增資料</a>
+    <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i>新增資料</a>
 </p>
-<table id="example" class="display table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.TransportName)</th>
-            <th>@Html.DisplayNameFor(model => model.TransportDesc)</th>
-            <th>@Html.DisplayNameFor(model => model.TransportPrice)</th>
-            <th>@Html.DisplayNameFor(model => model.Rating)</th>
-            <th>@Html.DisplayNameFor(model => model.Views)</th>
-            <th>@Html.DisplayNameFor(model => model.TransportCode)</th>
-            <th>@Html.DisplayNameFor(model => model.IsActive)</th>   
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="card">
+    <table id="example" class="display table table-striped table-bordered">
+        <thead>
             <tr>
-                <td>@Html.DisplayFor(modelItem => item.TransportName)</td>
-                <td>@Html.DisplayFor(modelItem => item.TransportDesc)</td>
-                <td>@Html.DisplayFor(modelItem => item.TransportPrice)</td>
-                <td>@Html.DisplayFor(modelItem => item.Rating)</td>
-                <td>@Html.DisplayFor(modelItem => item.Views)</td>
-                <td>@Html.DisplayFor(modelItem => item.TransportCode)</td>
-                <td>@Html.DisplayFor(modelItem => item.IsActiveText)</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.TransportID" class="btn btn-sm btn-primary">修改</a>
-                    <a asp-action="Details" asp-route-id="@item.TransportID" class="btn btn-sm btn-success">詳細資料</a>
-                    <a asp-action="Delete" asp-route-id="@item.TransportID" class="btn btn-sm btn-danger">刪除</a>
-                </td>
+                <th>@Html.DisplayNameFor(model => model.TransportName)</th>
+                <th>@Html.DisplayNameFor(model => model.TransportDesc)</th>
+                <th>@Html.DisplayNameFor(model => model.TransportPrice)</th>
+                <th>@Html.DisplayNameFor(model => model.Rating)</th>
+                <th>@Html.DisplayNameFor(model => model.Views)</th>
+                <th>@Html.DisplayNameFor(model => model.IsActive)</th>   
+                <th>操作</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.TransportName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TransportDesc)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TransportPrice)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Rating)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Views)</td>
+                    <td>
+                        <button class="btn btn-sm toggle-active @(item.IsActive == true ? "btn-success" : "btn-secondary")"
+                                data-id="@item.TransportID"
+                                data-status="@(item.IsActive)">
+                            @(item.IsActive == true ? "啟用" : "停用")
+                        </button>
+                    </td>
+                
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.TransportID" class="btn btn-sm btn-primary">修改</a>
+                        @* <a asp-action="Details" asp-route-id="@item.TransportID" class="btn btn-sm btn-success">詳細資料</a> *@
+                        @* <a asp-action="Delete" asp-route-id="@item.TransportID" class="btn btn-sm btn-danger">刪除</a> *@
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @section Scripts {
     <!-- DataTables CSS & JS -->
@@ -53,6 +61,9 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
     <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
 
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         $(document).ready(function () {
             $('#example').DataTable({
@@ -60,28 +71,70 @@
                 pageLength: 10,                // 預設顯示 10 筆
                 fixedHeader: true,  // 固定表頭
 
-                columnDefs: [{   //評分
-                    targets: 3, // 第 4 欄
-                    render: function (data, type, row) {
-                        if (type === 'display') {
-                            var score = parseFloat(data) || 0;
-                            var fullStars = Math.floor(score); // 整數顆數
-                            var halfStar = (score % 1 >= 0.5) ? 1 : 0; // 半顆
-                            var emptyStars = 5 - fullStars - halfStar;
-
-                            var stars = '★'.repeat(fullStars);
-                            if (halfStar) stars += '☆'; // 半顆用空心星代替
-                            stars += '✰'.repeat(emptyStars);
-
-                            return `<span style="color:gold; font-size:14px;">${stars}</span> <small>(${score})</small>`;
+                columnDefs: [
+                    {
+                        targets: 2, // 第 3 欄 (價格)
+                        render: function (data, type, row) {
+                            if (type === 'display') {
+                                let price = parseFloat(data) || 0;
+                                return "NT$" + price.toLocaleString(); // 千分位
+                            }
+                            return data;
                         }
-                        return data;
+                    },
+                    {   //評分 + ★☆
+                        targets: 3, // 第 4 欄
+                        render: function (data, type, row) {
+                            if (type === 'display') {
+                                var score = parseFloat(data) || 0;
+                                var fullStars = Math.floor(score); // 整數顆數
+                                var halfStar = (score % 1 >= 0.5) ? 1 : 0; // 半顆
+                                var emptyStars = 5 - fullStars - halfStar;
+
+                                var stars = '★'.repeat(fullStars);
+                                if (halfStar) stars += '☆'; // 半顆用空心星代替
+                                stars += '✰'.repeat(emptyStars);
+
+                                return `<span style="color:gold; font-size:14px;">${stars}</span> <small>(${score})</small>`;
+                            }
+                            return data;
                     }
                 }],
+
                 language: { //載入中文語系
                     url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"
                 }
-            });            
+            });
+
+            // 綁定啟用/停用按鈕點擊事件
+            $('#example').on('click', '.toggle-active', function () {
+                var button = $(this);
+                var id = button.data('id');
+                var currentStatus = button.data('status');
+
+                $.ajax({
+                    url: '@Url.Action("ToggleActive", "Transportations")', // 會去呼叫 Controller
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            // 更新按鈕樣式與文字
+                            button.data('status', res.newStatus);
+                            if (res.newStatus) {
+                                button.removeClass("btn-secondary").addClass("btn-success").text("啟用");
+                            } else {
+                                button.removeClass("btn-success").addClass("btn-secondary").text("停用");
+                            }
+                        } else {
+                            alert("更新失敗");
+                        }
+                    },
+                    error: function () {
+                        alert("發生錯誤，請稍後再試");
+                    }
+                });
+            });
+           
         });
     </script>            
 }

@@ -1,36 +1,7 @@
-﻿@using Cat_Paw_Footprint.Areas.Employee.ViewModel
+@using Cat_Paw_Footprint.Areas.Employee.ViewModel
 @model Cat_Paw_Footprint.Areas.Employee.ViewModel.LoginViewModel
-
 @{
-    ViewData["Title"] = "登入";// 設定頁面標題
-}
-
-@section Styles {
-    <style>
-        /* 修改帳號與密碼的文字顏色 */
-        input[name="Account"],
-        input[name="Password"] {
-            color: #566A7F;
-        }
-
-        /* 修改帳號、密碼 label 文字顏色 */
-        label[for="Account"],
-        label[for="Password"] {
-            color: #566A7F !important;
-        }
-
-        /* 修改登入按鈕顏色 */
-        button[type="submit"] {
-            background-color: #22b3c1;
-            border-color: #22b3c1;
-        }
-
-        /* 可選：滑鼠hover時改變按鈕顏色 */
-        button[type="submit"]:hover {
-            background-color: #1da0aa;
-            border-color: #1da0aa;
-        }
-    </style>
+    ViewData["Title"] = "登入";
 }
 
 
@@ -53,7 +24,7 @@ else
         <form asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Login" method="post">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            
+
             <div class="form-floating mb-3">
                 <input asp-for="Account" class="form-control" placeholder="請輸入帳號" name="Account" />
                 <label asp-for="Account">帳號</label>
@@ -70,7 +41,7 @@ else
 
             @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
             {
-                <div class="alert alert-danger mt-3"><p style="color: red;">Debug：@Model?.ErrorMessage</p></div>
+                <div class="alert alert-danger mt-3"><p style="color: red;">@Model?.ErrorMessage</p></div>
             }
         </form>
     </div>

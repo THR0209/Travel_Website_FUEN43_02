@@ -5,10 +5,10 @@
 		public int MonthlyOrders { get; set; }
 		public int OpenTrips { get; set; }
 		public int CustomerCount { get; set; }
-		public int ResolvedTickets { get; set; }
+        public int ResolvedThisMonth { get; set; }
 
-		// 額外可以放成長率 / 比較資訊
-		public double OrderGrowthRate { get; set; }
+        // 額外可以放成長率 / 比較資訊
+        public double OrderGrowthRate { get; set; }
 		public double CustomerGrowthRate { get; set; }
 		public double TicketGrowthRate { get; set; }
 	}

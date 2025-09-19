@@ -26,8 +26,9 @@ public partial class CustomerSupportTickets
     public DateTime? CreateTime { get; set; }
 
     public DateTime? UpdateTime { get; set; }
+	public string? TicketCode { get; set; }
 
-    public virtual CustomerProfile? Customer { get; set; }
+	public virtual CustomerProfile? Customer { get; set; }
 
     public virtual ICollection<CustomerSupportFeedback> CustomerSupportFeedback { get; set; } = new List<CustomerSupportFeedback>();
 

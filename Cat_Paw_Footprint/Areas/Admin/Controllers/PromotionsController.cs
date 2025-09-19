@@ -1,12 +1,14 @@
 ﻿using Cat_Paw_Footprint.Areas.Admin.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 {
 	[Area("Admin")]
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaAdmin")]
 	public class PromotionsController : Controller
 	{
 		private readonly webtravel2Context _context;
@@ -132,7 +134,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 						});
 					}
 					await _context.SaveChangesAsync();
-				}
+                    TempData["SuccessMessage"] = "新增成功！";
+                }
 
 				return RedirectToAction(nameof(Index));
 			}
@@ -225,7 +228,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 						});
 					}
 					await _context.SaveChangesAsync();
-				}
+                    TempData["SuccessMessage"] = "更新成功！";
+                }
 
 				return RedirectToAction(nameof(Index));
 			}
@@ -295,7 +299,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				// 🔹 再刪 Promotion
 				_context.Promotions.Remove(promo);
 				await _context.SaveChangesAsync();
-			}
+                TempData["SuccessMessage"] = "刪除成功！";
+            }
 
 			return RedirectToAction(nameof(Index));
 		}

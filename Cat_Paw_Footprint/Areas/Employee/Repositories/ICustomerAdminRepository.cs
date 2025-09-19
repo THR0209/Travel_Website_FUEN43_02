@@ -19,5 +19,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Repositories
 		Task<IEnumerable<CustomerAdminViewModel>> GetAllLevelsAsync();
 		//根據信箱查詢id
 		Task<int?> GetCustomerIdByEmailAsync(string email);
+		Task<List<Customers>> GetCustomersByIdsAsync(List<int> ids);//根據多個id查詢客戶
+
 	}
 }

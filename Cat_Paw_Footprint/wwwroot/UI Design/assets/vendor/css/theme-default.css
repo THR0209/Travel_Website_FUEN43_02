@@ -92,14 +92,17 @@
 
 .app-brand .layout-menu-toggle {
     position: absolute;
-    left: 15rem;
-    border-radius: 50%;
+    left: 14rem;
+    width: auto; /* 跟內容一樣大小 */
+    height: auto;
+    transform: translateY(8px);
 }
 
     .app-brand .layout-menu-toggle i {
-        width: 1.5rem;
-        height: 1.5rem;
+        font-size: 20px; /* icon 大小 */
+        color: #fff;
         transition: all 0.3s ease-in-out;
+
     }
 
 @media (max-width: 1199.98px) {
@@ -113,7 +116,7 @@
 }
 
 .text-primary {
-    color: #696cff !important;
+    color: #22b3C1 !important;
 }
 
 .text-body[href]:hover {
@@ -121,7 +124,7 @@
 }
 
 .bg-primary {
-    background-color: #696cff !important;
+    background-color: #22b3C1 !important;
 }
 
 a.bg-primary:hover, a.bg-primary:focus {
@@ -229,91 +232,65 @@ button.list-group-item-primary {
     }
 
 .btn-primary {
-    color: #fff;
-    background-color: #696cff;
-    border-color: #696cff;
-    box-shadow: 0 0.125rem 0.25rem 0 rgba(105, 108, 255, 0.4);
+    border: 2px solid #22b3C1; /* 2px藍色框線 */
+    color: #22b3C1;
+    border-color: #22b3C1;
+    background: transparent;
 }
 
     .btn-primary:hover {
         color: #fff;
-        background-color: #5f61e6;
-        border-color: #5f61e6;
-        transform: translateY(-1px);
-    }
-
-    .btn-check:focus + .btn-primary, .btn-primary:focus, .btn-primary.focus {
-        color: #fff;
-        background-color: #5f61e6;
-        border-color: #5f61e6;
-        transform: translateY(0);
-        box-shadow: none;
-    }
-
-    .btn-check:checked + .btn-primary, .btn-check:active + .btn-primary, .btn-primary:active, .btn-primary.active, .show > .btn-primary.dropdown-toggle {
-        color: #fff;
-        background-color: #595cd9;
-        border-color: #595cd9;
-    }
-
-        .btn-check:checked + .btn-primary:focus, .btn-check:active + .btn-primary:focus, .btn-primary:active:focus, .btn-primary.active:focus, .show > .btn-primary.dropdown-toggle:focus {
-            box-shadow: none;
-        }
-
-    .btn-primary.disabled, .btn-primary:disabled {
-        box-shadow: none;
-    }
-
-.btn-outline-primary {
-    color: #696cff;
-    border-color: #696cff;
-    background: transparent;
-}
-
-    .btn-outline-primary:hover {
-        color: #fff;
-        background-color: #5f61e6;
-        border-color: #5f61e6;
+        background-color: #1da0aa;
+        border-color: #1da0aa;
         box-shadow: 0 0.125rem 0.25rem 0 rgba(105, 108, 255, 0.4);
         transform: translateY(-1px);
     }
 
-    .btn-check:focus + .btn-outline-primary, .btn-outline-primary:focus {
+    .btn-check:focus + .btn-primary, .btn-primary:focus {
         color: #fff;
-        background-color: #5f61e6;
-        border-color: #5f61e6;
+        background-color: #1da0aa;
+        border-color: #1da0aa;
         box-shadow: none;
         transform: translateY(0);
     }
 
-    .btn-check:checked + .btn-outline-primary, .btn-check:active + .btn-outline-primary, .btn-outline-primary:active, .btn-outline-primary.active, .btn-outline-primary.dropdown-toggle.show {
+    .btn-check:checked + .btn-primary,
+    .btn-check:active + .btn-primary,
+    .btn-primary:active,
+    .btn-primary.active,
+    .btn-primary.dropdown-toggle.show {
         color: #fff;
-        background-color: #595cd9;
-        border-color: #595cd9;
+        background-color: #1da0aa;
+        border-color: #1da0aa;
     }
 
-        .btn-check:checked + .btn-outline-primary:focus, .btn-check:active + .btn-outline-primary:focus, .btn-outline-primary:active:focus, .btn-outline-primary.active:focus, .btn-outline-primary.dropdown-toggle.show:focus {
+        .btn-check:checked + .btn-primary:focus,
+        .btn-check:active + .btn-primary:focus,
+        .btn-primary:active:focus,
+        .btn-primary.active:focus,
+        .btn-primary.dropdown-toggle.show:focus {
             box-shadow: none;
         }
 
-    .btn-outline-primary.disabled, .btn-outline-primary:disabled {
+    .btn-primary.disabled,
+    .btn-primary:disabled {
         box-shadow: none;
     }
 
-    .btn-outline-primary .badge {
-        background: #696cff;
-        border-color: #696cff;
+    .btn-primary .badge {
+        background: #1da0aa;
+        border-color: #1da0aa;
         color: #fff;
     }
 
-    .btn-outline-primary:hover .badge,
-    .btn-outline-primary:focus:hover .badge,
-    .btn-outline-primary:active .badge,
-    .btn-outline-primary.active .badge,
-    .show > .btn-outline-primary.dropdown-toggle .badge {
+    .btn-primary:hover .badge,
+    .btn-primary:focus:hover .badge,
+    .btn-primary:active .badge,
+    .btn-primary.active .badge,
+    .show > .btn-primary.dropdown-toggle .badge {
         background: #fff;
         border-color: #fff;
-        color: #696cff;
+        color: #22b3C1;
     }
 
 .dropdown-item:not(.disabled).active,
@@ -340,7 +317,7 @@ button.list-group-item-primary {
 
 .form-control:focus,
 .form-select:focus {
-    border-color: #696cff;
+    border-color: #22b3C1;
 }
 
 .input-group:focus-within .form-control,
@@ -358,8 +335,8 @@ button.list-group-item-primary {
 }
 
 .form-check-input:checked, .form-check-input[type=checkbox]:indeterminate {
-    background-color: #696cff;
-    border-color: #696cff;
+    background-color: #22b3C1;
+    border-color: #22b3C1;
     box-shadow: 0 2px 4px 0 rgba(105, 108, 255, 0.4);
 }
 
@@ -613,17 +590,17 @@ button.list-group-item-primary {
         }
 
 .form-floating > .form-control:not(:-moz-placeholder-shown) ~ label {
-    color: #696cff;
+    color: #697a8d;
 }
 
 .form-floating > .form-control:focus ~ label,
 .form-floating > .form-control:not(:placeholder-shown) ~ label,
 .form-floating > .form-select ~ label {
-    color: #696cff;
+    color: #697a8d;
 }
 
 .form-floating > .form-control:-webkit-autofill ~ label {
-    color: #696cff;
+    color: #697a8d;
 }
 
 .svg-illustration svg {
@@ -884,10 +861,6 @@ html:not(.layout-menu-collapsed) .bg-menu-theme .menu-inner .menu-item .menu-lin
     border: 3px solid #e7e7ff !important;
 }
 
-.app-brand .layout-menu-toggle {
-    background-color: #696cff;
-    border: 7px solid #f5f5f9;
-}
 
     .app-brand .layout-menu-toggle i {
         color: #fff;

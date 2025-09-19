@@ -12,7 +12,7 @@
             <input id="globalSearch" type="search" class="form-control" placeholder="搜尋：訂單編號・客戶・商品">
 		</div>
 		<div class="col-auto">
-			<button id="btnClearSearch" type="button" class="btn btn-outline-secondary">清除</button>
+			<button id="btnClearSearch" type="button" class="btn btn-secondary">清除</button>
 		</div>
 		<div class="col-auto text-muted">
 			<small id="searchResultHint"></small>
@@ -63,14 +63,14 @@
 </style>
 @{
     var groups = Model
-        .Where(o => o.ProductID != 0)                    
-        .GroupBy(o => o.ProductID)
-        .Select(g => new
-        {
-            ProductID = g.Key,
-            Name = g.First().Product?.ProductName ?? $"商品 {g.Key}",                     
-            ImageUrl = g.First().Product?.ProductImage != null? "data:image/png;base64," + Convert.ToBase64String(g.First().Product.ProductImage) : $"https://placehold.co/600x400?text=Noimage",
-            OrderCount = g.Count()
+                .Where(o => o.ProductID != 0)
+                .GroupBy(o => o.ProductID)
+                .Select(g => new
+                {
+                    ProductID = g.Key,
+                    Name = g.First().Product?.ProductName ?? $"商品 {g.Key}",                     
+                    ImageUrl = g.First().Product?.ProductImage != null ? "data:image/png;base64," + Convert.ToBase64String(g.First().Product.ProductImage) : $"https://placehold.co/600x400?text=Noimage",
+    OrderCount = g.Count()
         })
         .OrderBy(x => x.ProductID)
         .ToList();    
@@ -89,7 +89,10 @@ else
             {
                 <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-productname="@p.Name">
                     <div class="card h-100 shadow-sm">
-                        <img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">
+                        @if (p.ImageUrl == $"https://placehold.co/600x400?text=Noimage")
+                        {<img src="~/images/NoImage.png" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:contain">}
+                        else
+                        {<img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">}   
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="card-title mb-0">@p.Name</h5>
@@ -345,7 +348,9 @@ else
           if (!btn) return;
 
           const id = btn.dataset.id;
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 
@@ -383,7 +388,9 @@ else
             mProdName.textContent = productName;
             tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">載入中…</td></tr>';
 
-            const res = await fetch(`/Order/CustomerOrders/by-product/${productId}`);
+                    const res = await fetch(`/Order/CustomerOrders/by-product/${productId}`, {
+          credentials: 'include'
+        });
             const data = await res.json();
 
             const orders = data.orders || [];
@@ -422,7 +429,9 @@ else
           const id = mailBtn.dataset.id;
 
           // 先抓訂單資料，拿到 email、orderCode 等
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 
@@ -475,33 +484,46 @@ else
             ordersMD?.show();
           }, { once:true });
         });
-        
-        document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
+
+                document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
           ev.preventDefault();
           const form = ev.currentTarget;
-          const fd   = new FormData(form);
 
-          try{
-            const res = await fetch(form.action || mailAjaxUrl, {
-              method: 'POST',
-              body: fd
-            });
-            const ok = res.ok;
-            if (!ok) {
-              const json = await res.json().catch(()=>null);
-              alert('寄送失敗：' + (json?.error || res.status));
+          // 用 FormData 包含整個 form（含 AntiForgeryToken）
+          const fd = new FormData(form);
+           console.log([...fd]);
+
+          try {
+
+
+        const res = await fetch(form.action || mailAjaxUrl, {
+          method: 'POST',
+                body: fd,
+          credentials: 'include'
+        });
+
+            if (!res.ok) {
+              const text = await res.text().catch(() => "");
+              let msg;
+              try {
+                msg = JSON.parse(text).error;
+              } catch {
+                msg = text || res.status;
+              }
+              alert('寄送失敗：' + msg);
               return;
             }
-            // 關閉寄信視窗
+
+            // 成功 → 關閉寄信視窗
             const mailEl = document.getElementById('mailModal');
             const mailMD = mailEl ? bootstrap.Modal.getOrCreateInstance(mailEl) : null;
             mailMD?.hide();
 
-            // 提示一下
-            setTimeout(()=> alert('郵件已送出！'), 100);
-          }catch(err){
+            setTimeout(() => alert('郵件已送出！'), 100);
+
+          } catch (err) {
             console.error(err);
-            alert('寄送失敗（例外）');
+            alert('寄送失敗（例外: ' + err.message + '）');
           }
         });
         //表單編輯
@@ -510,7 +532,9 @@ else
           if (!btn) return;
 
           const id = btn.dataset.id;
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 
@@ -535,7 +559,9 @@ else
 
           const id = btn.dataset.id;
           const email = btn.dataset.email || '';
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 

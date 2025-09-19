@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>貓爪足跡-@ViewData["Title"]</title>
@@ -42,7 +43,7 @@
     }*@
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body> 
+<body>
     @{
         var Id = Context.Session.GetString("EmpId");
         var RoleId = Context.Session.GetString("EmpRoleId");
@@ -51,8 +52,8 @@
         var status = Context.Session.GetString("Status");// "True" 或 "False"
         var login = Context.Session.GetString("Login");// "True" 或 "False"
     }
-        
-    
+
+
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -64,6 +65,11 @@
                         <img src="/images/Logo.png" alt="TravelPaws Logo" style="height:60px;">
                     </span>
                     <span class="app-brand-text demo menu-text fw-bolder ms-3 mt-3" style="">貓爪足跡</span>
+                    <div class="layout-menu-toggle d-block d-xl-none mt-1">
+                        <a id="menuToggleBtn" class="nav-item nav-link px-0" href="javascript:void(0)">
+                            <i class="bx bx-menu bx-sm"></i>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="menu-inner-shadow"></div>
@@ -105,13 +111,12 @@
             <div class="layout-page">
 
                 <nav aria-label="breadcrumb" class="small">
-                        <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-                            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-                                <i class="bx bx-menu bx-sm"></i>
-                            </a>
-                        </div>
+                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                            <i class="bx bx-menu bx-sm"></i>
+                        </a>
+                    </div>
                 </nav>
-  
 
                 <!-- / Navbar -->
                 <!-- Content wrapper -->
@@ -139,6 +144,9 @@
             <!-- / Layout page -->
         </div>
     </div>
+    <!-- 回到頂部按鈕 -->
+    <button id="backToTop" title="回到頂部"><i class="fa-solid fa-circle-up"></i></button>
+    </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -157,15 +165,27 @@
     <!-- Main JS -->
     <script src="~/ui design/assets/js/main.js"></script>
 
+    <!-- Main JS -->
+    <script src="~/ui design/assets/js/main.js"></script>
+
     <!-- Page JS -->
     <script src="~/ui design/assets/js/dashboards-analytics.js"></script>
     <!-- 放在 _Layout 任何地方一次就好 -->
-    <form id="logoutForm" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Logout" method="post" class="d-none">
-        @Html.AntiForgeryToken()
-    </form>
-
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+<script>
+    $(function () {
+        $('#menuToggleBtn').click(function () {
+            $('#layout-menu').toggleClass('close-menu');
+        });
+    });
+</script>
+
+/* 隱藏側邊選單 */
+.close-menu {
+    display: none !important;
+}

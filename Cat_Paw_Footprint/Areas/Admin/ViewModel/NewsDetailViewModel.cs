@@ -11,7 +11,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
         [Display(Name = "消息內容")]
         public string NewsContent { get; set; }
 
-        [Display(Name = "是否啟用")]
+        [Display(Name = "狀態")]
         public bool IsActive { get; set; }
 
         [Display(Name = "發布時間")]

@@ -1,21 +1,206 @@
-﻿@model Cat_Paw_Footprint.Models.Products
+﻿@model Cat_Paw_Footprint.Areas.ProductManagement.ViewModel.ProductDetailsViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
+@section Styles {
+    <style>
+        body {
+            background-color: white;
+        }
+
+        .meal-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+            .meal-card:hover {
+                transform: scale(1.03);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+
+        .meal-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 1rem;
+            border-radius: 0.75rem 0.75rem 0 0;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .meal-body {
+            padding: 1rem;
+        }
+
+        .bg-breakfast {
+            background: linear-gradient(135deg, #6a11cb, #2575fc); /* 紫藍漸層 */
+        }
+
+        .bg-lunch {
+            background: linear-gradient(135deg, #56ab2f, #a8e063); /* 綠色漸層 */
+        }
+
+        .bg-dinner {
+            background: linear-gradient(135deg, #f7971e, #ffd200); /* 橘黃漸層 */
+        }
+
+        .day-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 1rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .info-tag {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .tag-breakfast {
+            background: #6a11cb;
+            color: white;
+        }
+
+        .tag-lunch {
+            background: #56ab2f;
+            color: white;
+        }
+
+        .tag-dinner {
+            background: #f7971e;
+            color: white;
+        }
+
+        .tag-hotel {
+            background: #2b5876;
+            color: white;
+        }
+
+        .tag-transport {
+            background: #0f9b0f;
+            color: white;
+        }
+
+        /* Timeline 外框 */
+        .timeline {
+            position: relative;
+            margin: 2rem 0;
+            padding-left: 2rem;
+            border-left: 3px solid #ddd;
+        }
+
+            /* Timeline 節點 */
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: -7px;
+                width: 14px;
+                height: 14px;
+                background: #4facfe;
+                border-radius: 50%;
+                top: 0;
+            }
+
+        /* Timeline 卡片 */
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1rem;
+        }
+
+            .timeline-item::before {
+                content: '';
+                position: absolute;
+                left: -10px;
+                top: 0.5rem;
+                width: 14px;
+                height: 14px;
+                background: #00f2fe;
+                border-radius: 50%;
+            }
+
+        .timeline-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+            .timeline-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            }
+
+        .day-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #4facfe;
+        }
+
+        .carousel-item img {
+            height: 250px; /* 固定高度 */
+            object-fit: contain; /* 圖片填滿容器，超出部分裁切 */
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            filter: invert(100%); /* 把白色變黑色 */
+        }
+
+        /* 浮動標題效果 */
+        .section-title {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .day-timeline h5 {
+            position: relative;
+            padding-left: 20px;
+        }
+
+            .day-timeline h5::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 6px;
+                width: 10px;
+                height: 10px;
+                background: #4facfe;
+                border-radius: 50%;
+            }
+    </style>
+}
+
 <div class="container">
-    <h1 class="mb-4">詳細行程檢視</h1>
+    @* <h1 class="mb-4">詳細行程檢視</h1> *@
+
+    <!-- 上方左右區塊 -->
     <div class="row mb-3 align-items-stretch">
-        <!-- 左側：產品封面照 -->
+        <!-- 左：產品封面照 -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-body text-center d-flex justify-content-center align-items-center">
-                    @if (Model.ProductImage != null)
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    @if (Model.Product.ProductImage != null)
                     {
-                        <img src="data:image/*;base64,@(Convert.ToBase64String(Model.ProductImage))"
-                             class="img-fluid rounded"
-                             style="w"
+                        <img src="data:image/*;base64,@(Convert.ToBase64String(Model.Product.ProductImage))"
+                             class="img-fluid rounded w-100 h-100"
                              alt="產品封面照" />
                     }
                     else
@@ -26,52 +211,82 @@
             </div>
         </div>
 
-        <!-- 右側：產品的基本資訊 -->
+        <!-- 右：產品基本資料 -->
         <div class="col-md-8">
             <div class="card h-100">
                 <div class="card-body">
-                    <h4 class="card-title">@Model.ProductName</h4>
-                    <p><strong>產品編號：</strong>@Model.ProductCode</p>
-                    <p><strong>價格：</strong>@Model.ProductPrice</p>
-                    <p><strong>區域：</strong>@Model.Region?.RegionName</p>
-                    <p><strong>出團時間：</strong>@Model.StartDate?.ToString("yyyy/MM/dd") ~ @Model.EndDate?.ToString("yyyy/MM/dd")</p>
-                    <p><strong>人數上限：</strong>@Model.MaxPeople</p>
+                    <h3 class="card-title fw-bold mb-4">產品名稱：@Model.Product.ProductName</h3>
+                    <h5><strong>產品編號：</strong>@Model.Product.ProductCode</h5>
+                    <h5><strong>價格：</strong>@Model.Product.ProductPrice / 人</h5>
+                    <h5><strong>出團時間：</strong>@Model.Product.StartDate?.ToString("yyyy/MM/dd") ~ @Model.Product.EndDate?.ToString("yyyy/MM/dd")</h5>
+                    <h5><strong>人數上限：</strong>@Model.Product.MaxPeople</h5>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 產品描述 + 行程內容 -->
-    <div class="row mb-3">
-        <div class="col-12">
+    <!-- Tabs 區塊 -->
+    <ul class="nav nav-tabs mb-3 mt-5 border-bottom justify-content-center" id="detailsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab">
+                <i class="fa-solid fa-file-lines me-1"></i> 產品描述
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="meal-hotel-transport-tab" data-bs-toggle="tab" data-bs-target="#meal-hotel-transport" type="button" role="tab">
+                <i class="fa-solid fa-hotel me-1"></i>
+                行程介紹
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="note-tab" data-bs-toggle="tab" data-bs-target="#note" type="button" role="tab">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> 注意事項
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tabs 內容區 -->
+    <div class="tab-content" id="detailsTabsContent">
+        <!-- Tab1: 產品描述 -->
+        <div class="tab-pane fade show active" id="desc" role="tabpanel">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title mb-3">產品描述與行程內容</h4>
-                    <p>@Html.Raw(Model.ProductDesc)</p>
+                    <h4 class="card-title mb-4"><i class="fa-solid fa-pen me-2"></i>產品描述</h4>
+                    <hr />
+                    <p>@Html.Raw(Model.Product.ProductDesc)</p>
+                </div>
+            </div>
+        </div>
 
-                    <!-- 餐點 (依早/午/晚分群) -->
-                    <h5 class="mt-4">用餐地點</h5>
-                    <div class="row text-center">
-                        <!-- 早餐 -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 shadow-sm rounded-4">
-                                <div class="card-header bg-primary text-white fw-bold">早餐</div>
-                                <div class="card-body text-start">
-                                    @if (Model.ProductRestaurants != null && Model.ProductRestaurants.Any(r => r.MealType == "Breakfast"))
+        <!-- Tab2: 食宿交通 -->
+        <div class="tab-pane fade" id="meal-hotel-transport" role="tabpanel">
+            <div class="card">
+                <div class="card-body">
+
+                    <!-- ================= 景點 ================= -->
+                    <div class="card mb-5 position-relative border border-primary rounded-4">
+                        <div class="section-title bg-primary text-white px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-archway me-2"></i> 景點
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側：文字內容 -->
+                                <div class="col-md-7">
+                                    @if (Model.Product.ProductLocations != null && Model.Product.ProductLocations.Any())
                                     {
-                                        @foreach (var group in Model.ProductRestaurants
-                                                                            .Where(r => r.MealType == "Breakfast")
-                                                                            .GroupBy(r => r.OrderIndex)
+                                        @foreach (var group in Model.Product.ProductLocations
+                                                                            .GroupBy(l => l.DayNumber)
                                                                             .OrderBy(g => g.Key))
                                         {
-                                            <div class="mb-3 mt-2">
-                                                <h6 class="fw-bold text-secondary mb-2">第 @group.Key 天</h6>
-                                                <ul class="list-unstyled ps-3">
-                                                    @foreach (var pr in group)
+                                            <div class="day-timeline mb-4">
+                                                <h5 class="fw-bold text-secondary">第 @group.Key 天</h5>
+                                                <ul class="list-unstyled ps-3 mb-3">
+                                                    @foreach (var loc in group)
                                                     {
-                                                        <li class="mb-1">
-                                                            <i class="bi bi-dot text-primary"></i>
-                                                            <span class="text-dark" style="font-size: 16px;">@pr.Restaurant?.RestaurantName</span>
+                                                        <li class="mb-2">
+                                                            <i class="fa-solid fa-location-dot text-danger me-2"></i>
+                                                            <span>@loc.Location?.LocationName</span><br />
+                                                            <span class="text-muted">@loc.Location?.LocationDesc</span>
                                                         </li>
                                                     }
                                                 </ul>
@@ -80,154 +295,325 @@
                                     }
                                     else
                                     {
-                                        <p class="text-muted">尚無資料</p>
+                                        <p class="text-muted">尚無景點資料</p>
                                     }
                                 </div>
-                            </div>
-                        </div>
 
+                                <!-- 右側：圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselSpots" class="carousel slide mt-3" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var spotImages = Model.Product.ProductLocations?
+                                                .Where(l => l.Location != null && l.Location.LocationPics.Any())
+                                                .SelectMany(l => l.Location.LocationPics)
+                                                .ToList();
 
-                        <!-- 午餐 -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 shadow-sm rounded-4">
-                                <div class="card-header bg-success text-white fw-bold">午餐</div>
-                                <div class="card-body text-start">
-                                    @if (Model.ProductRestaurants != null && Model.ProductRestaurants.Any(r => r.MealType == "Lunch"))
-                                    {
-                                        @foreach (var group in Model.ProductRestaurants
-                                                                            .Where(r => r.MealType == "Lunch")
-                                                                            .GroupBy(r => r.OrderIndex)
-                                                                            .OrderBy(g => g.Key))
-                                        {
-                                            <div class="mb-3 mt-2">
-                                                <h6 class="fw-bold text-secondary mb-2">第 @group.Key 天</h6>
-                                                <ul class="list-unstyled ps-3">
-                                                    @foreach (var pr in group)
+                                                if (spotImages != null && spotImages.Any())
+                                                {
+                                                    for (int i = 0; i < spotImages.Count; i++)
                                                     {
-                                                        <li class="mb-1">
-                                                            <i class="bi bi-dot text-primary"></i>
-                                                            <span class="text-dark" style="font-size: 16px;">@pr.Restaurant?.RestaurantName</span>
-                                                        </li>
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(spotImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="景點圖片 @(i + 1)">
+                                                        </div>
                                                     }
-                                                </ul>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <p class="text-muted">尚無資料</p>
-                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無景點照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselSpots" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselSpots" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- 晚餐 -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 shadow-sm rounded-4">
-                                <div class="card-header bg-warning text-white fw-bold">晚餐</div>
-                                <div class="card-body text-start">
-                                    @if (Model.ProductRestaurants != null && Model.ProductRestaurants.Any(r => r.MealType == "Dinner"))
-                                    {
-                                        @foreach (var group in Model.ProductRestaurants
-                                                                            .Where(r => r.MealType == "Dinner")
-                                                                            .GroupBy(r => r.OrderIndex)
-                                                                            .OrderBy(g => g.Key))
-                                        {
-                                            <div class="mb-3 mt-2">
-                                                <h6 class="fw-bold text-secondary mb-2">第 @group.Key 天</h6>
-                                                <ul class="list-unstyled ps-3">
-                                                    @foreach (var pr in group)
-                                                    {
-                                                        <li class="mb-1">
-                                                            <i class="bi bi-dot text-primary"></i>
-                                                            <span class="text-dark" style="font-size: 16px;">@pr.Restaurant?.RestaurantName</span>
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            </div>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <p class="text-muted">尚無資料</p>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
-                    <!-- 住宿 (依天數分群) -->
-                    @if (Model.ProductHotels != null && Model.ProductHotels.Any())
-                    {
-                        <h5 class="mt-4"><i class="fa-solid fa-hotel"></i> 住宿</h5>
-                        @foreach (var group in Model.ProductHotels.GroupBy(h => h.OrderIndex).OrderBy(g => g.Key))
-                        {
-                            <h6 class="text-success">第 @group.Key 天</h6>
-                            <ul class="list-group mb-3">
-                                @foreach (var ph in group)
-                                {
-                                    <li class="list-group-item">
-                                        <i class="fa-solid fa-paw"></i> @ph.Hotel?.HotelName
-                                        <br> 地址：@ph.Hotel?.HotelAddr
-                                    </li>
-                                }
-                            </ul>
-                        }
-                    }
 
-                    <!-- 景點 (依天數分群) -->
-                    @if (Model.ProductLocations != null && Model.ProductLocations.Any())
-                    {
-                        <h5 class="mt-4"><i class="fa-solid fa-archway"></i> 景點</h5>
-                        @foreach (var group in Model.ProductLocations.GroupBy(l => l.DayNumber).OrderBy(g => g.Key))
-                        {
-                            <h6 class="text-warning">第 @group.Key 天</h6>
-                            <ul class="list-group mb-3">
-                                @foreach (var pl in group)
-                                {
-                                    <li class="list-group-item">@pl.Location?.LocationName</li>
-                                }
-                            </ul>
-                        }
-                    }
+                    <!-- ================= 餐點 ================= -->
+                    <div class="card mb-5 position-relative border border-warning rounded-4">
+                        <div class="section-title bg-warning text-dark px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-utensils me-2"></i> 餐點
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側：文字內容 -->
+                                <div class="col-md-7">
+                                    @if (Model.Product.ProductRestaurants != null && Model.Product.ProductRestaurants.Any())
+                                    {
+                                        @foreach (var dayGroup in Model.Product.ProductRestaurants
+                                                                            .GroupBy(r => r.OrderIndex)
+                                                                            .OrderBy(g => g.Key))
+                                        {
+                                            <div class="day-timeline mb-4">
+                                                <h5 class="fw-bold text-secondary">第 @dayGroup.Key 天</h5>
+                                                <ul class="list-unstyled ps-3 mb-3">
+                                                    <li class="mb-2" style="font-size: 16px;">
+                                                        ☕ 早餐：
+                                                        @(dayGroup.Any(r => r.MealType == "Breakfast")
+                                                                                                        ? string.Join("、", dayGroup.Where(r => r.MealType == "Breakfast").Select(r => r.Restaurant?.RestaurantName))
+                                                                                                        : "尚無資料")
+                                                                                                                 <br />
+                                                                                                                 <span class="text-muted">
+                                                            @(dayGroup.Any(r => r.MealType == "Breakfast")
+                                                                                                                ? string.Join("、", dayGroup.Where(r => r.MealType == "Breakfast").Select(r => r.Restaurant?.RestaurantDesc))
+                                                                                                                : "尚無資料")
+                                                                                                                     </span>
+                                                                                                                 </li>
+                                                                                                                 <li class="mb-2" style="font-size: 16px;">
+                                                                                                                     🍲 午餐：
+                                                        @(dayGroup.Any(r => r.MealType == "Lunch")
+                                                                                                        ? string.Join("、", dayGroup.Where(r => r.MealType == "Lunch").Select(r => r.Restaurant?.RestaurantName))
+                                                                                                        : "尚無資料")
+                                                                                                                 <br />
+                                                                                                                 <span class="text-muted">
+                                                            @(dayGroup.Any(r => r.MealType == "Lunch")
+                                                                                                                ? string.Join("、", dayGroup.Where(r => r.MealType == "Lunch").Select(r => r.Restaurant?.RestaurantDesc))
+                                                                                                                : "尚無資料")
+                                                                                                                     </span>
+                                                                                                                 </li>
+                                                                                                                 <li class="mb-2" style="font-size: 16px;">
+                                                                                                                     🍴 晚餐：
+                                                        @(dayGroup.Any(r => r.MealType == "Dinner")
+                                                                                                        ? string.Join("、", dayGroup.Where(r => r.MealType == "Dinner").Select(r => r.Restaurant?.RestaurantName))
+                                                                                                        : "尚無資料")
+                                                                                                                 <br />
+                                                                                                                 <span class="text-muted">
+                                                            @(dayGroup.Any(r => r.MealType == "Dinner")
+                                                                                                                ? string.Join("、", dayGroup.Where(r => r.MealType == "Dinner").Select(r => r.Restaurant?.RestaurantDesc))
+                                                                                                                : "尚無資料")
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無餐點資料</p>
+                                    }
+                                </div>
 
-                    <!-- 交通 -->
-                    @if (Model.ProductsTransportations != null && Model.ProductsTransportations.Any())
-                    {
-                        <h5 class="mt-4"><i class="fa-solid fa-train-subway"></i> 交通方式</h5>
-                        <ul class="list-group mb-3">
-                            @foreach (var pt in Model.ProductsTransportations ?? new List<Products_Transportations>())
-                            {
-                                <li class="list-group-item">@pt.Transport?.TransportName</li>
-                            }
-                        </ul>
-                    }
+                                <!-- 右側：圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselMeals" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var mealImages = Model.Product.ProductRestaurants?
+                                                .Where(r => r.Restaurant != null && r.Restaurant.RestaurantPics.Any())
+                                                .SelectMany(r => r.Restaurant.RestaurantPics)
+                                                .ToList();
 
+                                                if (mealImages != null && mealImages.Any())
+                                                {
+                                                    for (int i = 0; i < mealImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(mealImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="餐點圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無餐點照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselMeals" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselMeals" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ================= 住宿 ================= -->
+                    <div class="card mb-5 position-relative border border-success rounded-4">
+                        <div class="section-title bg-success text-white px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-hotel me-2"></i> 住宿
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側文字區 -->
+                                <div class="col-md-7">
+                                    @if (Model.Product.ProductHotels != null && Model.Product.ProductHotels.Any())
+                                    {
+                                        @foreach (var group in Model.Product.ProductHotels.GroupBy(h => h.OrderIndex).OrderBy(g => g.Key))
+                                        {
+                                            <div class="day-timeline mb-4">
+                                                <h5 class="fw-bold text-secondary">第 @group.Key 天</h5>
+                                                <ul class="list-unstyled ps-3 mb-3">
+                                                    @foreach (var ph in group)
+                                                    {
+                                                        <li class="" style="font-size: 17px;">
+                                                            <i class="fa-solid fa-bed me-2"></i>
+                                                            @ph.Hotel?.HotelName <br />
+                                                            <span class="text-muted"><strong>地址：</strong>@ph.Hotel?.HotelAddr</span><br />
+                                                            <span class="text-muted">@ph.Hotel?.HotelDesc</span>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無住宿資料</p>
+                                    }
+                                </div>
+
+                                <!-- 右側圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselHotels" class="carousel slide mt-3" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var hotelImages = Model.Product.ProductHotels?
+                                                .Where(h => h.Hotel != null && h.Hotel.HotelPics.Any())
+                                                .SelectMany(h => h.Hotel.HotelPics)
+                                                .ToList();
+
+                                                if (hotelImages != null && hotelImages.Any())
+                                                {
+                                                    for (int i = 0; i < hotelImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(hotelImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="住宿圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無住宿照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselHotels" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselHotels" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ================= 交通 ================= -->
+                    <div class="card mb-5 position-relative border border-info rounded-4">
+                        <div class="section-title bg-info text-dark px-3 py-2 fw-bold rounded shadow-sm">
+                            <i class="fa-solid fa-bus me-2"></i> 交通
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 左側：文字內容 -->
+                                <div class="col-md-7">
+                                    <h4>交通方式：</h4>
+                                    @if (Model.Product.ProductsTransportations != null && Model.Product.ProductsTransportations.Any())
+                                    {
+                                        <ul class="list-unstyled ps-3 mb-3">
+                                            @foreach (var t in Model.Product.ProductsTransportations.ToList())
+                                            {
+                                                <li class="mb-2" style="font-size: 19px;"><i class="fa-solid fa-train-subway me-2"></i>@t.Transport?.TransportName<br /><span class="text-muted">@t.Transport?.TransportDesc</span></li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted">尚無交通資料</p>
+                                    }
+                                </div>
+
+                                <!-- 右側：圖片 Carousel -->
+                                <div class="col-md-5">
+                                    <h4 class="text-center fw-bold">相關圖片</h4>
+                                    <div id="carouselTransports" class="carousel slide" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            @{
+                                                var transportImages = Model.Product.ProductsTransportations?
+                                                .Where(t => t.Transport != null && t.Transport.TransportPics.Any())
+                                                .SelectMany(t => t.Transport.TransportPics)
+                                                .ToList();
+
+                                                if (transportImages != null && transportImages.Any())
+                                                {
+                                                    for (int i = 0; i < transportImages.Count; i++)
+                                                    {
+                                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                            <img src="data:image/*;base64,@(Convert.ToBase64String(transportImages[i].Picture))"
+                                                                 class="d-block w-100 rounded shadow-sm"
+                                                                 alt="交通圖片 @(i + 1)">
+                                                        </div>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <div class="carousel-item active">
+                                                        <img src="~/images/NoImage.png" class="d-block w-100 rounded shadow-sm" alt="無交通照片">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselTransports" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carouselTransports" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 注意事項 -->
-    <div class="row mb-3">
-        <div class="col-12">
+
+        <!-- Tab3: 注意事項 -->
+        <div class="tab-pane fade" id="note" role="tabpanel">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">注意事項</h4>
-                    <p>@Html.Raw(Model.ProductNote)</p>
+                    <h4 class="card-title mb-4"><i class="fa-solid fa-triangle-exclamation me-2"></i> 注意事項</h4>
+                    <hr />
+                    <p>@Html.Raw(Model.Product.ProductNote)</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- 操作按鈕 -->
-    <div class="row">
+    <div class="row mt-3">
         <div class="col-12">
             <a asp-action="Index" class="btn btn-secondary">返回列表</a>
         </div>
     </div>
 </div>
-
-
-

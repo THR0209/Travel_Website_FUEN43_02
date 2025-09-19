@@ -2,72 +2,42 @@
 
 @* 4客服 *@
 <ul class="menu-inner py-1">
-    <!-- Dashboard -->
+    <!-- 首頁 -->
     <li class="menu-item active">
         <a class="menu-link" asp-area="" asp-controller="Home" asp-action="Index">
             <i class="menu-icon tf-icons bx bx-home-circle"></i>
-            <div data-i18n="Analytics">首頁</div>
+            <div>首頁</div>
         </a>
     </li>
-    <li class="menu-header text-uppercase">
-        <i class="menu-icon tf-icons bx bx-user-circle"></i>
-        <span class="menu-header-text">帳號管理</span>
-    </li>
+
+
+    <!-- 帳號管理 -->
     <li class="menu-item">
-        <a class="menu-link" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Profile">
-            <div data-i18n="Connections">我的資料</div>
-        </a>
-    </li>
-    <!-- 客服相關功能 下拉選單 -->
-    <li class="menu-item">
-        <a class="menu-link menu-toggle" href="javascript:void(0);">
-            <i class="menu-icon tf-icons fa-solid fa-envelope-open-text"></i>
-            <div data-i18n="CustomerService">客服 / FAQ 管理</div>
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-user-circle"></i>
+            <div>帳號管理</div>
         </a>
         <ul class="menu-sub">
-            <!-- FAQs 維護 -->
             <li class="menu-item">
-                <a class="menu-link" asp-area="CustomerService" asp-controller="FAQs" asp-action="Index">
-                    <div data-i18n="FAQs">FAQs 維護</div>
+                <a class="menu-link" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Profile">
+                    <div>我的資料</div>
                 </a>
             </li>
-
-            <!-- 客服工單維護 -->
-            <li class="menu-item">
-                <a class="menu-link" asp-area="CustomerService" asp-controller="CustomerSupportTickets" asp-action="Index">
-                    <div data-i18n="Tickets">客服工單維護</div>
-                </a>
-            </li>
-
-            <!-- 客服評價維護 -->
-            <li class="menu-item">
-                <a class="menu-link" asp-area="CustomerService" asp-controller="CustomerSupportFeedback" asp-action="Index">
-                    <div data-i18n="Ratings">客服評價維護</div>
-                </a>
-            </li>
-
-            @* <!-- 黑名單管理 -->
-            <li class="menu-item">
-                <a class="menu-link" asp-area="CustomerService" asp-controller="Blacklist" asp-action="Index">
-                    <div data-i18n="Blacklist">黑名單管理</div>
-                </a>
-            </li>
-
-            <!-- Email 發送 -->
-            <li class="menu-item">
-                <a class="menu-link" asp-area="CustomerService" asp-controller="Email" asp-action="Index">
-                    <div data-i18n="Email">Email 發送</div>
-                </a>
-            </li>
-
-            <!-- 客服聊天室 -->
-            <li class="menu-item">
-                <a class="menu-link" asp-area="CustomerService" asp-controller="Chat" asp-action="Index">
-                    <div data-i18n="Chat">客服聊天室</div>
-                </a>
-            </li> *@
         </ul>
     </li>
+    <!-- 客服管理 -->
+    <li class="menu-item">
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons fa-solid fa-envelope-open-text"></i>
+            <div>客服管理</div>
+        </a>
+        <ul class="menu-sub">
+            <li class="menu-item"><a class="menu-link" asp-area="CustomerService" asp-controller="FAQs" asp-action="Index"><div>FAQs維護</div></a></li>
+            <li class="menu-item"><a class="menu-link" asp-area="CustomerService" asp-controller="CustomerSupportTickets" asp-action="Index"><div>客服工單維護</div></a></li>
+            <li class="menu-item"><a class="menu-link" asp-area="CustomerService" asp-controller="CustomerSupportFeedback" asp-action="Index"><div>客服評價維護</div></a></li>
+        </ul>
+    </li>
+</ul>
                     
     <!-- #endregion -->
     @await Html.PartialAsync("_Logout")  <!-- 把登出放在同一個 menu-inner 裡 -->

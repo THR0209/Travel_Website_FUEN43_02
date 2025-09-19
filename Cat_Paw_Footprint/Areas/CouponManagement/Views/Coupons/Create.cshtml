@@ -1,63 +1,88 @@
 ﻿@model Cat_Paw_Footprint.Models.Coupons
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "新增優惠券";
 }
 
-<h1>Create</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-primary text-white fw-bold">
+                    <i class="fa-solid fa-ticket me-2"></i> 新增優惠券
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-<h4>Coupons</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="CouponCode" class="control-label"></label>
-                <input asp-for="CouponCode" class="form-control" />
-                <span asp-validation-for="CouponCode" class="text-danger"></span>
+                        <div class="mb-3 mt-3">
+                            <label asp-for="CouponCode" class="form-label fw-semibold"></label>
+                            <input asp-for="CouponCode" class="form-control" placeholder="輸入流水號" />
+                            <span asp-validation-for="CouponCode" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label asp-for="DisCountCode" class="form-label fw-semibold"></label>
+                            <input asp-for="DisCountCode" class="form-control" placeholder="輸入優惠券折扣代碼" />
+                            <span asp-validation-for="DisCountCode" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CouponDesc" class="form-label fw-semibold"></label>
+                            <input asp-for="CouponDesc" class="form-control" placeholder="輸入優惠券描述" />
+                            <span asp-validation-for="CouponDesc" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DiscountType" class="form-label fw-semibold"></label>
+                            <select asp-for="DiscountType" class="form-select">
+                                <option value="0">百分比折扣 (%)</option>
+                                <option value="1">固定金額折扣 ($)</option>
+                            </select>
+                            <span asp-validation-for="DiscountType" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DiscountValue" class="form-label fw-semibold"></label>
+                            <input asp-for="DiscountValue" class="form-control" placeholder="輸入折扣值" />
+                            <span asp-validation-for="DiscountValue" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="StartDate" class="form-label fw-semibold"></label>
+                            <input asp-for="StartDate" class="form-control" type="date" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EndTime" class="form-label fw-semibold"></label>
+                            <input asp-for="EndTime" class="form-control" type="date" />
+                            <span asp-validation-for="EndTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label fw-semibold"></label>
+                            <span asp-validation-for="IsActive" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> 返回清單
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-plus"></i> 建立
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="CouponDesc" class="control-label"></label>
-                <input asp-for="CouponDesc" class="form-control" />
-                <span asp-validation-for="CouponDesc" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DiscountType" class="control-label"></label>
-                <input asp-for="DiscountType" class="form-control" />
-                <span asp-validation-for="DiscountType" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DiscountValue" class="control-label"></label>
-                <input asp-for="DiscountValue" class="form-control" />
-                <span asp-validation-for="DiscountValue" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
-                <input asp-for="EndTime" class="form-control" />
-                <span asp-validation-for="EndTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IsActive" class="control-label"></label>
-                <input asp-for="IsActive" class="form-control" />
-                <span asp-validation-for="IsActive" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

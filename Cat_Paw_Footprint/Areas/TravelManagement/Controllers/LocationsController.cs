@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ using System.Threading.Tasks;
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
     [Area("TravelManagement")]
-    public class LocationsController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaTravelManagement")]
+	public class LocationsController : Controller
     {
         private readonly webtravel2Context _context;
 
@@ -89,6 +91,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
                 return NotFound();
             }
 
+
+			// 空值會導致掛掉，待處理
 			var viewModel = new LocationsViewModel
 			{
 				LocationID = locations.LocationID,
@@ -99,10 +103,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 				LocationDesc = locations.LocationDesc,
 				LocationPrice = locations.LocationPrice,
 				DistrictID = locations.DistrictID,
-				DistrictName = locations.District.DistrictName,
+				DistrictName = (locations.District.DistrictName != null) ? (locations.District.DistrictName) : "" ,
 				District = locations.District,
 				RegionID = locations.RegionID,
-				RegionName = locations.Region.RegionName,
+				RegionName = (locations.Region.RegionName != null) ? (locations.Region.RegionName) : "",
 				Region = locations.Region,
 				Rating = locations.Rating,
 				Views = locations.Views,
@@ -350,18 +354,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			return View(model);
 		}
 
-		// ---- 單張刪除圖片 API (AJAX 用) ----
-		[HttpPost]
-		public async Task<IActionResult> DeletePicture(int id)
-		{
-			var pic = await _context.LocationPics.FindAsync(id);
-			if (pic == null) return NotFound();
-
-			_context.LocationPics.Remove(pic);
-			await _context.SaveChangesAsync();
-
-			return Ok(); // 讓前端 JS 判斷成功
-		}
+		
 
 		// GET: TravelManagement/Locations/Delete/5
 		public async Task<IActionResult> Delete(int? id)
@@ -402,5 +395,35 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         {
             return _context.Locations.Any(e => e.LocationID == id);
         }
-    }
+
+		// ---- 單張刪除圖片 API (AJAX 用) ----
+		[HttpPost]
+		public async Task<IActionResult> DeletePicture(int id)
+		{
+			var pic = await _context.LocationPics.FindAsync(id);
+			if (pic == null) return NotFound();
+
+			_context.LocationPics.Remove(pic);
+			await _context.SaveChangesAsync();
+
+			return Ok(); // 讓前端 JS 判斷成功
+		}
+
+		// ---- 切換啟用狀態 API (AJAX 用) ----
+		[HttpPost]
+		public JsonResult ToggleActive(int id)
+		{
+			var locations = _context.Locations.FirstOrDefault(h => h.LocationID == id);
+			if (locations == null)
+			{
+				return Json(new { success = false });
+			}
+
+			// 切換啟用狀態
+			locations.IsActive = !locations.IsActive;
+			_context.SaveChanges();
+
+			return Json(new { success = true, newStatus = locations.IsActive });
+		}
+	}
 }

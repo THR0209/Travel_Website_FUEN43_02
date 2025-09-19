@@ -16,6 +16,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.ViewModel
 		public int? PriorityID { get; set; }
 		public DateTime? CreateTime { get; set; }
 		public DateTime? UpdateTime { get; set; }
+		public string? TicketCode { get; set; }
 
 		// Navigation
 		public virtual CustomerProfile? Customer { get; set; }

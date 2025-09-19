@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.Admin.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ using System.Threading.Tasks;
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class NewsTablesController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaAdmin")]
+	public class NewsTablesController : Controller
     {
         private readonly webtravel2Context _context;
 
@@ -128,10 +130,11 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 					UpdateTime = DateTime.Now,
 					EmployeeID = currentEmpId,
 				};
-
-				_context.Add(entity);
+                
+                _context.Add(entity);
 				await _context.SaveChangesAsync();
-				return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = "新增成功！";
+                return RedirectToAction(nameof(Index));
 			}
 
 			// ❗ 除錯：把所有錯誤列出來
@@ -234,7 +237,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 
 					_context.Update(newsTable);
 					await _context.SaveChangesAsync();
-				}
+                    TempData["SuccessMessage"] = "更新成功！";
+                }
 				catch (DbUpdateConcurrencyException)
 				{
 					if (!_context.NewsTable.Any(e => e.NewsID == viewModel.NewsID))
@@ -304,7 +308,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 			{
 				_context.NewsTable.Remove(newsTable);
 				await _context.SaveChangesAsync();
-			}
+                TempData["SuccessMessage"] = "刪除成功！";
+            }
 			return RedirectToAction(nameof(Index));
 		}
 

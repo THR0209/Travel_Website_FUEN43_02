@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 {
-	[DateRange("PublishTime", "ExpireTime", ErrorMessage = "發佈時間不可大於到期時間")]
+	[DateRange("PublishTime", "ExpireTime", ErrorMessage = "到期時間必須比發佈時間晚至少 24 小時")]
 	public class NewsCreateViewModel
     {
         public int NewsID { get; set; }
@@ -25,7 +25,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 		[Required(ErrorMessage = "到期時間不可為空")]
 		public DateTime? ExpireTime { get; set; }
 
-		[Display(Name = "是否啟用")]
+		[Display(Name = "狀態")]
 		public bool IsActive { get; set; }
 
         public DateTime? CreateTime { get; set; }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cat_Paw_Footprint.Models;
 
@@ -31,6 +32,10 @@ public partial class Products
 
 	[DisplayName("結束日期")]
 	public DateTime? EndDate { get; set; }
+
+	[DisplayName("建立時間")]
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+	public DateTime? CreateTime { get; set; }
 
 	[DisplayName("人數上限")]
 	public int? MaxPeople { get; set; }

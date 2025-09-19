@@ -21,5 +21,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 		Task<IEnumerable<CustomerAdminViewModel>> GetAllLevelsAsync();
 		//根據信箱查詢id
 		Task<int?> GetCustomerIdByEmailAsync(string email);
+		Task BatchSaveCustomersAsync(List<CustomerUpdateDto> updates);//批次更新
 	}
 }

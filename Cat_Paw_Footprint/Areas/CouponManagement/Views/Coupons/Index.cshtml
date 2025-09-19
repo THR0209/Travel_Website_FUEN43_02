@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Models.Coupons>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "優惠券管理";
 }
 
 @section Styles {
@@ -14,6 +14,14 @@
         tr {
             background-color: #22B3C1;
         }
+
+        table.dataTable thead th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        table.dataTable thead th:last-child {
+            border-top-right-radius: 8px;
+        }
     </style>
 }
 
@@ -22,64 +30,73 @@
 <p>
     <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> 新增優惠券</a>
 </p>
-<table class="table">
+<table class="table table-bordered table-striped table-hover">
     <thead>
         <tr>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.CouponCode)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CouponDesc)
-            </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.DiscountType)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.DiscountValue)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.StartDate)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.EndTime)
             </th>
-            <th>
+            <th class="fs-5">
                 @Html.DisplayNameFor(model => model.IsActive)
             </th>
-            <th></th>
+            <th class="fs-5" style="width:15%">操作</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CouponCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CouponDesc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountValue)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CouponID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CouponID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CouponID">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CouponCode)
+                </td>
+                <td>
+                    @if (item.DiscountType == 0)
+                    {
+                        <span>百分比折扣 (%)</span>
+                    }
+                    else
+                    {
+                        <span>固定金額折扣 ($)</span>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DiscountValue)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EndTime)
+                </td>
+                <td class="text-center">
+                    @if (item.IsActive == true)
+                    {
+                        <span class="badge bg-success text-center justify-content-between">啟用中</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger text-center justify-content-between">已下架</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.CouponID" class="btn btn-primary btn-sm mb-1 ms-auto" >編輯</a>
+                    <a asp-action="Details" asp-route-id="@item.CouponID" class="btn btn-info btn-sm mb-1 ms-auto" >檢視</a>
+                    <a asp-action="Delete" asp-route-id="@item.CouponID" class="btn btn-danger btn-sm mb-1 ms-auto" >下架</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
@@ -98,14 +115,12 @@
 
     <script>
         $(document).ready(function (){
-            $('table').DataTable({
+            $('table').dataTable({
                 "language" : {
                     url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json',
                 },
                 layout: {
-                    bottomEnd: {
-                        buttons: ['copy', 'csv', 'pdf', 'print']
-                    }
+
                 }
             });
         });

@@ -1,0 +1,124 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.HotProductViewModel>
+@{
+    ViewData["Title"] = "熱門行程排行";
+}
+
+
+
+
+<h1 class="d-flex justify-content-between align-items-center">
+    🔥 熱門行程排行
+    <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard" 
+       class="btn btn-outline-primary btn-sm">
+        <i class="fa-solid fa-chart-line"></i> 回到儀表板
+    </a>
+</h1>
+
+<!-- 表格 -->
+<div class="container mt-4">
+    <table class="table table-striped table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th>排行</th>
+                <th>行程名稱</th>
+                <th>訂單數</th>
+                <th>瀏覽次數</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int rank = 1;
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@rank</td>
+                        <td>@item.ProductName</td>
+                        <td>@item.OrderCount</td>
+                        <td>@item.Views</td>
+                    </tr>
+                    rank++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- 圖表 -->
+<div class="container mt-4">
+    <h4>📊 訂單數 vs 瀏覽次數</h4>
+    <canvas id="hotProductsChart"></canvas>
+</div>
+
+<!-- 行程管理按鈕 -->
+<div class="row mt-4">
+    <div class="col text-center">
+        <a asp-area="ProductManagement" asp-controller="Products" asp-action="Index" class="btn btn-primary">
+            行程管理
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        fetch("/Admin/Reports/GetHotProducts")
+            .then(r => r.json())
+            .then(data => {
+                let labels = data.map(d => d.productName || d.ProductName);  
+                let orderCounts = data.map(d => d.orderCount || d.OrderCount);
+                let views = data.map(d => d.views || d.Views);
+
+       new Chart(document.getElementById("hotProductsChart"), {
+    type: "bar",
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: "訂單數",
+                data: orderCounts,
+                backgroundColor: "rgba(54, 162, 235, 0.7)",
+                yAxisID: "y1"   // ✅ 左邊 Y 軸
+            },
+            {
+                label: "瀏覽次數",
+                data: views,
+                backgroundColor: "rgba(255, 206, 86, 0.7)",
+                yAxisID: "y2"   // ✅ 右邊 Y 軸
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: "top" },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        return context.dataset.label + ": " + context.raw.toLocaleString();
+                    }
+                }
+            }
+        },
+        scales: {
+            y1: {
+                type: "linear",
+                position: "left",
+                beginAtZero: true,
+                title: { display: true, text: "訂單數" }
+            },
+            y2: {
+                type: "linear",
+                position: "right",
+                beginAtZero: true,
+                grid: { drawOnChartArea: false }, // ✅ 避免格線重疊
+                title: { display: true, text: "瀏覽次數" }
+            },
+            x: { stacked: false }
+        }
+    }
+});
+
+            })
+            .catch(err => console.error("載入熱門行程錯誤:", err));
+    </script>
+}

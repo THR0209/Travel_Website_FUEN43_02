@@ -1,4 +1,5 @@
 ﻿using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.ValidationAttributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -25,7 +26,10 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 
 		public Products Product { get; set; } = new Products();
 
-		public ProductAnalysis ProductAnalysis { get; set; } = new();
+		public ProductAnalysis ProductAnalysis { get; set; } = new ProductAnalysis();
+
+
+		public DateTime? ReleaseDate { get; set; }
 
 		[NotMapped] //不進資料庫
 		public IFormFile? UploadImage { get; set; }    // 上傳用
@@ -43,8 +47,6 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 		public Dictionary<int, List<OrderedItem>> SelectedLocationsByDay { get; set; } = new();
 
 		public List<DayLocations> SelectedLocations { get; set; } = new();
-
-
 	}
 
 	public class RestaurantSelection

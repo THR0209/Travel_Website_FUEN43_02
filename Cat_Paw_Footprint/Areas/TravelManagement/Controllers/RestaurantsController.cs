@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,8 @@ using System.Threading.Tasks;
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
     [Area("TravelManagement")]
-    public class RestaurantsController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaTravelManagement")]
+	public class RestaurantsController : Controller
     {
         private readonly webtravel2Context _context;
 
@@ -343,20 +345,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "Keyword", "Keyword", model.KeywordID);
 
 			return View(model);
-		}
-
-		// ---- 單張刪除圖片 API (AJAX 用) ----
-		[HttpPost]
-		public async Task<IActionResult> DeletePicture(int id)
-		{
-			var pic = await _context.RestaurantPics.FindAsync(id);
-			if (pic == null) return NotFound();
-
-			_context.RestaurantPics.Remove(pic);
-			await _context.SaveChangesAsync();
-
-			return Ok(); // 讓前端 JS 判斷成功
-		}
+		}		
 
 		// GET: TravelManagement/Restaurants/Delete/5
 		public async Task<IActionResult> Delete(int? id)
@@ -397,5 +386,35 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         {
             return _context.Restaurants.Any(e => e.RestaurantID == id);
         }
-    }
+
+		// ---- 單張刪除圖片 API (AJAX 用) ----
+		[HttpPost]
+		public async Task<IActionResult> DeletePicture(int id)
+		{
+			var pic = await _context.RestaurantPics.FindAsync(id);
+			if (pic == null) return NotFound();
+
+			_context.RestaurantPics.Remove(pic);
+			await _context.SaveChangesAsync();
+
+			return Ok(); // 讓前端 JS 判斷成功
+		}
+
+		// ---- 切換啟用狀態 API (AJAX 用) ----
+		[HttpPost]
+		public JsonResult ToggleActive(int id)
+		{
+			var restaurants = _context.Restaurants.FirstOrDefault(h => h.RestaurantID == id);
+			if (restaurants == null)
+			{
+				return Json(new { success = false });
+			}
+
+			// 切換啟用狀態
+			restaurants.IsActive = !restaurants.IsActive;
+			_context.SaveChanges();
+
+			return Json(new { success = true, newStatus = restaurants.IsActive });
+		}
+	}
 }

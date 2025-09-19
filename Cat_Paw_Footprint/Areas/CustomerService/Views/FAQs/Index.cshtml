@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "FAQs維護";// 設定頁面標題
 }
 
@@ -8,15 +7,20 @@
 @section Styles {
     <!-- DataTables 樣式表 -->
     <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <!-- Bootstrap 樣式表 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- jQuery UI 樣式表 -->
+    <link href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" rel="stylesheet" />
     <!-- 客製 FAQ 管理樣式 -->
     <link href="~/css/faqs.css" rel="stylesheet" />
+    <!-- 主題樣式表 -->
+    <link href="~/UI Design/assets/vendor/css/theme-default.css" rel="stylesheet" />
 }
 
 <section id="view-faq" class="section">
-    
     <!-- FAQ 工具列 -->
     <div class="card">
-        <h3>FAQ管理</h3>
+        <h3>FAQs管理</h3>
         <div class="toolbar" style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
             <!-- 左側: 新增按鈕 -->
             <div>
@@ -24,7 +28,6 @@
                     <i class="fa-solid fa-square-plus"></i> 新增 FAQ
                 </button>
             </div>
-
             <!-- 右側: 分類、搜尋、清除 -->
             <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1; justify-content: flex-end;">
                 <select id="faqCategoryFilter" style="max-width:220px; flex-shrink: 0;">
@@ -34,28 +37,25 @@
                 <button class="btn btn-ghost" id="btnFaqClear" style="flex-shrink: 0;">清除</button>
             </div>
         </div>
-
-
         <!-- FAQ 資料表 -->
         <table id="faqTable" aria-label="FAQ 列表">
             <thead>
                 <tr>
-                    <th style="width:140px">分類</th>
-                    <th>問題</th>
-                    <th>答案</th>
-                    <th>狀態</th>
-                    <th style="width:160px">操作</th>
+                    <th style="width:80px">分類</th>
+                    <th style="width:260px">問題</th>
+                    <th style="width:300px">答案</th>
+                    <th style="width:80px">狀態</th>
+                    <th style="width:140px">操作</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
     </div>
-
     <div class="card">
         <h3>分類管理</h3>
         <!-- FAQ 分類管理工具列 -->
         <div class="toolbar">
-            <button class="btn btn-secondary" id="btnAddCategory"><i class="fa-solid fa-square-plus"></i>新增分類</button>
+            <button class="btn btn-primary" id="btnAddCategory"><i class="fa-solid fa-square-plus"></i>新增分類</button>
         </div>
         <!-- FAQ 分類資料表 -->
         <table id="categoryTable" aria-label="分類列表">
@@ -67,59 +67,79 @@
     </div>
 </section>
 
-<!-- FAQ 編輯 Modal -->
-<div id="faqModal" class="modal">
-    <div class="modal-content">
-        <h3 id="faqModalTitle"></h3>
-        <label>
-            分類
-            <select id="faqFormCategory"></select>
-        </label>
-        <label>
-            狀態
-            <select id="faqFormStatus">
-                <option value="上架">上架</option>
-                <option value="下架">下架</option>
-            </select>
-        </label>
-        <label>
-            問題
-            <input id="faqFormQuestion" type="text" />
-        </label>
-        <label>
-            答案
-            <textarea id="faqFormAnswer"></textarea>
-        </label>
-        <div class="modal-footer">
-            <button class="btn btn-ghost" id="faqModalCancel">取消</button>
-            <button class="btn btn-primary" id="faqModalSave">儲存</button>
+<!-- FAQ 編輯 Modal (Bootstrap 樣式) -->
+<div class="modal fade" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="faqModalLabel">FAQ資訊</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="faqForm">
+                    <input type="hidden" id="faqID" />
+                    <div class="mb-3">
+                        <label for="faqFormCategory" class="form-label">分類</label>
+                        <select id="faqFormCategory" class="form-select"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="faqFormStatus" class="form-label">狀態</label>
+                        <select id="faqFormStatus" class="form-select">
+                            <option value="">請選擇</option>
+                            <option value="上架">上架</option>
+                            <option value="下架">下架</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="faqFormQuestion" class="form-label">問題</label>
+                        <input id="faqFormQuestion" type="text" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="faqFormAnswer" class="form-label">答案</label>
+                        <textarea id="faqFormAnswer" class="form-control"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="faqModalSave">儲存</button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- FAQ 分類編輯 Modal -->
-<div id="categoryModal" class="modal">
-    <div class="modal-content">
-        <h3 id="categoryModalTitle">新增分類</h3>
-        <label>
-            分類名稱
-            <input id="categoryFormName" type="text" />
-        </label>
-        <div class="modal-footer">
-            <button class="btn btn-ghost" id="categoryModalCancel">取消</button>
-            <button class="btn btn-primary" id="categoryModalSave">儲存</button>
+<!-- FAQ 分類編輯 Modal (Bootstrap 樣式) -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryModalLabel">分類資訊</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryID" />
+                    <div class="mb-3">
+                        <label for="categoryFormName" class="form-label">分類名稱</label>
+                        <input id="categoryFormName" type="text" class="form-control" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="categoryModalSave">儲存</button>
+            </div>
         </div>
     </div>
 </div>
-
-<!-- 回到頂部按鈕 -->
-<button id="backToTop" title="回到頂部"><i class="fa-solid fa-circle-up"></i></button>
 
 @section Scripts {
     <!-- jQuery 函式庫 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- DataTables 函式庫 --> 
+    <!-- DataTables 函式庫 -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- FAQ 管理自訂 JS -->
     <script src="~/js/faqs.js"></script>
 }
