@@ -167,12 +167,34 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		}
 
 		// 刪除工單
-		[HttpPost]
 		public async Task<IActionResult> DeleteTicket([FromBody] int id)
 		{
-			if (!await _service.ExistsAsync(id)) return NotFound();
-			await _service.DeleteAsync(id);
-			return Json(new { success = true });
+			if (id <= 0) return BadRequest(new { success = false, message = "工單ID不正確" });
+			try
+			{
+				if (!await _service.ExistsAsync(id)) return NotFound(new { success = false, message = "工單不存在" });
+
+				// 檢查有無關聯 Feedback
+				bool hasFeedback = await _context.CustomerSupportFeedback.AnyAsync(f => f.TicketID == id);
+				if (hasFeedback)
+				{
+					return BadRequest(new
+					{
+						success = false,
+						message = "此工單有客戶回饋資料，請先刪除相關回饋再刪工單！"
+					});
+				}
+
+				await _service.DeleteAsync(id);
+				await _context.SaveChangesAsync();
+
+				return Json(new { success = true });
+			}
+			catch (Exception ex)
+			{
+				var msg = ex.InnerException?.Message ?? ex.Message;
+				return StatusCode(500, new { success = false, message = msg });
+			}
 		}
 
 		// 取得所有下拉選單資料

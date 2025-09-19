@@ -101,23 +101,27 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 			var hotels = await _context.Products_Hotels
 				.Where(ph => ph.ProductID == id)
 				.Include(ph => ph.Hotel)
+					.ThenInclude(ph => ph.HotelPics)
 				.OrderBy(ph => ph.OrderIndex)
 				.ToListAsync();
 
 			var restaurants = await _context.Products_Restaurants
 				.Where(pr => pr.ProductID == id)
 				.Include(pr => pr.Restaurant)
+					.ThenInclude(pr => pr.RestaurantPics)
 				.OrderBy(pr => pr.OrderIndex)
 				.ToListAsync();
 
 			var transports = await _context.Products_Transportations
 				.Where(pt => pt.ProductID == id)
 				.Include(pt => pt.Transport)
+					.ThenInclude(pt => pt.TransportPics)
 				.ToListAsync();
 
 			var locations = await _context.Products_Locations
 				.Where(pl => pl.ProductID == id)
 				.Include(pl => pl.Location)
+				    .ThenInclude(pl => pl.LocationPics)
 				.OrderBy(pl => pl.OrderIndex)
 				.ToListAsync();
 

@@ -177,7 +177,12 @@
 
             // 刪除工單
             $('#ticketTable tbody').on('click', '.btn-delete', async function () {
-                const id = $(this).data('id');
+                const id = Number($(this).data('id'));
+                if (isNaN(id) || id <= 0) {
+                    alert('工單ID無效');
+                    return;
+                }
+
                 if (!confirm('確定刪除這筆工單？')) return;
 
                 const res = await fetch('/CustomerService/CustomerSupportTickets/DeleteTicket', {
@@ -186,8 +191,15 @@
                     body: JSON.stringify(id)
                 });
 
-                if (!res.ok) return alert('刪除失敗');
-                ticketTable.row($(this).closest('tr')).remove().draw(false);
+                if (!res.ok) {
+                    let errMsg = '儲存失敗';
+                    try {
+                        const err = await res.json();
+                        if (err.message) errMsg = err.message;
+                    } catch { }
+                    alert(errMsg);
+                    return;
+                }
             });
 
             // 儲存工單
@@ -225,10 +237,15 @@
                     });
 
                     if (!res.ok) {
-                        alert('儲存失敗');
-                        $('#saveTicket').prop('disabled', false);
+                        let errMsg = '刪除失敗';
+                        try {
+                            const err = await res.json();
+                            if (err.message) errMsg = err.message;
+                        } catch { }
+                        alert(errMsg);
                         return;
                     }
+                    ticketTable.row($(this).closest('tr')).remove().draw(false);
 
                     const result = await res.json();
                     ticketModal.hide();
@@ -239,6 +256,7 @@
                 } finally {
                     $('#saveTicket').prop('disabled', false);
                 }
+
             });
 
             // Modal 關閉時自動把焦點移回主頁新增工單按鈕（無障礙修正）

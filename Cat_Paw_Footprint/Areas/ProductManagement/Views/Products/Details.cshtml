@@ -306,7 +306,7 @@
                                         <div class="carousel-inner">
                                             @{
                                                 var spotImages = Model.Product.ProductLocations?
-                                                .Where(l => l.Location != null && l.Location.LocationPics != null)
+                                                .Where(l => l.Location != null && l.Location.LocationPics.Any())
                                                 .SelectMany(l => l.Location.LocationPics)
                                                 .ToList();
 
@@ -413,7 +413,7 @@
                                         <div class="carousel-inner">
                                             @{
                                                 var mealImages = Model.Product.ProductRestaurants?
-                                                .Where(r => r.Restaurant != null && r.Restaurant.RestaurantPics != null)
+                                                .Where(r => r.Restaurant != null && r.Restaurant.RestaurantPics.Any())
                                                 .SelectMany(r => r.Restaurant.RestaurantPics)
                                                 .ToList();
 
@@ -491,7 +491,7 @@
                                         <div class="carousel-inner">
                                             @{
                                                 var hotelImages = Model.Product.ProductHotels?
-                                                .Where(h => h.Hotel != null && h.Hotel.HotelPics != null)
+                                                .Where(h => h.Hotel != null && h.Hotel.HotelPics.Any())
                                                 .SelectMany(h => h.Hotel.HotelPics)
                                                 .ToList();
 
@@ -559,7 +559,7 @@
                                         <div class="carousel-inner">
                                             @{
                                                 var transportImages = Model.Product.ProductsTransportations?
-                                                .Where(t => t.Transport != null && t.Transport.TransportPics != null)
+                                                .Where(t => t.Transport != null && t.Transport.TransportPics.Any())
                                                 .SelectMany(t => t.Transport.TransportPics)
                                                 .ToList();
 
