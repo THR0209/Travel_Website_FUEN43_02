@@ -345,7 +345,9 @@ else
           if (!btn) return;
 
           const id = btn.dataset.id;
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 
@@ -383,7 +385,9 @@ else
             mProdName.textContent = productName;
             tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">載入中…</td></tr>';
 
-            const res = await fetch(`/Order/CustomerOrders/by-product/${productId}`);
+                    const res = await fetch(`/Order/CustomerOrders/by-product/${productId}`, {
+          credentials: 'include'
+        });
             const data = await res.json();
 
             const orders = data.orders || [];
@@ -422,7 +426,9 @@ else
           const id = mailBtn.dataset.id;
 
           // 先抓訂單資料，拿到 email、orderCode 等
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 
@@ -475,33 +481,46 @@ else
             ordersMD?.show();
           }, { once:true });
         });
-        
-        document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
+
+                document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
           ev.preventDefault();
           const form = ev.currentTarget;
-          const fd   = new FormData(form);
 
-          try{
-            const res = await fetch(form.action || mailAjaxUrl, {
-              method: 'POST',
-              body: fd
-            });
-            const ok = res.ok;
-            if (!ok) {
-              const json = await res.json().catch(()=>null);
-              alert('寄送失敗：' + (json?.error || res.status));
+          // 用 FormData 包含整個 form（含 AntiForgeryToken）
+          const fd = new FormData(form);
+           console.log([...fd]);
+
+          try {
+
+
+        const res = await fetch(form.action || mailAjaxUrl, {
+          method: 'POST',
+                body: fd,
+          credentials: 'include'
+        });
+
+            if (!res.ok) {
+              const text = await res.text().catch(() => "");
+              let msg;
+              try {
+                msg = JSON.parse(text).error;
+              } catch {
+                msg = text || res.status;
+              }
+              alert('寄送失敗：' + msg);
               return;
             }
-            // 關閉寄信視窗
+
+            // 成功 → 關閉寄信視窗
             const mailEl = document.getElementById('mailModal');
             const mailMD = mailEl ? bootstrap.Modal.getOrCreateInstance(mailEl) : null;
             mailMD?.hide();
 
-            // 提示一下
-            setTimeout(()=> alert('郵件已送出！'), 100);
-          }catch(err){
+            setTimeout(() => alert('郵件已送出！'), 100);
+
+          } catch (err) {
             console.error(err);
-            alert('寄送失敗（例外）');
+            alert('寄送失敗（例外: ' + err.message + '）');
           }
         });
         //表單編輯
@@ -510,7 +529,9 @@ else
           if (!btn) return;
 
           const id = btn.dataset.id;
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 
@@ -535,7 +556,9 @@ else
 
           const id = btn.dataset.id;
           const email = btn.dataset.email || '';
-          const res = await fetch(`${getApiBase}/${id}`);
+                  const res = await fetch(`${getApiBase}/${id}`, {
+          credentials: 'include'
+        });
           if (!res.ok) { alert('讀取訂單失敗'); return; }
           const o = await res.json();
 

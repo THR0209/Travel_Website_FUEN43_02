@@ -1,11 +1,16 @@
 ﻿using Cat_Paw_Footprint.Areas.Order.Models;
 using Cat_Paw_Footprint.Areas.Order.Services;
+using Cat_Paw_Footprint.Models;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.Order.Controllers
 {
+
 	[Area("Order")]
 	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaOrder")]
 	public class MailController : Controller
@@ -36,9 +41,13 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
 			return RedirectToAction("Index", "CustomerOrders", new { area = "Order" });
 		}
 		[HttpPost]
-		[ValidateAntiForgeryToken]
+		[IgnoreAntiforgeryToken]
 		public async Task<IActionResult> SendAjax([FromForm] string to, [FromForm] string subject, [FromForm] string body)
 		{
+			foreach (var key in Request.Form.Keys)
+			{
+				Console.WriteLine($"{key} = {Request.Form[key]}");
+			}
 			if (string.IsNullOrWhiteSpace(to))
 				return BadRequest(new { ok = false, error = "收件者信箱為必填" });
 
@@ -49,9 +58,10 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
 			}
 			catch (System.Exception ex)
 			{
+				Console.WriteLine($"SMTP 發送錯誤: {ex}");
 				return BadRequest(new { ok = false, error = ex.Message });
 			}
-		}
+		}	
 	}
 
 	public class MailComposeVm
@@ -62,3 +72,5 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
 		public string Body { get; set; } = "";
 	}
 }
+
+

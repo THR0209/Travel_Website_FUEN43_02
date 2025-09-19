@@ -142,5 +142,18 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 fname);
         }
-    }
+
+
+		[HttpPost("Order/CustomerOrders/Edit/{id:int}")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(int id, [Bind("CustomerID,ProductID,OrderID,OrderStatusID,TotalAmount,CreateTime,UpdateTime")] CustomerOrders customerOrders)
+		{
+			if (id != customerOrders.OrderID) return NotFound();
+			if (!ModelState.IsValid) return View(customerOrders);
+
+			_context.Update(customerOrders);
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index));
+		}
+	}
 }

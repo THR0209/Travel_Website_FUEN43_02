@@ -279,7 +279,6 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 
 		[HttpPost]//單獨帳號個人資料頁更新
 		[AllowAnonymous]
-		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Profile(ProfileEditInput input)
 		{
 			var empId = int.Parse(HttpContext.Session.GetString("EmpId")!);
@@ -331,5 +330,35 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 		}
 
 		#endregion
+
+
+		//[HttpPost]//信箱測試
+		//[AllowAnonymous]
+		//[ValidateAntiForgeryToken]
+		//public IActionResult EmailTest(IFormCollection form)
+		//{
+		//	var email = form["email"].ToString();
+		//	if (string.IsNullOrWhiteSpace(email))
+		//	{
+		//		return Json(new { ok = false, message = "請輸入 Email" });
+		//	}
+		//	// 簡單的 Email 格式檢查
+		//	if (!email.Contains("@") || !email.Contains("."))
+		//	{
+		//		return Json(new { ok = false, message = "Email 格式不正確" });
+		//	}
+		//	// 模擬發送 Email
+		//	System.Diagnostics.Debug.WriteLine($"模擬發送 Email 到 {email}");
+		//	return Json(new { ok = true, message = $"測試郵件已發送到 {email}（模擬）" });
+		//}
+
+		//[HttpGet]
+		//[AllowAnonymous]
+		//[ValidateAntiForgeryToken]
+		//public IActionResult EmailTest()
+		//{
+		//	return View();
+		//}
+
 	}
 }
