@@ -47,21 +47,22 @@ namespace Cat_Paw_Footprint
 	.AddCookie("VendorAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Vendor.Auth";
-		options.LoginPath = "/Vendor/VendorHome/Login";   // �t�ӵn�J��
-		options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
+		options.LoginPath = "/Vendor/VendorHome/Login";   // 非登入時強制跳轉
+		options.AccessDeniedPath = "/Vendor/VendorHome/Denied";// 非權限時強制跳轉
 	})
 	.AddCookie("CustomerAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/Customer/Account/Login"; // �Ȥ�n�J��
-		options.AccessDeniedPath = "/Customer/Account/Denied";
+		options.LoginPath = "/Customer/Account/Login"; // 非登入時強制跳轉
+		options.AccessDeniedPath = "/Customer/Account/Denied";// 非權限時強制跳轉
 	}).AddCookie("EmployeeAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Employee.Auth";
-		options.LoginPath = "/Employee/EmployeeAuth/Login";       // ���u�n�J��
+		options.LoginPath = "/Employee/EmployeeAuth/Login";      // 非登入時強制跳轉
 		options.AccessDeniedPath = "/Home/Index";
 	});
 
+			#region AccessDeniedPath權限進入限制
 			builder.Services.AddAuthorization(options =>
 			{
 				options.AddPolicy("Emp.AdminOnly", policy =>
@@ -100,7 +101,7 @@ namespace Cat_Paw_Footprint
 			  .RequireAuthenticatedUser()
 			  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
 			});
-
+			#endregion
 			builder.Services.AddSession(options =>
 			{
 				options.Cookie.Name = ".CatPaw.Employee.Session"; // �ۭq���u Session �W��
@@ -108,7 +109,7 @@ namespace Cat_Paw_Footprint
 				options.Cookie.HttpOnly = true;                   // ���� JS �s���A���� XSS
 				options.Cookie.IsEssential = true;                // �קK�Q�s��������
 			});
-
+			#region 註冊連線層與邏輯層
 			builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 			builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 			builder.Services.AddScoped<ICustomerAdminRepository, CustomerAdminRepository>();
@@ -125,6 +126,7 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
+			#endregion
 
 			builder.Services.AddHttpContextAccessor();
 
