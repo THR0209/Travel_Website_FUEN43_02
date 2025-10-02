@@ -51,7 +51,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "住宿代碼")]
 		public string? HotelCode { get; set; }
 
-		[Display(Name = "是否啟用")]
+		[Display(Name = "狀態")]
 		public bool? IsActive { get; set; }
 
 		[NotMapped] // 不會影響資料庫

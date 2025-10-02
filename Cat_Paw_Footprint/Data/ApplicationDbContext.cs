@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
+	public class ApplicationDbContext : IdentityDbContext<IdentityUser, IdentityRole, string>
 	{
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
-        {
-	    }
+		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+			: base(options)
+		{
+		}
 		public DbSet<Vendors> Vendors { get; set; } = null!;
 		public DbSet<Customers> Customers { get; set; } = null!;
 		public DbSet<Models.CustomerProfile> CustomerProfiles { get; set; }

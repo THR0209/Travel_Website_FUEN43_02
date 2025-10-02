@@ -36,7 +36,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 
 			return await _repo.UpdateSelfAsync(empId, name, phone, email, address, photo, newPasswordHash, idNumber);
 		}
-		public async Task UpdateAccountAsync(int id, bool status, string? password, int roleId,string idStr)
+		public async Task UpdateAccountAsync(int id, bool status, string? password, int roleId, string idStr)
 		{
 
 			if (int.TryParse(idStr, out var empId) && id == empId)

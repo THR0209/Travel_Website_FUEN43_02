@@ -2,14 +2,21 @@
 
 namespace Cat_Paw_Footprint.Areas.CustomerService.ViewModel
 {
-	// FAQ 與分類用於前端資料的 ViewModel
+	/// <summary>
+	/// FAQ 與 FAQ 分類前端使用的 ViewModel
+	/// </summary>
 	public class FAQServiceDashboardViewModel
 	{
-		// FAQ 與 FAQ 分類前端資料用的 ViewModel
+		/// <summary>
+		/// FAQ 資料用 ViewModel
+		/// </summary>
 		public class FAQViewModel
 		{
-			// FAQ 主鍵
+			/// <summary>
+			/// FAQ 主鍵
+			/// </summary>
 			public int FAQID { get; set; }
+
 			[Required(ErrorMessage = "問題不可為空")]
 			[StringLength(200, ErrorMessage = "問題長度不可超過 200 字")]
 			public string? Question { get; set; }
@@ -26,7 +33,9 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.ViewModel
 			public DateTime? UpdateTime { get; set; }
 		}
 
-		// FAQ 分類資料的 ViewModel
+		/// <summary>
+		/// FAQ 分類資料用 ViewModel
+		/// </summary>
 		public class FAQCategoryViewModel
 		{
 			public int? CategoryID { get; set; }

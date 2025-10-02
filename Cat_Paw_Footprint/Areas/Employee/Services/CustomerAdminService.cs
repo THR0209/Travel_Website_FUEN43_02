@@ -2,7 +2,6 @@
 using Cat_Paw_Footprint.Areas.Employee.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.Employee.Services
 {

@@ -2,93 +2,95 @@
     ViewData["Title"] = "會員報表";
 }
 
-<h1 class="d-flex justify-content-between align-items-center">
-    會員報表
-    <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard" 
-       class="btn btn-outline-primary btn-sm">
-        <i class="fa-solid fa-chart-line"></i> 回到儀表板
-    </a>
-</h1>
-
-<div class="container">
-    <div class="row g-4">
-        <!-- 本月訂閱 vs 非訂閱 -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header text-center fw-bold fs-5">
-                    本月訂閱 vs 非訂閱
-                </div>
-                <div class="card-body text-center">
-                    <canvas id="subscriptionThisMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
-                    資料來源：會員資料表
-                </div>
-            </div>
-        </div>
-
-        <!-- 上月訂閱 vs 非訂閱 -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header text-center fw-bold fs-5">
-                    上月訂閱 vs 非訂閱
-                </div>
-                <div class="card-body text-center">
-                    <canvas id="subscriptionLastMonth"style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
-                    資料來源：會員資料表
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mt-1">
-        <!-- 本月銅 / 銀 / 金 -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header text-center fw-bold fs-5">
-                    本月銅 / 銀 / 金 等級比例
-                </div>
-                <div class="card-body text-center">
-                    <canvas id="levelThisMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
-                    資料來源：會員等級表
-                </div>
-            </div>
-        </div>
-
-        <!-- 上月銅 / 銀 / 金 -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header text-center fw-bold fs-5">
-                    上月銅 / 銀 / 金 等級比例
-                </div>
-                <div class="card-body text-center">
-                    <canvas id="levelLastMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
-                </div>
-                <div class="card-footer text-muted text-center">
-                    最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
-                    資料來源：會員等級表
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 優惠券管理按鈕 -->
-    <div class="row mt-4">
-        <div class="col text-center">
-            <a asp-area="CouponManagement" asp-controller="Coupons" asp-action="Index" class="btn btn-primary">
-                優惠券管理
+<div class="card mb-4 shadow">
+    <div class="card-header bg-white pb-0">
+        <div class="position-relative">
+            <h1 class="text-center mb-3">會員報表</h1>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard"
+               class="btn btn-outline-primary position-absolute end-0 top-50 translate-middle-y me-2">
+                <i class="fa-solid fa-chart-line"></i> 回到儀表板
             </a>
         </div>
     </div>
-</div>
+    <div class="card-body">
+        <div class="container-fluid px-0">
+            <div class="row g-4">
+                <!-- 本月訂閱 vs 非訂閱 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            本月訂閱 vs 非訂閱
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="subscriptionThisMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員資料表
+                        </div>
+                    </div>
+                </div>
+                <!-- 上月訂閱 vs 非訂閱 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            上月訂閱 vs 非訂閱
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="subscriptionLastMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員資料表
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="row g-4 mt-1">
+                <!-- 本月銅 / 銀 / 金 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            本月銅 / 銀 / 金 等級比例
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="levelThisMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員等級表
+                        </div>
+                    </div>
+                </div>
+                <!-- 上月銅 / 銀 / 金 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            上月銅 / 銀 / 金 等級比例
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="levelLastMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員等級表
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 優惠券管理按鈕 -->
+            <div class="row mt-4">
+                <div class="col text-center">
+                    <a asp-area="CouponManagement" asp-controller="Coupons" asp-action="Index" class="btn btn-outline-primary">
+                        優惠券管理
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>

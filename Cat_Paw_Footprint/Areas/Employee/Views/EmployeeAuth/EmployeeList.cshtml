@@ -4,165 +4,155 @@
     ViewData["Title"] = "員工管理";
     var roles = ViewBag.Roles as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
 }
-<h2 class="mb-3">員工管理</h2>
-<div class="mb-3">
-    <button type="button" class="btn btn-success" id="btn-save-all"><i class="fa-solid fa-square-plus"></i>全部儲存</button>
+
+<div class="mt-2 text-end" id="emp-btn-save-wrap" style="display:none;">
+
+    <button type="button" class="btn btn-outline-success" id="btn-save-all">
+        <i class="fa-solid fa-square-plus"></i>全部儲存
+    </button>
 </div>
 <div class="card">
-    <div class="table-responsive">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-users-gear me-2"></i>員工管理
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
         <table class="table table-striped align-middle" id="emp-table">
-            <thead>
-                <tr>
-                    <th style="width:90px;">員編</th>
-                    <th style="width:160px;">帳號</th>
-                    <th style="width:160px;">姓名</th>
-                    <th style="width:220px;">角色</th>
-                    <th style="width:90px;">啟用</th>
-                    <th style="width:220px;">新密碼</th>
-                    <th style="width:120px;">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var emp in Model)
-                {
-                    <tr data-id="@emp.EmployeeID">
-                        <td>@emp.EmployeeID</td>
-                        <td>@emp.Account</td>
-                        <td>@emp.EmployeeName</td>
-                        <td>
-                            <select class="form-select js-role">
-                                @foreach (var role in roles)
-                                {
-                                    <option value="@role.Value" selected="@(emp.RoleID.HasValue && emp.RoleID.Value.ToString() == role.Value)">
-                                        @role.Text
-                                    </option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <input type="checkbox" class="form-check-input js-status" @(emp.Status == true ? "checked" : "") />
-                        </td>
-                        <td>
-                            <input type="password" class="form-control js-password" placeholder="留空不變" />
-                        </td>
-                        <td style="text-align:center">
-                            <button type="button" class="btn btn-info btn-sm js-detail">詳細</button>
-                            <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
-                        </td>
+                <thead>
+                    <tr>
+                        <th style="width:60px;">員編</th>
+                        <th style="width:160px;">帳號</th>
+                        <th style="width:160px;">姓名</th>
+                        <th style="width:220px;">角色</th>
+                        <th style="width:90px;">啟用</th>
+                        <th style="width:220px;">新密碼</th>
+                        <th style="width:200px;">操作</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var emp in Model)
+                    {
+                        <tr data-id="@emp.EmployeeID">
+                            <td class="text-center">@emp.EmployeeID</td>
+                            <td >@emp.Account</td>
+                            <td class="text-center">@emp.EmployeeName</td>
+                            <td class ="text-center">
+                                <select class="form-select js-role">
+                                    @foreach (var role in roles)
+                                    {
+                                        <option value="@role.Value" selected="@(emp.RoleID.HasValue && emp.RoleID.Value.ToString() == role.Value)">
+                                            @role.Text
+                                        </option>
+                                    }
+                                </select>
+                            </td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-flex justify-content-center">
+                                        <input type="checkbox" class="form-check-input js-status" role="switch" @(emp.Status == true ? "checked" : "") />
+                                </div>
+                            </td>
+                            <td>
+                                <input type="password" class="form-control js-password" placeholder="留空不變" />
+                            </td>
+                            <td style="text-align:center">
+                            <button type="button" class="btn btn-outline-secondary js-detail">
+                                <i class="fa-solid fa-eye"></i> <span class="btn-text">詳情</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary js-save">
+                                <i class="fa-solid fa-floppy-disk"></i> <span class="btn-text">儲存</span>
+                            </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
     </div>
 </div>
 <!-- 只用來取 Anti-Forgery Token -->
 <form id="anti-form" method="post">
     @Html.AntiForgeryToken()
 </form>
-<div class="modal fade" id="empDetailModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="empDetailModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">員工詳細資料</h5>
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-primary text-white" style="background: linear-gradient(90deg,#22b3c1 60%,#b4e1eb 100%);">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-address-card me-2"></i>
+                    員工詳細資料
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            <div class="modal-body py-4 px-4" style="background:#f8f9fa;">
+                <!-- 這裡 AJAX 會塞 HTML -->
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
 </div>
+
+
 @section Scripts {
     <script>
         (() => {
-          const table = document.getElementById("emp-table");
-          if (!table) return;
+            const tableEl = document.getElementById("emp-table");
+            if (!tableEl) return;
+            const token = document.querySelector('#anti-form input[name="__RequestVerificationToken"]').value;
 
-          const tokenInput = document.querySelector('#anti-form input[name="__RequestVerificationToken"]');
-          const token = tokenInput ? tokenInput.value : "";
+            // 單筆儲存
+            tableEl.addEventListener("click", async (e) => {
+                const btn = e.target.closest(".js-save");
+                if (!btn) return;
+                const tr = btn.closest("tr");
+                const form = new FormData();
+                form.append("id", tr.dataset.id);
+                form.append("roleId", tr.querySelector(".js-role").value);
+                form.append("status", tr.querySelector(".js-status").checked ? "true" : "false");
+                const pwd = tr.querySelector(".js-password").value;
+                if (pwd.trim()) form.append("password", pwd);
+                form.append("__RequestVerificationToken", token);
 
-          // 1) 儲存
-          table.addEventListener("click", async (e) => {
-            const btn = e.target.closest(".js-save");
-            if (!btn) return;
+                btn.disabled = true;
+                const textEl = btn.querySelector(".btn-text");
+                const oldText = textEl.textContent;
+                textEl.textContent = "儲存中…";
 
-            const tr = btn.closest("tr");
-            const id = tr.dataset.id;
-            const roleId = tr.querySelector(".js-role").value;
-            const status = tr.querySelector(".js-status").checked;
-            const password = tr.querySelector(".js-password").value;
+                try {
+                    const res = await fetch('@Url.Action("UpdateRow", "EmployeeAuth", new { area = "Employee" })', { method:"POST", body:form });
+                    const data = await res.json();
+                    if (data.ok) {
+                        alert("更新成功");
+                        tr.querySelector(".js-password").value = "";
+                    } else alert("更新失敗：" + (data.message||""));
+                } catch(err) { alert("發生錯誤：" + err.message); }
+                finally { btn.disabled=false; textEl.textContent = oldText; }
+            });
 
-            const form = new FormData();
-            form.append("id", id);
-            form.append("roleId", roleId);
-            form.append("status", status ? "true" : "false");
-            if (password && password.trim().length > 0) form.append("password", password);
-            if (token) form.append("__RequestVerificationToken", token);
+            // 詳細
+            tableEl.addEventListener("click", async (e) => {
+                const btn = e.target.closest(".js-detail");
+                if (!btn) return;
+                const tr = btn.closest("tr");
+                const id = tr.dataset.id;
 
-            btn.disabled = true;
-            const oldText = btn.textContent;
-            btn.textContent = "儲存中…";
+                btn.disabled = true;
+                const textEl = btn.querySelector(".btn-text");
+                const oldText = textEl.textContent;
+                textEl.textContent = "載入中…";
 
-            try {
-              const res = await fetch('@Url.Action("UpdateRow", "EmployeeAuth", new { area = "Employee" })', {
-                method: "POST",
-                body: form,
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-              });
-              if (!res.ok) throw new Error("HTTP " + res.status);
-              const data = await res.json();
-              if (data.ok) {
-                alert("更新成功");
-                tr.querySelector(".js-password").value = "";
-              } else {
-                alert("更新失敗：" + (data.message || "請稍後再試"));
-              }
-            } catch (err) {
-              alert("發生錯誤：" + err.message);
-            } finally {
-              btn.disabled = false;
-              btn.textContent = oldText;
-            }
-          });
+                try {
+                    const res = await fetch('@Url.Action("Detail", "EmployeeAuth", new { area = "Employee" })?id='+id);
+                    const html = await res.text();
+                    document.querySelector("#empDetailModal .modal-body").innerHTML = html;
 
-          // 2) 詳細
-          table.addEventListener("click", async (e) => {
-            const btn = e.target.closest(".js-detail");
-            if (!btn) return;
-
-            const tr = btn.closest("tr");
-            const id = tr.dataset.id;
-
-            btn.disabled = true;
-            const old = btn.textContent;
-            btn.textContent = "載入中…";
-
-            try {
-              const res = await fetch('@Url.Action("Detail", "EmployeeAuth", new { area = "Employee" })' + `?id=${id}`, {
-                method: "GET",
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-              });
-              if (!res.ok) throw new Error("HTTP " + res.status);
-
-              const html = await res.text();
-              document.querySelector("#empDetailModal .modal-body").innerHTML = html;
-
-              if (!window.bootstrap || !bootstrap.Modal) {
-                console.error("Bootstrap JS 未載入");
-                alert("Modal 需要載入 Bootstrap JS（bundle）");
-                return;
-              }
-              new bootstrap.Modal(document.getElementById('empDetailModal')).show();
-            } catch (err) {
-              alert("載入失敗：" + err.message);
-            } finally {
-              btn.disabled = false;
-              btn.textContent = old;
-            }
-          });
-        })();
-                document.getElementById("btn-save-all").addEventListener("click", async () => {
+                    new bootstrap.Modal(document.getElementById('empDetailModal')).show();
+                } catch(err) { alert("載入失敗：" + err.message); }
+                finally { btn.disabled=false; textEl.textContent = oldText;  }
+            });
+            document.getElementById("btn-save-all").addEventListener("click", async () => {
             const buttons = document.querySelectorAll("#emp-table .js-save");
             const results = [];
 
@@ -206,6 +196,20 @@
 
             alert(results.join("\n"));
         });
+            // DataTables 初始化
+            $(document).ready(function() {
+                const table = $('#emp-table').DataTable({
+                    language:{
+                        search:"搜尋：", lengthMenu:"每頁顯示 _MENU_ 筆", info:"顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                        paginate:{ first:"第一頁", last:"最後頁", next:"下一頁", previous:"上一頁" }, zeroRecords:"找不到資料"
+                    },
+                    pageLength:10, lengthMenu:[5,10,20,50],
+                    columnDefs:[
+                        {targets: [3,4,5,6], orderable:false, searchable:false}
+                    ]
+                });
+                $('.dataTables_filter').after($('#emp-btn-save-wrap').show());
+            });
+        })();
     </script>
-
 }

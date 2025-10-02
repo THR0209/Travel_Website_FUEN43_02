@@ -6,17 +6,17 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 {
 	[DateRange("PublishTime", "ExpireTime", ErrorMessage = "到期時間必須比發佈時間晚至少 24 小時")]
 	public class NewsCreateViewModel
-    {
-        public int NewsID { get; set; }
+	{
+		public int NewsID { get; set; }
 
 		[Display(Name = "消息標題")]
-		[Required(ErrorMessage ="消息標題不可為空")]
-        public string? NewsTitle { get; set; }
+		[Required(ErrorMessage = "消息標題不可為空")]
+		public string? NewsTitle { get; set; }
 
 		[Display(Name = "消息內容")]
 		[Required(ErrorMessage = "消息內容不可為空")]
 		public string? NewsContent { get; set; }
-		
+
 		[Display(Name = "發佈時間")]
 		[Required(ErrorMessage = "發佈時間不可為空")]
 		public DateTime? PublishTime { get; set; }
@@ -28,9 +28,9 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 		[Display(Name = "狀態")]
 		public bool IsActive { get; set; }
 
-        public DateTime? CreateTime { get; set; }
+		public DateTime? CreateTime { get; set; }
 
-        public DateTime? UpdateTime { get; set; }
+		public DateTime? UpdateTime { get; set; }
 
 		[Display(Name = "員工姓名")]
 		public string? EmployeeName { get; set; }
@@ -39,5 +39,5 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
 		public int? EmployeeID { get; set; }
 
 		//public virtual EmployeeProfile? Employee { get; set; }
-    }
+	}
 }

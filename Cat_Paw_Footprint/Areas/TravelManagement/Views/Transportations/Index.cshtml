@@ -1,62 +1,64 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.TransportationsViewModel>
 
 @{
-    ViewData["Title"] = "交通一覽";
+    ViewData["Title"] = "交通總覽";
 }
 
-<h1>交通一覽</h1>
-
-
-<p>
-    <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i>新增資料</a>
-</p>
+<div class="mt-2" id="cr-tra" style="display:none;">
+    <a asp-action="Create" class="btn btn-outline-primary">
+        <i class="fa-solid fa-square-plus"></i>新增資料
+    </a>
+</div>
 <div class="card">
-    <table id="example" class="display table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>@Html.DisplayNameFor(model => model.TransportName)</th>
-                <th>@Html.DisplayNameFor(model => model.TransportDesc)</th>
-                <th>@Html.DisplayNameFor(model => model.TransportPrice)</th>
-                <th>@Html.DisplayNameFor(model => model.Rating)</th>
-                <th>@Html.DisplayNameFor(model => model.Views)</th>
-                <th>@Html.DisplayNameFor(model => model.IsActive)</th>   
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-bus me-2"></i>交通總覽
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+        <table id="example" class="display table table-striped" style="table-layout:fixed;">
+            <thead>
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => item.TransportName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.TransportDesc)</td>
-                    <td>@Html.DisplayFor(modelItem => item.TransportPrice)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Rating)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Views)</td>
-                    <td>
-                        <button class="btn btn-sm toggle-active @(item.IsActive == true ? "btn-success" : "btn-secondary")"
-                                data-id="@item.TransportID"
-                                data-status="@(item.IsActive)">
-                            @(item.IsActive == true ? "啟用" : "停用")
-                        </button>
-                    </td>
-                
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.TransportID" class="btn btn-sm btn-primary">修改</a>
-                        @* <a asp-action="Details" asp-route-id="@item.TransportID" class="btn btn-sm btn-success">詳細資料</a> *@
-                        @* <a asp-action="Delete" asp-route-id="@item.TransportID" class="btn btn-sm btn-danger">刪除</a> *@
-                    </td>
+                    <th>@Html.DisplayNameFor(model => model.TransportName)</th>
+                    <th>@Html.DisplayNameFor(model => model.TransportDesc)</th>
+                    <th>@Html.DisplayNameFor(model => model.TransportPrice)</th>
+                    <th>@Html.DisplayNameFor(model => model.Rating)</th>
+                    <th>@Html.DisplayNameFor(model => model.Views)</th>
+                    <th>@Html.DisplayNameFor(model => model.IsActive)</th>   
+                    <th>操作</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="text-center">
+                        <td>@Html.DisplayFor(modelItem => item.TransportName)</td>
+                        <td class="text-start">@Html.DisplayFor(modelItem => item.TransportDesc)</td>
+                        <td>@Html.DisplayFor(modelItem => item.TransportPrice)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Rating)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Views)</td>
+                        <td>
+                            <button class="btn btn-sm toggle-active @(item.IsActive == true ? "btn-success" : "btn-warning")"
+                                    data-id="@item.TransportID"
+                                    data-status="@(item.IsActive)">
+                                @(item.IsActive == true ? "上架" : "下架")
+                            </button>
+                        </td>
+                
+                        <td>
+                            @* <a asp-action="Details" asp-route-id="@item.TransportID" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i>詳情</a> *@
+                            <a asp-action="Edit" asp-route-id="@item.TransportID" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen-to-square"></i>編輯</a>
+                            @* <a asp-action="Delete" asp-route-id="@item.TransportID" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-ban"></i>下架</a> *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 
 @section Scripts {
-    <!-- DataTables CSS & JS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
-
     <!-- FixedHeader 套件 -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
     <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
@@ -67,13 +69,26 @@
     <script>
         $(document).ready(function () {
             $('#example').DataTable({
-                lengthMenu: [5, 10, 25, 50],   // 每頁顯示筆數
-                pageLength: 10,                // 預設顯示 10 筆
-                fixedHeader: true,  // 固定表頭
-
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料",
+                },
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
                 columnDefs: [
+                    { targets: 0, width: "10%" },
+                    { targets: 1, width: "30%" },
                     {
-                        targets: 2, // 第 3 欄 (價格)
+                        targets: 2,
+                        width: "15%",// 第 3 欄 (價格)
                         render: function (data, type, row) {
                             if (type === 'display') {
                                 let price = parseFloat(data) || 0;
@@ -83,7 +98,8 @@
                         }
                     },
                     {   //評分 + ★☆
-                        targets: 3, // 第 4 欄
+                        targets: 3,
+                        width: "15%",// 第 4 欄
                         render: function (data, type, row) {
                             if (type === 'display') {
                                 var score = parseFloat(data) || 0;
@@ -98,13 +114,16 @@
                                 return `<span style="color:gold; font-size:14px;">${stars}</span> <small>(${score})</small>`;
                             }
                             return data;
-                    }
-                }],
-
-                language: { //載入中文語系
-                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/zh-HANT.json"
-                }
+                            }
+                    },
+                    { targets: 4, width: "15%" },
+                    { targets: 5, width: "5%" },
+                    { targets: 6, width: "10%" },
+                    
+                ],
             });
+             $("#example th").css("width", "");
+            $('.dataTables_length').after($('#cr-tra').show());
 
             // 綁定啟用/停用按鈕點擊事件
             $('#example').on('click', '.toggle-active', function () {

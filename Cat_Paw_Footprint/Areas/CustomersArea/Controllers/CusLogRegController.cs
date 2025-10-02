@@ -7,7 +7,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
 	[Area("Customers")]
 	[Authorize(AuthenticationSchemes = "CustomerAuth")]
-	public class CusLogRegController: Controller
+	public class CusLogRegController : Controller
 	{
 		private readonly EmployeeDbContext _context;
 

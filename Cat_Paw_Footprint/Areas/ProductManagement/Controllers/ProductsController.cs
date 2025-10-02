@@ -4,19 +4,9 @@ using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
-using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 {

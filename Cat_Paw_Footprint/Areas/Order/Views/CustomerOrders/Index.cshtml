@@ -2,50 +2,72 @@
 @model IEnumerable<Cat_Paw_Footprint.Models.CustomerOrders>
 
 @{
-    ViewData["Title"] = "訂單一覽";   
+    ViewData["Title"] = "訂單總覽";
 }
 
-<h1 class="h4 mb-0">行程 / 地點</h1><br />
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="btn-group" role="group" aria-label="view switch">
-		<div class="col-auto">
-            <input id="globalSearch" type="search" class="form-control" placeholder="搜尋：訂單編號・客戶・商品">
-		</div>
-		<div class="col-auto">
-			<button id="btnClearSearch" type="button" class="btn btn-secondary">清除</button>
-		</div>
-		<div class="col-auto text-muted">
-			<small id="searchResultHint"></small>
-		</div>
-	</div> 
-    <div class="card mb-3">
-        <div class="card-body">
-            <form method="get" action="@Url.Action("Export", "CustomerOrders", new { area = "Order" })" class="row g-2 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label mb-1">開始日期</label>
-                    <input type="date" name="start" class="form-control" />
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-1">結束日期</label>
-                    <input type="date" name="end" class="form-control" />
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-success">
-                        下載 Excel
-                    </button>
-                </div>
-                <div class="col-auto">
-                    <small class="text-muted">（不填表示不限制）</small>
-                </div>
-            </form>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>訂單總覽
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
         </div>
-    </div>
-    <div class="btn-group" role="group" aria-label="view switch">
-        <button id="btnViewCard" type="button" class="btn btn-outline-secondary">圖卡</button>
-        <button id="btnViewTable" type="button" class="btn btn-outline-secondary">表單</button>
+        <!-- 操作區：搜尋、匯出、視圖切換 -->
+        <div class="row g-2 align-items-center mb-3">
+            <!-- 搜尋區 -->
+            <div class="col-md-5 col-12">
+                <div class="input-group">
+                    <input id="globalSearch" type="search" class="form-control" placeholder="搜尋：訂單編號・客戶・商品">
+                    <button id="btnClearSearch" type="button" class="btn btn-outline-secondary">清除</button>
+                </div>
+                <small id="searchResultHint" class="text-muted"></small>
+            </div>
+            <!-- 匯出區 -->
+            <div class="col-md-5 col-12">
+                <form method="get" action="@Url.Action("Export", "CustomerOrders", new { area = "Order" })" class="row gx-2 align-items-end">
+                    <div class="col-auto">
+                        <label class="form-label mb-1">開始日期</label>
+                        <input type="date" name="start" class="form-control" />
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-1">結束日期</label>
+                        <input type="date" name="end" class="form-control" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-success">下載 Excel</button>
+                    </div>
+                    <div class="col-auto">
+                        <small class="text-muted">（不填表示不限制）</small>
+                    </div>
+                </form>
+            </div>
+            <!-- 視圖切換 -->
+            <div class="col-md-2 col-12 text-end">
+                <div class="btn-group" role="group" aria-label="view switch">
+                    <button id="btnViewCard" type="button" class="btn btn-outline-secondary">圖卡</button>
+                    <button id="btnViewTable" type="button" class="btn btn-outline-secondary">表單</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 <style>
+    /* 排版相關調整： */
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .product-card {
+        min-width: 220px;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
     .th-sort {
         cursor: pointer;
         user-select: none;
@@ -60,6 +82,10 @@
             content: " ▼";
             font-size: .8em;
         }
+
+    .card-img-top {
+        height: 140px !important;
+    }
 </style>
 @{
     var groups = Model
@@ -82,92 +108,99 @@
 }
 else
 {
-    <!-- 卡片視圖 -->
-    <div id="viewCards">
-        <div class="row g-3">
-            @foreach (var p in groups)
-            {
-                <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-productname="@p.Name">
-                    <div class="card h-100 shadow-sm">
-                        @if (p.ImageUrl == $"https://placehold.co/600x400?text=Noimage")
-                        {<img src="~/images/NoImage.png" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:contain">}
-                        else
-                        {<img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">}   
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h5 class="card-title mb-0">@p.Name</h5>
-                                <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
+    <div class="card">
+         <div class="card-body">
+            <!-- 主內容區：卡片/表格切換 -->
+            <div class="row">
+                <!-- 卡片區 -->
+                <div id="viewCards" class="col-12 @(groups.Any() ? "" : "d-none")">
+                    <div class="row g-3">
+                        @foreach (var p in groups)
+                        {
+                            <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-productname="@p.Name">
+                                <div class="card h-100 shadow-sm">
+                                    @if (p.ImageUrl == $"https://placehold.co/600x400?text=Noimage")
+                                    {<img src="~/images/NoImage.png" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:contain">}
+                                    else
+                                    {<img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">}   
+                                    <div class="card-body d-flex flex-column">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="card-title mb-0">@p.Name</h5>
+                                            <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-outline-primary mt-auto btn-open-orders"
+                                                data-productid="@p.ProductID"
+                                                data-productname="@p.Name"									
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#ordersModal">
+                                            查看訂單
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <button type="button"
-                                    class="btn btn-primary mt-auto btn-open-orders"
-                                    data-productid="@p.ProductID"
-                                    data-productname="@p.Name"									
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#ordersModal">
-                                查看訂單
-                            </button>
-                        </div>
+                        }
                     </div>
                 </div>
-            }
+                <!-- 表格區 -->
+                <div id="viewTable" class="col-12 d-none">
+                    <div class="table-responsive">
+                        <table id="ordersTable" class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr class="text-center">
+                                    <th data-sort="ordercode">訂單編號</th>
+                                    <th data-sort="totalamount">總金額</th>
+                                    <th data-sort="createtime">建立時間</th>
+                                    <th data-sort="updatetime">更新時間</th>
+                                    <th data-sort="customer" style="width:100px">客戶</th>
+                                    <th data-sort="status">狀態</th>
+                                    <th data-sort="product">商品</th>
+                                    <th style="width:160px">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                                @foreach (var o in Model.OrderByDescending(x => x.CreateTime))
+                                {						
+                                    var orderCode = "ORD-" + (o.CreateTime.HasValue ? o.CreateTime.Value.ToString("yyyyMMdd-HHmmss") : "NA") + "-" + o.OrderID;
+                                    var statusText = o.OrderStatus?.StatusDesc ?? "";
+                                    var statusClass = statusText == "已付款" ? "bg-success"
+                                                    : statusText == "未付款" ? "bg-warning"
+                                                    : statusText == "已取消" ? "bg-secondary"
+                                                    : "bg-danger";
+                                    var custName = o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString();
+                                    var prodName = o.Product?.ProductName ?? o.ProductID.ToString();
+                                    var amt = o.TotalAmount ?? 0;
+                                    var ct = o.CreateTime?.ToString("s") ?? "";  
+                                    var ut = o.UpdateTime?.ToString("s") ?? "";
+                                    <tr class="text-center"
+                                        data-id="@o.OrderID"
+                                        data-ordercode="@orderCode"
+                                        data-customer="@custName"
+                                        data-product="@prodName"
+                                        data-status="@statusText"
+                                        data-amount="@amt"
+                                        data-createtime="@ct"
+                                        data-updatetime="@ut">
+                                        <td class="font-monospace">@orderCode</td>
+                                        <td class="text-start">@($"NT$ {(o.TotalAmount ?? 0):N0}")</td>
+                                        <td>@o.CreateTime?.ToString("yyyy/MM/dd HH:mm")</td>
+                                        <td>@o.UpdateTime?.ToString("yyyy/MM/dd HH:mm")</td>
+                                        <td>@(o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString())</td>
+                                        <td><span class="badge @statusClass">@statusText</span></td>
+                                        <td>@(o.Product?.ProductName ?? o.ProductID.ToString())</td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-action" data-action="edit" data-id="@o.OrderID"><i class="fa-solid fa-pen-to-square"></i>編輯</button>
+                                            <button type="button" class="btn btn-outline-success btn-mail" data-id="@o.OrderID" data-email="@(o.CustomerProfile?.Email ?? "")"><i class="fa-solid fa-paper-plane"></i>寄信</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- 表格視圖（逐筆訂單；預設隱藏） -->
-<div id="viewTable" class="d-none">
-  <div class="table-responsive">
-    <table id="ordersTable" class="table table-hover align-middle">
-        <thead class="table-light">
-        <tr>
-            <th data-sort="ordercode" class="th-sort">訂單編號</th>
-            <th data-sort="totalamount" class="th-sort text-end">總金額</th>
-            <th data-sort="createtime" class="th-sort">建立時間</th>
-            <th data-sort="updatetime" class="th-sort">更新時間</th>
-            <th data-sort="customer" class="th-sort">客戶</th>
-            <th data-sort="status" class="th-sort">狀態</th>
-            <th data-sort="product" class="th-sort">商品</th>
-            <th style="width:140px">操作</th>
-        </tr>
-      </thead>
-      <tbody id="ordersTableBody">
-        @foreach (var o in Model.OrderByDescending(x => x.CreateTime))
-        {						
-            var orderCode = "ORD-" + (o.CreateTime.HasValue ? o.CreateTime.Value.ToString("yyyyMMdd-HHmmss") : "NA") + "-" + o.OrderID;
-            var statusText = o.OrderStatus?.StatusDesc ?? "";
-            var statusClass = statusText == "已付款" ? "bg-success"
-                             : statusText == "未付款" ? "bg-warning"
-                             : statusText == "已取消" ? "bg-secondary"
-                             : "bg-danger";
-            var custName = o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString();
-            var prodName = o.Product?.ProductName ?? o.ProductID.ToString();
-            var amt = o.TotalAmount ?? 0;
-            var ct = o.CreateTime?.ToString("s") ?? "";  
-            var ut = o.UpdateTime?.ToString("s") ?? "";
-            <tr data-id="@o.OrderID"
-                data-ordercode="@orderCode"
-                data-customer="@custName"
-                data-product="@prodName"
-                data-status="@statusText"
-                data-amount="@amt"
-                data-createtime="@ct"
-                data-updatetime="@ut">
-            <td class="font-monospace">@orderCode</td>
-            <td class="text-end">@($"NT$ {(o.TotalAmount ?? 0):N0}")</td>
-            <td>@o.CreateTime?.ToString("yyyy/MM/dd HH:mm")</td>
-            <td>@o.UpdateTime?.ToString("yyyy/MM/dd HH:mm")</td>
-            <td>@(o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString())</td>
-            <td><span class="badge @statusClass">@statusText</span></td>
-            <td>@(o.Product?.ProductName ?? o.ProductID.ToString())</td>
-            <td class="d-flex gap-2">
-								<button type="button" class="btn btn-sm btn-primary btn-action" data-action="edit" data-id="@o.OrderID">編輯</button>
-                <button type="button" class="btn btn-sm btn-success btn-mail" data-id="@o.OrderID" data-email="@(o.CustomerProfile?.Email ?? "")">寄信</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</div>
 }
 <div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -183,7 +216,7 @@ else
                 <div class="table-responsive">
                     <table class="table table-sm table-hover align-middle">
                         <thead class="table-light">
-                            <tr>
+                            <tr class="text-center">
                                 <th>訂單編號</th>
                                 <th>總金額</th>
                                 <th>建立時間</th>
@@ -191,7 +224,7 @@ else
                                 <th>客戶</th>
                                 <th>狀態</th>
                                 <th>商品</th>
-                                <th style="width:80px">操作</th>
+                                <th style="width:160px">操作</th>
                             </tr>
                         </thead>
                         <tbody id="m_tbody">
@@ -257,7 +290,7 @@ else
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="submit" class="btn btn-primary">儲存</button>
+                    <button type="submit" class="btn btn-outline-primary">儲存</button>
                 </div>
             </form>
         </div>
@@ -291,7 +324,7 @@ else
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">送出</button>
+                    <button type="submit" class="btn btn-outline-primary">送出</button>
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
                 </div>
             </form>
@@ -401,16 +434,16 @@ else
               orders.forEach(o => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                  <td class="font-monospace">${o.orderCode}</td>
-                  <td>NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}</td>
-                  <td>${fmt(o.createTime)}</td>
-                  <td>${fmt(o.updateTime)}</td>
-                  <td>${o.customer ?? ''}</td>
-                  <td><span class="badge ${getStatusClass(o.status)}">${o.status}</span></td>
-                  <td>${o.product ?? ''}</td>
-                  <td>
-                    <button type="button" class="btn btn-sm btn-primary btn-edit" data-id="${o.id}">編輯</button>
-                    <button type="button" class="btn btn-sm btn-success btn-mail" data-id="${o.id}" data-email="${o.customerEmail ?? ''}">寄信</button>
+                  <td class="font-monospace text-center">${o.orderCode}</td>
+                  <td class="text-center">NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}</td>
+                  <td class="text-center">${fmt(o.createTime)}</td>
+                  <td class="text-center">${fmt(o.updateTime)}</td>
+                  <td class="text-center">${o.customer ?? ''}</td>
+                  <td class="text-center"><span class="badge ${getStatusClass(o.status)}">${o.status}</span></td>
+                  <td class="text-center">${o.product ?? ''}</td>
+                  <td class="text-center">
+                    <button type="button" class="btn btn-outline-primary btn-edit" data-id="${o.id}"><i class="fa-solid fa-pen-to-square"></i>編輯</button>
+                    <button type="button" class="btn btn-outline-success btn-mail" data-id="${o.id}" data-email="${o.customerEmail ?? ''}"><i class="fa-solid fa-paper-plane"></i>寄信</button>
                   </td>
                 `;
                 tbody.appendChild(tr);

@@ -31,7 +31,7 @@ public partial class Coupons
 	[DisplayName("結束時間")]
 	public DateTime? EndTime { get; set; }
 
-	[DisplayName("是否啟用")]
+	[DisplayName("狀態")]
 	public bool IsActive { get; set; }
 
 	public ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();

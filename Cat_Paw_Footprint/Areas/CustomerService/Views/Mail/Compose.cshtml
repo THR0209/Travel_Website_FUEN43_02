@@ -1,0 +1,129 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomerService.Controllers.MailComposeVm
+@{
+    ViewData["Title"] = "發送 Email";
+}
+
+@section Styles {
+    <!-- CKEditor 套件 -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/js/myckeditor.js" rel="stylesheet" />
+}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 d-flex justify-content-center">
+            <div class="card shadow-sm rounded-3" style="width:100%; max-width:1100px;">
+                <div class="card-header bg-primary text-white fw-bold" style="background: linear-gradient(90deg,#22b3c1 60%,#b4e1eb 100%);">
+                    <i class="fa-solid fa-paper-plane"></i> 客服發送 Email
+                </div>
+                <div class="card-body">
+                    <!-- Bootstrap Toast -->
+                    <form asp-action="Send" method="post" class="row g-3">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3 mt-5">
+                            <label asp-for="To" class="form-label fw-semibold"></label>
+                            <input asp-for="To" class="form-control" type="email" placeholder="輸入收件者 Email" required />
+                            <span asp-validation-for="To" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Subject" class="form-label fw-semibold">主旨</label>
+                            <input asp-for="Subject" class="form-control" placeholder="輸入主旨" required />
+                            <span asp-validation-for="Subject" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">選擇範本</label>
+                            <select id="templateSelect" name="SelectedTemplate" class="form-select">
+                                @foreach (var tpl in Model.Templates)
+                                {
+                                    if (tpl.Id == Model.SelectedTemplate)
+                                    {
+                                        <option value="@tpl.Id" selected>@tpl.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@tpl.Id">@tpl.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Body" class="form-label fw-semibold">內容</label>
+                            <textarea asp-for="Body" class="form-control" id="editor" rows="12" placeholder="輸入內容（支援 HTML）"></textarea>
+                            <span asp-validation-for="Body" class="text-danger"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a asp-area="CustomerService" asp-controller="CustomerSupportTickets" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> 返回客服
+                            </a>
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fa-solid fa-paper-plane"></i> 送出
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container position-fixed top-0 end-0 p-3"></div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+    <script>
+        document.getElementById('templateSelect').addEventListener('change', function () {
+            const templateId = this.value;
+            fetch('@Url.Action("GetTemplateContent", "Mail")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `templateId=${encodeURIComponent(templateId)}`
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data.ok && window.ckeditor) {
+                    window.ckeditor.setData(data.content);
+                }
+            });
+        });
+
+        // Bootstrap Toast 顯示訊息
+        function showToast(message, type = "success") {
+            let $container = $(".toast-container");
+            if ($container.length === 0) {
+                $container = $('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
+                $("body").append($container);
+            }
+            const $toast = $(`
+                <div class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `);
+            $container.append($toast);
+            const bsToast = new bootstrap.Toast($toast[0]);
+            bsToast.show();
+            $toast.on('hidden.bs.toast', function () {
+                $(this).remove();
+            });
+        }
+
+        // Razor 端訊息自動顯示 Toast（成功/失敗）
+        $(function () {
+            var msg = @Html.Raw(ViewBag.MailOk != null ? "JSON.stringify('" + ViewBag.MailOk.Replace("'", "\\'") + "')" : "null");
+            if (msg) {
+                let type = msg.indexOf('失敗') > -1 ? 'danger' : 'success';
+                showToast(msg, type);
+            }
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

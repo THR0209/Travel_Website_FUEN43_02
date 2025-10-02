@@ -1,92 +1,91 @@
 ﻿@model Cat_Paw_Footprint.Areas.Employee.ViewModel.ProfileEditInput
 @using System
 @{
-    ViewData["Title"] = "我的資料";
+    ViewData["Title"] = "個人資料";
 }
 
-<style>
-    .table th {
-        border-radius:8px;
-        font-size:15px;
-    }
-
-</style>
-
-<h2>我的資料</h2>
 <div class="card">
-    <form id="profileForm" asp-action="Profile" asp-controller="EmployeeAuth" asp-area="Employee"
-          method="post" enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-    
-        <table class="table">
-            <tr>
-                <th>姓名</th>
-                <td>
-                    <input asp-for="EmployeeName" class="form-control" />
-                    <span asp-validation-for="EmployeeName" class="text-danger"></span>
-                </td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>
-                    <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </td>
-            </tr>
-            <tr>
-                <th>電話</th>
-                <td>
-                    <input asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
-                </td>
-            </tr>
-            <tr>
-                <th>身分證</th>
-                <td>
-                    <input asp-for="IDNumber" class="form-control" />
-                    <span asp-validation-for="IDNumber" class="text-danger"></span>
-                </td>
-            </tr>
-            <tr>
-                <th>地址</th>
-                <td>
-                    <input asp-for="Address" class="form-control" />
-                    <span asp-validation-for="Address" class="text-danger"></span>
-                </td>
-            </tr>
-            <tr>
-                <th>大頭照</th>
-                <td>
-                    @if (Model.ExistingPhoto != null && Model.ExistingPhoto.Length > 0)
-                    {
-                        var base64 = Convert.ToBase64String(Model.ExistingPhoto);
-                        <img id="photoPreview" src="data:image/*;base64,@base64"
-                             alt="大頭照" class="img-thumbnail mb-2" style="max-height:160px;" />
-                    }
-                    else
-                    {
-                        <img id="photoPreview" class="img-thumbnail mb-2 d-none" style="max-height:160px;" />
-                        <span class="text-muted d-block">目前沒有上傳照片</span>
-                    }
-
-                    <input asp-for="PhotoFile" type="file" class="form-control" accept="image/*" />
-                    <span asp-validation-for="PhotoFile" class="text-danger"></span>
-                </td>
-            </tr>
-            <tr>
-                <th>新密碼</th>
-                <td>
-                    <input asp-for="NewPassword" type="password" class="form-control" />
-                    <span asp-validation-for="NewPassword" class="text-danger"></span>
-                </td>
-            </tr>
-        </table>
-        <div style="text-align: right; margin-top: 1rem;">
-            <button type="submit" class="btn btn-primary">儲存變更</button>
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fas fa-user"></i>個人資料
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
         </div>
-    </form>
+        <form id="profileForm" asp-action="Profile" asp-controller="EmployeeAuth" asp-area="Employee"
+              method="post" enctype="multipart/form-data" >
+            @Html.AntiForgeryToken()
 
+            <table class="table table-primary table-bordered table-sm">
+                <tr>
+                    <th style="width:120px;">姓名</th>
+                    <td>
+                        <input asp-for="EmployeeName" class="form-control" />
+                        <span asp-validation-for="EmployeeName" class="text-danger"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>電話</th>
+                    <td>
+                        <input asp-for="Phone" class="form-control" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>身分證</th>
+                    <td>
+                        <input asp-for="IDNumber" class="form-control" />
+                        <span asp-validation-for="IDNumber" class="text-danger"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>地址</th>
+                    <td>
+                        <input asp-for="Address" class="form-control" />
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>大頭照</th>
+                    <td>
+                        @if (Model.ExistingPhoto != null && Model.ExistingPhoto.Length > 0)
+                        {
+                            var base64 = Convert.ToBase64String(Model.ExistingPhoto);
+                            <img id="photoPreview" src="data:image/*;base64,@base64"
+                                 alt="大頭照" class="img-thumbnail" />
+                        }
+                        else
+                        {
+                            <img id="photoPreview" class="img-thumbnail d-none" />
+                            <span class="text-muted">目前沒有上傳照片</span>
+                        }
+
+                        <input asp-for="PhotoFile" type="file" class="form-control mt-2" accept="image/*" />
+                        <span asp-validation-for="PhotoFile" class="text-danger"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>新密碼</th>
+                    <td>
+                        <input asp-for="NewPassword" type="password" class="form-control" />
+                        <span asp-validation-for="NewPassword" class="text-danger"></span>
+                    </td>
+                </tr>
+            </table>
+            <div class="text-end mt-3">
+                <button type="submit" class="btn btn-outline-primary">儲存變更</button>
+            </div>
+        </form>
+    </div>
 </div>
+
 @section Scripts {
     <script>
         document.getElementById('profileForm').addEventListener('submit', async (e) => {

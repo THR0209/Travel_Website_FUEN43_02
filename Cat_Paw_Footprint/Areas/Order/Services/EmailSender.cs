@@ -3,7 +3,6 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.Order.Services
 {

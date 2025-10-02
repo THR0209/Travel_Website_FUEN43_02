@@ -1,5 +1,4 @@
 ﻿using Cat_Paw_Footprint.Models;
-using Cat_Paw_Footprint.ValidationAttributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;

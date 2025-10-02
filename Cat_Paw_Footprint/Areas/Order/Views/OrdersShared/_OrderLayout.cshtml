@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>貓爪足跡-@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @* <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" /> *@
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="~/ui design/assets/img/favicon/favicon.ico" /> <!-- 路徑注意 -->
+    <link rel="icon" type="image/x-icon" href="~/assets/img/favicon/favicon.ico" /> <!-- 路徑注意 -->
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,24 +17,24 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC&display=swap">
 
     <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="~/ui design/assets/vendor/fonts/boxicons.css" /> <!-- 路徑注意 -->
+    <link rel="stylesheet" href="~/assets/vendor/fonts/boxicons.css" /> <!-- 路徑注意 -->
     <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
 
     <!-- Core CSS -->
-    <link rel="stylesheet" href="~/ui design/assets/vendor/css/core.css" class="template-customizer-core-css" />  <!-- 路徑注意 -->
-    <link rel="stylesheet" href="~/ui design/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />  <!-- 路徑注意 -->
-    <link rel="stylesheet" href="~/ui design/assets/css/demo.css" />  <!-- 路徑注意 -->
+    <link rel="stylesheet" href="~/assets/vendor/css/core.css" class="template-customizer-core-css" />  <!-- 路徑注意 -->
+    <link rel="stylesheet" href="~/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />  <!-- 路徑注意 -->
+    <link rel="stylesheet" href="~/assets/css/demo.css" />  <!-- 路徑注意 -->
     <!-- Vendors CSS -->
-    <link rel="stylesheet" href="~/ui design/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="~/ui design/assets/vendor/libs/apex-charts/apex-charts.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/apex-charts/apex-charts.css" />
 
     <!-- Page CSS -->
     <!-- Helpers -->
-    <script src="~/ui design/assets/vendor/js/helpers.js"></script>
+    <script src="~/assets/vendor/js/helpers.js"></script>
 
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="~/ui design/assets/js/config.js"></script>
+    <script src="~/assets/js/config.js"></script>
     @* @{
         var roleId = Context.Session.GetString("EmpRoleId");
         var status = Context.Session.GetString("Status"); // "True" 或 "False"
@@ -141,24 +140,23 @@
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
-    <script src="~/ui design/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="~/ui design/assets/vendor/libs/popper/popper.js"></script>
-    <script src="~/ui design/assets/vendor/js/bootstrap.js"></script>
-    <script src="~/ui design/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="~/assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="~/assets/vendor/libs/popper/popper.js"></script>
+    <script src="~/assets/vendor/js/bootstrap.js"></script>
+    <script src="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
 
-    <script src="~/ui design/assets/vendor/js/menu.js"></script>
+    <script src="~/assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
     <!-- Vendors JS -->
-    <script src="~/ui design/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+    <script src="~/assets/vendor/libs/apex-charts/apexcharts.js"></script>
 
     <!-- Main JS -->
-    <script src="~/ui design/assets/js/main.js"></script>
+    <script src="~/assets/js/main.js"></script>
 
     <!-- Page JS -->
-    <script src="~/ui design/assets/js/dashboards-analytics.js"></script>
+    <script src="~/assets/js/dashboards-analytics.js"></script>
     <!-- 放在 _Layout 任何地方一次就好 -->
     <form id="logoutForm" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Logout" method="post" class="d-none">
         @Html.AntiForgeryToken()

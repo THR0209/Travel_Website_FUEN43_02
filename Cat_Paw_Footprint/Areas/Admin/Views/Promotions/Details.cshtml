@@ -1,73 +1,77 @@
 ﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.PromotionViewModel
 
 @{
-    ViewData["Title"] = "詳細資訊";
+    ViewData["Title"] = "優惠活動詳細資訊";
 }
 
-<h1>優惠活動詳細資訊</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-info text-white fw-bold">
+                    <i class="fa-solid fa-circle-info me-2"></i> 優惠活動詳細資訊
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3 fw-semibold mt-3 mb-2">活動名稱</dt>
+                        <dd class="col-sm-9 mt-3 mb-2">@Html.DisplayFor(m => m.PromoName)</dd>
 
-<table class="table table-bordered">
-    <tr>
-        <th>活動名稱</th>
-        <td>@Html.DisplayFor(m => m.PromoName)</td>
-    </tr>
-    <tr>
-        <th>活動描述</th>
-        <td>@Html.DisplayFor(m => m.PromoDesc)</td>
-    </tr>
-    <tr>
-        <th>開始時間</th>
-        <td>@Html.DisplayFor(m => m.StartTime)</td>
-    </tr>
-    <tr>
-        <th>結束時間</th>
-        <td>@Html.DisplayFor(m => m.EndTime)</td>
-    </tr>
-    <tr>
-        <th>折扣類型</th>
-        <td>@Html.DisplayFor(m => m.DiscountTypeName)</td>
-    </tr>
-    <tr>
-        <th>折扣數值</th>
-         <td>@Html.DisplayFor(m => m.DiscountValueDisplay)</td>
-    </tr>
-    <tr>
-        <th>狀態</th>
-    <td>
-             @Html.ActiveBadge(Model.IsActive)
-    </td>
+                        <dt class="col-sm-3 fw-semibold">活動描述</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.PromoDesc)</dd>
 
-    </tr>
-    <tr>
-        <th>建立時間</th>
-        <td>@Html.DisplayFor(m => m.CreateTime)</td>
-    </tr>
-    <tr>
-        <th>更新時間</th>
-        <td>@Html.DisplayFor(m => m.UpdateTime)</td>
-    </tr>
-</table>
+                        <dt class="col-sm-3 fw-semibold">開始時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.StartTime)</dd>
 
-<h3>綁定的產品</h3>
-<table class="table table-striped">
-    <thead class="table-primary">
-        <tr>
-            <th>產品名稱</th>
-            <th>價格</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var product in Model.Products)
-        {
-            <tr>
-                <td>@product.ProductName</td>
-                <td>@product.ProductPrice</td>
-            </tr>
-        }
-    </tbody>
-</table>
+                        <dt class="col-sm-3 fw-semibold">結束時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.EndTime)</dd>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.PromoID" class="btn btn-warning">編輯</a>
-    <a asp-action="Index" class="btn btn-secondary">回到上一頁</a>
+                        <dt class="col-sm-3 fw-semibold">折扣類型</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.DiscountTypeName)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">折扣數值</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.DiscountValueDisplay)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">狀態</dt>
+                        <dd class="col-sm-9">
+                            @Html.ActiveBadge(Model.IsActive)
+                        </dd>
+
+                        <dt class="col-sm-3 fw-semibold">建立時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.CreateTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">更新時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(m => m.UpdateTime)</dd>
+                    </dl>
+
+                    <h5 class="fw-bold mt-4"><i class="fa-solid fa-boxes-stacked me-2"></i>綁定的產品</h5>
+                    <table class="table table-striped mb-4">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>產品名稱</th>
+                                <th>價格</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var product in Model.Products)
+                            {
+                                <tr>
+                                    <td>@product.ProductName</td>
+                                    <td>@product.ProductPrice</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> 回到上一頁
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@Model?.PromoID" class="btn btn-outline-info">
+                            <i class="fa-solid fa-pen-to-square"></i> 編輯
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -5,12 +5,6 @@
     ViewData["Title"] = "廠商管理";// 設定頁面標題
 }
 
-@section Styles {
-    <link href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
-
-}
-<h2 class="mb-3 text-center">廠商管理</h2>
 @if (TempData["SuccessMessage"] != null)
 {
    
@@ -20,63 +14,67 @@
         </div>
 
 }
-          
+
 <div class="card">
-    <div class="table-responsive">
-        <table class="table table-striped align-middle" id="productsTable">
-            <thead>
-                <tr>
-                    <th class="text-center" style="width:10%;">廠商編號</th>
-                    <th class="text-center" style="width:15%;">廠商帳號</th>
-                    <th class="text-center" style="width:20%;">廠商名稱</th>
-                    <th class="text-center" style="width:15%;">聯絡人</th>
-                    <th class="text-center" style="width:10%;">啟用</th>
-                    <th class="text-center" style="width:30%;">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var ven in Model)
-                {
-                    <tr data-id="@ven.VendorId" data-Account="@ven.Account">
-                        <td class="text-center">@ven.VendorId</td>
-                        <td class="text-center">@ven.Account</td>
-                        <td class="text-center">@ven.CompanyName</td>
-                        <td class="text-center">@ven.ContactName</td>
-                        <td>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input js-status" type="checkbox" role="switch"
-                                       @(ven.Status == true ? "checked" : "") />
-                            </div>
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-secondary btn-sm js-detail">詳細資訊</button>
-                            <button type="button" class="btn btn-info btn-sm js-history">登入紀錄</button>
-                            <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
-                        </td>
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-building me-2"></i>廠商管理
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+            <table class="table table-striped align-middle" id="ven-table">
+                <thead>
+                    <tr>
+                        <th style="width:10%;">廠商編號</th>
+                        <th style="width:15%;">廠商帳號</th>
+                        <th style="width:25%;">廠商名稱</th>
+                        <th style="width:15%;">聯絡人</th>
+                        <th style="width:10%;">啟用</th>
+                        <th style="width:35%;">操作</th>
                     </tr>
-                }
+                </thead>
+                <tbody>
+                    @foreach (var ven in Model)
+                    {
+                        <tr data-id="@ven.VendorId" data-Account="@ven.Account">
+                            <td class="text-center">@ven.VendorId</td>
+                            <td class="text-center">@ven.Account</td>
+                            <td >@ven.CompanyName</td>
+                            <td class="text-center">@ven.ContactName</td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-flex justify-content-center">
+                                    <input class="form-check-input js-status" type="checkbox" role="switch"
+                                            @(ven.Status == true ? "checked" : "") />
+                                </div>
+                            </td>
+                            <td class="text-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm js-detail"><i class="fa-solid fa-eye"></i>廠商資訊</button>
+                            <button type="button" class="btn btn-outline-info btn-sm js-history"><i class="fa-solid fa-user-clock"></i>登入紀錄</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm js-save"><i class="fa-solid fa-floppy-disk"></i>儲存</button>
+                            </td>
+                        </tr>
+                    }
             
-            </tbody>
-        </table>
+                </tbody>
+            </table>
     </div>
+</div>
+<form id="anti-form" method="post">
+    @Html.AntiForgeryToken()
+</form>
 
-        <form id="anti-form" method="post">
-            @Html.AntiForgeryToken()
-        </form>
-
-        <div class="modal fade" id="venDetailModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">廠商詳細資料</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <!-- 這裡會被 Script 填資料 -->
-                    <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                    </div>
-                </div>
+<div class="modal fade" id="venDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">廠商詳細資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- 這裡會被 Script 填資料 -->
+            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
@@ -166,8 +164,30 @@
                                     btn.textContent = oldText;
                         }
                     });
-
                 });
+        $(document).ready(function () {
+            $('#ven-table').DataTable({
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料",
+                },
+                pageLength: 10, // 預設每頁10筆
+                lengthMenu: [5, 10, 20, 50],
+                columnDefs: [
+                    {targets: 4,orderable: false,searchable: false},
+                    {targets: 5,orderable: false,searchable: false}
+                ],
+            });
+            $('.dataTables_filter').after($('#cus-btn-save-wrap').show());
+        });
 </script>
 
 }

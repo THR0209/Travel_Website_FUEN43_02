@@ -1,12 +1,6 @@
-﻿using Cat_Paw_Footprint.Areas.Order.Models;
-using Cat_Paw_Footprint.Areas.Order.Services;
-using Cat_Paw_Footprint.Models;
-using DocumentFormat.OpenXml.InkML;
+﻿using Cat_Paw_Footprint.Areas.Order.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.Order.Controllers
 {

@@ -38,8 +38,9 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 		}
 		public async Task<bool> RegisterVendorAsync(VendorAdminViewModel model)//廠商註冊
 		{
-			using var transaction =await _context.Database.BeginTransactionAsync();//開始交易
-			try {
+			using var transaction = await _context.Database.BeginTransactionAsync();//開始交易
+			try
+			{
 
 
 				var defaultPassword = "Travel@123";
@@ -77,7 +78,8 @@ namespace Cat_Paw_Footprint.Areas.Employee.Services
 				await transaction.CommitAsync();//成功後交易結束
 				return true;
 			}
-			catch {
+			catch
+			{
 				await transaction.RollbackAsync();//失敗後交易回復
 				throw;
 			}

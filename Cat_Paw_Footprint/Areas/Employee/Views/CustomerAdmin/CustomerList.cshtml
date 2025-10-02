@@ -3,66 +3,72 @@
 @{
     ViewData["Title"] = "客戶管理";
     var Level = ViewBag.Levels as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
-    <link href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" rel="stylesheet" />
 }
-<h2 class="mb-3">客戶管理</h2>
 
-<div class="mb-3">
-    <button type="button" class="btn btn-primary" id="btn-save-all"><i class="fa-solid fa-square-plus"></i>全部儲存</button>
+<div class="mt-2 text-end" id="cus-btn-save-wrap" style="display:none;">
+    <button type="button" class="btn btn-outline-success" id="btn-save-all">
+    <i class="fa-solid fa-square-plus"></i>全部儲存
+    </button>
 </div>
 <div class="card">
-    <div class="table-responsive">
-        <table class="table table-striped align-middle" id="productsTable">
-            <thead>
-                <tr>
-
-                    <th class="text-center" style="width:10%;">編號</th>
-                    <th class="text-center" style="width:10%;">姓名</th>
-                    <th class="text-center" style="width:15%;">等級</th>
-                    <th style="width:8%;">啟用</th>
-                    <th style="width:10%;">黑名單</th>
-                    <th class="text-center" style="width:25%;">信箱</th>
-                    <th class="text-center" style="width:31%;">操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var cus in Model)
-                {
-                    <tr data-id="@cus.CustomerID">
-
-                        <td class="text-center">@cus.CustomerID</td>
-                        <td class="text-center">@cus.CustomerName</td>
-                        <td class="text-center">
-                            <select class="form-select js-leavel">
-                                @foreach (var Levels in Level)
-                                {
-                                    <option value="@Levels.Value" selected="@(cus.Level.HasValue && cus.Level.Value.ToString() == Levels.Value)">
-                                        @Levels.Text
-                                    </option>
-                                }
-                            </select>
-
-                        </td>
-                        <td>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input js-status" type="checkbox" role="switch"
-                                       @(cus.Status == true ? "checked" : "") />
-                            </div>
-                        </td>
-                        <td>
-                            <input type="checkbox" class="form-check-input js-isblacklisted" @(cus.IsBlacklisted == true ? "checked" : "") />
-                        </td>
-                        <td class="text-center">@cus.Email</td>
-                        <td class="text-center">
-                            <button type="button" class="btn btn-secondary btn-sm js-detail">客戶資訊</button>
-                            <button type="button" class="btn btn-info btn-sm js-history">登入紀錄</button>
-                            <button type="button" class="btn btn-primary btn-sm js-save">儲存</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-users me-2"></i>客戶管理
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+        <table class="table table-striped align-middle" id="cus-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">編號</th>
+                            <th style="width:10%;">姓名</th>
+                            <th style="width:15%;">等級</th>
+                            <th style="width:10%;">啟用</th>
+                            <th style="width:10%;">黑名單</th>
+                            <th style="width:25%;">信箱</th>
+                            <th style="width:45%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cus in Model)
+                        {
+                            <tr data-id="@cus.CustomerID">
+                                <td class="text-center">@cus.CustomerID</td>
+                                <td class="text-center">@cus.CustomerName</td>
+                                <td class="text-center">
+                                    <select class="form-select js-leavel">
+                                        @foreach (var Levels in Level)
+                                        {
+                                            <option value="@Levels.Value" selected="@(cus.Level.HasValue && cus.Level.Value.ToString() == Levels.Value)">
+                                                @Levels.Text
+                                            </option>
+                                        }
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-flex justify-content-center">
+                                        <input class="form-check-input js-status" type="checkbox" role="switch"
+                                               @(cus.Status == true ? "checked" : "") />
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input js-isblacklisted" @(cus.IsBlacklisted == true ? "checked" : "") />
+                                </td>
+                                <td>@cus.Email</td>
+                                <td class="text-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm js-detail">
+                                <i class="fa-solid fa-eye"></i>
+                                客戶詳情
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm js-history"><i class="fa-solid fa-user-clock"></i>登入紀錄</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm js-save"><i class="fa-solid fa-floppy-disk"></i>儲存</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+     </div>
 </div>
 <!-- ✅ 跟 Script 有關 -->
 <form id="anti-form" method="post">
@@ -80,27 +86,16 @@
             <!-- 這裡會被 Script 填資料 -->
             <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
 </div>
 
-
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
     <script>
-                $(document).ready(function () {
-                    $('#productsTable').DataTable({
-                        "pageLength": 20, // 每頁顯示 20 筆
-                        "language": {
-                            url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json'
-                        }
-                    });
-                });
         //下方是詳細資料
-                        document.querySelectorAll(".js-detail").forEach(btn => {
+                    document.querySelectorAll(".js-detail").forEach(btn => {
                     btn.addEventListener("click", async e => {
                         const tr = btn.closest("tr");
                         const email = tr.querySelector("td:nth-child(6)").textContent; // 假設信箱在第6欄
@@ -188,8 +183,8 @@
 
                             let cart = [];
 
-                        document.getElementById("btn-save-all").addEventListener("click", async () => {
-                    const buttons = document.querySelectorAll("#productsTable .js-save");
+                    document.getElementById("btn-save-all").addEventListener("click", async () => {
+                    const buttons = document.querySelectorAll("#cus-table .js-save");
                     const results = [];
 
                     let index = 1;
@@ -229,8 +224,32 @@
                         index++;
                         await new Promise(r => setTimeout(r, 200)); // 避免同時打爆伺服器
                     }
-
                     alert(results.join("\n"));
                 });
+        $(document).ready(function () {
+            $('#cus-table').DataTable({
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料",
+                },
+                pageLength: 10, // 預設每頁10筆
+                lengthMenu: [5, 10, 20, 50],
+                columnDefs: [
+                    { targets:2, orderable: false, searchable: false },
+                    { targets:3, orderable: false, searchable: false },
+                    { targets:4, orderable: false, searchable: false },
+                    { targets:6, orderable: false, searchable: false }, 
+                ],
+            });
+            $('.dataTables_filter').after($('#cus-btn-save-wrap').show());
+        });
     </script>
 }

@@ -7,24 +7,6 @@
         </a>
     </li>
 
-
-    <!-- 帳號管理 -->
-    <li class="menu-item">
-        <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user-circle"></i>
-            <div>帳號管理</div>
-        </a>
-        <ul class="menu-sub">
-            <li class="menu-item">
-                <a class="menu-link" asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Profile">
-                    <div>我的資料</div>
-                </a>
-            </li>
-        </ul>
-    </li>
-
-   
-
     <!-- 行程管理 -->
     <li class="menu-item">
         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -69,14 +51,4 @@
             <li class="menu-item"><a class="menu-link" asp-area="TravelManagement" asp-controller="Keywords" asp-action="Index"><div>關鍵字</div></a></li>
         </ul>
     </li>
-
-    
-
-    
-
-
-        @await Html.PartialAsync("_Logout")
-
-
-
 </ul>

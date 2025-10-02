@@ -1,7 +1,4 @@
-﻿using Cat_Paw_Footprint.ValidationAttributes;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿
 
 namespace Cat_Paw_Footprint.Models;
 

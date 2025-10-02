@@ -2,7 +2,7 @@
 @model Cat_Paw_Footprint.Areas.ProductManagement.ViewModel.ProductEditViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "編輯產品";
 }
 
 @if (ViewBag.ModelErrors != null)
@@ -36,14 +36,9 @@
     <!-- jQuery UI -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
-    <style>
-        label {
-            font-size: 18px;
-        }
-    </style>
 }
 
-<a asp-action="Index" class="btn btn-primary float-end">返回上頁</a>
+<a asp-action="Index" class="btn btn-outline-primary float-end">返回上頁</a>
 <h1 class="ms-3">更新行程內容</h1>
 <hr />
 
@@ -166,7 +161,7 @@
             <div class="card p-3 ms-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4><i class="fa fa-hotel"></i> 住宿資訊</h4>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#hotelModal">新增住宿</button>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#hotelModal">新增住宿</button>
                 </div>
                 <div id="selectedHotels" class="mb-3 mt-3">
                     <h6 class="text-danger">目前尚未新增住宿資訊</h6>
@@ -180,7 +175,7 @@
                 @* Card Header *@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0"><i class="fa-solid fa-train-subway"></i> 交通資訊</h4>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transportModal"><i class="fa-solid fa-square-plus"></i> 新增交通</button>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#transportModal"><i class="fa-solid fa-square-plus"></i> 新增交通</button>
                 </div>
                 @* 顯示已選內容的區塊 *@
                 <div id="selectedTransports" class="mb-3 mt-3">
@@ -207,7 +202,7 @@
                 <div class="border rounded p-2 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="mb-0"><i class="fa-solid fa-mug-saucer"></i> 早餐</h5>
-                        <button type="button" class="btn btn-sm btn-primary open-restaurant-modal" data-meal="breakfast" data-bs-toggle="modal" data-bs-target="#restaurantModal">
+                        <button type="button" class="btn btn-sm btn-outline-primary open-restaurant-modal" data-meal="breakfast" data-bs-toggle="modal" data-bs-target="#restaurantModal">
                             <i class="fa-solid fa-square-plus"></i> 新增早餐餐廳
                         </button>
                     </div>
@@ -221,7 +216,7 @@
                 <div class="border rounded p-2 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="mb-0"><i class="fa-solid fa-burger"></i> 午餐</h5>
-                        <button type="button" class="btn btn-sm btn-primary open-restaurant-modal" data-meal="lunch" data-bs-toggle="modal" data-bs-target="#restaurantModal">
+                        <button type="button" class="btn btn-sm btn-outline-primary open-restaurant-modal" data-meal="lunch" data-bs-toggle="modal" data-bs-target="#restaurantModal">
                             <i class="fa-solid fa-square-plus"></i> 新增午餐餐廳
                         </button>
                     </div>
@@ -235,7 +230,7 @@
                 <div class="border rounded p-2 mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="mb-0"><i class="fa-solid fa-bowl-food"></i> 晚餐</h5>
-                        <button type="button" class="btn btn-sm btn-primary open-restaurant-modal" data-meal="dinner" data-bs-toggle="modal" data-bs-target="#restaurantModal">
+                        <button type="button" class="btn btn-sm btn-outline-primary open-restaurant-modal" data-meal="dinner" data-bs-toggle="modal" data-bs-target="#restaurantModal">
                             <i class="fa-solid fa-square-plus"></i> 新增晚餐餐廳
                         </button>
                     </div>
@@ -252,7 +247,7 @@
             <div class="card p-3 ms-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="mb-0"><i class="fa-solid fa-archway"></i> 景點資訊</h4>
-                    <button type="button" id="addDayBtn" class="btn btn-primary">
+                    <button type="button" id="addDayBtn" class="btn btn-outline-primary">
                         <i class="fa-solid fa-square-plus"></i> 新增天數
                     </button>
                 </div>
@@ -275,7 +270,7 @@
                 <input type="hidden" name="Product.IsActive" value="false" />
                 <label class="form-check-label">上架</label>
             </div>
-            <input type="submit" value="更新資料" class="btn btn-primary" />
+            <input type="submit" value="更新資料" class="btn btn-outline-primary" />
         </div>
 
     </div>
@@ -303,8 +298,8 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" id="confirmHotels" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" id="confirmHotels" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
@@ -332,8 +327,8 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" id="confirmLocations" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" id="confirmLocations" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
@@ -361,9 +356,9 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" id="clearRestaurants" class="btn btn-danger">清空全部</button>
-                <button type="button" id="confirmRestaurants" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" id="clearRestaurants" class="btn btn-outline-danger">清空全部</button>
+                <button type="button" id="confirmRestaurants" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
@@ -391,8 +386,8 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" id="confirmTransports" class="btn btn-primary" data-bs-dismiss="modal">確認選擇</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" id="confirmTransports" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
         </div>
     </div>
@@ -686,10 +681,10 @@
                 <div class="day-block border rounded p-2 mb-3" data-day="${dayNum}">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="mb-0"><i class="fa-solid fa-sun"></i> 第 <span class="day-index">${dayNum}</span> 天</h5>
-                        <button type="button" class="btn btn-sm btn-danger remove-day ms-auto me-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-day ms-auto me-2">
                                 <i class="fa-solid fa-trash"></i> 刪除
                         </button>
-                        <button type="button" class="btn btn-sm btn-primary open-location-modal"
+                        <button type="button" class="btn btn-sm btn-outline-primary open-location-modal"
                                 data-day="${dayNum}" data-bs-toggle="modal" data-bs-target="#locationModal">
                             <i class="fa-solid fa-square-plus"></i> 新增景點
                         </button>

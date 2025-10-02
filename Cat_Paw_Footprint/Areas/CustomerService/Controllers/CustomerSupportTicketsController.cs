@@ -1,36 +1,54 @@
-﻿using Cat_Paw_Footprint.Areas.CustomerService.Services;
-using Cat_Paw_Footprint.Areas.CustomerService.ViewModel;
-using Microsoft.AspNetCore.Authorization;
-using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Cat_Paw_Footprint.Areas.CustomerService.Services; // 匯入客戶服務工單相關業務邏輯服務介面
+using Cat_Paw_Footprint.Areas.CustomerService.ViewModel; // 匯入工單 ViewModel
+using Microsoft.AspNetCore.Authorization; // 匯入身份驗證/授權相關功能
+using Cat_Paw_Footprint.Data; // 匯入資料庫 DbContext
+using Cat_Paw_Footprint.Models; // 匯入資料庫模型
+using Microsoft.AspNetCore.Mvc; // 匯入 MVC 控制器相關功能
+using Microsoft.EntityFrameworkCore; // 匯入 Entity Framework Core
 
 namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 {
+	// 設定此 Controller 屬於 CustomerService 區域
 	[Area("CustomerService")]
+	// 需員工身份驗證且符合 AreaCustomerService 授權政策
 	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaCustomerService")]
+	// 路由格式：CustomerService/[controller]/[action]
 	[Route("CustomerService/[controller]/[action]")]
 	public class CustomerSupportTicketsController : Controller
 	{
+		// 注入工單服務
 		private readonly ICustomerSupportTicketsService _service;
+		// 注入資料庫 DbContext
 		private readonly webtravel2Context _context;
 
+		// 建構式注入服務與 DbContext
 		public CustomerSupportTicketsController(ICustomerSupportTicketsService service, webtravel2Context context)
 		{
 			_service = service;
 			_context = context;
 		}
 
-		// 主頁
-		public IActionResult Index() => View();
+		/// <summary>
+		/// 主頁：顯示目前員工的所有工單
+		/// </summary>
+		public async Task<IActionResult> Index()
+		{
+			// 取得目前登入員工 ID
+			var empId = User.FindFirst("EmployeeID")?.Value;
+			// 篩選屬於此員工的工單
+			var tickets = (await _service.GetAllAsync())
+				.Where(t => t.EmployeeID?.ToString() == empId);
+			return View(tickets);
+		}
 
-		// 取得所有工單資料
-		[HttpGet]
+		/// <summary>
+		/// 取得所有工單詳細資料
+		/// GET: /CustomerService/CustomerSupportTickets/GetTickets
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> GetTickets()
 		{
+			// 使用 EF 取得工單及關聯資料
 			var tickets = await _context.CustomerSupportTickets
 				.Include(t => t.Employee)
 					.ThenInclude(e => e.EmployeeProfile)
@@ -40,10 +58,11 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				.Include(t => t.Priority)
 				.Select(t => new
 				{
-					ticketID = t.TicketID != null ? t.TicketID : 0, // 防 null
+					ticketID = t.TicketID != null ? t.TicketID : 0,
 					ticketCode = t.TicketCode ?? "",
 					customerID = t.CustomerID != null ? t.CustomerID : 0,
 					customerName = t.Customer != null && t.Customer.CustomerName != null ? t.Customer.CustomerName : "",
+					customerEmail = t.Customer != null && t.Customer.Email != null ? t.Customer.Email : "", // 顯示客戶 Email
 					employeeID = t.EmployeeID != null ? t.EmployeeID : 0,
 					employeeName = t.Employee != null && t.Employee.EmployeeProfile != null && t.Employee.EmployeeProfile.EmployeeName != null
 						? t.Employee.EmployeeProfile.EmployeeName : "",
@@ -59,10 +78,13 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				})
 				.ToListAsync();
 
-			return Json(tickets);
+			return Json(tickets); // 回傳 JSON 格式
 		}
 
-		// 取得指定工單
+		/// <summary>
+		/// 取得指定工單資料
+		/// GET: /CustomerService/CustomerSupportTickets/GetById?id={id}
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> GetById(int id)
 		{
@@ -92,12 +114,16 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			return Json(ticket);
 		}
 
-		// 新增工單（處理人員自動取目前登入者）
+		/// <summary>
+		/// 新增工單，處理人員自動取目前登入者
+		/// POST: /CustomerService/CustomerSupportTickets/CreateTicket
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> CreateTicket([FromBody] CustomerSupportTicketViewModel vm)
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
-			// 取得目前登入員工ID
+
+			// 取得目前登入員工 ID
 			var empIDStr = User.FindFirst("EmployeeID")?.Value;
 			if (string.IsNullOrEmpty(empIDStr) || !int.TryParse(empIDStr, out int employeeID))
 				return BadRequest("無法取得登入員工ID");
@@ -123,6 +149,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				TicketCode = newCode
 			};
 
+			// 呼叫 Service 新增工單
 			await _service.AddAsync(new CustomerSupportTicketViewModel
 			{
 				CustomerID = entity.CustomerID,
@@ -140,7 +167,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			// 取得新增的工單完整資料
 			var createdTicket = (await _service.GetAllAsync()).OrderByDescending(t => t.TicketID).FirstOrDefault();
 
-			// 回傳 DataTables 所需的所有欄位
+			// 回傳 DataTables 所需欄位
 			return Json(new
 			{
 				success = true,
@@ -157,16 +184,28 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			});
 		}
 
-		// 編輯工單
+		/// <summary>
+		/// 編輯工單，只允許變更狀態與優先度
+		/// POST: /CustomerService/CustomerSupportTickets/EditTicket
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> EditTicket([FromBody] CustomerSupportTicketViewModel vm)
 		{
-			if (!await _service.ExistsAsync(vm.TicketID)) return NotFound();
-			await _service.UpdateAsync(vm);
+			// 只允許修改狀態及優先度
+			var ticket = await _service.GetByIdAsync(vm.TicketID);
+			if (ticket == null) return NotFound();
+
+			ticket.StatusID = vm.StatusID;
+			ticket.PriorityID = vm.PriorityID;
+			await _service.UpdateAsync(ticket);
+
 			return Json(new { success = true });
 		}
 
-		// 刪除工單
+		/// <summary>
+		/// 刪除工單，會檢查是否有關聯 Feedback
+		/// POST: /CustomerService/CustomerSupportTickets/DeleteTicket
+		/// </summary>
 		public async Task<IActionResult> DeleteTicket([FromBody] int id)
 		{
 			if (id <= 0) return BadRequest(new { success = false, message = "工單ID不正確" });
@@ -174,7 +213,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			{
 				if (!await _service.ExistsAsync(id)) return NotFound(new { success = false, message = "工單不存在" });
 
-				// 檢查有無關聯 Feedback
+				// 檢查是否有關聯回饋資料
 				bool hasFeedback = await _context.CustomerSupportFeedback.AnyAsync(f => f.TicketID == id);
 				if (hasFeedback)
 				{
@@ -197,10 +236,16 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			}
 		}
 
-		// 取得所有下拉選單資料
+		/// <summary>
+		/// 取得所有下拉選單資料 (客戶、員工、狀態、優先度、類型)
+		/// GET: /CustomerService/CustomerSupportTickets/GetDropdowns
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> GetDropdowns()
 		{
+			// 顯示連線字串（除錯用）
+			Console.WriteLine("Using DB: " + _context.Database.GetDbConnection().ConnectionString);
+
 			var customers = await _context.CustomerProfile
 				.Select(c => new { customerID = c.CustomerID, customerName = c.CustomerName }).ToListAsync();
 
@@ -219,7 +264,10 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			return Json(new { customers, employees, statuses, priorities, types });
 		}
 
-		// 客戶 autocomplete API
+		/// <summary>
+		/// 客戶 autocomplete API
+		/// GET: /CustomerService/CustomerSupportTickets/GetCustomersAutocomplete?term={term}
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> GetCustomersAutocomplete(string term)
 		{
