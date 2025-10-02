@@ -10,7 +10,7 @@ namespace Cat_Paw_Footprint.Helpers
             public static IHtmlContent ActiveBadge(this IHtmlHelper htmlHelper, bool isActive)
             {
                 var badgeClass = isActive ? "badge bg-success" : "badge bg-warning";
-                var badgeText = isActive ? "上架中" : "下架";
+                var badgeText = isActive ? "上架" : "下架";
 
                 return new HtmlString($"<span class=\"{badgeClass}\">{badgeText}</span>");
             }

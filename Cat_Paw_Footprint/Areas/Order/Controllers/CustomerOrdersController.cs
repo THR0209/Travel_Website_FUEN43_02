@@ -1,29 +1,30 @@
 ﻿using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Cat_Paw_Footprint.Areas.Order.Services;
 
 
 namespace Cat_Paw_Footprint.Areas.Order.Controllers
 {
     [Area("Order")]
-    public class CustomerOrdersController : Controller
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaOrder")]
+	public class CustomerOrdersController : Controller
     {
-        private readonly webtravel2Context _context;
+		private readonly webtravel2Context _context;
+		private readonly IEmailSender _sender;
 
-        public CustomerOrdersController(webtravel2Context context)
-        {
-            _context = context;
-        }
+		// ✅ 同時注入 DbContext 與 EmailSender
+		public CustomerOrdersController(webtravel2Context context, IEmailSender sender)
+		{
+			_context = context;
+			_sender = sender;
+		}
 
-        // GET: Order/CustomerOrders
-        public async Task<IActionResult> Index()
+		// GET: Order/CustomerOrders
+		public async Task<IActionResult> Index()
         {
             var webtravel2Context = _context.CustomerOrders.Include(c => c.CustomerProfile).Include(c => c.CustomerProfile).Include(c => c.OrderStatus).Include(c => c.Product);
             return View(await webtravel2Context.ToListAsync());
@@ -166,6 +167,28 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
 			_context.Update(customerOrders);
 			await _context.SaveChangesAsync();
 			return RedirectToAction(nameof(Index));
+		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SendAjax([FromForm] string to, [FromForm] string subject, [FromForm] string body)
+		{
+			foreach (var key in Request.Form.Keys)
+			{
+				Console.WriteLine($"{key} = {Request.Form[key]}");
+			}
+			if (string.IsNullOrWhiteSpace(to))
+				return BadRequest(new { ok = false, error = "收件者信箱為必填" });
+
+			try
+			{
+				await _sender.SendAsync(to, subject ?? "(無主旨)", body ?? "");
+				return Ok(new { ok = true });
+			}
+			catch (System.Exception ex)
+			{
+				Console.WriteLine($"SMTP 發送錯誤: {ex}");
+				return BadRequest(new { ok = false, error = ex.Message });
+			}
 		}
 	}
 }

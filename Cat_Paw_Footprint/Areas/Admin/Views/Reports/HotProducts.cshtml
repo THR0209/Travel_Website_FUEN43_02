@@ -6,53 +6,63 @@
 
 
 
-<h1 class="d-flex justify-content-between align-items-center">
-    🔥 熱門行程排行
-    <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard" 
-       class="btn btn-outline-primary btn-sm">
-        <i class="fa-solid fa-chart-line"></i> 回到儀表板
-    </a>
-</h1>
-
-<!-- 表格 -->
-<div class="container mt-4">
-    <table class="table table-striped table-hover">
-        <thead class="table-primary">
-            <tr>
-                <th>排行</th>
-                <th>行程名稱</th>
-                <th>訂單數</th>
-                <th>瀏覽次數</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                int rank = 1;
-                foreach (var item in Model)
-                {
+<div class="card mb-4">
+    <div class="card-body">
+        <!-- 排行表格 -->
+        <div class="position-relative mb-4">
+            <h2 class="text-center mb-0">
+                🔥 熱門行程排行
+                <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard"
+                       class="btn btn-outline-primary position-absolute end-0 top-50 translate-middle-y me-2">
+                    <i class="fa-solid fa-chart-line"></i> 回到儀表板
+                </a>
+            </h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-primary">
                     <tr>
-                        <td>@rank</td>
-                        <td>@item.ProductName</td>
-                        <td>@item.OrderCount</td>
-                        <td>@item.Views</td>
+                        <th>排行</th>
+                        <th>行程名稱</th>
+                        <th>訂單數</th>
+                        <th>瀏覽次數</th>
                     </tr>
-                    rank++;
-                }
-            }
-        </tbody>
-    </table>
+                </thead>
+                <tbody>
+                    @{
+                        int rank = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@rank</td>
+                                <td>@item.ProductName</td>
+                                <td>@item.OrderCount</td>
+                                <td>@item.Views</td>
+                            </tr>
+                            rank++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<!-- 圖表 -->
-<div class="container mt-4">
-    <h4>📊 訂單數 vs 瀏覽次數</h4>
-    <canvas id="hotProductsChart"></canvas>
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row justify-content-center">
+            <div class="col-12 d-flex justify-content-center">
+                <div style="width:100%; max-width:1200px;">
+                    <canvas id="hotProductsChart" width="1100" height="600" style="max-width:100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- 行程管理按鈕 -->
-<div class="row mt-4">
+<div class="row mt-3">
     <div class="col text-center">
-        <a asp-area="ProductManagement" asp-controller="Products" asp-action="Index" class="btn btn-primary">
+        <a asp-area="ProductManagement" asp-controller="Products" asp-action="Index" class="btn btn-outline-primary">
             行程管理
         </a>
     </div>
@@ -64,60 +74,95 @@
         fetch("/Admin/Reports/GetHotProducts")
             .then(r => r.json())
             .then(data => {
-                let labels = data.map(d => d.productName || d.ProductName);  
+                let labels = data.map(d => d.productName || d.ProductName);
                 let orderCounts = data.map(d => d.orderCount || d.OrderCount);
                 let views = data.map(d => d.views || d.Views);
 
-       new Chart(document.getElementById("hotProductsChart"), {
-    type: "bar",
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: "訂單數",
-                data: orderCounts,
-                backgroundColor: "rgba(54, 162, 235, 0.7)",
-                yAxisID: "y1"   // ✅ 左邊 Y 軸
-            },
-            {
-                label: "瀏覽次數",
-                data: views,
-                backgroundColor: "rgba(255, 206, 86, 0.7)",
-                yAxisID: "y2"   // ✅ 右邊 Y 軸
-            }
-        ]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { position: "top" },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        return context.dataset.label + ": " + context.raw.toLocaleString();
+                new Chart(document.getElementById("hotProductsChart"), {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "訂單數",
+                                data: orderCounts,
+                                backgroundColor: "rgba(54, 162, 235, 0.7)",
+                                yAxisID: "y1"
+                            },
+                            {
+                                label: "瀏覽次數",
+                                data: views,
+                                backgroundColor: "rgba(255, 206, 86, 0.7)",
+                                yAxisID: "y2"
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "📊 訂單數 vs 瀏覽次數",
+                                font: {
+                                    size: 30,      // 標題字體變大
+                                    weight: "bold"
+                                },
+                                padding: { top: 18, bottom: 18 }
+                            },
+                            legend: {
+                                position: "top",
+                                labels: {
+                                    font: {
+                                        size: 16,   // 圖例字體變大
+                                        weight: "bold"
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return context.dataset.label + ": " + context.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y1: {
+                                type: "linear",
+                                position: "left",
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: "訂單數",
+                                    font: { size: 18, weight: "bold" } // Y1 標籤字體
+                                },
+                                ticks: {
+                                    font: { size: 12, weight: "bold" }
+                                }
+                            },
+                            y2: {
+                                type: "linear",
+                                position: "right",
+                                beginAtZero: true,
+                                grid: { drawOnChartArea: false },
+                                title: {
+                                    display: true,
+                                    text: "瀏覽次數",
+                                    font: { size: 18, weight: "bold" } // Y2 標籤字體
+                                },
+                                ticks: {
+                                    font: { size: 12, weight: "bold" }
+                                }
+                            },
+                            x: {
+                                stacked: false,
+                                ticks: {
+                                    font: { size: 16, weight: "bold" }
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        },
-        scales: {
-            y1: {
-                type: "linear",
-                position: "left",
-                beginAtZero: true,
-                title: { display: true, text: "訂單數" }
-            },
-            y2: {
-                type: "linear",
-                position: "right",
-                beginAtZero: true,
-                grid: { drawOnChartArea: false }, // ✅ 避免格線重疊
-                title: { display: true, text: "瀏覽次數" }
-            },
-            x: { stacked: false }
-        }
-    }
-});
-
+                });
             })
             .catch(err => console.error("載入熱門行程錯誤:", err));
     </script>

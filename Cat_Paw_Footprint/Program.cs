@@ -1,39 +1,41 @@
+using Cat_Paw_Footprint.Areas.CustomerService;
 using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
 using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
+using Cat_Paw_Footprint.Areas.Order.Models;
+using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Areas.Vendor.Repositories;
 using Cat_Paw_Footprint.Areas.Vendor.Services;
 using Cat_Paw_Footprint.Data;
-using Cat_Paw_Footprint.Models;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Areas.Order.Models;
-using Cat_Paw_Footprint.Areas.Order.Services;
 
 namespace Cat_Paw_Footprint
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
 			// Add services to the container.
 			builder.Services.AddDbContext<EmployeeDbContext>(options =>
-	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+				options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
 
 			builder.Services.AddDbContext<webtravel2Context>(options =>
-	            options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
+				options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
 
 			var connectionString = builder.Configuration.GetConnectionString("EmployeeConnection") ?? throw new InvalidOperationException("Connection string 'EmployeeConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+			builder.Services.AddDbContext<ApplicationDbContext>(options =>
+				options.UseSqlServer(connectionString));
+			builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 			builder.Services
-				.AddIdentity<IdentityUser, IdentityRole>(opt => {
-					opt.SignIn.RequireConfirmedAccount = false; // ï¿½ï¿½ï¿½Õ¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Hï¿½cï¿½ï¿½ï¿½ï¿½
+				.AddIdentity<IdentityUser, IdentityRole>(opt =>
+				{
+					opt.SignIn.RequireConfirmedAccount = false;
 					opt.Password.RequiredLength = 6;
 				})
 				.AddEntityFrameworkStores<ApplicationDbContext>()
@@ -41,27 +43,28 @@ namespace Cat_Paw_Footprint
 				.AddDefaultUI();
 			builder.Services.AddAuthentication(options =>
 			{
-				options.DefaultScheme = "VendorAuth"; // ï¿½wï¿½]ï¿½Ï¥ï¿½ VendorAuth
+				options.DefaultScheme = "VendorAuth"; 
 				options.DefaultChallengeScheme = "VendorAuth";
 			})
-	.AddCookie("VendorAuth", options =>
-	{
-		options.Cookie.Name = ".CatPaw.Vendor.Auth";
-		options.LoginPath = "/Vendor/VendorHome/Login";   // ï¿½tï¿½Óµnï¿½Jï¿½ï¿½
-		options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
-	})
-	.AddCookie("CustomerAuth", options =>
-	{
-		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/Customer/Account/Login"; // ï¿½È¤ï¿½nï¿½Jï¿½ï¿½
-		options.AccessDeniedPath = "/Customer/Account/Denied";
-	}).AddCookie("EmployeeAuth", options =>
-	{
-		options.Cookie.Name = ".CatPaw.Employee.Auth";
-		options.LoginPath = "/Employee/EmployeeAuth/Login";       // ï¿½ï¿½ï¿½uï¿½nï¿½Jï¿½ï¿½
-		options.AccessDeniedPath = "/Home/Index";
-	});
+			.AddCookie("VendorAuth", options =>
+			{
+				options.Cookie.Name = ".CatPaw.Vendor.Auth";
+				options.LoginPath = "/Vendor/VendorHome/Login";   // «Dµn¤J®É±j¨î¸õÂà
+				options.AccessDeniedPath = "/Vendor/VendorHome/Denied";// «DÅv­­®É±j¨î¸õÂà
+			})
+			.AddCookie("CustomerAuth", options =>
+			{
+				options.Cookie.Name = ".CatPaw.Customer.Auth";
+				options.LoginPath = "/Customer/Account/Login"; // «Dµn¤J®É±j¨î¸õÂà
+				options.AccessDeniedPath = "/Customer/Account/Denied";// «DÅv­­®É±j¨î¸õÂà
+			}).AddCookie("EmployeeAuth", options =>
+			{
+				options.Cookie.Name = ".CatPaw.Employee.Auth";
+				options.LoginPath = "/Employee/EmployeeAuth/Login";// «Dµn¤J®É±j¨î¸õÂà
+				options.AccessDeniedPath = "/Home/Index";
+			});
 
+			#region AccessDeniedPathÅv­­¶i¤J­­¨î
 			builder.Services.AddAuthorization(options =>
 			{
 				options.AddPolicy("Emp.AdminOnly", policy =>
@@ -69,46 +72,47 @@ namespace Cat_Paw_Footprint
 						  .RequireAuthenticatedUser()
 						  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
 
-				options.AddPolicy("AreaAdmin", policy =>//ï¿½ï¿½ï¿½ï¿½ ï¿½Ì·sï¿½ï¿½ï¿½ï¿½ ï¿½uï¿½fï¿½ï¿½ï¿½ï¿½
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
+				options.AddPolicy("AreaAdmin", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
 
-				options.AddPolicy("AreaCouponManagement", policy =>//ï¿½uï¿½fï¿½ï¿½
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "Sales"));
+				options.AddPolicy("AreaCouponManagement", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "Sales"));
 
-				options.AddPolicy("AreaCustomerService", policy =>//ï¿½ÈªA
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "CustomerService", "SuperAdmin"));
+				options.AddPolicy("AreaCustomerService", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "CustomerService", "SuperAdmin"));
 
-				options.AddPolicy("AreaOrder", policy =>//ï¿½qï¿½ï¿½
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
+				options.AddPolicy("AreaOrder", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
 
 
-				options.AddPolicy("AreaProductManagement", policy =>//ï¿½ï¿½ï¿½~
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "TourGuide"));
+				options.AddPolicy("AreaProductManagement", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "TourGuide"));
 
-				options.AddPolicy("AreaTravelManagement", policy =>//ï¿½È¹C
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
-			});
+				options.AddPolicy("AreaTravelManagement", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
+						});
+			#endregion
 
 			builder.Services.AddSession(options =>
 			{
-				options.Cookie.Name = ".CatPaw.Employee.Session"; // ï¿½Û­qï¿½ï¿½ï¿½u Session ï¿½Wï¿½ï¿½
-				options.IdleTimeout = TimeSpan.FromHours(9);   // ï¿½Û­qï¿½Oï¿½É®É¶ï¿½
-				options.Cookie.HttpOnly = true;                   // ï¿½ï¿½ï¿½ï¿½ JS ï¿½sï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ XSS
-				options.Cookie.IsEssential = true;                // ï¿½×§Kï¿½Qï¿½sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				options.Cookie.Name = ".CatPaw.Employee.Session"; 
+				options.IdleTimeout = TimeSpan.FromHours(9);
+				options.Cookie.HttpOnly = true;                   
+				options.Cookie.IsEssential = true;                
 			});
-
+			#region µù¥U³s½u¼h»PÅÞ¿è¼h
 			builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 			builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 			builder.Services.AddScoped<ICustomerAdminRepository, CustomerAdminRepository>();
@@ -125,6 +129,11 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
+			builder.Services.AddScoped<ICustomerSupportMessagesRepository, CustomerSupportMessagesRepository>();
+			builder.Services.AddScoped<ICustomerSupportMessagesService, CustomerSupportMessagesService>();
+			builder.Services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
+			builder.Services.AddScoped<IEmployeeMiniRepository, EmployeeMiniRepository>();
+			#endregion
 
 			builder.Services.AddHttpContextAccessor();
 
@@ -134,25 +143,28 @@ namespace Cat_Paw_Footprint
 			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
 
+			builder.Services.AddSignalR();
+
 			var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseMigrationsEndPoint();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+			// Configure the HTTP request pipeline.
+			if (app.Environment.IsDevelopment())
+			{
+				app.UseMigrationsEndPoint();
+			}
+			else
+			{
+				app.UseExceptionHandler("/Home/Error");
+				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+				app.UseHsts();
+			}
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
 
-            app.UseRouting();
-			app.UseSession(); // ï¿½Ò¥ï¿½ Session ï¿½ï¿½ï¿½ï¿½ï¿½nï¿½ï¿½
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
+			app.UseMiddleware<IgnoreRouteMiddleware>(); //¨Ï¥Î¦Û­q¤¤¤¶³nÅé¡A©¿²¤¯S©w¸ô¥Ñ
+			app.UseRouting();
+			app.UseSession();
 			app.Use(async (context, next) =>
 			{
 				var path = context.Request.Path.Value ?? "";
@@ -178,17 +190,18 @@ namespace Cat_Paw_Footprint
 
 				await next();
 			});
-			app.UseAuthentication();// ï¿½b Authorization ï¿½ï¿½ï¿½e
+			app.UseAuthentication();
 			app.UseAuthorization();
 			app.MapControllerRoute(
 				name: "areas",
 				pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 			app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();
+				name: "default",
+				pattern: "{controller=Home}/{action=Index}/{id?}");
+			app.MapRazorPages();
+			app.MapHub<TicketChatHub>("/ticketChatHub");
 
-            app.Run();
+			app.Run();
 		}
-    }
+	}
 }

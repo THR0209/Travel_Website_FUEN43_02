@@ -10,14 +10,16 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 	public class FAQService : IFAQService
 	{
 		private readonly IFAQRepository _repository;
+
 		/// <summary>
 		/// 透過 DI 注入 FAQ Repository
 		/// </summary>
 		public FAQService(IFAQRepository repository) => _repository = repository;
 
 		// ===== FAQ CRUD =====
+
 		/// <summary>
-		/// 透過 DI 注入 FAQ Repository
+		/// 取得所有 FAQ，轉成 ViewModel 回傳
 		/// </summary>
 		public async Task<List<FAQViewModel>> GetAllFAQsAsync()
 		{
@@ -89,6 +91,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 
 			await _repository.UpdateFAQAsync(existing); // 更新資料庫
 		}
+
 		/// <summary>
 		/// 刪除 FAQ
 		/// </summary>

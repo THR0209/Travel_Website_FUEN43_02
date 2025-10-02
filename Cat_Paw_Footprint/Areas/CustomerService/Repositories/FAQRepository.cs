@@ -5,11 +5,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 {
 	/// <summary>
-	/// FAQ 與 FAQ 分類資料存取層，與 DB 直接互動
+	/// FAQ 與 FAQ 分類資料存取層，直接與資料庫互動
 	/// </summary>
 	public class FAQRepository : IFAQRepository
 	{
 		private readonly webtravel2Context _context;
+		
 		/// <summary>
 		/// 透過 DI 注入 DbContext
 		/// </summary>
@@ -18,7 +19,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 		// ===== FAQ CRUD =====
 
 		/// <summary>
-		/// 透過 DI 注入 DbContext
+		/// 取得所有 FAQ 資料，包含分類
 		/// </summary>
 		public async Task<List<FAQs>> GetAllFAQsAsync()
 			=> await _context.FAQs.Include(f => f.Category).ToListAsync();
@@ -77,7 +78,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 		/// <summary>
 		/// 依據分類 ID 取得單筆分類
 		/// </summary>
-
 		public async Task<FAQCategorys?> GetCategoryByIdAsync(int id)
 			=> await _context.FAQCategorys.FindAsync(id);
 

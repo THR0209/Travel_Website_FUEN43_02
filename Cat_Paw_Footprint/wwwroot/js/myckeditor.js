@@ -327,9 +327,23 @@ const editorConfig = {
 	}
 };
 
-ClassicEditor.create(document.querySelector('#editor'), editorConfig);
+ClassicEditor.create(document.querySelector('#editor'), editorConfig)
+	.then(editor => {
+		window.ckeditor = editor; // 讓全域可用
+	})
+	.catch(error => {
+		console.error('CKEditor 啟動失敗', error);
+	});
 
-ClassicEditor.create(document.querySelector('#editor2'), editorConfig);
+if (document.querySelector('#editor2')) {
+	ClassicEditor.create(document.querySelector('#editor2'), editorConfig)
+		.then(editor => {
+			window.ckeditor2 = editor;
+		})
+		.catch(error => {
+			console.error('CKEditor2 啟動失敗', error);
+		});
+}
 
 // 初始化 CKEditor
 //ClassicEditor

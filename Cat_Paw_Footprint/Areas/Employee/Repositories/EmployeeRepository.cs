@@ -13,14 +13,14 @@ namespace Cat_Paw_Footprint.Areas.Employee.Repositories
 		{
 			_db = db;
 		}
-		
+
 
 		public async Task<IEnumerable<EmployeeViewModel>> GetAllAsync()// 取得所有員工（含角色 & 個資）
 		{
 			return await _db.Employees
-			.Select(e => new EmployeeViewModel 
+			.Select(e => new EmployeeViewModel
 			{
-			EmployeeID = e.EmployeeID,//員工編號
+				EmployeeID = e.EmployeeID,//員工編號
 				EmployeeName = e.EmployeeProfile.EmployeeName,//員工姓名
 				Account = e.Account,//帳號
 				RoleID = e.RoleID,//角色代號
@@ -37,7 +37,7 @@ namespace Cat_Paw_Footprint.Areas.Employee.Repositories
 			}).ToListAsync();// 將查詢結果轉換為清單並回傳
 
 		}
-		
+
 
 		public async Task<EmployeeViewModel?> GetByIdAsync(int id)// 依 ID 取得單一員工（含角色 & 個資）
 		{

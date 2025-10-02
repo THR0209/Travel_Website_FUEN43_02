@@ -13,8 +13,8 @@
                 </div>
                 <div class="card-body">
                     <dl class="row">
-                        <dt class="col-sm-3 fw-semibold mt-3">優惠券折扣代碼</dt>
-                        <dd class="col-sm-9">@Html.DisplayFor(model => model.DisCountCode)</dd>
+                        <dt class="col-sm-3 fw-semibold mt-3 mb-2">優惠券折扣代碼</dt>
+                        <dd class="col-sm-9 mt-3 mb-2">@Html.DisplayFor(model => model.DisCountCode)</dd>
 
                         <dt class="col-sm-3 fw-semibold">描述</dt>
                         <dd class="col-sm-9">@Html.DisplayFor(model => model.CouponDesc)</dd>
@@ -54,10 +54,10 @@
                     </dl>
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a asp-action="Index" class="btn btn-secondary">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
                             <i class="fa-solid fa-arrow-left"></i> 返回清單
                         </a>
-                        <a asp-action="Edit" asp-route-id="@Model?.CouponID" class="btn btn-info">
+                        <a asp-action="Edit" asp-route-id="@Model?.CouponID" class="btn btn-outline-info">
                             <i class="fa-solid fa-pen-to-square"></i> 編輯
                         </a>
                     </div>

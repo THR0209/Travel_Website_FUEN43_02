@@ -5,18 +5,6 @@
     {
       "library": "font-awesome@7.0.1",
       "destination": "wwwroot/lib/font-awesome/"
-    },
-    {
-      "library": "datatables@1.10.21",
-      "destination": "wwwroot/lib/datatables/"
-    },
-    {
-      "library": "ckeditor5@44.3.0",
-      "destination": "wwwroot/lib/ckeditor5/"
-    },
-    {
-      "library": "Chart.js@4.5.0",
-      "destination": "wwwroot/Chart.js/"
     }
   ]
 }

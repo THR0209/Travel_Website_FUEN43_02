@@ -4,11 +4,8 @@ using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis.Scripting;
 using System.Security.Claims;
 
 namespace Cat_Paw_Footprint.Areas.Employee.Controllers
@@ -329,6 +326,31 @@ namespace Cat_Paw_Footprint.Areas.Employee.Controllers
 			{ return Json(new { ok = false, message = "更新失敗" }); }
 		}
 
+		// 【額外建議】動態取得個人大頭照（for Layout 側邊欄/頭像）
+		[HttpGet]
+		[AllowAnonymous]
+		public IActionResult ProfilePhoto(string id)
+		{
+			// id通常是EmployeeID
+			if (string.IsNullOrEmpty(id)) return NotFound();
+			if (!int.TryParse(id, out int empId)) return NotFound();
+
+			// 取得個人資料
+			var profile = _context.EmployeeProfile.FirstOrDefault(p => p.EmployeeID == empId);
+			var photo = profile?.Photo;
+			if (photo == null || photo.Length == 0)
+			{
+				// 若無照片，回傳預設大頭貼
+				var defaultPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/NoImage.png");
+				var bytes = System.IO.File.ReadAllBytes(defaultPath);
+				return File(bytes, "image/png");
+			}
+			else
+			{
+				// 若有照片，回傳照片資料
+				return File(photo, "image/jpeg");
+			}
+		}
 		#endregion
 
 

@@ -53,7 +53,7 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "景點代碼")]
 		public string? LocationCode { get; set; }
 
-		[Display(Name = "是否啟用")]
+		[Display(Name = "狀態")]
 		public bool? IsActive { get; set; }
 
 		[NotMapped] // 不會影響資料庫

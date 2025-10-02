@@ -3,55 +3,55 @@
     ViewData["Title"] = "客服分析報表";
 }
 
-
-
-<h1 class="d-flex justify-content-between align-items-center">
-    🎧 客服分析報表
-    <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard" 
-       class="btn btn-outline-primary btn-sm">
-        <i class="fa-solid fa-chart-line"></i> 回到儀表板
-    </a>
-</h1>
-
-<div class="container mt-4">
-    <table class="table table-bordered table-hover">
-        <thead class="table-info">
-            <tr>
-                <th>案件狀態</th>
-                <th>案件數量</th>
-            </tr>
-        </thead>
-       <tbody>
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>
-                @{
-                    var statusName = item.StatusName?.ToString();
-                    string displayName = statusName switch
-                    {
-                        "1" => "待處理",
-                        "2" => "已完成",
-                        _   => "其他"
-                    };
-                }
-                @displayName
-            </td>
-            <td>@item.Count</td>
-        </tr>
-    }
-</tbody>
-
-    </table>
-</div>
-
-<div class="row">
-    <div class="col-md-8 offset-md-2">
-        <div class="card shadow-sm p-3 rounded-4">
-              <h5 class="card-title text-center">案件狀態分佈</h5>
-                <div class="card-body">
-              
-                <canvas id="ticketChart" style="max-height:400px;"></canvas>
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-white pb-0 position-relative">
+        <h2 class="text-center mb-5">🎧 客服分析報表</h2>
+        <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard"
+           class="btn btn-outline-primary position-absolute end-0 top-50 translate-middle-y me-2">
+            <i class="fa-solid fa-chart-line"></i> 回到儀表板
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-12">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr>
+                            <th class="fs-5">案件狀態</th>
+                            <th class="fs-5">案件數量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @{
+                                        var statusName = item.StatusName?.ToString();
+                                        string displayName = statusName switch
+                                        {
+                                            "1" => "待處理",
+                                            "2" => "已完成",
+                                            _ => "其他"
+                                        };
+                                    }
+                                    @displayName
+                                </td>
+                                <td>@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-12">
+                <div class="card shadow-sm p-3 rounded-4">
+                    <h5 class="card-title text-center">案件狀態分佈</h5>
+                    <div class="card-body">
+                        <canvas id="ticketChart" style="max-height:400px;"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

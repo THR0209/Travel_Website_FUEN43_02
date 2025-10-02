@@ -24,10 +24,16 @@
   <ItemGroup>
     <Folder Include="Areas\CouponManagement\Data\" />
     <Folder Include="Areas\CouponManagement\ViewModel\" />
+    <Folder Include="Areas\CustomersArea\Data\" />
+    <Folder Include="Areas\CustomersArea\Models\" />
+    <Folder Include="Areas\CustomersArea\Services\" />
+    <Folder Include="Areas\CustomersArea\Repositories\" />
+    <Folder Include="Areas\CustomersArea\Views\" />
     <Folder Include="Areas\ProductManagement\Data\" />
     <Folder Include="Areas\ProductManagement\ViewModel\" />
     <Folder Include="Areas\TravelManagement\Data\" />
     <Folder Include="Areas\TravelManagement\Views\Shared\" />
+    <Folder Include="Views\Shared\test\" />
   </ItemGroup>
 
   <ItemGroup>
