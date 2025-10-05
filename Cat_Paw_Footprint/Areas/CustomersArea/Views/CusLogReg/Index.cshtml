@@ -1,0 +1,21 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<h2>客戶首頁</h2>
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <p>目前登入帳號：@User.Identity.Name</p>
+
+    <form asp-action="Logout" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-danger">登出</button>
+    </form>
+}
+else
+{
+    <p>尚未登入</p>
+    <a asp-action="Login" asp-controller="CusLogReg" asp-area="CustomersArea" class="btn btn-outline-primary">前往登入</a>
+}
