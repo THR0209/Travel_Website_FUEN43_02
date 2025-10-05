@@ -1,3 +1,4 @@
+using Cat_Paw_Footprint.Areas.CustomersArea.Repositories;
 using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
 using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
@@ -6,6 +7,7 @@ using Cat_Paw_Footprint.Areas.Order.Models;
 using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Areas.Vendor.Repositories;
 using Cat_Paw_Footprint.Areas.Vendor.Services;
+using Cat_Paw_Footprint.Areas.CustomersArea.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using ClosedXML.Parser;
@@ -70,7 +72,12 @@ namespace Cat_Paw_Footprint
 
 			builder.Services
 				.AddIdentity<IdentityUser, IdentityRole>(opt => {
-					opt.SignIn.RequireConfirmedAccount = false; // ���ե������H�c����
+					opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);//鎖定5分鐘
+					opt.Lockout.MaxFailedAccessAttempts = 5;//5次錯誤就鎖定
+					opt.Lockout.AllowedForNewUsers = true;//新用戶也鎖定
+
+
+					opt.SignIn.RequireConfirmedAccount = false; // 註冊不需驗證
 					opt.Password.RequiredLength = 6;
 				})
 				.AddEntityFrameworkStores<ApplicationDbContext>()
@@ -90,8 +97,8 @@ namespace Cat_Paw_Footprint
 	.AddCookie("CustomerAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/Customer/Account/Login"; // 非登入時強制跳轉
-		options.AccessDeniedPath = "/Customer/Account/Denied";// 非權限時強制跳轉
+		options.LoginPath = "/CustomersArea/Account/Login"; // 非登入時強制跳轉
+		options.AccessDeniedPath = "/CustomersArea/Account/Index";// 非權限時強制跳轉
 	}).AddCookie("EmployeeAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Employee.Auth";
@@ -163,6 +170,8 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
+			builder.Services.AddScoped <ICusLogRegRepository, CusLogRegRepository>();
+			builder.Services.AddScoped<ICusLogRegService, CusLogRegService>();
 			#endregion
 
 			builder.Services.AddHttpContextAccessor();
