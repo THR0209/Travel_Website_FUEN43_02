@@ -97,8 +97,8 @@ namespace Cat_Paw_Footprint
 	.AddCookie("CustomerAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/CustomersArea/Account/Login"; // 非登入時強制跳轉
-		options.AccessDeniedPath = "/CustomersArea/Account/Index";// 非權限時強制跳轉
+		options.LoginPath = "/CustomersArea/CusLogReg/Login"; // 非登入時強制跳轉
+		options.AccessDeniedPath = "/CustomersArea/CusLogReg/Index";// 非權限時強制跳轉
 	}).AddCookie("EmployeeAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Employee.Auth";
