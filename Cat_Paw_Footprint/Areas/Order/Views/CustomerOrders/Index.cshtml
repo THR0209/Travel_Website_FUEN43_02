@@ -1,785 +1,468 @@
-﻿@using System
-@model IEnumerable<Cat_Paw_Footprint.Models.CustomerOrders>
-
-@{
-    ViewData["Title"] = "訂單總覽";
+﻿@{
+    ViewData["Title"] = "訂單顯示";
 }
 
+<div id="app" class="container py-4" v-cloak>
+    <h2 class="mb-3">行程 / 地點</h2>
 
-<div class="card mb-4">
-    <div class="card-body">
-        <div class="mb-4 text-center">
-            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
-                <i class="fa-solid fa-file-invoice-dollar me-2"></i>訂單總覽
-            </span>
-            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+    <div class="d-flex gap-2 align-items-center mb-3">
+        <input v-model="q" class="form-control" placeholder="搜尋：商品 / 訂單 / 客戶">
+        <button class="btn btn-outline-secondary" v-on:click ="q=''">清除</button>
+        <div class="btn-group ms-auto">
+            <button class="btn btn-outline-primary" :class="{active:view==='card'}" v-on:click="switchToCard">卡片</button>
+            <button class="btn btn-outline-primary" :class="{active:view==='table'}" v-on:click="switchToTable">表格</button>
         </div>
-        <!-- 操作區：搜尋、匯出、視圖切換 -->
-        <div class="row g-2 align-items-center mb-3">
-            <!-- 搜尋區 -->
-            <div class="col-md-5 col-12">
-                <div class="input-group">
-                    <input id="globalSearch" type="search" class="form-control" placeholder="搜尋：訂單編號・客戶・商品">
-                    <button id="btnClearSearch" type="button" class="btn btn-outline-secondary">清除</button>
-                </div>
-                <small id="searchResultHint" class="text-muted"></small>
-            </div>
-            <!-- 匯出區 -->
-            <div class="col-md-5 col-12">
-                <form method="get" action="@Url.Action("Export", "CustomerOrders", new { area = "Order" })" class="row gx-2 align-items-end">
-                    <div class="col-auto">
-                        <label class="form-label mb-1">開始日期</label>
-                        <input type="date" name="start" class="form-control" />
+    </div>
+    <div class="row g-2 align-items-end mb-2" v-if="view==='table'">
+        <div class="col-auto">
+            <label class="form-label mb-1">排序欄位</label>
+            <select class="form-select form-select-sm" v-model="sortBy">
+                <option value="createTime">建立時間</option>
+                <option value="totalAmount">總金額</option>
+                <option value="customerName">客戶</option>
+                <option value="status">狀態</option>
+                <option value="orderCode">訂單編號</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">順序</label>
+            <select class="form-select form-select-sm" v-model="sortDir">
+                <option value="desc">↓</option>
+                <option value="asc">↑</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">起日</label>
+            <input type="date" class="form-control form-control-sm" v-model="filterStart">
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">迄日</label>
+            <input type="date" class="form-control form-control-sm" v-model="filterEnd">
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">狀態</label>
+            <select class="form-select form-select-sm" v-model="filterStatus">
+                <option value="">全部</option>
+                <option value="已付款">已付款</option>
+                <option value="未付款">未付款</option>
+                <option value="已取消">已取消</option>
+                <option value="錯誤">錯誤</option>
+            </select>
+        </div>
+    </div>
+    <!-- 卡片 -->
+    <div v-if="view==='card'" class="row g-3">
+        <div v-for="p in filteredProducts" :key="p.productId" class="col-12 col-sm-6 col-md-4 col-xl-3">
+            <div class="card h-100 shadow-sm product-card">
+                <img :src="p.imageUrl" class="card-img-top" :alt="p.productName" style="height:180px;object-fit:cover">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">{{ p.productName || ('商品 ' + p.productId) }}</h5>
+                        <span class="badge text-bg-light">{{ p.count }} 筆</span>
                     </div>
-                    <div class="col-auto">
-                        <label class="form-label mb-1">結束日期</label>
-                        <input type="date" name="end" class="form-control" />
-                    </div>
-                    <div class="col-auto">
-                        <button type="submit" class="btn btn-outline-success">下載 Excel</button>
-                    </div>
-                    <div class="col-auto">
-                        <small class="text-muted">（不填表示不限制）</small>
-                    </div>
-                </form>
-            </div>
-            <!-- 視圖切換 -->
-            <div class="col-md-2 col-12 text-end">
-                <div class="btn-group" role="group" aria-label="view switch">
-                    <button id="btnViewCard" type="button" class="btn btn-outline-secondary">圖卡</button>
-                    <button id="btnViewTable" type="button" class="btn btn-outline-secondary">表單</button>
+                    <button class="btn btn-primary mt-auto" v-on:click ="openOrders(p)">查看訂單</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<style>
-    /* 排版相關調整： */
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 500;
-    }
 
-    .product-card {
-        min-width: 220px;
-    }
-
-    .table th, .table td {
-        vertical-align: middle;
-    }
-
-    .th-sort {
-        cursor: pointer;
-        user-select: none;
-    }
-
-        .th-sort[aria-sort="ascending"]::after {
-            content: " ▲";
-            font-size: .8em;
-        }
-
-        .th-sort[aria-sort="descending"]::after {
-            content: " ▼";
-            font-size: .8em;
-        }
-
-    .card-img-top {
-        height: 140px !important;
-    }
-</style>
-@{
-    var groups = Model
-                .Where(o => o.ProductID != 0)
-                .GroupBy(o => o.ProductID)
-                .Select(g => new
-                {
-                    ProductID = g.Key,
-                    Name = g.First().Product?.ProductName ?? $"商品 {g.Key}",                     
-                    ImageUrl = g.First().Product?.ProductImage != null ? "data:image/png;base64," + Convert.ToBase64String(g.First().Product.ProductImage) : $"https://placehold.co/600x400?text=Noimage",
-    OrderCount = g.Count()
-        })
-        .OrderBy(x => x.ProductID)
-        .ToList();    
-}
-
-@if (!groups.Any())
-{
-    <div class="alert alert-info">目前尚無訂單資料；請先建立商品並新增訂單。</div>
-}
-else
-{
-    <div class="card">
-         <div class="card-body">
-            <!-- 主內容區：卡片/表格切換 -->
-            <div class="row">
-                <!-- 卡片區 -->
-                <div id="viewCards" class="col-12 @(groups.Any() ? "" : "d-none")">
-                    <div class="row g-3">
-                        @foreach (var p in groups)
-                        {
-                            <div class="col-12 col-sm-6 col-md-4 col-xl-3 product-card" data-productname="@p.Name">
-                                <div class="card h-100 shadow-sm">
-                                    @if (p.ImageUrl == $"https://placehold.co/600x400?text=Noimage")
-                                    {<img src="~/images/NoImage.png" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:contain">}
-                                    else
-                                    {<img src="@p.ImageUrl" class="card-img-top" alt="@p.Name" style="height:180px;object-fit:cover">}   
-                                    <div class="card-body d-flex flex-column">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <h5 class="card-title mb-0">@p.Name</h5>
-                                            <span class="badge text-bg-light">@($"{p.OrderCount} 筆")</span>
-                                        </div>
-                                        <button type="button"
-                                                class="btn btn-outline-primary mt-auto btn-open-orders"
-                                                data-productid="@p.ProductID"
-                                                data-productname="@p.Name"									
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#ordersModal">
-                                            查看訂單
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        }
+    <!-- 表格（所有訂單）-->
+    <div v-else class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th v-on:click="setSort('orderCode')" role="button" style="cursor:pointer">訂單編號<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('totalAmount')" role="button" style="cursor:pointer">總金額<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('createTime')" role="button" style="cursor:pointer">建立時間<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('customerName')" role="button" style="cursor:pointer">客戶<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('status')" role="button" style="cursor:pointer">狀態 <small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th style="width:140px">操作</th>
+                </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+                <tr v-for="o in tableOrders" :key="o.id">
+                    <td class="font-monospace text-center">{{ o.orderCode }}</td>
+                    <td class="text-center">NT$ {{ (o.totalAmount||0).toLocaleString() }}</td>
+                    <td class="text-center">{{ fmt(o.createTime) }}</td>
+                    <td class="text-center">{{ o.customerName }}</td>
+                    <td class="text-center"><span :class="['badge', statusClass(o.statusText)]">{{ o.statusText }}</span></td>
+                    <td class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary" v-on:click ="openEdit(o.id)">編輯</button>
+                        <button class="btn btn-sm btn-success" v-on:click ="openMail(o.id)">寄信</button>
+                    </td>
+                </tr>
+                <tr v-if="!loadingOrders && filteredOrders.length===0">
+                    <td colspan="6" class="text-center text-muted py-4">尚無資料</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 訂單清單 Modal（點卡片後顯示該商品的訂單）-->
+    <div class="modal fade" id="ordersModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">訂單 — {{ currentProduct?.productName }}</h5>
+                        <small class="text-muted">共 {{ orders.length }} 筆</small>
                     </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <!-- 表格區 -->
-                <div id="viewTable" class="col-12 d-none">
-                    <div class="table-responsive">
-                        <table id="ordersTable" class="table table-hover align-middle">
+                <div class="modal-body">
+                    <div v-if="loadingOrders" class="text-center text-muted py-4">載入中…</div>
+                    <div v-else class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
                             <thead class="table-light">
-                                <tr class="text-center">
-                                    <th data-sort="ordercode">訂單編號</th>
-                                    <th data-sort="totalamount">總金額</th>
-                                    <th data-sort="createtime">建立時間</th>
-                                    <th data-sort="updatetime">更新時間</th>
-                                    <th data-sort="customer" style="width:100px">客戶</th>
-                                    <th data-sort="status">狀態</th>
-                                    <th data-sort="product">商品</th>
-                                    <th style="width:160px">操作</th>
+                                <tr>
+                                    <th>訂單編號</th>
+                                    <th>總金額</th>
+                                    <th>建立時間</th>
+                                    <th>客戶</th>
+                                    <th>狀態</th>
+                                    <th style="width:140px">操作</th>
                                 </tr>
                             </thead>
-                            <tbody id="ordersTableBody">
-                                @foreach (var o in Model.OrderByDescending(x => x.CreateTime))
-                                {						
-                                    var orderCode = "ORD-" + (o.CreateTime.HasValue ? o.CreateTime.Value.ToString("yyyyMMdd-HHmmss") : "NA") + "-" + o.OrderID;
-                                    var statusText = o.OrderStatus?.StatusDesc ?? "";
-                                    var statusClass = statusText == "已付款" ? "bg-success"
-                                                    : statusText == "未付款" ? "bg-warning"
-                                                    : statusText == "已取消" ? "bg-secondary"
-                                                    : "bg-danger";
-                                    var custName = o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString();
-                                    var prodName = o.Product?.ProductName ?? o.ProductID.ToString();
-                                    var amt = o.TotalAmount ?? 0;
-                                    var ct = o.CreateTime?.ToString("s") ?? "";  
-                                    var ut = o.UpdateTime?.ToString("s") ?? "";
-                                    <tr class="text-center"
-                                        data-id="@o.OrderID"
-                                        data-ordercode="@orderCode"
-                                        data-customer="@custName"
-                                        data-product="@prodName"
-                                        data-status="@statusText"
-                                        data-amount="@amt"
-                                        data-createtime="@ct"
-                                        data-updatetime="@ut">
-                                        <td class="font-monospace">@orderCode</td>
-                                        <td class="text-start">@($"NT$ {(o.TotalAmount ?? 0):N0}")</td>
-                                        <td>@o.CreateTime?.ToString("yyyy/MM/dd HH:mm")</td>
-                                        <td>@o.UpdateTime?.ToString("yyyy/MM/dd HH:mm")</td>
-                                        <td>@(o.CustomerProfile?.CustomerName ?? o.CustomerID.ToString())</td>
-                                        <td><span class="badge @statusClass">@statusText</span></td>
-                                        <td>@(o.Product?.ProductName ?? o.ProductID.ToString())</td>
-                                        <td>
-                                            <button type="button" class="btn btn-outline-primary btn-action" data-action="edit" data-id="@o.OrderID"><i class="fa-solid fa-pen-to-square"></i>編輯</button>
-                                            <button type="button" class="btn btn-outline-success btn-mail" data-id="@o.OrderID" data-email="@(o.CustomerProfile?.Email ?? "")"><i class="fa-solid fa-paper-plane"></i>寄信</button>
-                                        </td>
-                                    </tr>
-                                }
+                            <tbody id="m_tbody">
+                                <tr v-for="o in tableOrders" :key="o.id">
+                                    <td class="font-monospace text-center">{{ o.orderCode }}</td>
+                                    <td class="text-center">NT$ {{ (o.totalAmount||0).toLocaleString() }}</td>
+                                    <td class="text-center">{{ fmt(o.createTime) }}</td>
+                                    <td class="text-center">{{ o.customerName ?? o.customerId }}</td>
+                                    <td class="text-center"><span :class="['badge', statusClass(o.status)]">{{ o.status }}</span></td>
+                                    <td class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-primary" v-on:click="openEdit(o.id)">編輯</button>
+                                        <button class="btn btn-sm btn-success" v-on:click="openMail(o.id)">寄信</button>
+                                    </td>
+                                </tr>
+
+                                <tr v-if="orders.length===0"><td colspan="6" class="text-center text-muted py-4">尚無資料</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <small class="text-muted">更新時間：{{ new Date().toLocaleString('zh-TW') }}</small>
+                </div>
             </div>
         </div>
     </div>
-}
-<div class="modal fade" id="ordersModal" tabindex="-1" aria-labelledby="ordersModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div>
-                    <h5 class="modal-title" id="ordersModalLabel">訂單 — <span id="m_product_name"></span></h5>
-                    <small class="text-muted" id="m_summary"></small>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover align-middle">
-                        <thead class="table-light">
-                            <tr class="text-center">
-                                <th>訂單編號</th>
-                                <th>總金額</th>
-                                <th>建立時間</th>
-                                <th>更新時間</th>
-                                <th>客戶</th>
-                                <th>狀態</th>
-                                <th>商品</th>
-                                <th style="width:160px">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="m_tbody">
-                            <tr><td colspan="8" class="text-center py-4 text-muted">尚無資料</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <small class="text-muted" id="m_updated"></small>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="editOrderLabel" class="modal-title">編輯訂單</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
-            </div>
 
-            <form id="editOrderForm" method="post">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <input type="hidden" name="OrderID" id="e_OrderID" />
-
-                    <div class="mb-3">
-                        <label class="form-label">客戶ID</label>
-                        <input type="number" class="form-control" name="CustomerID" id="e_CustomerID" readonly/>
+    <!-- 編輯 Modal（簡版）-->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">編輯訂單</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" v-if="editing">
+                    <div class="mb-2">
+                        <label class="form-label">客戶名稱</label>
+                        <input :value="editing?.customerName" class="form-control" readonly>
                     </div>
-
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label">商品ID</label>
-                        <input type="number" class="form-control" name="ProductID" id="e_ProductID" />
+                        <input v-model.number="editing.productId" type="number" class="form-control">
                     </div>
-
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label">狀態</label>
-                        <select class="form-select" name="OrderStatusID" id="e_OrderStatusID">
-                            <option value="1">已付款</option>
-                            <option value="2">未付款</option>
-                            <option value="3">已取消</option>
-                            <option value="4">錯誤</option>
+                        <select v-model.number="editing.orderStatusId" class="form-select">
+                            <option v-for="s in statuses" :key="s.id" :value="s.id">{{ s.name }}</option>
                         </select>
                     </div>
-
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label">總金額</label>
-                        <input type="number" class="form-control" name="TotalAmount" id="e_TotalAmount" min="0" autofocus/>
+                        <input v-model.number="editing.totalAmount" type="number" min="0" class="form-control">
                     </div>
-
-                    <div class="mb-3">
+                    <div class="mb-2">
                         <label class="form-label">建立時間</label>
-                        <input type="datetime-local" class="form-control" name="CreateTime" id="e_CreateTime" readonly />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">更新時間</label>
-                        <input type="datetime-local" class="form-control" name="UpdateTime" id="e_UpdateTime" readonly />
+                        <input v-model="editing.createTime" type="datetime-local" class="form-control" readonly>
                     </div>
                 </div>
-
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="submit" class="btn btn-outline-primary">儲存</button>
+                    <button class="btn btn-primary" v-on:click ="saveEdit">儲存</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
-</div>
-<!-- 寄信彈窗 -->
-<div class="modal fade" id="mailModal" tabindex="-1" aria-labelledby="mailModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="mailModalLabel" class="modal-title">寄信給客戶</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
-            </div>
 
-            <form id="sendMailForm" method="post" action="@Url.Action("SendAjax","CustomerOrders", new { area = "Order" })">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label" for="mail_to">收件者</label>
-                        <input type="email" class="form-control" id="mail_to" name="to" placeholder="customer@example.com" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="mail_subject">主旨</label>
-                        <input type="text" class="form-control" id="mail_subject" name="subject" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="mail_body">內容</label>
-                        <textarea class="form-control" id="mail_body" name="body" rows="6" placeholder="輸入郵件內容…" required></textarea>
-                    </div>
-                    <div id="mail_hint" class="small text-muted"></div>
+    <!-- 寄信 Modal（用你現有 SendAjax）-->
+    <div class="modal fade" id="mailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">寄信 <small class="text-muted" id="mail_hint"></small></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
+                <div class="modal-body" v-if="mail">
+                    <div class="mb-2">
+                        <label class="form-label">收件者</label>
+                        <input v-model="mail.to" type="email" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">主旨</label>
+                        <input v-model="mail.subject" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">內容 (HTML)</label>
+                        <textarea v-model="mail.body" rows="8" class="form-control"></textarea>
+                    </div>
+                </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-outline-primary">送出</button>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                    <button class="btn btn-success" v-on:click ="sendMail">送出</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+
     <script>
-        const byProdBase  = '@Url.Action("ByProduct", "CustomerOrders", new { area = "Order" })';
-        const getApiBase  = '@Url.Action("Get", "CustomerOrders", new { area = "Order" })'; 
-        const tbody = document.getElementById('m_tbody');
-        const mProdName = document.getElementById('m_product_name');
-        const mSummary = document.getElementById('m_summary');
-        const mUpdated = document.getElementById('m_updated');
-        const mailAjaxUrl = '@Url.Action("SendAjax", "Mail", new { area = "Order" })';
+        (() => {
+          const { createApp, ref, computed, onMounted } = Vue;
 
+          createApp({
+            setup(){
+              const q = ref('');
+              const view = ref('card');                // 'card' | 'table'
+              const products = ref([]);
+              const orders = ref([]);                  // 目前列表（卡片點開的商品 或 表格載入的集合）
+              const currentProduct = ref(null);
+              const loadingOrders = ref(false);
+              const editing = ref(null);               // 單筆編輯資料（由 API getOne 取得）
+              const mail = ref(null);                  // {to, subject, body, orderId}
+              const statuses = ref([]);
+            // ---- 排序 / 篩選 狀態 ----
+              const sortBy = ref('createTime');   // createTime | totalAmount | customerName | status | orderCode
+              const sortDir = ref('desc');        // asc | desc
+              const filterStart = ref('');        // 'YYYY-MM-DD'
+              const filterEnd   = ref('');
+              const filterStatus = ref('');       // '', '已付款', '未付款', '已取消', '錯誤'
+              const apiBase = '/Order/CustomerOrders'; // 你在 Areas 的路徑根
+              const statusOrder = {
+                  '已付款': 1,
+                  '未付款': 2,
+                  '已取消': 3,
+                  '錯誤':   4
+              };
+              onMounted(async ()=>{
+                  try{
+                    const { data } = await axios.get(`${apiBase}/api-json/products`);
+                    products.value = data;
+                  }catch(e){ console.error('load products failed', e); }
 
-
-        function getStatusClass(status) {
-          switch (status) {
-            case "已付款": return "bg-success";   
-            case "未付款": return "bg-warning";
-            case "已取消":   return "bg-secondary";
-            case "錯誤":   return "bg-danger";
-            default:       return "bg-secondary"; 
-          }
-        }
-
-        function fmt(v) {
-          if (!v) return '';
-          const d = new Date(v);
-          if (isNaN(d.getTime())) return v;
-          return d.toLocaleString('zh-TW');
-        }
-
-        function toLocalInput(dt) {
-          if (!dt) return "";
-          const d = new Date(dt);
-          if (isNaN(d.getTime())) return "";
-          const pad = n => n.toString().padStart(2, '0');
-          const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-          return s;
-        }
-
-        function toLocal(dt) {
-          if (!dt) return "";
-          const d = new Date(dt);
-          return isNaN(d.getTime()) ? dt : d.toLocaleString('zh-TW');
-        }
-        //圖卡編輯
-        tbody?.addEventListener('click', async (e) => {
-          const btn = e.target.closest('.btn-edit');
-          if (!btn) return;
-
-          const id = btn.dataset.id;
-                  const res = await fetch(`${getApiBase}/${id}`, {
-          credentials: 'include'
-        });
-          if (!res.ok) { alert('讀取訂單失敗'); return; }
-          const o = await res.json();
-
-          document.getElementById('e_OrderID').value       = o.id;
-          document.getElementById('e_CustomerID').value    = o.customerId ?? '';
-          document.getElementById('e_ProductID').value     = o.productId ?? '';
-          document.getElementById('e_OrderStatusID').value = o.orderStatusId ?? 1;
-          document.getElementById('e_TotalAmount').value   = o.totalAmount ?? 0;
-          document.getElementById('e_CreateTime').value    = toLocalInput(o.createTime);
-          document.getElementById('e_UpdateTime').value    = toLocalInput(o.updateTime);
-
-          const form = document.getElementById('editOrderForm');
-          form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
-
-          const ordersEl = document.getElementById('ordersModal');
-          const editEl   = document.getElementById('editOrderModal');
-
-          const ordersMD = ordersEl ? bootstrap.Modal.getOrCreateInstance(ordersEl) : null;
-          const editMD   = editEl   ? bootstrap.Modal.getOrCreateInstance(editEl)   : null;
-
-          if (!editMD) { alert('找不到編輯視窗'); return; }
-
-          ordersMD?.hide();
-
-          requestAnimationFrame(() => {
-            cleanupBackdrops();
-            editMD.show();
-          });
-        });
-        
-        document.querySelectorAll('.btn-open-orders').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const productId = btn.dataset.productid;
-            const productName = btn.dataset.productname;
-            mProdName.textContent = productName;
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">載入中…</td></tr>';
-
-                    const res = await fetch(`/Order/CustomerOrders/by-product/${productId}`, {
-          credentials: 'include'
-        });
-            const data = await res.json();
-
-            const orders = data.orders || [];
-            if (orders.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted">這個商品尚無訂單，請先新增。</td></tr>';
-            } else {
-              tbody.innerHTML = '';
-              orders.forEach(o => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                  <td class="font-monospace text-center">${o.orderCode}</td>
-                  <td class="text-center">NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}</td>
-                  <td class="text-center">${fmt(o.createTime)}</td>
-                  <td class="text-center">${fmt(o.updateTime)}</td>
-                  <td class="text-center">${o.customer ?? ''}</td>
-                  <td class="text-center"><span class="badge ${getStatusClass(o.status)}">${o.status}</span></td>
-                  <td class="text-center">${o.product ?? ''}</td>
-                  <td class="text-center">
-                    <button type="button" class="btn btn-outline-primary btn-edit" data-id="${o.id}"><i class="fa-solid fa-pen-to-square"></i>編輯</button>
-                    <button type="button" class="btn btn-outline-success btn-mail" data-id="${o.id}" data-email="${o.customerEmail ?? ''}"><i class="fa-solid fa-paper-plane"></i>寄信</button>
-                  </td>
-                `;
-                tbody.appendChild(tr);
+                  try{
+                    const st = await axios.get(`${apiBase}/api-json/statuses`);
+                    statuses.value = Array.isArray(st.data) ? st.data : [];
+                  }catch(e){
+                    console.error('load statuses failed', e);
+                    // 後備：避免空白（真的取不到時）
+                    statuses.value = [
+                      { id: 1, name: '已付款' },
+                      { id: 2, name: '未付款' },
+                      { id: 3, name: '已取消' },
+                      { id: 4, name: '錯誤' },
+                    ];
+                  }
               });
-            }
 
-            mSummary.textContent = `共 ${orders.length} 筆｜總金額 NT$ ${Number(data?.kpi?.totalAmount ?? 0).toLocaleString()}`;
-            mUpdated.textContent = `更新時間：${new Date().toLocaleString('zh-TW')}`;
-          });
-        });
-        //圖卡寄信
-        tbody?.addEventListener('click', async (e) => {
-          const mailBtn = e.target.closest('.btn-mail');
-          if (!mailBtn) return;
+              const filteredProducts = computed(()=>{
+                const s = q.value.trim().toLowerCase();
+                if (!s) return products.value;
+                return products.value.filter(p =>
+                  (p.productName||'').toLowerCase().includes(s)
+                );
+              });
 
-          const id = mailBtn.dataset.id;
+              const filteredOrders = computed(()=>{
+                  const s = q.value.trim().toLowerCase();
+                  const pool = orders.value;
+                  if (!s) return pool;
+                  return pool.filter(o =>
+                    (o.productName||'').toLowerCase().includes(s) ||
+                    (o.orderCode||'').toLowerCase().includes(s)  ||
+                    (o.customerName||'').toLowerCase().includes(s)
+                  );
+              });                
 
-          // 先抓訂單資料，拿到 email、orderCode 等
-                  const res = await fetch(`${getApiBase}/${id}`, {
-          credentials: 'include'
-        });
-          if (!res.ok) { alert('讀取訂單失敗'); return; }
-          const o = await res.json();
+                // 排序
+                const tableOrders = computed(()=>{
+                  const list = [...filteredOrders.value];
 
-          // 假如 ByProduct/Get 沒回傳 email，請在 ByProduct 的 Select/ Get 的 Ok(...) 補上 customerEmail 欄位
-          // 這裡用備援：若沒有 email，就留空讓你手動輸入
-          const to   = o.customerEmail ?? '';
-          const code = o.orderCode ?? `#${o.orderCode}`;
+                  const dir = (sortDir.value === 'asc') ? 1 : -1;
+                  const key = sortBy.value;
 
-          // 預設主旨 / 內容（你可自行改模板）
-          const subject = `【訂單通知】${code}`;
-          const body    =
-        `親愛的客戶您好，
+                  list.sort((a,b)=>{
+                    let av = a[key], bv = b[key];
 
-        這是關於您的訂單 ${code} 的通知。
-        目前狀態：${o.status ?? '(未提供)'}
-        總金額：NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}
-        建立時間：${o.createTime ? new Date(o.createTime).toLocaleString('zh-TW') : ''}
+                    // 狀態特別規則：用 statusOrder 做序
+                    if (key === 'status' || key === 'statusText') {
+                      av = statusOrder[a.status || a.statusText] || 999;
+                      bv = statusOrder[b.status || b.statusText] || 999;
+                      return (av - bv) * dir;
+                    }
 
-        如有任何問題，歡迎回信與我們聯繫。
-        貓爪足跡 敬上`;
+                    // 金額數字
+                    if (key === 'totalAmount') {
+                      av = Number(av ?? 0); bv = Number(bv ?? 0);
+                      return (av - bv) * dir;
+                    }
 
-          // 填入寄信表單
-          document.getElementById('mail_to').value      = to;
-          document.getElementById('mail_subject').value = subject;
-          document.getElementById('mail_body').value    = body;
-          document.getElementById('mail_hint').textContent = `訂單：${code}`;
+                    // 時間：轉毫秒比大小
+                    if (key === 'createTime' || key === 'updateTime') {
+                      const ad = av ? new Date(av).getTime() : 0;
+                      const bd = bv ? new Date(bv).getTime() : 0;
+                      return (ad - bd) * dir;
+                    }
 
-          // 關閉「查看訂單」，打開「寄信」
-          const ordersEl = document.getElementById('ordersModal');
-          const mailEl   = document.getElementById('mailModal');
-          const ordersMD = ordersEl ? bootstrap.Modal.getOrCreateInstance(ordersEl) : null;
-          const mailMD   = mailEl   ? bootstrap.Modal.getOrCreateInstance(mailEl)   : null;
+                    // 一般字串：轉小寫比
+                    av = (av ?? '').toString().toLowerCase();
+                    bv = (bv ?? '').toString().toLowerCase();
+                    return (av < bv ? -1 : av > bv ? 1 : 0) * dir;
+                  });
 
-          if (!mailMD) { alert('找不到寄信視窗'); return; }
+                  return list;
+                });
 
-          ordersMD?.hide();
-          ordersEl?.addEventListener('hidden.bs.modal', () => {
-            // 清理殘留 backdrop，再開寄信
-            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-            document.body.classList.remove('modal-open');
-            document.body.style.removeProperty('padding-right');
-            mailMD.show();
-          }, { once:true });
+                    // 表頭點擊切換排序
+                function setSort(key) {
+                    if (sortKey.value === key) {
+                    sortAsc.value = !sortAsc.value;   // 點同一欄就切換方向
+                    } else {
+                    sortKey.value = key;
+                    sortAsc.value = true;
+                    }
+                }
+                function fmt(v){ return v ? new Date(v).toLocaleString('zh-TW') : '' }
+                function statusClass(s){
+                return s==='已付款' ? 'bg-success'
+                        : s==='未付款' ? 'bg-warning'
+                        : s==='已取消' ? 'bg-secondary'
+                        : 'bg-danger';
+                }
 
-          // 寄信關閉後回到查看訂單（可要可不要）
-          mailEl?.addEventListener('hidden.bs.modal', () => {
-            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-            document.body.classList.remove('modal-open');
-            document.body.style.removeProperty('padding-right');
-            ordersMD?.show();
-          }, { once:true });
-        });
+                async function openOrders(p){
+                currentProduct.value = p;
+                loadingOrders.value = true;
+                const { data } = await axios.get(`${apiBase}/api-json/by-product/${p.productId}`);
+                orders.value = data.orders;
+                loadingOrders.value = false;
 
-                document.getElementById('sendMailForm')?.addEventListener('submit', async (ev) => {
-          ev.preventDefault();
-          const form = ev.currentTarget;
+                // 打開 Bootstrap Modal
+                const el = document.getElementById('ordersModal');
+                bootstrap.Modal.getOrCreateInstance(el).show();
+                }
 
-          // 用 FormData 包含整個 form（含 AntiForgeryToken）
-          const fd = new FormData(form);
-           console.log([...fd]);
+                async function openEdit(id){
+                const { data } = await axios.get(`${apiBase}/get/${id}`); // 你原本就有 Get/{id}
+                editing.value = {
+                      id:            data.id,
+                      customerId:    data.customerId,
+                      customerName:  data.customerName || `客戶 ${data.customerId}`,   // 顯示用
+                      productId:     data.productId,
+                      productName:   data.productName,    // 如要顯示可用
+                      orderStatusId: data.orderStatusId,
+                      statusText:    data.statusText,
+                      totalAmount:   data.totalAmount ?? 0,
+                      createTime:    data.createTime ? toLocalInput(data.createTime) : '',   // 顯示用（唯讀）
+                      updateTime:    data.updateTime ? toLocalInput(data.updateTime) : ''
+                    };
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
+                }
 
-          try {
+                async function saveEdit(){
+                const p = editing.value;
+                await axios.put(`${apiBase}/api-json/${p.id}`, {
+                    customerID:    p.customerId,
+                    productID:     p.productId,
+                    orderStatusID: p.orderStatusId,
+                    totalAmount:   p.totalAmount,
+                    createTime:    p.createTime,
+                    updateTime:    new Date().toISOString()
+                });
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).hide();
+                editing.value = null;
 
+                // 重新載入目前商品的訂單（若在卡片模式）
+                if (currentProduct.value) {
+                    const { data } = await axios.get(`${apiBase}/api-json/by-product/${currentProduct.value.productId}`);
+                    orders.value = data.orders;
+                }
+                }
 
-        const res = await fetch(form.action || mailAjaxUrl, {
-          method: 'POST',
-                body: fd,
-          credentials: 'include'
-        });
+                async function openMail(id){
+                const { data } = await axios.get(`${apiBase}/api-json/mail-template/${id}`);
+                mail.value = { to: data.to || '', subject: data.subject || '', body: data.body || '', orderId: id };
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('mailModal')).show();
+                }
 
-            if (!res.ok) {
-              const text = await res.text().catch(() => "");
-              let msg;
-              try {
-                msg = JSON.parse(text).error;
-              } catch {
-                msg = text || res.status;
+                async function sendMail(){
+                const fd = new FormData();
+                fd.append('to', mail.value.to);
+                fd.append('subject', mail.value.subject);
+                fd.append('body', mail.value.body);
+                await axios.post(`${apiBase}/send-ajax`, fd);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('mailModal')).hide();
+                alert('郵件已送出！');
+                mail.value = null;
+                }
+
+                function toLocalInput(dt){
+                const d = new Date(dt);
+                if (isNaN(d.getTime())) return '';
+                const pad = n => n.toString().padStart(2,'0');
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
+                async function loadOrdersAll(){
+                try{
+                    const { data } = await axios.get(`${apiBase}/api-json/orders`, { withCredentials: true });
+                    // 後端回傳是 { orders: [...] }
+                    orders.value = Array.isArray(data?.orders) ? data.orders : [];
+                    console.log('ALL ORDERS COUNT =', orders.value.length);
+                    }catch(err){
+                    console.error('載入全部訂單失敗：', err);
+                    orders.value = [];
+                    }
+                }
+                function setSort(field){
+                  if (sortBy.value === field) {
+                    sortDir.value = (sortDir.value === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    sortBy.value = field;
+                    sortDir.value = 'asc';
+                  }
+                }
+              async function switchToTable(){
+                view.value = 'table';
+                if (orders.value.length === 0) {
+                  await loadOrdersAll();
+                }
               }
-              alert('寄送失敗：' + msg);
-              return;
-            }
 
-            // 成功 → 關閉寄信視窗
-            const mailEl = document.getElementById('mailModal');
-            const mailMD = mailEl ? bootstrap.Modal.getOrCreateInstance(mailEl) : null;
-            mailMD?.hide();
-
-            setTimeout(() => alert('郵件已送出！'), 100);
-
-          } catch (err) {
-            console.error(err);
-            alert('寄送失敗（例外: ' + err.message + '）');
-          }
-        });
-        //表單編輯
-        document.getElementById('ordersTableBody')?.addEventListener('click', async (e) => {
-          const btn = e.target.closest('.btn-action[data-action="edit"]');
-          if (!btn) return;
-
-          const id = btn.dataset.id;
-                  const res = await fetch(`${getApiBase}/${id}`, {
-          credentials: 'include'
-        });
-          if (!res.ok) { alert('讀取訂單失敗'); return; }
-          const o = await res.json();
-
-          document.getElementById('e_OrderID').value       = o.id;
-          document.getElementById('e_CustomerID').value    = o.customerId ?? '';
-          document.getElementById('e_ProductID').value     = o.productId ?? '';
-          document.getElementById('e_OrderStatusID').value = o.orderStatusId ?? 1;
-          document.getElementById('e_TotalAmount').value   = o.totalAmount ?? 0;
-          document.getElementById('e_CreateTime').value    = toLocalInput(o.createTime);
-          document.getElementById('e_UpdateTime').value    = toLocalInput(o.updateTime);
-
-          const form = document.getElementById('editOrderForm');
-          form.setAttribute('action', '@Url.Action("Edit", "CustomerOrders", new { area = "Order" })' + '/' + id);
-
-          const editMD = bootstrap.Modal.getOrCreateInstance(document.getElementById('editOrderModal'));
-          editMD.show();
-        });
-        //表單寄信
-        document.getElementById('ordersTableBody')?.addEventListener('click', async (e) => {
-          const btn = e.target.closest('.btn-mail');
-          if (!btn) return;
-
-          const id = btn.dataset.id;
-          const email = btn.dataset.email || '';
-                  const res = await fetch(`${getApiBase}/${id}`, {
-          credentials: 'include'
-        });
-          if (!res.ok) { alert('讀取訂單失敗'); return; }
-          const o = await res.json();
-
-          const to   = email || o.customerEmail || '';
-          const code = o.orderCode ?? `#${o.orderCode}`;
-          document.getElementById('mail_to').value      = to;
-          document.getElementById('mail_subject').value = `【訂單通知】${code}`;
-          document.getElementById('mail_body').value    = `親愛的客戶您好，
-
-        這是關於您的訂單 ${code} 的通知。
-        目前狀態：${o.status ?? '(未提供)'}
-        總金額：NT$ ${Number(o.totalAmount ?? 0).toLocaleString()}
-        建立時間：${o.createTime ? new Date(o.createTime).toLocaleString('zh-TW') : ''}
-
-        如有任何問題，歡迎回信與我們聯繫。
-        貓爪足跡 敬上`;
-          document.getElementById('mail_hint').textContent = `訂單：${code}`;
-
-          const mailMD = bootstrap.Modal.getOrCreateInstance(document.getElementById('mailModal'));
-          mailMD.show();
-        });
-
-        function cleanupBackdrops(){
-          document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-          document.body.classList.remove('modal-open');
-          document.body.style.removeProperty('padding-right');
-        } 
-        
-        //搜尋功能
-       
-        (function(){
-            const box   = document.getElementById('globalSearch');
-            const clear = document.getElementById('btnClearGlobalSearch');
-            const hint  = document.getElementById('globalSearchHint');
-
-            const viewCards = document.getElementById('viewCards');   // 卡片容器
-            const viewTable = document.getElementById('viewTable');   // 表格容器
-            const tbody     = document.getElementById('ordersTableBody');
-
-            if (!box) return;
-
-            const norm = s => (s ?? '').toString().trim().toLowerCase();
-            const cards = () => Array.from(document.querySelectorAll('.product-card'));
-            const rows  = () => Array.from(tbody?.querySelectorAll('tr') || []);
-
-            function isCardsMode(){
-            // 視你的切換實作而定：這裡以 .d-none 判斷
-            return viewCards && !viewCards.classList.contains('d-none');
-            }
-
-            function applyForCards(q){
-            let visible = 0;
-            cards().forEach(card=>{
-                const productName = norm(card.dataset.productname || card.querySelector('.card-title')?.textContent);
-                const hit = !q || productName.includes(q);
-                card.style.display = hit ? '' : 'none';
-                if (hit) visible++;
-            });
-            setHint(q, `符合「${box.value}」的商品：${visible} 項`);
-            }
-
-            function applyForTable(q){
-            let visible = 0;
-            rows().forEach(tr=>{
-                const code = norm(tr.dataset.ordercode);
-                const cust = norm(tr.dataset.customer);
-                const prod = norm(tr.dataset.product);
-                const hit = !q || code.includes(q) || cust.includes(q) || prod.includes(q);
-                tr.style.display = hit ? '' : 'none';
-                if (hit) visible++;
-            });
-            setHint(q, `符合「${box.value}」的訂單：${visible} 筆`);
-            }
-
-            function setHint(q, text){
-            if (!hint) return;
-            hint.textContent = q ? text : '';
-            }
-
-            function applyGlobal(){
-            const q = norm(box.value);
-            if (isCardsMode()) applyForCards(q);
-            else               applyForTable(q);
-            }
-
-            // 綁事件
-            box.addEventListener('input', applyGlobal);
-            clear?.addEventListener('click', ()=>{
-            box.value = '';
-            applyGlobal();
-            box.focus();
-            });
-
-            // 如果你有視圖切換按鈕（例如 #btnViewCard / #btnViewTable），切換時要重跑一次
-            document.getElementById('btnViewCard') ?.addEventListener('click', applyGlobal);
-            document.getElementById('btnViewTable')?.addEventListener('click', applyGlobal);
-
-            // 初次套用
-            applyGlobal();
-        })();
-
-
-        
-        (function setupViewSwitch(){
-          const btnCard  = document.getElementById('btnViewCard');
-          const btnTable = document.getElementById('btnViewTable');
-          const viewCards = document.getElementById('viewCards');
-          const viewTable = document.getElementById('viewTable');
-
-          // 從 localStorage 還原上次選擇
-          const key = 'ordersProductView';
-          const saved = localStorage.getItem(key) || 'card';
-          applyView(saved);
-
-          btnCard?.addEventListener('click', ()=> applyView('card'));
-          btnTable?.addEventListener('click', ()=> applyView('table'));
-
-          function applyView(v){
-            if(v==='table'){
-              viewCards?.classList.add('d-none');
-              viewTable?.classList.remove('d-none');
-              btnTable?.classList.add('active');
-              btnCard?.classList.remove('active');
-              localStorage.setItem(key,'table');
-            }else{
-              viewTable?.classList.add('d-none');
-              viewCards?.classList.remove('d-none');
-              btnCard?.classList.add('active');
-              btnTable?.classList.remove('active');
-              localStorage.setItem(key,'card');
-            }
-          }
-        })();
-                (function(){
-          const table = document.getElementById('ordersTable');
-          const tbody = document.getElementById('ordersTableBody');
-          const ths   = table?.querySelectorAll('thead th[data-sort]');
-          if (!table || !tbody || !ths?.length) return;
-
-          const collator = new Intl.Collator('zh-Hant', { numeric: true, sensitivity: 'base' });
-          let state = { key: null, dir: 1 }; // 1: asc, -1: desc
-
-          const getters = {
-            ordercode  : tr => tr.dataset.ordercode || '',
-            totalamount: tr => Number(tr.dataset.amount || '0'),
-            createtime : tr => Date.parse(tr.dataset.createtime || '') || 0,
-            updatetime : tr => Date.parse(tr.dataset.updatetime || '') || 0,
-            customer   : tr => tr.dataset.customer || '',
-            status     : tr => tr.dataset.status || '',
-            product    : tr => tr.dataset.product || ''
-          };
-
-          function sortBy(key){
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-            const get  = getters[key] || (tr => tr.textContent || '');
-            const dir  = (state.key === key) ? -state.dir : 1; // 同欄再點切換方向
-            state = { key, dir };
-
-            rows.sort((a,b)=>{
-              const va = get(a), vb = get(b);
-              if (typeof va === 'number' && typeof vb === 'number') {
-                return (va - vb) * dir;
+              function switchToCard(){
+                view.value = 'card';
               }
-              // 文字/日期統一字串比較（日期已轉數字在上面處理）
-              return collator.compare(String(va), String(vb)) * dir;
-            });
 
-            // 重新插回 DOM
-            const frag = document.createDocumentFragment();
-            rows.forEach(r => frag.appendChild(r));
-            tbody.appendChild(frag);
-
-            // 更新表頭指示
-            ths.forEach(th => th.removeAttribute('aria-sort'));
-            const active = Array.from(ths).find(th => th.dataset.sort === key);
-            if (active) active.setAttribute('aria-sort', dir === 1 ? 'ascending' : 'descending');
-          }
-
-          // 綁事件（點擊與鍵盤）
-          ths.forEach(th=>{
-            th.tabIndex = 0;
-            th.addEventListener('click',    () => sortBy(th.dataset.sort));
-            th.addEventListener('keydown',  e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sortBy(th.dataset.sort); }});
-          });
+              return {
+                q, view, products, orders, filteredProducts, filteredOrders,
+                currentProduct, loadingOrders, editing, mail,
+                openOrders, openEdit, saveEdit, openMail, sendMail,
+                fmt, statusClass,switchToCard, switchToTable, loadOrdersAll,sortBy, sortDir, filterStart, filterEnd, filterStatus,
+                setSort,tableOrders,filteredProducts,statuses 
+              };
+            }
+          }).mount('#app');
         })();
-</script>
-
+    </script>
 }

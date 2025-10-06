@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "購物車";
+}
+<div class="container py-4" id="app" v-cloak>
+    <h2 class="mb-3">購物車</h2>
+
+    <div class="mb-3 d-flex gap-2">
+        <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
+        <button class="btn btn-outline-secondary" v-on:click="reload">重新整理</button>
+    </div>
+
+    <div v-if="items.length===0" class="alert alert-info">購物車是空的</div>
+
+    <div v-else class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>商品</th>
+                    <th class="text-end">單價</th>
+                    <th class="text-center">數量</th>
+                    <th class="text-end">小計</th>
+                    <th style="width:100px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="it in items" :key="it.productId">
+                    <td class="d-flex align-items-center gap-2">
+                        <img :src="it.imageUrl" alt="" style="width:60px;height:60px;object-fit:contain;background:#f8f9fa" />
+                        <div>{{ it.productName }}</div>
+                    </td>
+                    <td class="text-end">NT$ {{ it.price.toLocaleString() }}</td>
+                    <td class="text-center">
+                        <input type="number" class="form-control form-control-sm w-auto d-inline-block"
+                               v-model.number="it.qty" min="1" v-on:change="update(it)">
+                    </td>
+                    <td class="text-end">NT$ {{ (it.price * it.qty).toLocaleString() }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" v-on:click="remove(it.productId)">移除</button>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="3" class="text-end">總計</th>
+                    <th class="text-end">NT$ {{ total.toLocaleString() }}</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
+        <button class="btn btn-primary" v-on:click="checkout" :disabled="items.length===0 || !customerId">結帳</button>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        [v-cloak] {
+            display: none
+        }</style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script>
+        (()=> {
+          const { createApp, ref, onMounted, computed } = Vue;
+
+          createApp({
+            setup(){
+              const items = ref([]);
+              const total = ref(0);
+              const customerId = ref(0);
+
+              async function reload(){
+                const { data } = await axios.get('/CustomerArea/Order/Cart/api');
+                items.value = data.items || [];
+                total.value = data.total || 0;
+              }
+              async function update(it){
+                await axios.post('/CustomerArea/Order/Cart/update', new URLSearchParams({
+                  productId: it.productId, qty: it.qty
+                }));
+                await reload();
+              }
+              async function remove(productId){
+                await axios.post('/CustomerArea/Order/Cart/remove', new URLSearchParams({ productId }));
+                await reload();
+              }
+              async function clearCart(){
+                await axios.post('/CustomerArea/Order/Cart/clear');
+                await reload();
+              }
+              async function checkout(){
+                await axios.post('/CustomerArea/Order/Cart/checkout', new URLSearchParams({ customerId: customerId.value }));
+                alert('已建立訂單（未付款），請到「我的訂單」付款');
+                await reload();
+                window.location.href = '/CustomerArea/Order/Orders';
+              }
+
+              onMounted(reload);
+
+              return { items, total, customerId, reload, update, remove, clearCart, checkout };
+            }
+          }).mount('#app');
+        })();
+    </script>
+}

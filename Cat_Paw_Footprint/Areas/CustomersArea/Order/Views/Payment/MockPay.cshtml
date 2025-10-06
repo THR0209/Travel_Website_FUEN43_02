@@ -1,0 +1,42 @@
+﻿@{
+    var orderId = (int)ViewData["OrderId"];
+    var code = (string)ViewData["OrderCode"];
+    var product = (string)ViewData["ProductName"];
+    var amount = (int)ViewData["Amount"];
+    var status = (string)ViewData["Status"];
+    ViewData["Title"] = "信用卡付款（模擬）";
+}
+<div class="container py-4">
+    <h3 class="mb-3">信用卡付款（模擬）</h3>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row mb-0">
+                        <dt class="col-4">訂單編號</dt>
+                        <dd class="col-8">@code</dd>
+                        <dt class="col-4">商品</dt>
+                        <dd class="col-8">@product</dd>
+                        <dt class="col-4">金額</dt>
+                        <dd class="col-8">NT$ @amount.ToString("N0")</dd>
+                        <dt class="col-4">目前狀態</dt>
+                        <dd class="col-8">@status</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <form method="post" action="/CustomerArea/Order/Payment/mock/submit">
+                        <input type="hidden" name="orderId" value="@orderId" />
+                        <div class="mb-2">
+                            <label class="form-label">卡號（隨意輸入）</label>
+                            <input class="form-control" name="cardNo" required maxlength="16" />
+                        </div>
+                        <button class="btn btn-success">付款</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="/CustomerArea/Order/Orders" class="btn btn-outline-secondary">返回我的訂單</a>
+</div>

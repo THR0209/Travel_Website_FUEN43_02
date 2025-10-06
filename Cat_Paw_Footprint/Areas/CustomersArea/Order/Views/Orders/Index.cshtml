@@ -1,0 +1,126 @@
+﻿@{
+    ViewData["Title"] = "我的訂單";
+}
+<div class="container py-4" id="app" v-cloak>
+    <h2 class="mb-3">我的訂單</h2>
+
+    <div class="d-flex gap-2 mb-3">
+        <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
+        <button class="btn btn-primary" v-on:click="load">載入</button>
+        <input v-model="q" class="form-control ms-auto" placeholder="搜尋：訂單/商品/狀態">
+    </div>
+
+    <div v-if="filtered.length===0" class="alert alert-info">尚無訂單</div>
+
+    <div v-else class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>訂單編號</th>
+                    <th>商品</th>
+                    <th class="text-end">金額</th>
+                    <th>狀態</th>
+                    <th>建立時間</th>
+                    <th style="width:180px">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="o in filtered" :key="o.id">
+                    <td class="text-center font-monospace">{{ o.orderCode }}</td>
+                    <td>{{ o.productName }}</td>
+                    <td class="text-end">NT$ {{ (o.amount||0).toLocaleString() }}</td>
+                    <td><span class="badge" :class="statusClass(o.status)">{{ o.status }}</span></td>
+                    <td class="text-center">{{ fmt(o.createTime) }}</td>
+                    <td class="d-flex gap-2">
+                        <a :href="`/CustomerArea/Order/Payment/mock?orderId=${o.id}`" class="btn btn-sm btn-success" v-if="o.status==='未付款'">信用卡付款</a>
+                        <button class="btn btn-sm btn-outline-primary" v-on:click="view(o.id)">明細</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 明細 Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">訂單明細</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" v-if="detail">
+                    <dl class="row">
+                        <dt class="col-4">訂單編號</dt>
+                        <dd class="col-8">{{ detail.orderCode }}</dd>
+                        <dt class="col-4">商品</dt>
+                        <dd class="col-8">{{ detail.product }}</dd>
+                        <dt class="col-4">金額</dt>
+                        <dd class="col-8">NT$ {{ (detail.amount||0).toLocaleString() }}</dd>
+                        <dt class="col-4">狀態</dt>
+                        <dd class="col-8">{{ detail.status }}</dd>
+                        <dt class="col-4">建立時間</dt>
+                        <dd class="col-8">{{ fmt(detail.createTime) }}</dd>
+                        <dt class="col-4">客戶</dt>
+                        <dd class="col-8">{{ detail.customer }}</dd>
+                        <dt class="col-4">Email</dt>
+                        <dd class="col-8">{{ detail.email }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        [v-cloak] {
+            display: none
+        }</style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script>
+        (()=> {
+          const { createApp, ref, computed } = Vue;
+
+          createApp({
+            setup(){
+              const customerId = ref(0);
+              const list = ref([]);
+              const q = ref('');
+              const detail = ref(null);
+
+              function statusClass(s){
+                return s==='已付款' ? 'bg-success'
+                     : s==='未付款' ? 'bg-warning'
+                     : s==='已取消' ? 'bg-secondary'
+                     : 'bg-danger';
+              }
+              function fmt(v){ return v ? new Date(v).toLocaleString('zh-TW') : '' }
+
+              async function load(){
+                const { data } = await axios.get('/CustomerArea/Order/Orders/api', { params:{ customerId: customerId.value }});
+                list.value = Array.isArray(data) ? data : [];
+              }
+
+              const filtered = computed(()=>{
+                const s = (q.value||'').toLowerCase().trim();
+                if(!s) return list.value;
+                return list.value.filter(o =>
+                  (o.orderCode||'').toLowerCase().includes(s) ||
+                  (o.productName||'').toLowerCase().includes(s) ||
+                  (o.status||'').toLowerCase().includes(s)
+                );
+              });
+
+              async function view(id){
+                const { data } = await axios.get(`/CustomerArea/Order/Orders/api/${id}`);
+                detail.value = data;
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
+              }
+
+              return { customerId, list, q, filtered, detail, load, view, statusClass, fmt };
+            }
+          }).mount('#app');
+        })();
+    </script>
+}
