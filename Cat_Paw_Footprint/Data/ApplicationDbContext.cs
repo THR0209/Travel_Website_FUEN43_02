@@ -22,6 +22,12 @@ namespace Cat_Paw_Footprint.Data
 				.HasOne(v => v.User)
 				.WithOne() // IdentityUser 不需要反向導航
 				.HasForeignKey<Vendors>(v => v.UserId);
+			builder.Entity<Customers>()
+				.HasOne(c => c.LevelNavigation)
+				.WithMany(l => l.Customers)
+				.HasForeignKey(c => c.Level)
+				.HasPrincipalKey(l => l.Level);
+			builder.Entity<CustomerProfile>().ToTable("CustomerProfile");
 		}
 	}
 }
