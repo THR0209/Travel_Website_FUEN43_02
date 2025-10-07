@@ -97,8 +97,8 @@ namespace Cat_Paw_Footprint
 	.AddCookie("CustomerAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/CustomersArea/CusLogReg/Login"; // 非登入時強制跳轉
-		options.AccessDeniedPath = "/CustomersArea/CusLogReg/Index";// 非權限時強制跳轉
+		options.LoginPath = "/CustomersArea/Account/Login"; // 非登入時強制跳轉
+		options.AccessDeniedPath = "/CustomersArea/Account/Index";// 非權限時強制跳轉
 	}).AddCookie("EmployeeAuth", options =>
 	{
 		options.Cookie.Name = ".CatPaw.Employee.Auth";
@@ -145,8 +145,9 @@ namespace Cat_Paw_Footprint
 			  .RequireAuthenticatedUser()
 			  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
 			});
-			#endregion
-			builder.Services.AddSession(options =>
+            builder.Services.AddDistributedMemoryCache();
+            #endregion
+            builder.Services.AddSession(options =>
 			{
 				options.Cookie.Name = ".CatPaw.Employee.Session"; // �ۭq���u Session �W��
 				options.IdleTimeout = TimeSpan.FromHours(9);   // �ۭq�O�ɮɶ�

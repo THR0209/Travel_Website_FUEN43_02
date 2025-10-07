@@ -1,0 +1,50 @@
+﻿@{
+    var total = (int)(ViewData["Total"] ?? 0);
+    var ids = (string)(ViewData["Ids"] ?? "");
+    ViewData["Title"] = "信用卡付款";
+}
+<div class="container py-4" id="app" v-cloak>
+    <h2 class="mb-3">信用卡付款（模擬）</h2>
+    <p>本次付款總額：<strong>NT$ @total.ToString("N0")</strong></p>
+
+    <div class="row g-2 mb-3">
+        <div class="col-12 col-md-6">
+            <label class="form-label">卡號</label>
+            <input v-model="card.number" class="form-control" placeholder="4111-1111-1111-1111" required />
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label">到期（月/年）</label>
+            <input v-model="card.exp" class="form-control" placeholder="mm-yy" required />
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label">CVC</label>
+            <input v-model="card.cvc" class="form-control" placeholder="123" required />
+        </div>
+    </div>
+
+    <form asp-action="Confirm" method="post" class="d-inline">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ids" value="@ids" />
+        <button class="btn btn-primary">付款</button>
+        <a asp-area="CustomerArea" asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary ms-2">返回購物車</a>
+    </form>
+</div>
+
+@section Scripts {
+    <style>
+        [v-cloak] {
+            display: none
+        }</style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        (()=> {
+          const { createApp, ref } = Vue;
+          createApp({
+            setup(){
+              const card = ref({ number:'', exp:'', cvc:'' });
+              return { card };
+            }
+          }).mount('#app');
+        })();
+    </script>
+}
