@@ -1,6 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- head -->
+    <link rel="manifest" href="~/CustomersArea/manifest.json?v=3">
+    <meta name="theme-color" content="#317EFB">
+    <link rel="icon" type="image/png" href="~/CustomersArea/icon-192.png?v=3">
+    @* 簡易pwa *@
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
@@ -185,7 +191,13 @@
 
     <!-- Page JS -->
     <script src="~/ui design/assets/js/dashboards-analytics.js"></script>
-
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/CustomersArea/service-worker.js')
+                .then(reg => console.log('Service Worker 註冊成功:', reg))
+                .catch(err => console.log('Service Worker 註冊失敗:', err));
+        }
+    </script>
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     @await RenderSectionAsync("Scripts", required: false)

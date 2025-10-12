@@ -57,11 +57,22 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 			var result = await _userManager.CheckPasswordAsync(user, password);
 			if (!result)
 			{
+				await _userManager.AccessFailedAsync(user);
+
+				// 檢查是否已達鎖定條件
+				if (await _userManager.IsLockedOutAsync(user))
+				{
+					return new CusLogRegDto
+					{
+						ErrorMessage = "帳號已鎖定，請 5 分鐘後再試。"
+					};
+				}
 				// 失敗：寫入紀錄
 				await _repo.CreateLoginLogAsync(customer.CustomerId, false, ip);
 
 				// 最近三次都錯誤 → 發信通知
 				var loginLogs = await _repo.GetLastLoginHistoryAsync(customer.CustomerId);
+				int x =loginLogs.Count();
 				if (loginLogs.Count() >= 3 && loginLogs.Take(3).All(log => log.IsSuccessful == false))
 				{
 					var ipList = string.Join("<br/>",
@@ -76,10 +87,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 
 					await _emailSender.SendEmailAsync(customer.Email, subject, body);
 				}
-
+				
 				return new CusLogRegDto { ErrorMessage = "密碼錯誤" };
 			}
 
+			await _userManager.ResetAccessFailedCountAsync(user);
 			// ✅ 成功：寫入成功紀錄並回傳資料
 			await _repo.CreateLoginLogAsync(customer.CustomerId, true, ip);
 

@@ -68,7 +68,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Repositories
 				{
 					LoginLogID = log.LoginLogID,
 					LoginTime = log.LoginTime,
-					LoginIP = log.LoginIP
+					LoginIP = log.LoginIP,
+					IsSuccessful = log.IsSuccessful
 				})
 				.ToListAsync();
 		}
