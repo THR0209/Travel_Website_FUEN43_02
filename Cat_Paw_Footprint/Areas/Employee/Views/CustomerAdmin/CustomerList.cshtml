@@ -5,251 +5,228 @@
     var Level = ViewBag.Levels as IEnumerable<SelectListItem> ?? Enumerable.Empty<SelectListItem>();
 }
 
-<div class="mt-2 text-end" id="cus-btn-save-wrap" style="display:none;">
-    <button type="button" class="btn btn-outline-success" id="btn-save-all">
-    <i class="fa-solid fa-square-plus"></i>全部儲存
-    </button>
-</div>
-<div class="card">
-    <div class="card-body">
-        <div class="mb-4 text-center">
-            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
-                <i class="fa-solid fa-users me-2"></i>客戶管理
-            </span>
-            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
-        </div>
-        <table class="table table-striped align-middle" id="cus-table">
-                    <thead>
-                        <tr>
-                            <th style="width:5%;">編號</th>
-                            <th style="width:10%;">姓名</th>
-                            <th style="width:15%;">等級</th>
-                            <th style="width:10%;">啟用</th>
-                            <th style="width:10%;">黑名單</th>
-                            <th style="width:25%;">信箱</th>
-                            <th style="width:45%;">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var cus in Model)
-                        {
-                            <tr data-id="@cus.CustomerID">
-                                <td class="text-center">@cus.CustomerID</td>
-                                <td class="text-center">@cus.CustomerName</td>
-                                <td class="text-center">
-                                    <select class="form-select js-leavel">
-                                        @foreach (var Levels in Level)
-                                        {
-                                            <option value="@Levels.Value" selected="@(cus.Level.HasValue && cus.Level.Value.ToString() == Levels.Value)">
-                                                @Levels.Text
-                                            </option>
-                                        }
-                                    </select>
-                                </td>
-                                <td class="text-center">
-                                    <div class="form-check form-switch d-flex justify-content-center">
-                                        <input class="form-check-input js-status" type="checkbox" role="switch"
-                                               @(cus.Status == true ? "checked" : "") />
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <input type="checkbox" class="form-check-input js-isblacklisted" @(cus.IsBlacklisted == true ? "checked" : "") />
-                                </td>
-                                <td>@cus.Email</td>
-                                <td class="text-center">
-                            <button type="button" class="btn btn-outline-secondary btn-sm js-detail">
-                                <i class="fa-solid fa-eye"></i>
-                                客戶詳情
-                            </button>
-                            <button type="button" class="btn btn-outline-info btn-sm js-history"><i class="fa-solid fa-user-clock"></i>登入紀錄</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm js-save"><i class="fa-solid fa-floppy-disk"></i>儲存</button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-     </div>
-</div>
-<!-- ✅ 跟 Script 有關 -->
-<form id="anti-form" method="post">
-    @Html.AntiForgeryToken()
-</form>
+<div id="app" class="mt-3">
+    <div class="mt-2 text-end" id="cus-btn-save-wrap">
+        <button type="button" class="btn btn-outline-success" @@click="saveAll">
+            <i class="fa-solid fa-square-plus"></i> 全部儲存
+        </button>
+    </div>
 
-<!-- ✅ 跟 Script 有關 -->
-<div class="modal fade" id="cusDetailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">客戶詳細資料</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-4 text-center">
+                <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                    <i class="fa-solid fa-users me-2"></i>客戶管理
+                </span>
+                <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
             </div>
-            <!-- 這裡會被 Script 填資料 -->
-            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+
+            <table id="cus-table" class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>編號</th>
+                        <th>姓名</th>
+                        <th>等級</th>
+                        <th>啟用</th>
+                        <th>黑名單</th>
+                        <th>信箱</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(cus, index) in customers" :key="cus.customerId" :data-id="cus.customerId">
+                        <td class="text-center">{{ cus.customerId }}</td>
+                        <td class="text-center">{{ cus.customerName }}</td>
+                        <td class="text-center">
+                            <select class="form-select" v-model="cus.level">
+                                <option v-for="lvl in levels" :key="lvl.value" :value="lvl.value">{{ lvl.text }}</option>
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-flex justify-content-center">
+                                <input type="checkbox" class="form-check-input" v-model="cus.status" />
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input" v-model="cus.isBlacklisted" />
+                        </td>
+                        <td>{{ cus.email }}</td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" @@click="showDetail(cus.email)">
+                                <i class="fa-solid fa-eye"></i> 客戶詳情
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm" @@click="showHistory(cus.email)">
+                                <i class="fa-solid fa-user-clock"></i> 登入紀錄
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" @@click="save(cus, index)">
+                                <i class="fa-solid fa-floppy-disk"></i> 儲存
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="cusDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">客戶詳細資料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" v-html="modalContent"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <form id="anti-form" method="post">
+        @Html.AntiForgeryToken()
+    </form>
 </div>
 
 @section Scripts {
-    <script>
-        //下方是詳細資料
-                    document.querySelectorAll(".js-detail").forEach(btn => {
-                    btn.addEventListener("click", async e => {
-                        const tr = btn.closest("tr");
-                        const email = tr.querySelector("td:nth-child(6)").textContent; // 假設信箱在第6欄
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const { createApp, ref, onMounted } = Vue;
 
-                        try {
-                            const res = await fetch('@Url.Action("CustomerDetail", "CustomerAdmin", new { area = "Employee" })' + `?email=${encodeURIComponent(email)}`, {
-                                method: "GET",
-                                headers: { "X-Requested-With": "XMLHttpRequest" }
-                            });
-                            if (!res.ok) throw new Error("HTTP " + res.status);
+    createApp({
+        setup() {
+            const customers = ref(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.Select(m => new {
+                    customerId = m.CustomerID,
+                    customerName = m.CustomerName,
+                    level = m.Level,
+                    status = m.Status,
+                    isBlacklisted = m.IsBlacklisted,
+                    email = m.Email
+                })
+            )));
+            const levels = ref(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                (Level ?? Enumerable.Empty<SelectListItem>()).Select(l => new {
+                    value = l.Value,
+                    text = l.Text
+                })
+            )));
+            const modalContent = ref("");
+            const token = ref("");
 
-                            const html = await res.text();
-                            document.querySelector("#cusDetailModal .modal-body").innerHTML = html;
+            const getToken = () => {
+                token.value = document.querySelector("#anti-form input[name=__RequestVerificationToken]")?.value || "";
+            };
 
-                            new bootstrap.Modal(document.getElementById('cusDetailModal')).show();
-                        } catch (err) {
-                            alert("載入失敗：" + err.message);
-                        }
-                    });
-                });
-                        //下方是登陸紀錄
-                                document.querySelectorAll(".js-history").forEach(btn => {
-                                            btn.addEventListener("click", async e => {
-                                                const tr = btn.closest("tr");
-                                                const email = tr.querySelector("td:nth-child(6)").textContent; // 假設信箱在第6欄
-                                                try {
-                                                            const res = await fetch('@Url.Action("LoginHistory", "CustomerAdmin", new { area = "Employee" })' + `?email=${encodeURIComponent(email)}`, {
-                                                        method: "GET",
-                                                        headers: { "X-Requested-With": "XMLHttpRequest" }
-                                                    });
-                                                    if (!res.ok) throw new Error("HTTP " + res.status);
-                                                    const html = await res.text();
-                                                    document.querySelector("#cusDetailModal .modal-body").innerHTML = html;
-                                                    new bootstrap.Modal(document.getElementById('cusDetailModal')).show();
-                                                } catch (err) {
-                                                    alert("載入失敗：" + err.message);
-                                                }
-                                });
-            });
+            const showDetail = async (email) => {
+                try {
+                    const res = await axios.get('@Url.Action("CustomerDetail", "CustomerAdmin", new { area = "Employee" })', { params: { email } });
+                    modalContent.value = res.data;
+                    new bootstrap.Modal(document.getElementById("cusDetailModal")).show();
+                } catch (err) {
+                    alert("載入失敗：" + err.message);
+                }
+            };
 
-            //儲存
-                document.querySelectorAll(".js-save").forEach(btn => {
-                    btn.addEventListener("click", async e => {
-                        const tr = btn.closest("tr");
-                        const id = tr.dataset.id;
-                        const leavel = tr.querySelector(".js-leavel").value;
-                        const Status = tr.querySelector(".js-status").checked;
-                        const IsBlacklistedd = tr.querySelector(".js-isblacklisted").checked;
-                        const form = new FormData();
+            const showHistory = async (email) => {
+                try {
+                    const res = await axios.get('@Url.Action("LoginHistory", "CustomerAdmin", new { area = "Employee" })', { params: { email } });
+                    modalContent.value = res.data;
+                    new bootstrap.Modal(document.getElementById("cusDetailModal")).show();
+                } catch (err) {
+                    alert("載入失敗：" + err.message);
+                }
+            };
 
-                                form.append("customerId", id);
-                form.append("levelId", leavel);
-                form.append("status", Status ? "true" : "false");
-                form.append("isBlacklisted", IsBlacklistedd ? "true" : "false");
+            const save = async (cus, index) => {
+                const form = new FormData();
+                form.append("customerId", cus.customerId);
+                form.append("levelId", cus.level);
+                form.append("status", cus.status ? "true" : "false");
+                form.append("isBlacklisted", cus.isBlacklisted ? "true" : "false");
+                form.append("__RequestVerificationToken", token.value);
 
-                        const token = document.querySelector("#anti-form input[name=__RequestVerificationToken]").value;
-
-                        if (token) form.append("__RequestVerificationToken", token);
-                            btn.disabled = true;
-                            const oldText = btn.textContent;
-                            btn.textContent = "儲存中…";
-                            try {
-                            const res = await fetch('@Url.Action("UpdateCustomer", "CustomerAdmin", new { area = "Employee" })', {
-                            method: "POST",
-                            body: form,
-                            headers: { "X-Requested-With": "XMLHttpRequest" }
-                            });
-                        if (!res.ok) throw new Error("HTTP " + res.status);
-                            const data = await res.json();
-                        if (data.ok) {
-                            alert("更新成功");
-                        }
-                        else {
-                                        alert("更新失敗：" + (data.message || "請稍後再試"));
-                                    }
-                            } catch (err) {
-                            alert("發生錯誤：" + err.message);
-                            } finally {
-                                    btn.disabled = false;
-                                        btn.textContent = oldText;
-                            }
-                        });
-
-                    });
-
-                            let cart = [];
-
-                    document.getElementById("btn-save-all").addEventListener("click", async () => {
-                    const buttons = document.querySelectorAll("#cus-table .js-save");
-                    const results = [];
-
-                    let index = 1;
-
-                    for (const btn of buttons) {
-                        const tr = btn.closest("tr");
-                        const id = tr.dataset.id;
-                        const level = tr.querySelector(".js-leavel").value;
-                        const status = tr.querySelector(".js-status").checked;
-                        const isBlacklisted = tr.querySelector(".js-isblacklisted").checked;
-
-                        const form = new FormData();
-                        form.append("customerId", id);
-                        form.append("levelId", level);
-                        form.append("status", status ? "true" : "false");
-                        form.append("isBlacklisted", isBlacklisted ? "true" : "false");
-
-                        const token = document.querySelector("#anti-form input[name=__RequestVerificationToken]").value;
-                        if (token) form.append("__RequestVerificationToken", token);
-
-                        try {
-                            const res = await fetch('@Url.Action("UpdateCustomer", "CustomerAdmin", new { area = "Employee" })', {
-                                method: "POST",
-                                body: form,
-                                headers: { "X-Requested-With": "XMLHttpRequest" }
-                            });
-                            const data = await res.json();
-                            if (data.ok) {
-                                results.push(`第 ${index} 筆 (客戶ID=${id}) ✅ 更新成功`);
-                            } else {
-                                results.push(`第 ${index} 筆 (客戶ID=${id}) ❌ 更新失敗: ${data.message || "未知錯誤"}`);
-                            }
-                        } catch (err) {
-                            results.push(`第 ${index} 筆 (客戶ID=${id}) ❌ 發生錯誤: ${err.message}`);
-                        }
-
-                        index++;
-                        await new Promise(r => setTimeout(r, 200)); // 避免同時打爆伺服器
+                try {
+                    const res = await axios.post('@Url.Action("UpdateCustomer", "CustomerAdmin", new { area = "Employee" })', form);
+                    if (res.data.ok) {
+                        alert(`第 ${index + 1} 筆 (客戶ID=${cus.customerId}) ✅ 更新成功`);
+                    } else {
+                        alert(`第 ${index + 1} 筆 (客戶ID=${cus.customerId}) ❌ 更新失敗: ${res.data.message || "請稍後再試"}`);
                     }
-                    alert(results.join("\n"));
-                });
-        $(document).ready(function () {
-            $('#cus-table').DataTable({
-                language: {
-                    search: "搜尋：",
-                    lengthMenu: "每頁顯示 _MENU_ 筆",
-                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
-                    paginate: {
-                        first: "第一頁",
-                        last: "最後一頁",
-                        next: "下一頁",
-                        previous: "上一頁"
+                } catch (err) {
+                    alert("發生錯誤：" + err.message);
+                }
+            };
+
+            const saveAll = async () => {
+    const results = [];
+    let index = 1;
+
+    // ✅ 取得 DataTables 目前顯示的列 (只更新當前頁)
+    const table = $('#cus-table').DataTable();
+    const currentRows = table.rows({ page: 'current' }).nodes();
+
+    // ✅ 從 DOM 拿出目前頁面每列的 customerId
+    const idsOnPage = Array.from(currentRows).map(tr => tr.getAttribute("data-id"));
+
+    // ✅ 找出 Vue 中相對應的資料
+    const currentPageCustomers = customers.value.filter(c => idsOnPage.includes(c.customerId.toString()));
+
+    for (const cus of currentPageCustomers) {
+        try {
+            const form = new FormData();
+            form.append("customerId", cus.customerId);
+            form.append("levelId", cus.level);
+            form.append("status", cus.status ? "true" : "false");
+            form.append("isBlacklisted", cus.isBlacklisted ? "true" : "false");
+            form.append("__RequestVerificationToken", token.value);
+
+            const res = await axios.post('@Url.Action("UpdateCustomer", "CustomerAdmin", new { area = "Employee" })', form);
+            if (res.data.ok) {
+                results.push(`第 ${index} 筆 (客戶ID=${cus.customerId}) ✅ 更新成功`);
+            } else {
+                results.push(`第 ${index} 筆 (客戶ID=${cus.customerId}) ❌ 更新失敗: ${res.data.message || "未知錯誤"}`);
+            }
+        } catch (err) {
+            results.push(`第 ${index} 筆 (客戶ID=${cus.customerId}) ❌ 發生錯誤: ${err.message}`);
+        }
+        index++;
+        await new Promise(r => setTimeout(r, 200));
+    }
+
+    alert(results.join("\n"));
+};
+
+            onMounted(() => {
+                getToken();
+                $('#cus-table').DataTable({
+                    language: {
+                        search: "搜尋：",
+                        lengthMenu: "每頁顯示 _MENU_ 筆",
+                        info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                        paginate: {
+                            first: "第一頁",
+                            last: "最後一頁",
+                            next: "下一頁",
+                            previous: "上一頁"
+                        },
+                        zeroRecords: "找不到資料",
                     },
-                    zeroRecords: "找不到資料",
-                },
-                pageLength: 10, // 預設每頁10筆
-                lengthMenu: [5, 10, 20, 50],
-                columnDefs: [
-                    { targets:2, orderable: false, searchable: false },
-                    { targets:3, orderable: false, searchable: false },
-                    { targets:4, orderable: false, searchable: false },
-                    { targets:6, orderable: false, searchable: false }, 
-                ],
+                    pageLength: 10,
+                    lengthMenu: [5, 10, 20, 50],
+                    columnDefs: [
+                        { targets: 2, orderable: false, searchable: false },
+                        { targets: 3, orderable: false, searchable: false },
+                        { targets: 4, orderable: false, searchable: false },
+                        { targets: 6, orderable: false, searchable: false },
+                    ],
+                });
             });
-            $('.dataTables_filter').after($('#cus-btn-save-wrap').show());
-        });
-    </script>
+
+            return { customers, levels, modalContent, showDetail, showHistory, save, saveAll };
+        }
+    }).mount("#app");
+</script>
 }

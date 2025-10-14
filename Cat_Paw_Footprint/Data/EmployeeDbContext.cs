@@ -18,6 +18,12 @@ namespace Cat_Paw_Footprint.Data
 		public DbSet<Models.CustomerLoginHistory> CustomerLoginHistory { get; set; }
 		public DbSet<Vendors> Vendors { get; set; }
 		public DbSet<VendorLoginHistory> VendorLoginHistory { get; set; }
+		public DbSet<TourGroups> TourGroups { get; set; }
+		public DbSet<TourGroupGuests> TourGroupGuests { get; set; }
+		public DbSet<TourGroupMembers> TourGroupMembers { get; set; }
+		public DbSet<GroupMessages> GroupMessages { get; set; }
+		public DbSet<GroupPhotos> GroupPhotos { get; set; }
+		public DbSet<GroupLocations> GroupLocations { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -65,10 +71,10 @@ namespace Cat_Paw_Footprint.Data
 					  .OnDelete(DeleteBehavior.Restrict); // 避免刪 Identity 時 Cascade 全部 Customer
 			});
 			modelBuilder.Entity<Customers>()
-	   .HasOne(c => c.LevelNavigation)
-	   .WithMany(l => l.Customers)
-	   .HasForeignKey(c => c.Level)   // 指定外鍵
-	   .HasPrincipalKey(l => l.Level);// 指定主鍵
+			   .HasOne(c => c.LevelNavigation)
+			   .WithMany(l => l.Customers)
+			   .HasForeignKey(c => c.Level)   // 指定外鍵
+			   .HasPrincipalKey(l => l.Level);// 指定主鍵
 			modelBuilder.Entity<CustomerProfile>().ToTable("CustomerProfile", t => t.ExcludeFromMigrations());
 			modelBuilder.Entity<CustomerLevels>().ToTable("CustomerLevels", t => t.ExcludeFromMigrations());
 			modelBuilder.Entity<CustomerLoginHistory>().ToTable("CustomerLoginHistory", t => t.ExcludeFromMigrations());
@@ -93,6 +99,32 @@ namespace Cat_Paw_Footprint.Data
 			{
 				entity.HasKey(l => l.LoginLogID);
 			});
+
+			//旅遊團
+			modelBuilder.Entity<TourGroupGuests>()
+				.HasOne(g => g.Group)
+				.WithMany(gp => gp.Guests)
+				.HasForeignKey(g => g.GroupId);
+
+			modelBuilder.Entity<TourGroupMembers>()
+				.HasOne(m => m.Group)
+				.WithMany(g => g.Members)
+				.HasForeignKey(m => m.GroupId);
+
+			modelBuilder.Entity<GroupMessages>()
+				.HasOne(m => m.Group)
+				.WithMany(g => g.Messages)
+				.HasForeignKey(m => m.GroupId);
+
+			modelBuilder.Entity<GroupPhotos>()
+				.HasOne(p => p.Group)
+				.WithMany(g => g.Photos)
+				.HasForeignKey(p => p.GroupId);
+
+			modelBuilder.Entity<GroupLocations>()
+				.HasOne(l => l.Group)
+				.WithMany(g => g.Locations)
+				.HasForeignKey(l => l.GroupId);
 		}
 
 
