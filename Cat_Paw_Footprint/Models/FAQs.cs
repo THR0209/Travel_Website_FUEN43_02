@@ -9,17 +9,21 @@ public partial class FAQs
 	[Key]
 	public int FAQID { get; set; }
 
-    public string? Question { get; set; }
+	public string? Question { get; set; }
 
-    public string? Answer { get; set; }
+	public string? Answer { get; set; }
 
-    public int? CategoryID { get; set; }
+	public int? CategoryID { get; set; }
 
 	public bool IsActive { get; set; }
 
+	public bool IsHot { get; set; } = false;
+
+	public int HotOrder { get; set; } = 0;
+
 	public DateTime? CreateTime { get; set; }
 
-    public DateTime? UpdateTime { get; set; }
+	public DateTime? UpdateTime { get; set; }
 
-    public virtual FAQCategorys? Category { get; set; }
+	public virtual FAQCategorys? Category { get; set; }
 }

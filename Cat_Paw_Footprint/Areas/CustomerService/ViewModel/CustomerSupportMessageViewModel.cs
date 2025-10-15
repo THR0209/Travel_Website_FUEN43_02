@@ -34,5 +34,8 @@
 		
 		/// <summary>發送者顯示名稱（員工或客戶名字）</summary>
 		public string? SenderDisplayName { get; set; }
+
+		/// <summary>拿來對應前端暫存 ID 用的欄位，不會存到資料庫</summary>
+		public string? TempId { get; set; }
 	}
 }

@@ -55,5 +55,10 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 		/// 刪除 FAQ 分類 (非同步)
 		/// </summary>
 		Task DeleteCategoryAsync(int id);
+
+		/// <summary>
+		/// 取得熱門 FAQ（依 HotOrder 排序）
+		/// </summary>
+		Task<List<FAQViewModel>> GetHotFAQsAsync(int count = 5);
 	}
 }

@@ -1,56 +1,64 @@
 ﻿@{
     ViewData["Title"] = "會員註冊";
 }
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
+@{
+    var tokens = antiforgery.GetAndStoreTokens(Context);
+    ViewData["IsLoginPage"] = true;
+}
+<meta name="csrf-token" content="@tokens.RequestToken" />
 
-<div id="registerApp" class="container mt-5 mb-5" style="max-width:600px;">
-    <h2 class="text-center mb-4">會員註冊</h2>
+<div id="registerApp">
+    <div class="card">
+        <h3 class="text-center mb-4 fw-bold">會員註冊</h3>
 
-    <form v-on:submit.prevent="register">
-        @Html.AntiForgeryToken() <!-- 一定要保留給後端驗證使用 -->
+        <form v-on:submit.prevent="register">
+            @Html.AntiForgeryToken() <!-- 一定要保留給後端驗證使用 -->
 
-        <div class="mb-3">
-            <label class="form-label">帳號</label>
-            <input type="text" v-model="form.account" class="form-control" required>
+            <div class="mb-3">
+                <label class="form-label">帳號</label>
+                <input type="text" v-model="form.account" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">密碼</label>
+                <input type="password" v-model="form.password" class="form-control" required minlength="6">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">姓名</label>
+                <input type="text" v-model="form.fullName" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">電子郵件</label>
+                <input type="email" v-model="form.email" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">電話</label>
+                <input type="tel" v-model="form.phone" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">地址</label>
+                <input type="text" v-model="form.address" class="form-control" required>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-outline-primary" :disabled="loading">
+                    {{ loading ? "註冊中..." : "註冊" }}
+                </button>
+            </div>
+        </form>
+
+        <div v-if="message" class="mt-4">
+            <div :class="['alert', messageType]">{{ message }}</div>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">密碼</label>
-            <input type="password" v-model="form.password" class="form-control" required minlength="6">
+        <div class="text-center mt-3">
+            <a href="/CustomersArea/CusLogReg/Login">已有帳號？前往登入</a>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">姓名</label>
-            <input type="text" v-model="form.fullName" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">電子郵件</label>
-            <input type="email" v-model="form.email" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">電話</label>
-            <input type="tel" v-model="form.phone" class="form-control" required>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">地址</label>
-            <input type="text" v-model="form.address" class="form-control" required>
-        </div>
-
-        <div class="d-grid mt-4">
-            <button type="submit" class="btn btn-primary" :disabled="loading">
-                {{ loading ? "註冊中..." : "註冊" }}
-            </button>
-        </div>
-    </form>
-
-    <div v-if="message" class="mt-4">
-        <div :class="['alert', messageType]">{{ message }}</div>
-    </div>
-
-    <div class="text-center mt-3">
-        <a href="/CustomersArea/CusLogReg/Login">已有帳號？前往登入</a>
     </div>
 </div>
 

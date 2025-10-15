@@ -171,6 +171,10 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
+			builder.Services.AddScoped<ICustomerSupportMessagesRepository, CustomerSupportMessagesRepository>();
+			builder.Services.AddScoped<ICustomerSupportMessagesService, CustomerSupportMessagesService>();
+			builder.Services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
+			builder.Services.AddScoped<IEmployeeMiniRepository, EmployeeMiniRepository>();
 			builder.Services.AddScoped <ICusLogRegRepository, CusLogRegRepository>();
 			builder.Services.AddScoped<ICusLogRegService, CusLogRegService>();
 			#endregion
@@ -179,6 +183,7 @@ namespace Cat_Paw_Footprint
 
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
+			builder.Services.AddSignalR();
 
 			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
@@ -239,8 +244,9 @@ namespace Cat_Paw_Footprint
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
+			app.MapHub<TicketChatHub>("/ticketChatHub");
 
-            app.Run();
+			app.Run();
 		}
     }
 }

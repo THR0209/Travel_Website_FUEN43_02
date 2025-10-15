@@ -29,6 +29,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.ViewModel
 
 			public string? CategoryName { get; set; }
 			public bool IsActive { get; set; } = false;
+			public bool IsHot { get; set; } = false;
+			public int HotOrder { get; set; } = 0;
 			public DateTime? CreateTime { get; set; }
 			public DateTime? UpdateTime { get; set; }
 		}

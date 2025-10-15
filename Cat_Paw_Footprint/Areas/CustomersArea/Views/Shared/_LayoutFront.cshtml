@@ -1,0 +1,210 @@
+﻿@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.Razor
+@using System.Security.Claims
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var customerAuth = await HttpContextAccessor.HttpContext.AuthenticateAsync("CustomerAuth");
+    var isCustomerLoggedIn = customerAuth?.Principal?.Identity?.IsAuthenticated ?? false;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- head -->
+    <link rel="manifest" href="~/CustomersArea/manifest.json?v=3">
+    <meta name="theme-color" content="#22B3C1">
+    <link rel="icon" type="image/png" href="~/CustomersArea/icon-192.png?v=3">
+    @* 簡易pwa *@
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>貓爪足跡-@ViewData["Title"]</title>
+    
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="~/front-end/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/front-end/assets/css/fontawesome.css" />
+    <link rel="stylesheet" href="~/front-end/assets/css/templatemo-woox-travel.css" />
+    <link rel="stylesheet" href="~/front-end/assets/css/owl.css" />
+    <link rel="stylesheet" href="~/front-end/assets/css/animate.css" />
+    <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <!-- ***** Preloader Start ***** -->
+    <div id="js-preloader" class="js-preloader">
+        <div class="preloader-inner">
+            <span class="dot"></span>
+            <div class="dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <!-- ***** Preloader End ***** -->
+    <!-- Header -->
+    <header class="site-header">
+        <nav class="navbar navbar-expand-lg container-fluid py-2">
+            <a class="navbar-brand brand-logo" asp-area="CustomersArea" asp-controller="Home" asp-action="Index" aria-label="首頁">
+                <img src="~/images/logo.png" alt="logo" style="width:60px; height:60px;" />
+                <span class="fs-2">貓爪足跡</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="切換選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav ms-auto mb-2 me-5 mb-lg-0 justify-content-between">
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">跟團行程</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">景點門票</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">美食</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">住宿</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">交通</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">優惠活動</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#faqSection">常見問題</a></li>
+                    <li class="nav-item p-1"><a class="nav-link" href="#">自由行專區</a></li>
+                </ul>
+                <div class="header-right d-flex align-items-center">
+                    <nav class="main-nav flex-grow-1">
+                        <ul class="nav align-items-center mb-0 w-100">
+                            @if (isCustomerLoggedIn)
+                            {
+                                <li class="nav-item ms-auto me-1">
+                                    <a href="#" class="nav-link">
+                                        <i class="fa-solid fa-calendar-check me-1"></i> 每日簽到
+                                    </a>
+                                </li>
+                                <li class="nav-item me-1">
+                                    <a href="#" class="nav-link">
+                                        <i class="fa-solid fa-bell me-1"></i> 通知
+                                    </a>
+                                </li>
+                                <li class="nav-item me-1">
+                                    <a href="#" class="nav-link">
+                                        <i class="fa-solid fa-cart-shopping me-1"></i> 購物車
+                                    </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="fa-solid fa-user me-1"></i> 會員中心
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow">
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="fa-solid fa-file-invoice me-2"></i> 訂單紀錄
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="fa-solid fa-headset me-2"></i> 客服聯繫
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <!-- 登出靠右 -->
+                                        <li class="d-flex justify-content-end pe-2">
+                                            <form asp-action="Logout" asp-controller="CusLogReg" asp-area="CustomersArea" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit"
+                                                        class="dropdown-item text-danger d-inline-flex align-items-center"
+                                                        style="background:none;border:none;width:auto;">
+                                                    <span class="me-2">登出</span>
+                                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item ms-auto d-flex gap-2">
+                                    <a href="/CustomersArea/CusLogReg/Login" class="btn btn-outline-primary rounded-pill">登入</a>
+                                    <a href="/CustomersArea/CusLogReg/Register" class="btn btn-outline-primary rounded-pill">註冊</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid p-0">
+        @RenderBody()
+    </div>
+
+    <!-- Footer -->
+    <footer class="pt-5 pb-4">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-12 col-md-4">
+                    <a class="brand-logo mb-2" asp-controller="Home" asp-action="Index">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2c5.5 0 10 4.5 10 10s-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2Z" fill="var(--brand)" /><path d="M8.8 9.5c.9 0 1.7.6 1.9 1.5.2-.9 1-1.5 1.9-1.5 1.1 0 2 .9 2 2 0 2.4-3.9 4.5-3.9 4.5S6.8 13.9 6.8 11.5c0-1.1.9-2 2-2Z" fill="#fff" /></svg>
+                        <span>TravelDay</span>
+                    </a>
+                    <p class="text-secondary small">這是示範用 KKDay 風格 RWD 首頁模板。</p>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="footer-title">探索</div>
+                    <ul class="list-unstyled small d-grid gap-2">
+                        <li><a href="#">本週熱門</a></li>
+                        <li><a href="#">在地體驗</a></li>
+                        <li><a href="#">交通票券</a></li>
+                        <li><a href="#">更多主題</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="footer-title">支援</div>
+                    <ul class="list-unstyled small d-grid gap-2">
+                        <li><a href="#">常見問題</a></li>
+                        <li><a href="#">訂單查詢</a></li>
+                        <li><a href="#">退款政策</a></li>
+                        <li><a href="#">聯絡我們</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="footer-title">追蹤我們</div>
+                    <div class="d-flex gap-3">
+                        <a href="#">Facebook</a>
+                        <a href="#">Instagram</a>
+                        <a href="#">YouTube</a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 border-secondary" />
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 small text-secondary">
+                <div> © 2025, made by FUEN43 Group 2.</div>
+                <div class="d-flex gap-3"><a href="#">服務條款</a><a href="#">隱私權</a></div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button class="to-top" aria-label="回到頂部" id="toTop">▲</button>
+
+        <script src="~/front-end/vendor/jquery/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+        <script src="~/front-end/assets/js/isotope.min.js"></script>
+        <script src="~/front-end/assets/js/owl-carousel.js"></script>
+        <script src="~/front-end/assets/js/tabs.js"></script>
+        <script src="~/front-end/assets/js/popup.js"></script>
+        <script src="~/front-end/assets/js/custom.js"></script>
+        <script src="~/front-end/assets/js/webFront.js"></script>
+        
+        <script>
+            if ('serviceWorker' in navigator) { 
+                navigator.serviceWorker.register('/CustomersArea/service-worker.js')
+                    .then(reg => console.log('Service Worker 註冊成功:', reg))
+                    .catch(err => console.log('Service Worker 註冊失敗:', err));
+            }
+        </script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

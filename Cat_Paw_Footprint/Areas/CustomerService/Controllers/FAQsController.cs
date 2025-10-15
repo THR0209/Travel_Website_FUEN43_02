@@ -1,7 +1,10 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomerService.Services; // 匯入 FAQ 服務介面
+using Cat_Paw_Footprint.Data;
 using Microsoft.AspNetCore.Authorization; // 匯入授權相關功能
 using Microsoft.AspNetCore.Mvc; // 匯入 MVC 控制器相關功能
 using Microsoft.AspNetCore.Mvc.Rendering; // 匯入 SelectList，用於下拉選單
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using static Cat_Paw_Footprint.Areas.CustomerService.ViewModel.FAQServiceDashboardViewModel;
 
 namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
@@ -14,10 +17,31 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 	[Route("[area]/[controller]")] // 路由格式：[區域]/[控制器]
 	public class FAQsController : Controller
 	{
+		private readonly webtravel2Context _context;
 		private readonly IFAQService _faqService; // FAQ 服務欄位
 
-		// 建構式注入 FAQ 服務
-		public FAQsController(IFAQService faqService) => _faqService = faqService;
+		// 建構式注入 FAQ 服務和 DbContext
+		public FAQsController(IFAQService faqService, webtravel2Context context)
+		{
+			_faqService = faqService;
+			_context = context;
+		}
+
+		public IActionResult TestDbColumns()
+		{
+			var connStr = _context.Database.GetDbConnection().ConnectionString; // 這裡要用 _context (不是 DbContext)
+			using (var conn = new SqlConnection(connStr))
+			{
+				conn.Open();
+				var cmd = new SqlCommand("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'FAQs'", conn);
+				var reader = cmd.ExecuteReader();
+				while (reader.Read())
+				{
+					Console.WriteLine(reader.GetString(0));
+				}
+			}
+			return Content("Done, check your console output.");
+		}
 
 		// ================= Razor View =================
 
@@ -143,7 +167,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex);
+				Console.WriteLine(ex.ToString());
 				return StatusCode(500, new { message = ex.Message });
 			}
 		}

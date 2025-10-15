@@ -9,12 +9,17 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 	/// </summary>
 	public class FAQRepository : IFAQRepository
 	{
+
 		private readonly webtravel2Context _context;
-		
+
 		/// <summary>
 		/// 透過 DI 注入 DbContext
 		/// </summary>
-		public FAQRepository(webtravel2Context context) => _context = context;
+		public FAQRepository(webtravel2Context context)
+		{
+			_context = context;
+			Console.WriteLine("DB Connection String: " + _context.Database.GetDbConnection().ConnectionString);
+		}
 
 		// ===== FAQ CRUD =====
 
@@ -22,7 +27,12 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 		/// 取得所有 FAQ 資料，包含分類
 		/// </summary>
 		public async Task<List<FAQs>> GetAllFAQsAsync()
-			=> await _context.FAQs.Include(f => f.Category).ToListAsync();
+		{
+			// 測試是否能查詢
+			var test = await _context.FAQs.Select(f => new { f.FAQID, f.IsHot, f.HotOrder }).ToListAsync();
+			Console.WriteLine("Test count: " + test.Count);
+			return await _context.FAQs.Include(f => f.Category).ToListAsync();
+		}
 
 		/// <summary>
 		/// 依據 FAQ ID 取得單筆 FAQ，包含分類
@@ -35,6 +45,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 		/// </summary>
 		public async Task AddFAQAsync(FAQs faq)
 		{
+			_context.FAQs.Add(faq);
 			_context.FAQs.Add(faq);
 			await _context.SaveChangesAsync();
 		}
@@ -51,6 +62,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Repositories
 			entity.Answer = faq.Answer;
 			entity.CategoryID = faq.CategoryID;
 			entity.IsActive = faq.IsActive;
+			entity.IsHot = faq.IsHot;
+			entity.HotOrder = faq.HotOrder;
 			entity.UpdateTime = DateTime.Now;
 
 			await _context.SaveChangesAsync();

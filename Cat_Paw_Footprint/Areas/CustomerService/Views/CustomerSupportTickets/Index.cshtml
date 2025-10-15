@@ -3,12 +3,14 @@
 @{
     ViewData["Title"] = "工單管理";
     var currentEmpId = User.FindFirst("EmployeeID")?.Value;
+    var currentEmpName = User.FindFirst("EmployeeName")?.Value ?? "未知員工";
     var finishedCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
         .Count(x => x.StatusName?.Trim() == "已完成" && x.EmployeeID?.ToString() == currentEmpId);
     var processingCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
         .Count(x => x.StatusName?.Trim() == "處理中" && x.EmployeeID?.ToString() == currentEmpId);
     var pendingCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
         .Count(x => x.StatusName?.Trim() == "待處理" && x.EmployeeID?.ToString() == currentEmpId);
+    
 }
 
 @section Styles {
@@ -39,7 +41,7 @@
         }
 
             .chat-bubble.me {
-                background: linear-gradient(90deg,#22b3c1 80%,#7adfe3 100%);
+                background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
                 color: #fff;
                 border-bottom-right-radius: .3em;
             }
@@ -68,10 +70,10 @@
 <div class="card">
     <div class="card-body">
         <div class="mb-4 text-center">
-            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+            <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3; letter-spacing:2px;">
                 <i class="fa-solid fa-clipboard-list me-2"></i>工單管理
             </span>
-            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
         </div>
         <div class="mb-4 d-flex flex-wrap gap-3">
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#d9edf7;color:#31708f;">
@@ -105,7 +107,7 @@
 <div class="modal fade" id="ticketChatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header border-0 pb-0" style="background: linear-gradient(90deg,#22b3c1 60%,#b4e1eb 100%);">
+            <div class="modal-header border-0 pb-0" style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
                 <h5 class="modal-title text-white" id="chatModalLabel">
                     <i class="fa-solid fa-comments me-2"></i>工單聊天室
                 </h5>
@@ -139,7 +141,7 @@
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
             <div class="card shadow-sm rounded-3" style="margin:0;">
-                <div class="card-header bg-primary text-white fw-bold" style="background: linear-gradient(90deg,#22b3c1 60%,#b4e1eb 100%);">
+                <div class="card-header bg-primary text-white fw-bold" style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
                     <i class="fa-solid fa-pen-to-square me-2"></i> 編輯工單
                 </div>
                 <div class="card-body">
@@ -183,9 +185,12 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script>
+        // Razor注入員工ID和姓名（全局可用）
+        const senderId = '@currentEmpId';
+        const senderName = '@currentEmpName';
+
         // DataTable 初始化
         $(document).ready(function () {
-            const senderId = '@currentEmpId';
 
             $('#ticketTable').DataTable({
                 ajax: {
@@ -266,7 +271,6 @@
         let currentTicketId = null;
         let connection = null;
         let chatModalInstance = null;
-        const senderId = '@currentEmpId';
 
         $(document).on('click', '.open-chat-btn', function () {
             currentTicketId = $(this).data('ticketid');
@@ -291,10 +295,11 @@
             });
 
             connection.on("ReceiveMessage", function (msg) {
+                console.log("SignalR msg:", msg);
                 if (msg.ticketID != currentTicketId) return;
                 // 檢查是否有 pending 訊息，若有則覆蓋
-                if (msg.senderID == senderId && msg.messageContent) {
-                    updatePendingMsg(msg.messageContent, msg);
+                if (msg.tempId && msg.senderID == senderId) {
+                    updatePendingMsg(msg.tempId, msg);
                 } else {
                     appendMsg(msg);
                 }
@@ -309,7 +314,7 @@
         function loadHistory(ticketId) {
             // 只載入最近 30 筆，必要時可做分頁
             const skip = 0, take = 30;
-            $('#chatBox').html('<div style="text-align:center;padding:50px 0;color:#22b3c1;font-size:1.3em;"><i class="fa fa-spinner fa-spin"></i> 聊天訊息載入中...</div>');
+            $('#chatBox').html('<div style="text-align:center;padding:50px 0;color:#7ec8e3;font-size:1.3em;"><i class="fa fa-spinner fa-spin"></i> 聊天訊息載入中...</div>');
             $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, function(msgs){
                 $('#chatBox').empty();
                 msgs.forEach(appendMsg);
@@ -318,12 +323,11 @@
 
         function appendMsg(msg) {
             const isMe = msg.senderID == senderId;
-            const isStaff = msg.senderRole === "員工";
             const alignClass = isMe ? "me" : "other";
             const bubbleClass = isMe ? "me" : "other";
-            const badgeColor = isStaff ? "bg-info text-white" : "bg-secondary text-white";
+            const badgeColor = msg.senderRole === "員工" ? "bg-info text-white" : "bg-secondary text-white";
             const displayName = `<span class="fw-semibold me-1" style="color:#045;">${msg.senderDisplayName}</span>`;
-            const time = `<span class="text-secondary ms-1">${msg.sentTime?.replace('T',' ').substring(0,16) ?? ''}</span>`;
+            const time = `<span class="text-secondary ms-1">${msg.sentTime ?? ''}</span>`;
             const badge = `<span class="badge ${badgeColor} rounded-pill px-2 py-1 me-1">${msg.senderRole}</span>`;
             const pending = msg.isPending ? `<span class="text-warning ms-2">(傳送中...)</span>` : '';
             const failed = msg.isFailed ? `<span class="text-danger ms-2">(發送失敗)</span>` : '';
@@ -348,18 +352,17 @@
         }
 
         // 覆蓋 pending 訊息為正式訊息
-        function updatePendingMsg(messageContent, savedMsg) {
-            // 以 messageContent 找 pending，建議後端可回傳 tempId 會更安全
-            const $pending = $(`.chat-message-row[data-tempid]`).filter(function(){
-                return $(this).find('.chat-bubble').text() === messageContent;
-            });
-            if ($pending.length) {
+        function updatePendingMsg(tempId, savedMsg) {
+            // 找到對應的 pending 訊息
+            const $pending = $(`[data-tempid="${tempId}"]`);
+                if ($pending.length) {
                 $pending.find('.chat-meta').html(`
                     <span class="badge bg-info text-white rounded-pill px-2 py-1 me-1">${savedMsg.senderRole}</span>
                     <span class="fw-semibold me-1" style="color:#045;">${savedMsg.senderDisplayName}</span>
                     <span class="text-secondary ms-1">${savedMsg.sentTime?.replace('T',' ').substring(0,16) ?? ''}</span>
                 `);
                 $pending.removeAttr('data-tempid');
+                $pending.find('.text-warning').remove(); // 移除「傳送中...」
             }
         }
 
@@ -378,7 +381,7 @@
             if (e.which === 13) sendChatMsg();
         });
 
-                function sendChatMsg() {
+        function sendChatMsg() {
             const msg = $('#chatInput').val().trim();
             if (!msg || !currentTicketId || !senderId) return;
 
@@ -389,7 +392,7 @@
             appendMsg({
                 senderID: senderId,
                 senderRole: "員工",
-                senderDisplayName: "我",
+                senderDisplayName: senderName, // ← 用目前員工名
                 sentTime: dayjs().format('YYYY-MM-DD HH:mm'),
                 messageContent: msg,
                 ticketID: currentTicketId,
@@ -403,18 +406,15 @@
             const data = {
                 ticketID: parseInt(currentTicketId, 10),
                 senderID: parseInt(senderId, 10),
-                messageContent: msg
+                messageContent: msg,
+                tempId: tempId
             };
             $.ajax({
                 url: '/CustomerService/CustomerSupportMessages/PostMessage',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                success: function (savedMsg) {
-                    // 3. Server訊息回來後，透過SignalR再覆蓋pending訊息
-                    // （SignalR已會收到訊息，可覆蓋pending訊息）
-                    // 你也可以在這裡直接 updatePendingMsg(tempId, savedMsg);
-                },
+                // success 不需要覆蓋，直接等 SignalR
                 error: function (xhr) {
                     markMsgFailed(tempId);
                     alert('發送失敗：' + xhr.responseText);

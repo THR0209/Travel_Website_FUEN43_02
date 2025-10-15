@@ -33,6 +33,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 				CategoryID = f.CategoryID,
 				CategoryName = f.Category?.CategoryName,
 				IsActive = f.IsActive,
+				IsHot = f.IsHot,
+				HotOrder = f.HotOrder,
 				CreateTime = f.CreateTime,
 				UpdateTime = f.UpdateTime
 			}).ToList();
@@ -69,6 +71,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 				Answer = faqVm.Answer,
 				CategoryID = faqVm.CategoryID ?? 0, // 若沒有選擇分類則預設 0
 				IsActive = faqVm.IsActive,
+				IsHot = faqVm.IsHot,
+				HotOrder = faqVm.HotOrder,
 				CreateTime = DateTime.Now,
 				UpdateTime = DateTime.Now
 			};
@@ -87,6 +91,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 			existing.Answer = faqVm.Answer;
 			existing.CategoryID = faqVm.CategoryID ?? existing.CategoryID;
 			existing.IsActive = faqVm.IsActive;
+			existing.IsHot = faqVm.IsHot;
+			existing.HotOrder = faqVm.HotOrder;
 			existing.UpdateTime = DateTime.Now;
 
 			await _repository.UpdateFAQAsync(existing); // 更新資料庫
@@ -136,5 +142,29 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 		/// 刪除分類
 		/// </summary>
 		public async Task DeleteCategoryAsync(int id) => await _repository.DeleteCategoryAsync(id);
+
+		public async Task<List<FAQViewModel>> GetHotFAQsAsync(int count = 5)
+		{
+			var faqs = await _repository.GetAllFAQsAsync();
+			return faqs
+				.Where(f => f.IsHot && f.IsActive)
+				.OrderBy(f => f.HotOrder)
+				.Take(count)
+				.Select(f => new FAQViewModel
+				{
+					FAQID = f.FAQID,
+					Question = f.Question,
+					Answer = f.Answer,
+					CategoryID = f.CategoryID,
+					CategoryName = f.Category?.CategoryName,
+					IsActive = f.IsActive,
+					IsHot = f.IsHot,
+					HotOrder = f.HotOrder,
+					CreateTime = f.CreateTime,
+					UpdateTime = f.UpdateTime
+				})
+				.ToList();
+		}
 	}
+
 }

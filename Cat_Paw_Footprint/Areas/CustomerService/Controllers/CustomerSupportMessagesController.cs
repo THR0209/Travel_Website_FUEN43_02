@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomerService.Services; // 匯入客戶服務訊息相關服務介面
 using Cat_Paw_Footprint.Areas.CustomerService.ViewModel; // 匯入客戶服務訊息 ViewModel
 using Microsoft.AspNetCore.Mvc; // 匯入 MVC 控制器相關功能
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
 
@@ -16,11 +17,16 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 	{
 		// 宣告私有欄位，用來儲存注入的客戶服務訊息服務
 		private readonly ICustomerSupportMessagesService _service;
+		// 加入 SignalR Hub
+		private readonly IHubContext<TicketChatHub> _hubContext;
 
-		// 透過建構式注入服務
-		public CustomerSupportMessagesController(ICustomerSupportMessagesService service)
+		// 建構式注入服務和 SignalR Hub
+		public CustomerSupportMessagesController(
+			ICustomerSupportMessagesService service,
+			IHubContext<TicketChatHub> hubContext)
 		{
 			_service = service;
+			_hubContext = hubContext;
 		}
 
 		/// <summary>
@@ -32,11 +38,20 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		/// <param name="take">取得的筆數 (預設 30)</param>
 		/// <returns>訊息列表 (JSON)</returns>
 		[HttpGet]
+		[HttpGet]
 		public async Task<IActionResult> GetMessages(int ticketId, int skip = 0, int take = 30)
 		{
-			// 依工單 ID 取得訊息列表，並進行分頁 (skip, take)
-			var msgs = await _service.GetByTicketIdAsync(ticketId, skip, take);
-			return Ok(msgs); // 回傳 200 OK 與訊息 JSON
+			try
+			{
+				// 依工單 ID 取得訊息列表，並進行分頁 (skip, take)
+				var msgs = await _service.GetByTicketIdAsync(ticketId, skip, take);
+				return Ok(msgs); // 回傳 200 OK 與訊息 JSON
+			}
+			catch (Exception ex)
+			{
+				// 直接把 exception 內容回傳，方便前端 debug
+				return StatusCode(500, ex.ToString());
+			}
 		}
 
 		/// <summary>
@@ -56,6 +71,9 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			{
 				// 新增訊息
 				var result = await _service.AddAsync(vm);
+				result.TempId = vm.TempId; // ← 保證回傳 tempId 給前端
+										   // 若有 SignalR 廣播，請用 result（含 tempId）廣播
+				await _hubContext.Clients.Group($"ticket-{vm.TicketID}").SendAsync("ReceiveMessage", result);
 				return Ok(result); // 回傳 200 OK 與新增結果 JSON
 			}
 			catch (Exception ex)

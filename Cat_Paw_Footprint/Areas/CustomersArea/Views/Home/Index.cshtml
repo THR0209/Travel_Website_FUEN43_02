@@ -1,0 +1,218 @@
+﻿
+@{
+    ViewData["Title"] = "首頁";
+}
+
+<!-- Hero -->
+<section class="hero mt-3">
+    <!-- 以貓為主題的 Banner 圖片（可改成本機 /uploads/banner-cat.jpg） -->
+    <img src="https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=1800&auto=format&fit=crop" alt="帶貓旅行的海邊日落" id="heroMedia" />
+    <div class="hero-content">
+        <h1 class="display-6 fw-bolder mb-3">帶著毛孩去旅行，探索下一站</h1>
+        <div class="search-bar">
+            <input class="search-input" type="search" placeholder="找寵物友善目的地或行程（例：寵物餐廳、寵物旅館）" />
+            <div class="search-chip search-hide-md">出發日期</div>
+            <div class="search-chip">2 位旅客</div>
+            <button class="btn-brand">搜尋</button>
+        </div>
+    </div>
+    <!-- 飄浮貓掌裝飾 -->
+    <div class="floating-paws" aria-hidden="true">
+        <span>🐾</span><span>🐾</span><span>🐾</span>
+    </div>
+</section>
+
+<!-- Trending Slider (Swiper) -->
+<section class="section" id="popular">
+    <div class="container">
+        <div class="section-title">
+            <h2>🔥 本週熱門商品</h2>
+            <div class="d-flex align-items-center gap-2">
+                <div class="swiper-prev btn btn-outline-secondary btn-sm rounded-pill">◀</div>
+                <div class="swiper-next btn btn-outline-secondary btn-sm rounded-pill">▶</div>
+            </div>
+        </div>
+        <div class="swiper" aria-label="熱門行程輪播">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=1600&auto=format&fit=crop" alt="寵物友善咖啡廳" />
+                            <span class="badge-live">毛孩歡迎</span>
+                        </div>
+                        <div class="product-body">
+                            <h3 class="product-title">台北｜寵物友善咖啡館巡禮</h3>
+                            <div class="product-meta">4.7★ ・ 台灣・3 小時</div>
+                            <div class="price">NT$ 690 起</div>
+                        </div>
+                    </article>
+                </div>
+                <div class="swiper-slide">
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="寵物友善步道" />
+                        </div>
+                        <div class="product-body">
+                            <h3 class="product-title">新北｜毛孩森林步道＋河濱散步</h3>
+                            <div class="product-meta">4.8★ ・ 台灣・1 日</div>
+                            <div class="price">NT$ 1,080 起</div>
+                        </div>
+                    </article>
+                </div>
+                <div class="swiper-slide">
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1600&auto=format&fit=crop" alt="寵物泳池" />
+                        </div>
+                        <div class="product-body">
+                            <h3 class="product-title">桃園｜寵物泳池戲水日</h3>
+                            <div class="product-meta">4.6★ ・ 台灣・半日</div>
+                            <div class="price">NT$ 850 起</div>
+                        </div>
+                    </article>
+                </div>
+                <div class="swiper-slide">
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <img src="https://images.unsplash.com/photo-1583511655826-05700d52f4d9?q=80&w=1600&auto=format&fit=crop" alt="寵物友善露營" />
+                        </div>
+                        <div class="product-body">
+                            <h3 class="product-title">苗栗｜寵物友善露營＆星空晚餐</h3>
+                            <div class="product-meta">4.5★ ・ 台灣・2 日</div>
+                            <div class="price">NT$ 2,980 起</div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Deals Grid -->
+<section class="section" id="deals">
+    <div class="container">
+        <div class="section-title">
+            <h2>精選特惠</h2>
+            <a href="#" class="link-primary">全部優惠</a>
+        </div>
+        <div class="row g-3 g-md-4">
+            <!-- 6 張商品卡 -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="日月潭 單車">
+                        <span class="badge-live">🔥 今日限定</span>
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">南投｜日月潭環潭自行車・SUP 立槳</h3>
+                        <div class="product-meta">4.7★ (1,122) ・ 台灣・3 小時</div>
+                        <div class="price">NT$ 980 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop" alt="浮潛">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">墾丁｜浮潛＆潮間帶生態導覽</h3>
+                        <div class="product-meta">4.3★ (523) ・ 台灣・半日</div>
+                        <div class="price">NT$ 1,200 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1518544801976-3e188ee7a9a2?q=80&w=1600&auto=format&fit=crop" alt="九份">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">新北｜九份黃金老街・阿妹茶樓</h3>
+                        <div class="product-meta">4.8★ (3,102) ・ 台灣・1 日</div>
+                        <div class="price">NT$ 1,050 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop" alt="韓國 咖啡">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">首爾｜文青咖啡巷弄漫遊</h3>
+                        <div class="product-meta">4.5★ (812) ・ 韓國・2 小時</div>
+                        <div class="price">NT$ 1,180 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1494475673543-6a6a27143b22?q=80&w=1600&auto=format&fit=crop" alt="藍山">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">澳洲｜藍山新秘境・空中步道</h3>
+                        <div class="product-meta">4.6★ (655) ・ 澳洲・1 日</div>
+                        <div class="price">NT$ 3,100 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?q=80&w=1600&auto=format&fit=crop" alt="巴黎">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">法國｜塞納河左岸夜色</h3>
+                        <div class="product-meta">4.9★ (1,210) ・ 法國・2 小時</div>
+                        <div class="price">NT$ 2,900 起</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section class="section" id="faqSection">
+    <div class="container py-3">
+        <div class="section-title mb-4">
+            <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px;color:#7ec8e3;">
+                <i class="fa-solid fa-circle-question me-2"></i> 常見問題
+            </h2>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
+        </div>
+        <h4 class="fw-bold mb-3" style="color:#168c9c;">
+            <i class="fa-regular fa-lightbulb me-2"></i> 熱門常見問題
+        </h4>
+        <div id="homeHotFaqAccordion"></div>
+        <div class="mt-4 text-center">
+            <a href="/CustomersArea/FrontFAQs"
+               class="btn btn-outline-info rounded-pill px-4 py-2 fw-bold"
+               style="letter-spacing:1px;">
+                <i class="fa-solid fa-list-ul me-2"></i>查看更多常見問題
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- Newsletter / CTA -->
+<section class="section">
+    <div class="container">
+        <div class="newsletter d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3">
+            <div>
+                <h3 class="mb-1">訂閱最新旅遊優惠</h3>
+                <p class="mb-0">第一時間取得折扣碼、熱門活動與旅遊靈感。</p>
+            </div>
+            <form class="d-flex gap-2 w-100 w-lg-50" onsubmit="event.preventDefault(); alert('已訂閱！');">
+                <input type="email" class="form-control form-control-lg" placeholder="輸入你的 Email" required>
+                <button class="btn btn-dark btn-lg rounded-5">訂閱</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+
