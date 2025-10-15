@@ -15,6 +15,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_faqService = faqService;
 		}
 
+		//GET: CustomersArea/FrontFAQs/Hot
 		[HttpGet]
 		[Route("api/hot")]
 		public async Task<IActionResult> Hot(int count = 5)
@@ -23,13 +24,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(hotFaqs);
 		}
 
+		//GET: CustomersArea/FrontFAQs
 		[HttpGet]
-		[Route("")]
+		[Route("Index")]
 		public IActionResult Index()
 		{
 			return View();
 		}
 
+		//GET: CustomersArea/FrontFAQs/All
 		[HttpGet]
 		[Route("api/all")]
 		public async Task<IActionResult> All()
@@ -38,6 +41,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(faqs.Where(f => f.IsActive).ToList());
 		}
 
+		//GET: CustomersArea/FrontFAQs/Categories
 		[HttpGet]
 		[Route("api/categories")]
 		public async Task<IActionResult> Categories()

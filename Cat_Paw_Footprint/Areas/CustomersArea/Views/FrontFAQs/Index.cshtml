@@ -2,99 +2,100 @@
     ViewData["Title"] = "常見問題";
 }
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-<style>
-    body {
-        background: #f8fafd;
-    }
 
-    .faq-header {
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        border-radius: 20px;
-        padding: 2.5rem 2rem 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .faq-search-box {
-        border-radius: 40px;
-        border: 1px solid #d5e5f7;
-        font-size: 1.25rem;
-        padding: 1rem 2.5rem;
-        background: #f7faff;
-        margin-bottom: 2rem;
-    }
-
-    .faq-popular-carousel {
-        display: flex;
-        gap: 1.5rem;
-        overflow-x: auto;
-        padding-bottom: 1rem;
-    }
-
-    .faq-popular-item {
-        flex: 0 0 320px;
-        background: #ffffff;
-        border-radius: 18px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-        padding: 1.5rem;
-        margin-right: .5rem;
-        transition: box-shadow .2s;
-    }
-
-        .faq-popular-item:hover {
-            box-shadow: 0 6px 16px rgba(34,109,211,0.12);
+@section Styles {
+    <style>
+        body {
+            background: #f8fafd;
         }
 
-    .faq-category-card {
-        background: linear-gradient(90deg, #eaf6ff 0%, #f9f9fd 70%);
-        border-radius: 16px;
-        padding: 1.2rem .5rem;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        text-align: center;
-        cursor: pointer;
-        transition: background .2s, box-shadow .2s;
-        border: none;
-        margin-bottom: 1rem;
-    }
-
-        .faq-category-card:hover {
-            background: linear-gradient(90deg, #d5e5f7 0%, #f7faff 100%);
-            box-shadow: 0 2px 8px rgba(34,109,211,0.10);
+        .faq-header {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            padding: 2.5rem 2rem 1.5rem;
+            margin-bottom: 2rem;
         }
 
-    .faq-category-icon {
-        font-size: 2rem;
-        color: #226dd3;
-        margin-bottom: .5rem;
-    }
+        .faq-search-box {
+            border-radius: 40px;
+            border: 1px solid #d5e5f7;
+            font-size: 1.25rem;
+            padding: 1rem 2.5rem;
+            background: #f7faff;
+            margin-bottom: 2rem;
+        }
 
-    .faq-detail-accordion .accordion-item {
-        border-radius: 12px;
-        margin-bottom: 1rem;
-        box-shadow: 0 1px 8px rgba(34,109,211,0.08);
-        border: none;
-        overflow: hidden;
-    }
+        .faq-popular-carousel {
+            display: flex;
+            gap: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
 
-    .faq-detail-accordion .accordion-button {
-        background: #f7faff;
-        font-weight: 500;
-        font-size: 1.1rem;
-        border-radius: 0;
-        padding: 1rem 1.5rem;
-    }
+        .faq-popular-item {
+            flex: 0 0 320px;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 1.5rem;
+            margin-right: .5rem;
+            transition: box-shadow .2s;
+        }
 
-    .faq-detail-accordion .accordion-body {
-        background: #fff;
-        padding: 1.2rem 1.5rem;
-        font-size: 1.05rem;
-        color: #444;
-    }
+            .faq-popular-item:hover {
+                box-shadow: 0 6px 16px rgba(34,109,211,0.12);
+            }
 
+        .faq-category-card {
+            background: linear-gradient(90deg, #eaf6ff 0%, #f9f9fd 70%);
+            border-radius: 16px;
+            padding: 1.2rem .5rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            text-align: center;
+            cursor: pointer;
+            transition: background .2s, box-shadow .2s;
+            border: none;
+            margin-bottom: 1rem;
+        }
 
-</style>
+            .faq-category-card:hover {
+                background: linear-gradient(90deg, #d5e5f7 0%, #f7faff 100%);
+                box-shadow: 0 2px 8px rgba(34,109,211,0.10);
+            }
+
+        .faq-category-icon {
+            font-size: 2rem;
+            color: #226dd3;
+            margin-bottom: .5rem;
+        }
+
+        .faq-detail-accordion .accordion-item {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 8px rgba(34,109,211,0.08);
+            border: none;
+            overflow: hidden;
+        }
+
+        .faq-detail-accordion .accordion-button {
+            background: #f7faff;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 0;
+            padding: 1rem 1.5rem;
+        }
+
+        .faq-detail-accordion .accordion-body {
+            background: #fff;
+            padding: 1.2rem 1.5rem;
+            font-size: 1.05rem;
+            color: #444;
+        }
+
+    </style>
+
+}
 
 <div class="container py-5">
     <div class="row justify-content-center">

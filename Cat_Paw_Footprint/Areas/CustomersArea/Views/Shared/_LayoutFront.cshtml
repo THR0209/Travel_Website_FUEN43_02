@@ -26,13 +26,14 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="~/front-end/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/front-end/assets/css/fontawesome.css" />
     <link rel="stylesheet" href="~/front-end/assets/css/templatemo-woox-travel.css" />
     <link rel="stylesheet" href="~/front-end/assets/css/owl.css" />
     <link rel="stylesheet" href="~/front-end/assets/css/animate.css" />
     <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
-    @await RenderSectionAsync("Styles", required: false)
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <!-- ***** Preloader Start ***** -->
@@ -111,7 +112,7 @@
                                                 <button type="submit"
                                                         class="dropdown-item text-danger d-inline-flex align-items-center"
                                                         style="background:none;border:none;width:auto;">
-                                                    <span class="me-2">登出</span>
+                                                    <span class="text-danger me-2">登出</span>
                                                     <i class="fa-solid fa-right-from-bracket"></i>
                                                 </button>
                                             </form>
@@ -204,7 +205,7 @@
                     .catch(err => console.log('Service Worker 註冊失敗:', err));
             }
         </script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderSection("Scripts", required: false)
 
 </body>
 </html>
