@@ -1,7 +1,10 @@
-﻿namespace Cat_Paw_Footprint.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Cat_Paw_Footprint.Models
 {
 	public class GroupPhotos
 	{
+		[Key]
 		public int PhotoId { get; set; }
 		public int GroupId { get; set; }
 		public string UploaderType { get; set; } = null!;

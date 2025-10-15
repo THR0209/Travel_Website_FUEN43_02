@@ -1,7 +1,10 @@
-﻿namespace Cat_Paw_Footprint.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Cat_Paw_Footprint.Models
 {
 	public class TourGroups
 	{
+		[Key]
 		public int GroupId { get; set; }
 		public string GroupCode { get; set; } = null!;
 		public string GroupName { get; set; } = null!;

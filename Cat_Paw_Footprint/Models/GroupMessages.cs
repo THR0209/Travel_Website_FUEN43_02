@@ -1,7 +1,10 @@
-﻿namespace Cat_Paw_Footprint.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Cat_Paw_Footprint.Models
 {
 	public class GroupMessages
 	{
+		[Key]
 		public int MessageId { get; set; }
 		public int GroupId { get; set; }
 		public string SenderType { get; set; } = null!;
