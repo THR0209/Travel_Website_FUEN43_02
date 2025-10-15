@@ -34,6 +34,7 @@
     <Folder Include="Areas\ProductManagement\ViewModel\" />
     <Folder Include="Areas\TourGuideArea\Data\" />
     <Folder Include="Areas\TourGuideArea\Models\" />
+    <Folder Include="Areas\TourGuideArea\ViewModel\" />
     <Folder Include="Areas\TourGuideArea\Views\" />
     <Folder Include="Areas\TravelManagement\Data\" />
     <Folder Include="Areas\TravelManagement\Views\Shared\" />

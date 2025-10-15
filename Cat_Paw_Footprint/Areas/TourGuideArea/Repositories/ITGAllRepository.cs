@@ -1,6 +1,8 @@
-﻿namespace Cat_Paw_Footprint.Areas.TourGuideArea.Repositories
+﻿
+using Cat_Paw_Footprint.Models;
+namespace Cat_Paw_Footprint.Areas.TourGuideArea.Repositories
 {
-	public class ITGAllRepository
+	public interface ITGAllRepository
 	{
 	}
 }

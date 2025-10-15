@@ -1,13 +1,15 @@
 using Cat_Paw_Footprint.Areas.CustomersArea.Repositories;
+using Cat_Paw_Footprint.Areas.CustomersArea.Services;
 using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
 using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
 using Cat_Paw_Footprint.Areas.Order.Models;
 using Cat_Paw_Footprint.Areas.Order.Services;
+using Cat_Paw_Footprint.Areas.TourGuideArea.Repositories;
+using Cat_Paw_Footprint.Areas.TourGuideArea.Services;
 using Cat_Paw_Footprint.Areas.Vendor.Repositories;
 using Cat_Paw_Footprint.Areas.Vendor.Services;
-using Cat_Paw_Footprint.Areas.CustomersArea.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using ClosedXML.Parser;
@@ -177,6 +179,8 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<IEmployeeMiniRepository, EmployeeMiniRepository>();
 			builder.Services.AddScoped <ICusLogRegRepository, CusLogRegRepository>();
 			builder.Services.AddScoped<ICusLogRegService, CusLogRegService>();
+			builder.Services.AddScoped<ITGAllRepository, TGAllRepository>();
+			builder.Services.AddScoped<ITGAllService, TGAllService>();
 			#endregion
 
 			builder.Services.AddHttpContextAccessor();
