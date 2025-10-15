@@ -1,0 +1,167 @@
+@{
+    ViewData["Title"] = "會員報表";
+}
+
+<div class="card mb-4 shadow">
+    <div class="card-header bg-white pb-0">
+        <div class="position-relative">
+            <h1 class="text-center mb-3">會員報表</h1>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard"
+               class="btn btn-outline-primary position-absolute end-0 top-50 translate-middle-y me-2">
+                <i class="fa-solid fa-chart-line"></i> 回到儀表板
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid px-0">
+            <div class="row g-4">
+                <!-- 本月訂閱 vs 非訂閱 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            本月訂閱 vs 非訂閱
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="subscriptionThisMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員資料表
+                        </div>
+                    </div>
+                </div>
+                <!-- 上月訂閱 vs 非訂閱 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            上月訂閱 vs 非訂閱
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="subscriptionLastMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員資料表
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-1">
+                <!-- 本月銅 / 銀 / 金 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            本月銅 / 銀 / 金 等級比例
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="levelThisMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員等級表
+                        </div>
+                    </div>
+                </div>
+                <!-- 上月銅 / 銀 / 金 -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                        <div class="card-header text-center fw-bold fs-5">
+                            上月銅 / 銀 / 金 等級比例
+                        </div>
+                        <div class="card-body text-center">
+                            <canvas id="levelLastMonth" style="max-width: 350px; display:block; margin:0 auto;" width="400" height="400"></canvas>
+                        </div>
+                        <div class="card-footer text-muted text-center">
+                            最後更新：@DateTime.Now.ToString("yyyy/MM/dd HH:mm") <br>
+                            資料來源：會員等級表
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 優惠券管理按鈕 -->
+            <div class="row mt-4">
+                <div class="col text-center">
+                    <a asp-area="CouponManagement" asp-controller="Coupons" asp-action="Index" class="btn btn-outline-primary">
+                        優惠券管理
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function drawPieChart(canvasId, dataset, title, colors, order = null) {
+                // ✅ 依固定順序排序 (如果有指定 order)
+                if (order) {
+                    dataset.sort((a, b) => order.indexOf(a.label) - order.indexOf(b.label));
+                }
+
+                // 過濾掉 count = 0 的資料
+                dataset = dataset.filter(x => x.count > 0);
+
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: dataset.map(x => x.label),
+                        datasets: [{
+                            data: dataset.map(x => x.count),
+                            backgroundColor: colors.slice(0, dataset.length),
+                            borderColor: colors.slice(0, dataset.length).map(c => c.replace("0.7", "1")),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            title: { display: true, text: title },
+                            datalabels: {
+                                formatter: (value, ctx) => {
+                                    let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    let percent = sum > 0 ? ((value / sum) * 100).toFixed(1) + "%" : "0%";
+                                    return `${percent}\n(${value}人)`;
+                                },
+                                color: '#000',
+                                font: { weight: 'bold', size: 12 }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+
+            // ===== 訂閱 vs 非訂閱 =====
+            fetch('/Admin/Reports/GetMemberSubscriptionRatio')
+                .then(res => res.json())
+                .then(data => {
+                    const colors = ['rgba(54, 162, 235, 0.7)', 'rgba(255, 99, 132, 0.7)'];
+                    drawPieChart("subscriptionThisMonth", data.thisMonth, "本月訂閱比例", colors);
+                    drawPieChart("subscriptionLastMonth", data.lastMonth, "上月訂閱比例", colors);
+                })
+                .catch(err => console.error("訂閱比例 API 錯誤:", err));
+
+            // ===== 銅 / 銀 / 金 =====
+            fetch('/Admin/Reports/GetMemberLevelRatio')
+                .then(res => res.json())
+                .then(data => {
+                    const colors = [
+                        'rgba(205, 127, 50, 0.7)',   // Bronze
+                        'rgba(192, 192, 192, 0.7)',  // Silver
+                        'rgba(255, 215, 0, 0.7)'     // Gold
+                    ];
+                    const order = ["Bronze", "Silver", "Gold"]; // 固定排序
+                    drawPieChart("levelThisMonth", data.thisMonth, "本月等級比例", colors, order);
+                    drawPieChart("levelLastMonth", data.lastMonth, "上月等級比例", colors, order);
+                })
+                .catch(err => console.error("會員等級比例 API 錯誤:", err));
+        });
+    </script>
+}
+

@@ -1,0 +1,57 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@media print {
+    body {
+        margin: 0 !important;
+    }
+}
+
+:root {
+    --ck-content-font-family: 'Lato';
+}
+
+.main-container {
+    font-family: var(--ck-content-font-family);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.editor-container_classic-editor .editor-container__editor {
+    min-width: 795px;
+    max-width: 795px;
+}
+
+.editor_container__word-count .ck-word-count {
+    color: var(--ck-color-text);
+    display: flex;
+    height: 20px;
+    gap: var(--ck-spacing-small);
+    justify-content: flex-end;
+    font-size: var(--ck-font-size-base);
+    line-height: var(--ck-line-height-base);
+    font-family: var(--ck-font-face);
+    padding: var(--ck-spacing-small) var(--ck-spacing-standard);
+}
+
+.editor-container_include-word-count.editor-container_classic-editor .editor_container__word-count {
+    border: 1px solid var(--ck-color-base-border);
+    border-radius: var(--ck-border-radius);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
+}
+
+.editor-container_include-word-count.editor-container_classic-editor .editor-container__editor .ck-editor .ck-editor__editable {
+    border-radius: 0;
+}
+
+.ck-editor__editable_inline {
+    min-height: 45vh; /* 高度佔視窗 40% */
+}
+
+.ck-editor__editable {
+    /*min-height: 200px;*/ /* 編輯器最小高度 */
+    max-height: 45vh; /* 編輯器最大高度，超過就捲動 */
+    overflow-y: auto; /* 超出時出現捲軸 */
+}

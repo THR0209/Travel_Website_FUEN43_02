@@ -1,0 +1,140 @@
+﻿@using Cat_Paw_Footprint.Helpers.Cat_Paw_Footprint.Helpers
+@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.PromotionViewModel>
+
+@{
+	ViewData["Title"] = "優惠活動";
+}
+
+<div class="mt-2" id="cr-pro" style="display:none;">
+	<a asp-action="Create" class="btn btn-outline-primary">
+		<i class="fa-solid fa-square-plus"></i>新增優惠活動
+	</a>
+</div>
+<div class="card">
+	<div class="card-body">
+		<div class="mb-4 text-center">
+			<span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+				<i class="fa-solid fa-gift me-2"></i>優惠活動
+			</span>
+			<div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+		</div>
+		<div class="table-responsive">
+			<table id="PromotionsTable" class="table table-striped align-middle">
+				<thead class="table-primary">
+					<tr>
+						<th style="width: 13%;">
+							@Html.DisplayNameFor(model => model.PromoName)
+						</th>
+						<th style="width: 15%;">
+							@Html.DisplayNameFor(model => model.PromoDesc)
+						</th>
+						<th style="width: 8%;">
+							@Html.DisplayNameFor(model => model.StartTime)
+						</th>
+						<th style="width: 8%;">
+							@Html.DisplayNameFor(model => model.EndTime)
+						</th>
+						<th style="width: 8%;">
+							@Html.DisplayNameFor(model => model.DiscountType)
+						</th>
+						<th style="width: 8%;">
+							@Html.DisplayNameFor(model => model.DiscountValue)
+						</th>
+						<th style="width: 3%;">
+							@Html.DisplayNameFor(model => model.IsActive)
+						</th>
+						<th style="width: 8%;">
+							@Html.DisplayNameFor(model => model.CreateTime)
+						</th>
+						<th style="width: 8%;">
+							@Html.DisplayNameFor(model => model.UpdateTime)
+						</th>
+						<th style="width: 10%;">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in Model)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(modelItem => item.PromoName)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.PromoDesc)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.StartTime)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.EndTime)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.DiscountTypeName)
+							</td>
+							<td>@Html.DisplayFor(modelItem => item.DiscountValueDisplay)</td>
+							<td class="text-center">
+								@Html.ActiveBadge(item.IsActive)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.CreateTime)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.UpdateTime)
+							</td>
+							<td class="text-center">
+								<a asp-action="Details" asp-route-id="@item.PromoID" class="btn btn-outline-secondary btn-sm mb-1 btn-action"><i class="fa-solid fa-eye"></i>詳情</a>
+								<a asp-action="Edit" asp-route-id="@item.PromoID" class="btn btn-outline-primary btn-sm mb-1 btn-action"><i class="fa-solid fa-pen-to-square"></i>編輯</a>
+								<a asp-action="Delete" asp-route-id="@item.PromoID" class="btn btn-outline-danger btn-sm mb-1 btn-action"><i class="fa-solid fa-trash"></i>刪除</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+		</table>
+	</div>
+    </div>
+</div>
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('.table').DataTable({
+				language: {
+						search: "搜尋：",
+						lengthMenu: "每頁顯示 _MENU_ 筆",
+						info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+						paginate: {
+							first: "第一頁",
+							last: "最後一頁",
+							next: "下一頁",
+							previous: "上一頁"
+						},
+						zeroRecords: "找不到資料",
+					},
+					pageLength: 10, // 預設每頁10筆
+					lengthMenu: [5, 10, 20, 50],
+					columnDefs: [
+						{ targets:9, orderable: false, searchable: false },
+					]
+				// layout: {
+				// 	topStart: {
+				// 		buttons: ['copy', 'csv', 'pdf', 'print']
+				// 	}
+				// },
+				// fixedHeader: true
+			});
+
+			// 顯示成功訊息（延遲一點點，讓 DataTable 先完成）
+			@if (TempData["SuccessMessage"] != null)
+			{
+				<text>
+					setTimeout(function () {
+						alert('@Html.Raw(TempData["SuccessMessage"])')
+					}, 300); // 0.3 秒後顯示
+				</text>
+
+			}
+			$('.dataTables_length').after($('#cr-pro').show());
+	});
+
+	</script>
+}

@@ -1,0 +1,75 @@
+﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsEditViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    ViewData["Title"] = "編輯最新消息";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <i class="fa-solid fa-pen-to-square me-2"></i> 編輯最新消息
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="NewsID" />
+
+                        <div class="mb-3 mt-3">
+                            <label asp-for="NewsTitle" class="form-label fw-semibold"></label>
+                            <input asp-for="NewsTitle" class="form-control" placeholder="請輸入標題" />
+                            <span asp-validation-for="NewsTitle" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="NewsContent" class="form-label fw-semibold"></label>
+                            <textarea asp-for="NewsContent" class="form-control" rows="7" placeholder="請輸入消息內容"></textarea>
+                            <span asp-validation-for="NewsContent" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PublishTime" class="form-label fw-semibold"></label>
+                            <input asp-for="PublishTime" class="form-control" type="datetime-local" min="2000-01-01T00:00" max="2099-12-31T23:59" />
+                            <span asp-validation-for="PublishTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ExpireTime" class="form-label fw-semibold"></label>
+                            <input asp-for="ExpireTime" class="form-control" type="datetime-local" min="2000-01-01T00:00" max="2099-12-31T23:59" />
+                            <span asp-validation-for="ExpireTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="hidden" asp-for="IsActive" value="false" />
+                            <input type="checkbox" class="form-check-input" asp-for="IsActive" value="true" />
+                            <label asp-for="IsActive" class="form-check-label fw-semibold">上架</label>
+                            <span asp-validation-for="IsActive" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="EmployeeName" class="form-label fw-semibold"></label>
+                            <input asp-for="EmployeeName" class="form-control" readonly />
+                            <input type="hidden" asp-for="EmployeeID" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> 返回清單
+                            </a>
+                            <button type="submit" class="btn btn-outline-warning text-dark">
+                                <i class="fa-solid fa-save"></i> 儲存變更
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

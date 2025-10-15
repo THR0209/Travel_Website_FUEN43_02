@@ -1,23 +1,38 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
-    var login = Context.Session.GetString("Login");
+    ViewData["Title"] = "首頁";
+    var login = Context.Session.GetString("Login"); // "True" 或 "False"
+    bool isLogin = User.Identity.IsAuthenticated; // 判斷是否已登入
+    var empName = User.FindFirst("EmployeeName")?.Value
+                  ?? User.Identity.Name
+                  ?? "未登入";
+    var empID = User.FindFirst("EmployeeID")?.Value ?? "";
 }
 
-<div class="text-center">
-    <h1 class="display-4">首頁</h1>
-    <p>
-        這裡是首頁，您的登入狀態:
-        <span>
-            @if (login == "True") 
-            {
-                @:登入中
-            }
-                
-            else 
-            {
-                @:未登入 
-            }
-        </span>
-        </p>
-</div>
+@* <!-- Debug 區塊，協助檢查登入狀態（可移除） -->
+<div style="border:1px solid #aaa; padding:8px; margin-bottom:8px;">
+    <b>IsAuthenticated:</b> @isLogin <br />
+    <b>empName:</b> @empName <br />
+    <b>empID:</b> @empID <br />
+    <b>User.Identity.Name:</b> @User.Identity.Name
+    <b>AuthenticationType:</b> @User.Identity.AuthenticationType
+</div> *@
 
+<!-- 外層容器 -->
+<div class="d-flex flex-column align-items-center justify-content-start flex-grow-1 p-4">
+    <!-- 歡迎區塊 -->
+    <div class="w-100 d-flex justify-content-center mt-3">
+        <div class="card shadow-sm border-0 rounded-3" style="max-width: 500px; width: 100%;">
+            <div class="card-body text-center p-4">
+                @if (login == "True")
+                {
+                    <span>旅途的掌舵者，歡迎您再次登入！</span>
+                }
+                else
+                {
+                    <h4 class="mb-3">未登入</h4>
+                    <p class="mb-4">請先登入帳號以管理網站內容。</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

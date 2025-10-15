@@ -21,9 +21,11 @@ public partial class Promotions
 
     public decimal? DiscountValue { get; set; }
 
-    public bool? IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     public DateTime? CreateTime { get; set; }
 
     public DateTime? UpdateTime { get; set; }
+
+	public virtual ICollection<Products_Promotions> Products_Promotions { get; set; } = new List<Products_Promotions>();
 }

@@ -6,7 +6,8 @@ namespace Cat_Paw_Footprint.Models;
 
 public partial class CustomerTripProjects
 {
-    public int? CustomerID { get; set; }
+	public virtual Customers? CustomerID { get; set; }
+
 	[Key]
 	public int ProjectID { get; set; }
 

@@ -1,0 +1,193 @@
+@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.VendorAdminViewModel>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "廠商管理";// 設定頁面標題
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+   
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-building me-2"></i>廠商管理
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+            <table class="table table-striped align-middle" id="ven-table">
+                <thead>
+                    <tr>
+                        <th style="width:10%;">廠商編號</th>
+                        <th style="width:15%;">廠商帳號</th>
+                        <th style="width:25%;">廠商名稱</th>
+                        <th style="width:15%;">聯絡人</th>
+                        <th style="width:10%;">啟用</th>
+                        <th style="width:35%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ven in Model)
+                    {
+                        <tr data-id="@ven.VendorId" data-Account="@ven.Account">
+                            <td class="text-center">@ven.VendorId</td>
+                            <td class="text-center">@ven.Account</td>
+                            <td >@ven.CompanyName</td>
+                            <td class="text-center">@ven.ContactName</td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-flex justify-content-center">
+                                    <input class="form-check-input js-status" type="checkbox" role="switch"
+                                            @(ven.Status == true ? "checked" : "") />
+                                </div>
+                            </td>
+                            <td class="text-center">
+                            <button type="button" class="btn btn-outline-secondary btn-sm js-detail"><i class="fa-solid fa-eye"></i>廠商資訊</button>
+                            <button type="button" class="btn btn-outline-info btn-sm js-history"><i class="fa-solid fa-user-clock"></i>登入紀錄</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm js-save"><i class="fa-solid fa-floppy-disk"></i>儲存</button>
+                            </td>
+                        </tr>
+                    }
+            
+                </tbody>
+            </table>
+    </div>
+</div>
+<form id="anti-form" method="post">
+    @Html.AntiForgeryToken()
+</form>
+
+<div class="modal fade" id="venDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">廠商詳細資料</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- 這裡會被 Script 填資料 -->
+            <div class="modal-body"><!-- AJAX 會塞 Partial 進來 --></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+                        document.querySelectorAll(".js-detail").forEach(btn => {
+                btn.addEventListener("click", async e => {
+                    const tr = btn.closest("tr");
+                        const account = tr.querySelector("td:nth-child(2)").textContent; // 假設帳號在第2欄
+
+                    try {
+        const res = await fetch('@Url.Action("VendorDetail", "VendorAdmin", new { area = "Employee" })' + `?account=${encodeURIComponent(account)}`, {
+                            method: "GET",
+                            headers: { "X-Requested-With": "XMLHttpRequest" }
+                        });
+                        if (!res.ok) throw new Error("HTTP " + res.status);
+
+                        const html = await res.text();
+                        document.querySelector("#venDetailModal .modal-body").innerHTML = html;
+
+
+                        new bootstrap.Modal(document.getElementById('venDetailModal')).show();
+                    } catch (err) {
+                        alert("載入失敗：" + err.message);
+                    }
+                });
+            });
+
+             document.querySelectorAll(".js-history").forEach(btn => {
+                    btn.addEventListener("click", async e => {
+                        const tr = btn.closest("tr");
+                        const vendorId = tr.querySelector("td:nth-child(1)").textContent; // 假設廠商id在第1欄
+
+                        try {
+                               const res = await fetch('@Url.Action("LoginHistory", "VendorAdmin", new { area = "Employee" })' + `?VendorId=${encodeURIComponent(vendorId)}`, {
+                                method: "GET",
+                                headers: { "X-Requested-With": "XMLHttpRequest" }
+                            });
+                            if (!res.ok) throw new Error("HTTP " + res.status);
+
+                            const html = await res.text();
+                            document.querySelector("#venDetailModal .modal-body").innerHTML = html;
+
+                            new bootstrap.Modal(document.getElementById('venDetailModal')).show();
+                        } catch (err) {
+                            alert("載入失敗：" + err.message);
+                        }
+                    });
+                });
+
+                       //儲存
+            document.querySelectorAll(".js-save").forEach(btn => {
+                btn.addEventListener("click", async e => {
+                    const tr = btn.closest("tr");
+                    const account = tr.dataset.account;
+                    const Status = tr.querySelector(".js-status").checked;
+                    const form = new FormData();
+                            form.append("account", account);
+            form.append("status", Status ? "true" : "false");
+
+                    const token = document.querySelector("#anti-form input[name=__RequestVerificationToken]").value;
+
+                    if (token) form.append("__RequestVerificationToken", token);
+                        btn.disabled = true;
+                        const oldText = btn.textContent;
+                        btn.textContent = "儲存中…";
+                        try {
+                                const res = await fetch('@Url.Action("UpdateStatus", "VendorAdmin", new { area = "Employee" })', {
+                        method: "POST",
+                        body: form,
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                        });
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                        const data = await res.json();
+                    if (data.success) {
+                        alert("更新成功");
+                    }
+                    else {
+                                    alert("更新失敗：" + (data.message || "請稍後再試"));
+                                }
+                        } catch (err) {
+                        alert("發生錯誤：" + err.message);
+                        } finally {
+                                btn.disabled = false;
+                                    btn.textContent = oldText;
+                        }
+                    });
+                });
+        $(document).ready(function () {
+            $('#ven-table').DataTable({
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料",
+                },
+                pageLength: 10, // 預設每頁10筆
+                lengthMenu: [5, 10, 20, 50],
+                columnDefs: [
+                    {targets: 4,orderable: false,searchable: false},
+                    {targets: 5,orderable: false,searchable: false}
+                ],
+            });
+            $('.dataTables_filter').after($('#cus-btn-save-wrap').show());
+        });
+</script>
+
+}

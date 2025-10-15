@@ -1,0 +1,62 @@
+﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsDetailViewModel
+
+@{
+    ViewData["Title"] = "最新消息詳情";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-info text-white fw-bold">
+                    <i class="fa-solid fa-circle-info me-2"></i> 最新消息詳情
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3 fw-semibold mt-3 mb-2">標題</dt>
+                        <dd class="col-sm-9 mt-3 mb-2">@Html.DisplayFor(model => model.NewsTitle)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">內容</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.NewsContent)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">發布時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.PublishTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">到期時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.ExpireTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">是否啟用</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">啟用</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">停用</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3 fw-semibold">建立時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.CreateTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">修改時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.UpdateTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">員工名稱</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.EmployeeName)</dd>
+                    </dl>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> 返回清單
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@Model?.NewsID" class="btn btn-info">
+                            <i class="fa-solid fa-pen-to-square"></i> 編輯
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

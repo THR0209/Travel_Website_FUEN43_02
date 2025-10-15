@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "客戶登入";
+}
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
+@{
+    var tokens = antiforgery.GetAndStoreTokens(Context);
+}
+<meta name="csrf-token" content="@tokens.RequestToken" />
+
+<div id="app">
+    <div class="card">
+        <h3 class="text-center mb-4 fw-bold">會員登入</h3>
+
+        <form v-on:submit.prevent="submitLogin">
+            <div class="mb-3">
+                <label for="account" class="form-label fw-semibold">帳號</label>
+                <input type="text" class="form-control form-control-lg" id="account" v-model="account" required placeholder="請輸入帳號">
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label fw-semibold">密碼</label>
+                <input type="password" class="form-control form-control-lg" id="password" v-model="password" required placeholder="請輸入密碼">
+            </div>
+
+            <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-semibold">登入</button>
+        </form>
+
+        <div v-if="errors.length" class="alert alert-danger mt-3">
+            <div v-for="(err, idx) in errors" :key="idx">{{ err }}</div>
+        </div>
+
+        <div class="bottom-links">
+            <a asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="Register" class="text-decoration-none">會員註冊</a>
+            <span>|</span>
+            <a asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Register" class="text-decoration-none">員工登入</a>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    account: "",
+                    password: "",
+                    errors: []
+                };
+            },
+            methods: {
+                async submitLogin() {
+                    this.errors = [];
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+
+                    try {
+                        const form = new FormData();
+                        form.append("account", this.account);
+                        form.append("password", this.password);
+
+                        const response = await axios.post("/CustomersArea/CusLogReg/Login", form, {
+                            headers: { "RequestVerificationToken": token }
+                        });
+
+                        if (response.data.success) {
+                            window.location.href = response.data.redirectUrl; // 成功導向首頁
+                        } else {
+                            this.errors.push(response.data.error || "登入失敗，請檢查帳號密碼");
+                        }
+
+                    } catch (err) {
+                        if (err.response?.data) {
+                            this.errors.push(err.response.data.error || "登入失敗，請稍後再試。");
+                        } else {
+                            this.errors.push("伺服器錯誤，請稍後再試。");
+                        }
+                    }
+                }
+            }
+        });
+        app.mount("#app");
+    </script>
+}

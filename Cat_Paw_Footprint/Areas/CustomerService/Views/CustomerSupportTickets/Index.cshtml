@@ -1,0 +1,549 @@
+﻿@using Cat_Paw_Footprint.Areas.CustomerService.ViewModel
+@model IEnumerable<CustomerSupportTicketViewModel>
+@{
+    ViewData["Title"] = "工單管理";
+    var currentEmpId = User.FindFirst("EmployeeID")?.Value;
+    var currentEmpName = User.FindFirst("EmployeeName")?.Value ?? "未知員工";
+    var finishedCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
+        .Count(x => x.StatusName?.Trim() == "已完成" && x.EmployeeID?.ToString() == currentEmpId);
+    var processingCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
+        .Count(x => x.StatusName?.Trim() == "處理中" && x.EmployeeID?.ToString() == currentEmpId);
+    var pendingCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
+        .Count(x => x.StatusName?.Trim() == "待處理" && x.EmployeeID?.ToString() == currentEmpId);
+    
+}
+
+@section Styles {
+    <style>
+        /* 美化聊天室訊息泡泡 */
+        .chat-message-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+            .chat-message-row.me {
+                align-items: flex-end;
+            }
+
+            .chat-message-row.other {
+                align-items: flex-start;
+            }
+
+        .chat-bubble {
+            max-width: 72%;
+            padding: 12px 18px;
+            border-radius: 1.4em;
+            box-shadow: 0 2px 8px #0002;
+            position: relative;
+            font-size: 1.08em;
+            word-break: break-word;
+        }
+
+            .chat-bubble.me {
+                background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
+                color: #fff;
+                border-bottom-right-radius: .3em;
+            }
+
+            .chat-bubble.other {
+                background: #f4f7fa;
+                color: #234;
+                border-bottom-left-radius: .3em;
+            }
+
+        .chat-meta {
+            font-size: 0.92em;
+            opacity: .70;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+        }
+
+            .chat-meta .badge {
+                font-size: 0.95em;
+                margin-right: 8px;
+            }
+    </style>
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3; letter-spacing:2px;">
+                <i class="fa-solid fa-clipboard-list me-2"></i>工單管理
+            </span>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+        <div class="mb-4 d-flex flex-wrap gap-3">
+            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#d9edf7;color:#31708f;">
+                待處理 <span class="fw-bold">@pendingCount</span> 筆
+            </div>
+            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#fcf8e3;color:#8a6d3b;">
+                處理中 <span class="fw-bold">@processingCount</span> 筆
+            </div>
+            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#dff0d8;color:#3c763d;">
+                已完成 <span class="fw-bold">@finishedCount</span> 筆
+            </div>
+        </div>
+        <table id="ticketTable" class="table table-striped align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>工單編號</th>
+                    <th>主旨</th>
+                    <th>客戶</th>
+                    <th>狀態</th>
+                    <th>優先度</th>
+                    <th>建立時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 聊天室 Modal -->
+<div class="modal fade" id="ticketChatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0" style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
+                <h5 class="modal-title text-white" id="chatModalLabel">
+                    <i class="fa-solid fa-comments me-2"></i>工單聊天室
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body py-3" style="background:#f0f8fa;">
+                <div class="mb-2">
+                    <b>客戶：</b><span id="modalTicketCustomer"></span>
+                    <b class="ms-3">工單編號：</b><span id="modalTicketCode"></span>
+                    <b class="ms-3">主旨：</b><span id="modalTicketSubject"></span>
+                </div>
+                <div class="mb-2">
+                    <b>問題內容：</b><span id="modalTicketDescription"></span>
+                </div>
+                <div class="border rounded-4 p-3 my-2" id="chatBox"
+                     style="height:320px; overflow-y:auto; background:#fff; box-shadow:0 3px 12px #0001;">
+                </div>
+                <div class="input-group mt-3">
+                    <input type="text" id="chatInput" class="form-control rounded-start-pill" placeholder="輸入訊息..." style="font-size:1.1em;" />
+                    <button id="sendBtn" class="btn btn-outline-primary rounded-end-pill px-4">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 編輯工單 Modal -->
+<div class="modal fade" id="editTicketModal" tabindex="-1" aria-labelledby="editTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <div class="card shadow-sm rounded-3" style="margin:0;">
+                <div class="card-header bg-primary text-white fw-bold" style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
+                    <i class="fa-solid fa-pen-to-square me-2"></i> 編輯工單
+                </div>
+                <div class="card-body">
+                    <div id="editTicketAlertContainer"></div>
+                    <form id="editTicketForm" class="row g-3">
+                        <input type="hidden" id="editTicketId" name="TicketID" />
+                        <div class="mb-3 mt-4">
+                            <label for="editTicketCode" class="form-label fw-semibold">工單編號</label>
+                            <input type="text" id="editTicketCode" class="form-control" readonly />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTicketSubject" class="form-label fw-semibold">主旨</label>
+                            <input type="text" id="editTicketSubject" class="form-control" disabled />
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTicketDescription" class="form-label fw-semibold">問題內容</label>
+                            <textarea id="editTicketDescription" class="form-control" rows="3" disabled></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTicketStatus" class="form-label fw-semibold">狀態</label>
+                            <select id="editTicketStatus" name="StatusID" class="form-select"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editTicketPriority" class="form-label fw-semibold">優先度</label>
+                            <select id="editTicketPriority" name="PriorityID" class="form-select"></select>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fa-solid fa-xmark"></i> 取消
+                            </button>
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fa-solid fa-floppy-disk"></i> 儲存變更
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script>
+        // Razor注入員工ID和姓名（全局可用）
+        const senderId = '@currentEmpId';
+        const senderName = '@currentEmpName';
+
+        // DataTable 初始化
+        $(document).ready(function () {
+
+            $('#ticketTable').DataTable({
+                ajax: {
+                    url: '/CustomerService/CustomerSupportTickets/GetTickets',
+                    type: 'GET',
+                    dataSrc: function (json) {
+                        // 只顯示當前登入者的工單（比對 EmployeeID）
+                        const empId = '@currentEmpId';
+                        return json.filter(x => x.employeeID?.toString() === empId);
+                    }
+                },
+                columns: [
+                    { data: "ticketCode", title: "工單編號", width: "10%", className: "text-center" },
+                    { data: "subject", title: "主旨", width: "10%", className: "text-start" },
+                    { data: "customerName", title: "客戶", width: "10%", className: "text-center" },
+                    { data: "statusName", title: "狀態", width: "10%", className: "text-center" },
+                    { data: "priorityName", title: "優先度", width: "10%", className: "text-center" },
+                    {
+                        data: "createTime",
+                        title: "建立時間",
+                        width: "12%",
+                        className: "text-center",
+                        render: data => data ? dayjs(data).format("YYYY-MM-DD HH:mm") : ""
+                    },
+                    {
+                        data: null,
+                        title: "操作",
+                        width: "28%",
+                        orderable: false,
+                        searchable: false,
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            return `
+                                <a href="/CustomerService/Mail/Compose?to=${encodeURIComponent(row.customerEmail ?? '')}&subject=${encodeURIComponent('[工單通知] ' + (row.subject || ''))}"
+                                    class="btn btn-outline-success send-mail-btn">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    寄信
+                                </a>
+                                <button class="btn btn-outline-secondary open-chat-btn ms-2"
+                                    data-ticketid="${row.ticketID}"
+                                    data-ticketcode="${row.ticketCode}"
+                                    data-customer="${row.customerName}"
+                                    data-subject="${row.subject}"
+                                    data-description="${row.description}">
+                                    <i class="fa-solid fa-comments"></i>
+                                    聊天室
+                                </button>
+                                <button class="btn btn-outline-primary ms-2 edit-ticket-btn"
+                                    data-ticketid="${row.ticketID}"
+                                    data-ticketcode="${row.ticketCode}"
+                                    data-subject="${row.subject}"
+                                    data-description="${row.description}"
+                                    data-statusid="${row.statusID}"
+                                    data-priorityid="${row.priorityID}">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    編輯
+                                </button>`;
+                        }
+                    }
+                ],
+                order: [[0, 'desc']],
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料"
+                }
+            });
+        });
+
+         // 聊天室相關
+        let currentTicketId = null;
+        let connection = null;
+        let chatModalInstance = null;
+
+        $(document).on('click', '.open-chat-btn', function () {
+            currentTicketId = $(this).data('ticketid');
+            $('#modalTicketCode').text($(this).data('ticketcode'));
+            $('#modalTicketCustomer').text($(this).data('customer'));
+            $('#modalTicketSubject').text($(this).data('subject'));
+            $('#modalTicketDescription').text($(this).data('description'));
+            if (!chatModalInstance) {
+                chatModalInstance = new bootstrap.Modal(document.getElementById('ticketChatModal'));
+            }
+            chatModalInstance.show();
+            loadHistory(currentTicketId);
+
+            if (connection) connection.stop();
+
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/ticketChatHub")
+                .build();
+
+            connection.start().then(function () {
+                connection.invoke("JoinTicketGroup", currentTicketId);
+            });
+
+            connection.on("ReceiveMessage", function (msg) {
+                console.log("SignalR msg:", msg);
+                if (msg.ticketID != currentTicketId) return;
+                // 檢查是否有 pending 訊息，若有則覆蓋
+                if (msg.tempId && msg.senderID == senderId) {
+                    updatePendingMsg(msg.tempId, msg);
+                } else {
+                    appendMsg(msg);
+                }
+            });
+        });
+
+        $('#ticketChatModal').on('hidden.bs.modal', function () {
+            if (connection) connection.stop();
+            $('#chatBox').empty();
+        });
+
+        function loadHistory(ticketId) {
+            // 只載入最近 30 筆，必要時可做分頁
+            const skip = 0, take = 30;
+            $('#chatBox').html('<div style="text-align:center;padding:50px 0;color:#7ec8e3;font-size:1.3em;"><i class="fa fa-spinner fa-spin"></i> 聊天訊息載入中...</div>');
+            $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, function(msgs){
+                $('#chatBox').empty();
+                msgs.forEach(appendMsg);
+            });
+        }
+
+        function appendMsg(msg) {
+            const isMe = msg.senderID == senderId;
+            const alignClass = isMe ? "me" : "other";
+            const bubbleClass = isMe ? "me" : "other";
+            const badgeColor = msg.senderRole === "員工" ? "bg-info text-white" : "bg-secondary text-white";
+            const displayName = `<span class="fw-semibold me-1" style="color:#045;">${msg.senderDisplayName}</span>`;
+            const time = `<span class="text-secondary ms-1">${msg.sentTime ?? ''}</span>`;
+            const badge = `<span class="badge ${badgeColor} rounded-pill px-2 py-1 me-1">${msg.senderRole}</span>`;
+            const pending = msg.isPending ? `<span class="text-warning ms-2">(傳送中...)</span>` : '';
+            const failed = msg.isFailed ? `<span class="text-danger ms-2">(發送失敗)</span>` : '';
+
+            // 用 data-tempid 方便覆蓋 pending 訊息
+            const html = `
+            <div class="chat-message-row ${alignClass}" data-tempid="${msg.tempId || ''}">
+                <div class="chat-meta mb-1">
+                    ${badge}${displayName}${time}${pending}${failed}
+                </div>
+                <div class="chat-bubble ${bubbleClass}">
+                    ${msg.messageContent}
+                </div>
+            </div>
+            `;
+            $('#chatBox').append(html);
+
+            // 保持底部空間
+            const scrollHeight = $('#chatBox')[0].scrollHeight;
+            const clientHeight = $('#chatBox')[0].clientHeight;
+            $('#chatBox').scrollTop(scrollHeight - clientHeight + 40);
+        }
+
+        // 覆蓋 pending 訊息為正式訊息
+        function updatePendingMsg(tempId, savedMsg) {
+            // 找到對應的 pending 訊息
+            const $pending = $(`[data-tempid="${tempId}"]`);
+                if ($pending.length) {
+                $pending.find('.chat-meta').html(`
+                    <span class="badge bg-info text-white rounded-pill px-2 py-1 me-1">${savedMsg.senderRole}</span>
+                    <span class="fw-semibold me-1" style="color:#045;">${savedMsg.senderDisplayName}</span>
+                    <span class="text-secondary ms-1">${savedMsg.sentTime?.replace('T',' ').substring(0,16) ?? ''}</span>
+                `);
+                $pending.removeAttr('data-tempid');
+                $pending.find('.text-warning').remove(); // 移除「傳送中...」
+            }
+        }
+
+        // 標記訊息失敗
+        function markMsgFailed(tempId) {
+            const $pending = $(`[data-tempid="${tempId}"]`);
+            if ($pending.length) {
+                $pending.find('.chat-meta').append(`<span class="text-danger ms-2">(發送失敗)</span>`);
+            }
+        }
+
+        $('#sendBtn').on('click', function () {
+            sendChatMsg();
+        });
+        $('#chatInput').on('keypress', function(e) {
+            if (e.which === 13) sendChatMsg();
+        });
+
+        function sendChatMsg() {
+            const msg = $('#chatInput').val().trim();
+            if (!msg || !currentTicketId || !senderId) return;
+
+            // 產生唯一 tempId（用於 pending 訊息標記）
+            const tempId = 'pending_' + Date.now();
+
+            // 1. 立即顯示「傳送中」訊息
+            appendMsg({
+                senderID: senderId,
+                senderRole: "員工",
+                senderDisplayName: senderName, // ← 用目前員工名
+                sentTime: dayjs().format('YYYY-MM-DD HH:mm'),
+                messageContent: msg,
+                ticketID: currentTicketId,
+                isPending: true,
+                tempId: tempId
+            });
+
+            $('#chatInput').val('');
+
+            // 2. 送 AJAX
+            const data = {
+                ticketID: parseInt(currentTicketId, 10),
+                senderID: parseInt(senderId, 10),
+                messageContent: msg,
+                tempId: tempId
+            };
+            $.ajax({
+                url: '/CustomerService/CustomerSupportMessages/PostMessage',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                // success 不需要覆蓋，直接等 SignalR
+                error: function (xhr) {
+                    markMsgFailed(tempId);
+                    alert('發送失敗：' + xhr.responseText);
+                }
+            });
+        }
+
+        // appendMsg 支援 pending 狀態
+        function appendMsg(msg) {
+            const isMe = msg.senderID == senderId;
+            const alignClass = isMe ? "me" : "other";
+            const bubbleClass = isMe ? "me" : "other";
+            const badgeColor = msg.senderRole === "員工" ? "bg-info text-white" : "bg-secondary text-white";
+            const displayName = `<span class="fw-semibold me-1" style="color:#045;">${msg.senderDisplayName}</span>`;
+            const time = `<span class="text-secondary ms-1">${msg.sentTime ?? ''}</span>`;
+            const badge = `<span class="badge ${badgeColor} rounded-pill px-2 py-1 me-1">${msg.senderRole}</span>`;
+            const pending = msg.isPending ? `<span class="text-warning ms-2">(傳送中...)</span>` : '';
+            const failed = msg.isFailed ? `<span class="text-danger ms-2">(發送失敗)</span>` : '';
+
+            const html = `
+            <div class="chat-message-row ${alignClass}" data-tempid="${msg.tempId || ''}">
+                <div class="chat-meta mb-1">
+                    ${badge}${displayName}${time}${pending}${failed}
+                </div>
+                <div class="chat-bubble ${bubbleClass}">
+                    ${msg.messageContent}
+                </div>
+            </div>
+            `;
+            $('#chatBox').append(html);
+
+            // 保持底部
+            const scrollHeight = $('#chatBox')[0].scrollHeight;
+            const clientHeight = $('#chatBox')[0].clientHeight;
+            $('#chatBox').scrollTop(scrollHeight - clientHeight + 40);
+        }
+
+        // pending訊息覆蓋
+        function updatePendingMsg(tempId, savedMsg) {
+            const $pending = $(`[data-tempid="${tempId}"]`);
+            if ($pending.length) {
+                $pending.find('.chat-meta').html(`
+                    <span class="badge bg-info text-white rounded-pill px-2 py-1 me-1">${savedMsg.senderRole}</span>
+                    <span class="fw-semibold me-1" style="color:#045;">${savedMsg.senderDisplayName}</span>
+                    <span class="text-secondary ms-1">${savedMsg.sentTime?.replace('T',' ').substring(0,16) ?? ''}</span>
+                `);
+                $pending.removeAttr('data-tempid');
+            }
+        }
+
+        // 標記失敗
+        function markMsgFailed(tempId) {
+            const $pending = $(`[data-tempid="${tempId}"]`);
+            if ($pending.length) {
+                $pending.find('.chat-meta').append(`<span class="text-danger ms-2">(發送失敗)</span>`);
+            }
+        }
+
+        // 編輯工單相關
+        let statusOptions = [];
+        let priorityOptions = [];
+        function loadDropdowns(callback) {
+            $.get('/CustomerService/CustomerSupportTickets/GetDropdowns', function (data) {
+                statusOptions = data.statuses || [];
+                priorityOptions = data.priorities || [];
+                const $status = $('#editTicketStatus');
+                $status.empty();
+                statusOptions.forEach(opt => $status.append(`<option value="${opt.statusID}">${opt.statusName}</option>`));
+                const $priority = $('#editTicketPriority');
+                $priority.empty();
+                priorityOptions.forEach(opt => $priority.append(`<option value="${opt.priorityID}">${opt.priorityName}</option>`));
+                if (callback) callback();
+            });
+        }
+        $(document).on('click', '.edit-ticket-btn', function () {
+            let initDropdown = function() {
+                $('#editTicketId').val($(this).data('ticketid'));
+                $('#editTicketCode').val($(this).data('ticketcode'));
+                $('#editTicketSubject').val($(this).data('subject'));
+                $('#editTicketDescription').val($(this).data('description'));
+                $('#editTicketStatus').val($(this).data('statusid'));
+                $('#editTicketPriority').val($(this).data('priorityid'));
+                new bootstrap.Modal(document.getElementById('editTicketModal')).show();
+            }.bind(this);
+
+            if (statusOptions.length === 0 || priorityOptions.length === 0) {
+                loadDropdowns(initDropdown);
+            } else {
+                initDropdown();
+            }
+        });
+
+        // Bootstrap Alert 顯示成功/失敗訊息
+        function showEditTicketAlert(message, type = "success") {
+            const html = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $("#editTicketAlertContainer").html(html);
+            setTimeout(() => {
+                $("#editTicketAlertContainer .alert").alert('close');
+            }, 3000);
+        }
+
+        $('#editTicketForm').on('submit', function (e) {
+            e.preventDefault();
+            const data = {
+                TicketID: $('#editTicketId').val(),
+                StatusID: $('#editTicketStatus').val(),
+                PriorityID: $('#editTicketPriority').val()
+            };
+            $.ajax({
+                url: '/CustomerService/CustomerSupportTickets/EditTicket',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (result) {
+                    showEditTicketAlert('工單已更新', 'success');
+                    setTimeout(function() {
+                        $('#editTicketModal').modal('hide');
+                        location.reload();
+                    }, 1200);
+                },
+                error: function () {
+                    showEditTicketAlert('更新失敗，請稍後再試。', 'danger');
+                }
+            });
+        });
+    </script>
+}

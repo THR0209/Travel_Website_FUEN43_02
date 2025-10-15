@@ -9,6 +9,10 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.72.0" />
+    <PackageReference Include="Google.Cloud.SecretManager.V1" Version="2.6.0" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.19" />
@@ -16,13 +20,30 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.19" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="MimeKit" Version="4.13.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Areas\CouponManagement\Data\" />
     <Folder Include="Areas\CouponManagement\ViewModel\" />
+    <Folder Include="Areas\CustomersArea\Data\" />
+    <Folder Include="Areas\CustomersArea\Models\" />
+    <Folder Include="Areas\CustomersArea\Repositories\" />
+    <Folder Include="Areas\CustomersArea\Views\" />
     <Folder Include="Areas\ProductManagement\Data\" />
     <Folder Include="Areas\ProductManagement\ViewModel\" />
+    <Folder Include="Areas\TourGuideArea\Data\" />
+    <Folder Include="Areas\TourGuideArea\Models\" />
+    <Folder Include="Areas\TourGuideArea\ViewModel\" />
+    <Folder Include="Areas\TourGuideArea\Views\" />
+    <Folder Include="Areas\TravelManagement\Data\" />
+    <Folder Include="Areas\TravelManagement\Views\Shared\" />
+    <Folder Include="Views\Shared\test\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Admin\Models\" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,307 @@
+﻿@model Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.HotelsViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">修改</h2>
+        <h6 class="text-muted mb-4">住宿資訊</h6>
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="HotelID" />
+
+            <div class="row g-4">
+                <!-- 左半部 -->
+                <dvi class="col-md-6">
+
+                    <div class="mb-3">
+                        <label asp-for="HotelName" class="control-label"></label>
+                        <input asp-for="HotelName" class="form-control" />
+                        <span asp-validation-for="HotelName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="HotelAddr" class="control-label"></label>
+                        <input asp-for="HotelAddr" class="form-control" />
+                        <span asp-validation-for="HotelAddr" class="text-danger"></span>
+                    </div>                    
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RegionID" class="control-label"></label>
+                            <select asp-for="RegionID" class="form-control" asp-items="ViewBag.RegionID"></select>
+                            <span asp-validation-for="RegionID" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DistrictID" class="control-label"></label>
+                            <select asp-for="DistrictID" class="form-control" asp-items="ViewBag.DistrictID"></select>
+                            <span asp-validation-for="DistrictID" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Rating" class="control-label"></label>
+                            <input asp-for="Rating" class="form-control" />
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Views" class="control-label"></label>
+                            <input asp-for="Views" class="form-control" />
+                            <span asp-validation-for="Views" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="HotelDesc" class="control-label"></label>
+                        <textarea asp-for="HotelDesc" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="HotelDesc" class="text-danger"></span>
+                    </div>
+                </dvi>
+
+                <!-- 右半部 -->
+                <dvi class="col-md-6">                    
+                      
+                    <div class="mb-3">
+                        <label asp-for="IsActive" class="control-label"></label>
+                        <select asp-for="IsActive" class="form-control">
+                            <option value="">請選擇</option>
+                            <option value="true">上架</option>
+                            <option value="false">下架</option>
+                        </select>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HotelLat" class="control-label"></label>
+                            <input asp-for="HotelLat" class="form-control" />
+                            <span asp-validation-for="HotelLat" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HotelLng" class="control-label"></label>
+                            <input asp-for="HotelLng" class="form-control" />
+                            <span asp-validation-for="HotelLng" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- 多選關鍵字 -->
+                    <div class="mb-3">
+                        <label class="control-label">關鍵字</label>
+                        <select id="keywordSelect" class="form-control" asp-items="ViewBag.Keywords">
+                            <option value="">請選擇</option>
+                        </select>
+
+                        <!-- ✅ 隱藏欄位容器 (這裡會動態放多個 hidden input) -->
+                        <div id="KeywordIDsContainer"></div>
+                    </div>
+
+                    <!-- 已選關鍵字 -->
+                    <div class="mb-3">
+                        <label class="control-label">已選關鍵字</label>
+                        <div id="selectedKeywords" style="margin-top:10px;">
+                            @if (Model.KeywordID != null && Model.KeywordNames != null)
+                            {
+                                var keywordPairs = Model.KeywordID.Zip(Model.KeywordNames, (id, name) => new { Id = id, Name = name });
+                                foreach (var kw in keywordPairs)
+                                {
+                                    <span class="badge bg-primary m-1" data-id="@kw.Id">
+                                        @kw.Name
+                                        <button type="button" class="btn-close btn-sm text-white ms-2" onclick="removeKeyword(@kw.Id)"></button>
+                                    </span>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 上傳新圖片 -->
+                    <div class="mb-3">
+                        <label asp-for="Picture"></label>
+                        <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
+                        <span asp-validation-for="Picture" class="text-danger"></span>
+
+                        <!-- 預覽區 -->
+                        <div id="preview" style="margin-top:10px; display:flex; flex-wrap:wrap;"></div>
+                    </div>
+
+                    <!-- 現有圖片 (含刪除按鈕) -->
+                    <div class="mb-3">
+                        <div>
+                            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+                            {
+                                for (int i = 0; i < Model.PictureBase64.Count; i++)
+                                {
+                                    <div id="pic-@Model.PictureIds[i]"
+                                         style="display:inline-block; margin:10px; position:relative;">
+                                        <img src="@Model.PictureBase64[i]" style="width:120px; height:auto;" />
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                style="position:absolute; top:0; right:0;"
+                                                onclick="markImageForDelete(@Model.PictureIds[i])">
+                                            X
+                                        </button>
+                                    </div>
+                                }
+                            }
+                            <!-- ✅ 新的隱藏欄位容器 (動態產生) -->
+                            <div id="DeletedPictureIdsContainer"></div>
+                        </div>
+                    </div>
+                </dvi>
+                <!-- 按鈕區 -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-outline-primary">確認</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        //圖片
+        // 存放暫存的檔案 (用來過濾哪些要送到後端)
+        let selectedFiles = [];
+
+        // 預覽上傳的圖片
+        function previewImages(event) {
+            const files = event.target.files;
+            const preview = document.getElementById("preview");
+            preview.innerHTML = ""; // 清空舊預覽
+            selectedFiles = [];     // 清空舊選擇
+
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith("image/")) {
+                    selectedFiles.push(file); // 存進陣列
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const wrapper = document.createElement("div");
+                        wrapper.id = "new-pic-" + index;
+                        wrapper.style.position = "relative";
+                        wrapper.style.margin = "5px";
+
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.style.width = "120px";
+                        img.style.border = "1px solid #ccc";
+                        img.style.borderRadius = "8px";
+
+                        const btn = document.createElement("button");
+                        btn.innerText = "X";
+                        btn.type = "button";
+                        btn.className = "btn btn-sm btn-danger";
+                        btn.style.position = "absolute";
+                        btn.style.top = "0";
+                        btn.style.right = "0";
+                        btn.onclick = function() {
+                            removeNewImage(index);
+                        };
+
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(btn);
+                        preview.appendChild(wrapper);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            updateInputFiles(event.target);
+        }
+
+        // 刪除暫存的新圖片
+        function removeNewImage(index) {
+            selectedFiles.splice(index, 1); // 移除陣列中的檔案
+
+            const elem = document.getElementById("new-pic-" + index);
+            if (elem) elem.remove();
+
+            const input = document.querySelector("input[type='file'][name='Picture']");
+            updateInputFiles(input);
+        }
+
+        // 重建 input.files，確保刪掉的檔案不會送到後端
+        function updateInputFiles(input) {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            input.files = dataTransfer.files;
+        }
+
+        // 記錄刪除 ID，只刪 DOM (不直接呼叫後端)
+        let deletedIds = [];
+
+        function markImageForDelete(picId) {
+            if (!deletedIds.includes(picId)) {
+                deletedIds.push(picId);
+            }
+
+            // ✅ 重新建立 hidden inputs
+            let container = document.getElementById("DeletedPictureIdsContainer");
+            container.innerHTML = "";
+            deletedIds.forEach(id => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "DeletedPictureIds";
+                input.value = id;
+                container.appendChild(input);
+            });
+
+            // 移除 DOM
+            let picDiv = document.getElementById("pic-" + picId);
+            if (picDiv) picDiv.remove();
+        }
+
+        //關鍵字
+        // 關鍵字 (維持原本的多選邏輯)
+        function updateHiddenField() {
+            const hiddenContainer = document.getElementById("KeywordIDsContainer");
+            hiddenContainer.innerHTML = ""; 
+
+            const ids = Array.from(document.querySelectorAll("#selectedKeywords span"))
+                            .map(span => span.getAttribute("data-id"));
+
+            ids.forEach(id => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "KeywordID";
+                input.value = id;
+                hiddenContainer.appendChild(input);
+            });
+        }
+
+        // ✅ 選取關鍵字時觸發
+        document.getElementById("keywordSelect").addEventListener("change", function () {
+            const selectedId = this.value;
+            const selectedText = this.options[this.selectedIndex].text;
+
+            if (!selectedId) return;
+
+            if (document.querySelector(`#selectedKeywords span[data-id="${selectedId}"]`)) {
+                alert("此關鍵字已選取");
+                return;
+            }
+
+            const span = document.createElement("span");
+            span.className = "badge bg-primary m-1";
+            span.setAttribute("data-id", selectedId);
+            span.innerHTML = `${selectedText} <button type="button" class="btn-close btn-sm text-white ms-2" onclick="removeKeyword(${selectedId})"></button>`;
+
+            document.getElementById("selectedKeywords").appendChild(span);
+
+            updateHiddenField();
+        });
+
+        // ✅ 移除已選關鍵字
+        function removeKeyword(id) {
+            const elem = document.querySelector(`#selectedKeywords span[data-id="${id}"]`);
+            if (elem) elem.remove();
+            updateHiddenField();
+        }
+        
+        // ✅ 頁面載入時同步一次 (確保 Model 初始資料能正確存回去)
+        document.addEventListener("DOMContentLoaded", updateHiddenField);   
+    </script>
+}

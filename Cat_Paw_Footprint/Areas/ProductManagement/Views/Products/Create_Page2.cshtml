@@ -1,0 +1,174 @@
+﻿@model Cat_Paw_Footprint.Models.Products
+
+@{
+    ViewData["Title"] = "新增產品";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/css/myckeditor.css" rel="stylesheet" />
+}
+
+<a asp-action="Index" class="btn btn-primary float-end position-relative">返回上頁</a>
+<h1 class="ms-3">行程大綱</h1>
+
+<hr />
+
+<div class="row">
+    <!-- 整份表單 -->
+    <form asp-action="Create" enctype="multipart/form-data" class="d-flex">
+
+        <!-- 左側 Card -->
+        <div class="col-md-4 card p-3 ms-3">
+            <h4>行程代碼 </h4>
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <img src="@Url.Content("~/images/NoImage.png")" style="width:360px;height:270px;" class="mb-2" title="尚無内容" />
+                <input type="file" asp-for="ProductImage" class="form-control" accept="image/*" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProductCode" class="control-label mb-1">產品編號：</label>
+                <input asp-for="ProductCode" class="form-control" readonly />
+                <span asp-validation-for="ProductCode" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProductName" class="control-label mb-1">產品名稱：</label>
+                <input asp-for="ProductName" class="form-control" />
+                <span asp-validation-for="ProductName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="RegionID" class="control-label mb-1">出團地區：</label>
+                <select asp-for="RegionID" class="form-select" asp-items="ViewBag.RegionID">
+                    <option value="">請選擇地區</option>
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProductPrice" class="control-label mb-1">產品價格：</label>
+                <input asp-for="ProductPrice" class="form-control" />
+                <span asp-validation-for="ProductPrice" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="StartDate" class="control-label mb-1">出發時間：</label>
+                <input asp-for="StartDate" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="EndDate" class="control-label mb-1">返程時間：</label>
+                <input asp-for="EndDate" class="form-control" />
+                <span asp-validation-for="EndDate" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MaxPeople" class="control-label mb-1">人數上限：</label>
+                <input asp-for="MaxPeople" class="form-control" />
+                <span asp-validation-for="MaxPeople" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- 右側 Card -->
+        <div class="card w-px-700 ms-3 p-3 d-flex flex-column">
+            <div class="form-group mb-3">
+                <label asp-for="ProductDesc" class="control-label mb-1">產品描述：</label>
+                <textarea asp-for="ProductDesc" class="form-control" id="editor"></textarea>
+                <span asp-validation-for="ProductDesc" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ProductNote" class="control-label mb-1">注意事項：</label>
+                <textarea asp-for="ProductNote" class="form-control" id="editor2"></textarea>
+                <span asp-validation-for="ProductNote" class="text-danger"></span>
+            </div>
+
+            <!-- 送出按鈕：放在右側 card 最底部 -->
+            <div class="form-group ms-auto">
+                <input type="submit" value="儲存並進到下一頁" class="btn btn-primary" asp-action="" />
+            </div>
+        </div>
+    </form>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+
+    <script>
+        function previewImage(inputFile) {
+            if (inputFile.files && inputFile.files[0]) {
+               var allowType = "image.*";
+               //允許檔案格式
+               if (inputFile.files[0].type.match(allowType)) {
+                   // 讀取上圖片並預覽圖片內容
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#ProductImage').prev().attr('src', e.target.result) ;
+                        $('#ProductImage').prev().attr('title', inputFile.files[0].name);
+                    };
+                    reader.readAsDataURL(inputFile.files[0]);
+                    $('.btn').prop('disabled', false);
+               }
+               else {
+                    alert("不支援上傳的檔案格式!");
+                    $('.btn').prop('disabled', true);
+                    inputFile.value = "";
+                    $("#ProductImage").prev().attr('src', "/images/NoImage.png");
+                    $("#ProductImage").prev().attr('title', "尚無圖片");
+               }
+            }
+        }
+
+        $("#ProductImage").change( function () {
+            previewImage(this);
+        });
+    </script>
+
+    <script>
+        // 初始化 CKEditor
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                // 這裡可以放設定，例如 toolbar
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                    'blockQuote', 'insertTable', 'undo', 'redo'
+                ]
+            })
+            .then(editor => {
+                console.log('CKEditor 啟動成功', editor);
+            })
+            .catch(error => {
+                console.error('CKEditor 啟動失敗', error);
+            });
+    </script>
+
+    <script>
+        // 初始化 CKEditor
+        ClassicEditor
+            .create(document.querySelector('#editor2'), {
+                // 這裡可以放設定，例如 toolbar
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                    'blockQuote', 'insertTable', 'undo', 'redo'
+                ]
+            })
+            .then(editor => {
+                console.log('CKEditor 啟動成功', editor);
+            })
+            .catch(error => {
+                console.error('CKEditor 啟動失敗', error);
+            });
+    </script>
+}

@@ -1,0 +1,28 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.Employee.ViewModel.CustomerAdminViewModel>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">查無登入紀錄</div>
+}
+else
+{
+    <table class="table table-sm table-bordered">
+        <thead>
+            <tr>
+                <th>登入時間</th>
+                <th>登入IP</th>
+                <th>是否成功</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.LoginTime</td>
+                    <td>@item.LoginIP</td>
+                    <td>@(item.IsSuccessful == true ? "成功" : "失敗")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

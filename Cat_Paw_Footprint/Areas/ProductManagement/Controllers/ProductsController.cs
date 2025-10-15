@@ -1,165 +1,766 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Models;
-using Cat_Paw_Footprint.Data;
+using System.Data;
 
 namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 {
-    [Area("ProductManagement")]
-    public class ProductsController : Controller
-    {
-        private readonly webtravel2Context _context;
+	[Area("ProductManagement")]
+	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaProductManagement")]
+	public class ProductsController : Controller
+	{
+		private readonly webtravel2Context _context;
 
-        public ProductsController(webtravel2Context context)
-        {
-            _context = context;
-        }
+		public ProductsController(webtravel2Context context)
+		{
+			_context = context;
+		}
 
-        // GET: ProductManagement/Products
-        public async Task<IActionResult> Index()
-        {
-            var webtravel2Context = _context.Products.Include(p => p.Region);
-            return View(await webtravel2Context.ToListAsync());
-        }
+		// GET: ProductManagement/Products
+		public async Task<IActionResult> Index()
+		{
+			var webtravel2Context = _context.Products.Include(p => p.Region);
+			return View(await webtravel2Context.ToListAsync());
+		}
 
-        // GET: ProductManagement/Products/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+		[HttpPost]
+		//[Route("Products/Index/Json")]
+		[Route("ProductManagement/Products/Index/Json")]
+		public async Task<IActionResult> IndexJson()
+		{
+			var data = await _context.Products
+			.Include(p => p.Region)
+			.Include(p => p.ProductAnalyses) // 更新912
+			.OrderByDescending(p => p.ProductCode)
+			.Select(p => new {
+				p.ProductID,
+				p.ProductCode,
+				p.ProductImage,
+				p.ProductName,
+				p.ProductPrice,
+				StartDate = p.StartDate.HasValue ? p.StartDate.Value.ToString() : "",
+				EndDate = p.EndDate.HasValue ? p.EndDate.Value.ToString() : "",
+				p.MaxPeople,
+				p.RegionID,
+				p.IsActive,
+				RegionName = p.Region == null ? null : p.Region.RegionName,
+				Analyses = p.ProductAnalyses.Select(a => new {
+					releaseDate = a.ReleaseDate.HasValue ? a.ReleaseDate.Value.ToString() : "",
+					removalDate = a.RemovalDate.HasValue ? a.RemovalDate.Value.ToString() : ""
+				})
+			})
+			.ToListAsync();
 
-            var products = await _context.Products
-                .Include(p => p.Region)
-                .FirstOrDefaultAsync(m => m.ProductID == id);
-            if (products == null)
-            {
-                return NotFound();
-            }
+			return Json(data);
+		}
 
-            return View(products);
-        }
+		// GET: ProductManagement/Products/Details/5
+		public async Task<IActionResult> Details(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-        // GET: ProductManagement/Products/Create
-        public IActionResult Create()
-        {
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID");
-            return View();
-        }
+			var product = await _context.Products
+				.Where(p => p.ProductID == id)
+				//.Join(_context.Regions, p => p.RegionID, r => r.RegionID, (p, r) => new {p,r})
+				//.Include(p => p.Region)
+				//.Include(p => p.ProductHotels)
+				//	.ThenInclude(ph => ph.Hotel)
+				//.Include(p => p.ProductRestaurants)
+				//	.ThenInclude(pr => pr.Restaurant)
+				//.Include(p => p.ProductsTransportations)
+				//	.ThenInclude(pt => pt.Transport)
+				//.Include(p => p.ProductLocations)
+				//	.ThenInclude(pl => pl.Location)
+				//.Include(p => p.ProductAnalyses)
+				.FirstOrDefaultAsync();
 
-        // POST: ProductManagement/Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,ProductName,RegionID,ProductDesc,ProductPrice,ProductNote,StartDate,EndDate,MaxPeople,ProductImage,ProductCode")] Products products)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(products);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", products.RegionID);
-            return View(products);
-        }
+			if (product == null)
+			{
+				return NotFound();
+			}
 
-        // GET: ProductManagement/Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+			// 其他關聯分開查
+			var hotels = await _context.Products_Hotels
+				.Where(ph => ph.ProductID == id)
+				.Include(ph => ph.Hotel)
+					.ThenInclude(ph => ph.HotelPics)
+				.OrderBy(ph => ph.OrderIndex)
+				.ToListAsync();
 
-            var products = await _context.Products.FindAsync(id);
-            if (products == null)
-            {
-                return NotFound();
-            }
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", products.RegionID);
-            return View(products);
-        }
+			var restaurants = await _context.Products_Restaurants
+				.Where(pr => pr.ProductID == id)
+				.Include(pr => pr.Restaurant)
+					.ThenInclude(pr => pr.RestaurantPics)
+				.OrderBy(pr => pr.OrderIndex)
+				.ToListAsync();
 
-        // POST: ProductManagement/Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductID,ProductName,RegionID,ProductDesc,ProductPrice,ProductNote,StartDate,EndDate,MaxPeople,ProductImage,ProductCode")] Products products)
-        {
-            if (id != products.ProductID)
-            {
-                return NotFound();
-            }
+			var transports = await _context.Products_Transportations
+				.Where(pt => pt.ProductID == id)
+				.Include(pt => pt.Transport)
+					.ThenInclude(pt => pt.TransportPics)
+				.ToListAsync();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(products);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductsExists(products.ProductID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionID", products.RegionID);
-            return View(products);
-        }
+			var locations = await _context.Products_Locations
+				.Where(pl => pl.ProductID == id)
+				.Include(pl => pl.Location)
+				    .ThenInclude(pl => pl.LocationPics)
+				.OrderBy(pl => pl.OrderIndex)
+				.ToListAsync();
 
-        // GET: ProductManagement/Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+			var analyses = await _context.ProductAnalysis
+				.Where(pa => pa.ProductID == id)
+				.ToListAsync();
 
-            var products = await _context.Products
-                .Include(p => p.Region)
-                .FirstOrDefaultAsync(m => m.ProductID == id);
-            if (products == null)
-            {
-                return NotFound();
-            }
+			var vm = new ProductDetailsViewModel
+			{
+				Product = product,
+				Hotels = hotels,
+				Restaurants = restaurants,
+				Transports = transports,
+				Locations = locations,
+				Analyses = analyses
+			};
 
-            return View(products);
-        }
+			return View(vm);
+		}
 
-        // POST: ProductManagement/Products/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var products = await _context.Products.FindAsync(id);
-            if (products != null)
-            {
-                _context.Products.Remove(products);
-            }
+		// GET: ProductManagement/Products/Create
+		public IActionResult Create()
+		{
+			Console.WriteLine("=== [DEBUG] Create POST ===");
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+			var vm = new ProductCreateViewModel()
+			{
+				Product = new Products(),
+				ProductAnalysis = new ProductAnalysis()
+			};
 
-        private bool ProductsExists(int id)
-        {
-            return _context.Products.Any(e => e.ProductID == id);
-        }
-    }
+
+			/* 取得流水號 */
+			//model.ProductCode = GetCodeWithDate("Products", "PRO");
+
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
+			return View(vm);
+		}
+
+		// POST: ProductManagement/Products/Create
+		// To protect from overposting attacks, enable the specific properties you want to bind to.
+		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(ProductCreateViewModel vm)
+		{
+			Console.WriteLine("=== [DEBUG] Create POST ===");
+			Console.WriteLine("ModelState.IsValid = " + ModelState.IsValid);
+
+			// 抓出所有 ModelState 的錯誤
+			if (!ModelState.IsValid)
+			{
+				// 把錯誤收集起來
+				var allErrors = ModelState
+					.Where(ms => ms.Value.Errors.Any())
+					.Select(ms => new
+					{
+						Key = ms.Key,
+						Errors = ms.Value.Errors.Select(e => e.ErrorMessage).ToList()
+					});
+
+				// 丟進 ViewBag（讓 Razor 頁面也能看到）
+				ViewBag.ModelErrors = allErrors;
+
+				// 確保下拉選單不會因為回傳而消失
+				ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", vm.Product.RegionID);
+
+				return View(vm); // 回到表單，錯誤訊息會顯示
+			}
+
+			if (ModelState.IsValid)
+			{
+				/* 取得流水號 */
+				//products.ProductCode = GetCodeWithDate("Products", "PRO");
+
+				/* 將圖片轉成二進位並存進資料庫 */
+				if (vm.UploadImage != null && vm.UploadImage.Length > 0)
+				{
+					using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
+					vm.Product.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
+				}
+				// ===== 1. 存主表Products並產生ProductID =====
+
+				vm.Product.ProductCode = await GenerateProductCodeAsync();
+
+				_context.Add(vm.Product);
+				await _context.SaveChangesAsync();
+
+				int productId = vm.Product.ProductID;
+
+				// ===== 2. 存多對多關聯 =====
+
+				// (a) 交通方式
+				if (vm.SelectedTransportationIds != null && vm.SelectedTransportationIds.Any())
+				{
+					foreach (var tId in vm.SelectedTransportationIds)
+					{
+						_context.Products_Transportations.Add(new Products_Transportations
+						{
+							ProductID = productId,
+							TransportID = tId
+						});
+					}
+				}
+
+				// (b) 飯店
+				if (vm.SelectedHotelIds != null && vm.SelectedHotelIds.Any())
+				{
+					foreach (var hId in vm.SelectedHotelIds)
+					{
+						_context.Products_Hotels.Add(new Products_Hotels
+						{
+							ProductID = productId,
+							HotelID = hId.ID,
+							OrderIndex = hId.OrderIndex
+						});
+					}
+				}
+
+				// (c) 餐廳 – 早餐
+				if (vm.SelectedRestaurantsBreakfast != null && vm.SelectedRestaurantsBreakfast.Any())
+				{
+					foreach (var rId in vm.SelectedRestaurantsBreakfast)
+					{
+						_context.Products_Restaurants.Add(new Products_Restaurants
+						{
+							ProductID = productId,
+							RestaurantID = rId.ID,
+							OrderIndex = rId.OrderIndex,
+							MealType = "Breakfast"
+						});
+					}
+				}
+
+				// (d) 餐廳 – 午餐
+				if (vm.SelectedRestaurantsLunch != null && vm.SelectedRestaurantsLunch.Any())
+				{
+					foreach (var rId in vm.SelectedRestaurantsLunch)
+					{
+						_context.Products_Restaurants.Add(new Products_Restaurants
+						{
+							ProductID = productId,
+							RestaurantID = rId.ID,
+							OrderIndex = rId.OrderIndex,
+							MealType = "Lunch"
+						});
+					}
+				}
+
+				// (e) 餐廳 – 晚餐
+				if (vm.SelectedRestaurantsDinner != null && vm.SelectedRestaurantsDinner.Any())
+				{
+					foreach (var rId in vm.SelectedRestaurantsDinner)
+					{
+						_context.Products_Restaurants.Add(new Products_Restaurants
+						{
+							ProductID = productId,
+							RestaurantID = rId.ID,
+							OrderIndex = rId.OrderIndex,
+							MealType = "Dinner"
+						});
+					}
+				}
+
+				// (f) 景點 - 按天數存 (方法 1)
+				if (vm.SelectedLocations != null && vm.SelectedLocations.Any())
+				{
+					foreach (var dayBlock in vm.SelectedLocations) // dayBlock = DayLocations
+					{
+						int dayNumber = dayBlock.DayNumber;
+
+						foreach (var item in dayBlock.Locations)
+						{
+							_context.Products_Locations.Add(new Products_Locations
+							{
+								ProductID = productId,
+								LocationID = item.ID,
+								DayNumber = dayNumber,
+								OrderIndex = item.OrderIndex
+							});
+						}
+					}
+				}
+
+				_context.ProductAnalysis.Add(new ProductAnalysis
+				{
+					ProductID = productId,
+					ReleaseDate = vm.ProductAnalysis.ReleaseDate
+				});
+
+				// ===== 3. 寫入所有關聯表 =====
+				await _context.SaveChangesAsync();
+
+				return RedirectToAction(nameof(Index));
+			}
+
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", vm.Product.RegionID);
+			return View(vm);
+		}
+
+		// GET: ProductManagement/Products/Edit/5
+		[HttpGet]
+		[Route("ProductManagement/Products/Edit/{id?}")]
+		public async Task<IActionResult> Edit(int id)
+		{
+			var product = await _context.Products
+				.FirstOrDefaultAsync(p => p.ProductID == id);
+
+			if (product == null) return NotFound();
+
+			// 分開查關聯資料，可以加速讀取
+			var hotels = await _context.Products_Hotels
+				.Where(h => h.ProductID == id)
+				.OrderBy(h => h.OrderIndex)
+				.ToListAsync();
+
+			var transports = await _context.Products_Transportations
+				.Where(t => t.ProductID == id)
+				.ToListAsync();
+
+			var restaurants = await _context.Products_Restaurants
+				.Where(r => r.ProductID == id)
+				.OrderBy(r => r.OrderIndex)
+				.ToListAsync();
+
+			var locations = await _context.Products_Locations
+				.Where(l => l.ProductID == id)
+				.OrderBy(l => l.OrderIndex)
+				.ToListAsync();
+
+			var vm = new ProductEditViewModel
+			{
+				Product = product,
+
+				//ReleaseDate = product.ProductAnalyses
+				//	.Select(p => p.ReleaseDate)
+				//	.FirstOrDefault(),
+
+				ProductAnalysis = _context.ProductAnalysis
+					.Where(p => p.ProductID == id)
+					.Select(t => new ProductAnalysis
+					{
+						ProductID = t.ProductID,
+						ReleaseDate = t.ReleaseDate,
+					}).FirstOrDefault(),
+
+				// 已選飯店
+				SelectedHotelIds = product.ProductHotels
+					.OrderBy(h => h.OrderIndex)
+					.Select(h => new OrderedItem { ID = h.HotelID, OrderIndex = h.OrderIndex })
+					.ToList(),
+
+				// 已選交通
+				SelectedTransportationIds = product.ProductsTransportations
+					.Select(t => t.TransportID.Value)
+					.ToList(),
+
+				// 已選餐廳 (依餐別)
+				SelectedRestaurantsBreakfast = product.ProductRestaurants
+					.Where(r => r.MealType == "Breakfast")
+					.OrderBy(r => r.OrderIndex)
+					.Select(r => new OrderedItem { ID = r.RestaurantID, OrderIndex = r.OrderIndex })
+					.ToList(),
+
+				SelectedRestaurantsLunch = product.ProductRestaurants
+					.Where(r => r.MealType == "Lunch")
+					.OrderBy(r => r.OrderIndex)
+					.Select(r => new OrderedItem { ID = r.RestaurantID, OrderIndex = r.OrderIndex })
+					.ToList(),
+
+				SelectedRestaurantsDinner = product.ProductRestaurants
+					.Where(r => r.MealType == "Dinner")
+					.OrderBy(r => r.OrderIndex)
+					.Select(r => new OrderedItem { ID = r.RestaurantID, OrderIndex = r.OrderIndex })
+					.ToList(),
+
+				// 已選景點 (依天數)
+				//SelectedLocationsByDay = product.ProductLocations
+				//	.GroupBy(l => (int)l.DayNumber)
+				//	.ToDictionary(
+				//		g => g.Key,
+				//		g => g.OrderBy(l => l.OrderIndex)
+				//			  .Select(l => new OrderedItem { ID = l.LocationID, OrderIndex = l.OrderIndex })
+				//			  .ToList()
+				//	)
+
+				// ✅ 已選景點 (轉換成 List<DayLocations>)
+				SelectedLocations = product.ProductLocations
+					.GroupBy(l => l.DayNumber)
+					.OrderBy(g => g.Key)
+					.Select(g => new DayLocations
+					{
+						DayNumber = g.Key ?? 0, // DayNumber 允許 null 的話要處理
+						Locations = g.OrderBy(l => l.OrderIndex)
+										 .Select(l => new OrderedItem
+										 {
+											 ID = l.LocationID,
+											 OrderIndex = l.OrderIndex
+										 }).ToList()
+					})
+					.ToList()
+			};
+
+			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", product.RegionID);
+
+			return View(vm);
+		}
+
+
+		// POST: ProductManagement/Products/Edit/5
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[Route("ProductManagement/Products/Edit/{pid?}")]
+		public async Task<IActionResult> Edit(int pid, ProductEditViewModel vm)
+		{
+			if (!ModelState.IsValid)
+			{
+				ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", vm.Product.RegionID);
+				TempData["ErrorMessage"] = "修改失敗，請再試一次！";
+				return View(vm);
+			}
+
+			// 交易開始
+			using var tx = await _context.Database.BeginTransactionAsync();
+
+			try
+			{
+				// 1. 查產品本體
+				var entity = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.ProductID == pid);
+				if (entity == null) return NotFound();
+
+				// 2. 更新基本欄位
+				entity.ProductName = vm.Product.ProductName;
+				entity.RegionID = vm.Product.RegionID;
+				entity.ProductPrice = vm.Product.ProductPrice;
+				entity.StartDate = vm.Product.StartDate;
+				entity.EndDate = vm.Product.EndDate;
+				entity.MaxPeople = vm.Product.MaxPeople;
+				entity.ProductDesc = vm.Product.ProductDesc;
+				entity.ProductNote = vm.Product.ProductNote;
+				entity.IsActive = vm.Product.IsActive;
+
+				if (vm.UploadImage != null && vm.UploadImage.Length > 0)
+				{
+					using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
+					entity.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
+				}
+
+				_context.Products.Update(entity);
+
+				var id = entity.ProductID;
+
+				// ================= 關聯清除 + 重建 =================
+
+				// (a) 交通
+				var oldTrans = await _context.Products_Transportations
+					.Where(pt => pt.ProductID == id)
+					.AsNoTracking()
+					.ToListAsync();
+				_context.Products_Transportations.RemoveRange(oldTrans);
+
+				if (vm.SelectedTransportationIds?.Any() == true)
+				{
+					foreach (var tId in vm.SelectedTransportationIds)
+					{
+						_context.Products_Transportations.Add(new Products_Transportations
+						{
+							ProductID = id,
+							TransportID = tId
+						});
+					}
+				}
+
+				// (b) 飯店
+				var oldHotels = await _context.Products_Hotels
+					.Where(ph => ph.ProductID == id)
+					.AsNoTracking()
+					.ToListAsync();
+				_context.Products_Hotels.RemoveRange(oldHotels);
+
+				if (vm.SelectedHotelIds?.Any() == true)
+				{
+					foreach (var h in vm.SelectedHotelIds)
+					{
+						_context.Products_Hotels.Add(new Products_Hotels
+						{
+							ProductID = id,
+							HotelID = h.ID,
+							OrderIndex = h.OrderIndex
+						});
+					}
+				}
+
+				// (c) 餐廳
+				var oldRestaurants = await _context.Products_Restaurants
+					.Where(pr => pr.ProductID == id)
+					.AsNoTracking()
+					.ToListAsync();
+				_context.Products_Restaurants.RemoveRange(oldRestaurants);
+
+				if (vm.SelectedRestaurantsBreakfast?.Any() == true)
+				{
+					foreach (var r in vm.SelectedRestaurantsBreakfast)
+					{
+						_context.Products_Restaurants.Add(new Products_Restaurants
+						{
+							ProductID = id,
+							RestaurantID = r.ID,
+							OrderIndex = r.OrderIndex,
+							MealType = "Breakfast"
+						});
+					}
+				}
+				if (vm.SelectedRestaurantsLunch?.Any() == true)
+				{
+					foreach (var r in vm.SelectedRestaurantsLunch)
+					{
+						_context.Products_Restaurants.Add(new Products_Restaurants
+						{
+							ProductID = id,
+							RestaurantID = r.ID,
+							OrderIndex = r.OrderIndex,
+							MealType = "Lunch"
+						});
+					}
+				}
+				if (vm.SelectedRestaurantsDinner?.Any() == true)
+				{
+					foreach (var r in vm.SelectedRestaurantsDinner)
+					{
+						_context.Products_Restaurants.Add(new Products_Restaurants
+						{
+							ProductID = id,
+							RestaurantID = r.ID,
+							OrderIndex = r.OrderIndex,
+							MealType = "Dinner"
+						});
+					}
+				}
+
+				// (d) 景點
+				var oldLocations = await _context.Products_Locations
+					.Where(pl => pl.ProductID == id)
+					.AsNoTracking()
+					.ToListAsync();
+				_context.Products_Locations.RemoveRange(oldLocations);
+
+				if (vm.SelectedLocations?.Any() == true)
+				{
+					foreach (var day in vm.SelectedLocations)
+					{
+						foreach (var item in day.Locations)
+						{
+							_context.Products_Locations.Add(new Products_Locations
+							{
+								ProductID = id,
+								LocationID = item.ID,
+								DayNumber = day.DayNumber,
+								OrderIndex = item.OrderIndex
+							});
+						}
+					}
+				}
+
+				var analysis = await _context.ProductAnalysis
+					.FirstOrDefaultAsync(p => p.ProductID == id);
+
+				if (analysis != null)
+				{
+					analysis.ReleaseDate = vm.ProductAnalysis.ReleaseDate;
+					// 其他要更新的欄位...
+					_context.ProductAnalysis.Update(analysis);
+				}
+				else
+				{
+					// 如果真的沒有才新增
+					_context.ProductAnalysis.Add(new ProductAnalysis
+					{
+						ProductID = id,
+						ReleaseDate = vm.ProductAnalysis.ReleaseDate
+					});
+				}
+
+				// ================= 寫入 DB =================
+				var changes = await _context.SaveChangesAsync();
+
+				// Debug: 印出 EF 追蹤變更數
+				Console.WriteLine($"EF Core saved {changes} changes");
+				Console.WriteLine(_context.ChangeTracker.DebugView.LongView);
+
+				// 提交交易
+				await tx.CommitAsync();
+				TempData["SuccessMessage"] = "修改成功！";
+				return RedirectToAction(nameof(Index));
+			}
+			catch (Exception ex)
+			{
+				await tx.RollbackAsync();
+				Console.WriteLine("❌ Transaction rolled back: " + ex.Message);
+				throw;
+			}
+		}
+
+
+		// GET: ProductManagement/Products/Delete/5
+		[HttpGet]
+		[Route("ProductManagement/Products/Delete/{id?}")]
+		public async Task<IActionResult> Delete(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var products = await _context.Products
+				.Include(p => p.Region)
+				.FirstOrDefaultAsync(m => m.ProductID == id);
+			if (products == null)
+			{
+				return NotFound();
+			}
+
+			return View(products);
+		}
+
+
+
+		// POST: ProductManagement/Products/Delete/5
+		[HttpPost, ActionName("Delete")]
+		[Route("ProductManagement/Products/Delete/{id?}")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(int? id)
+		{
+			var products = await _context.Products.FirstOrDefaultAsync(p => p.ProductID == id);
+			if (products != null)
+			{
+				_context.Products.Remove(products);
+			}
+
+			await _context.SaveChangesAsync();
+			return RedirectToAction(nameof(Index));
+		}
+
+		private bool ProductsExists(string id)
+		{
+			return _context.Products.Any(e => e.ProductCode == id);
+		}
+
+
+		// 提供 DataTables 用的 API (取得Hotels內所有的資料)
+
+		public IActionResult GetHotels()
+		{
+			var hotels = _context.Hotels
+				.Select(h => new { hotelID = h.HotelID, hotelName = h.HotelName, hotelAddr = h.HotelAddr })
+				.ToList();
+
+			Console.WriteLine($"回傳飯店數量: {hotels.Count}");
+
+			return Json(new { data = hotels });
+		}
+
+
+		public IActionResult GetLocations()
+		{
+			var locations = _context.Locations
+				.Select(h => new { h.LocationID, h.LocationName, h.LocationAddr })
+				.ToList();
+
+			return Json(new { data = locations });
+		}
+
+
+		public IActionResult GetRestaurants()
+		{
+			var restaurants = _context.Restaurants
+				.Select(h => new { h.RestaurantID, h.RestaurantName, h.RestaurantAddr })
+				.ToList();
+
+			return Json(new { data = restaurants });
+		}
+
+
+		public IActionResult GetTransportations()
+		{
+			var transportations = _context.Transportations
+				.Select(h => new { h.TransportID, h.TransportName, h.TransportDesc })
+				.ToList();
+
+			return Json(new { data = transportations });
+		}
+
+		// === 新增圖片端點 ===
+		[HttpGet]
+		[Route("ProductManagement/Products/GetProductImage/{id}")]
+		public IActionResult GetProductImage(int id)
+		{
+			var product = _context.Products.FirstOrDefault(p => p.ProductID == id);
+			if (product == null || product.ProductImage == null)
+			{
+				var defaultImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/NoImage.png");
+				var defaultImage = System.IO.File.ReadAllBytes(defaultImagePath);
+				return File(defaultImage, "image/png");
+			}
+			return File(product.ProductImage, "image/png");
+		}
+
+
+		// 執行軟刪除
+		[HttpPost]
+		public async Task<IActionResult> Deactivate(int id)
+		{
+			var product = await _context.Products.FindAsync(id);
+			if (product == null)
+			{
+				return NotFound();
+			}
+
+			// 將 IsActive 設為 false (軟刪除)
+			product.IsActive = false;
+			await _context.SaveChangesAsync();
+
+			return Json(new { success = true });
+		}
+
+		private async Task<string> GenerateProductCodeAsync()
+		{
+			var now = await GetDatabaseNowAsync(); // ← 用資料庫時間
+			var today = now.Date;
+
+			// 計算今天已有幾筆
+			var dailyCount = await _context.Products
+				.CountAsync(p => EF.Functions.DateDiffDay(p.CreateTime, today) == 0);
+
+			var serial = (dailyCount + 1).ToString("D4"); // 四位數補 0
+			return $"PRO{now:yyMMdd}{serial}";
+		}
+
+		private async Task<DateTime> GetDatabaseNowAsync()
+		{
+			// 直接從 DB 取 GETDATE()
+			var conn = _context.Database.GetDbConnection();
+			await conn.OpenAsync();
+			using var cmd = conn.CreateCommand();
+			cmd.CommandText = "SELECT GETDATE()";
+			var result = await cmd.ExecuteScalarAsync();
+			return Convert.ToDateTime(result);
+		}
+
+
+	}
 }

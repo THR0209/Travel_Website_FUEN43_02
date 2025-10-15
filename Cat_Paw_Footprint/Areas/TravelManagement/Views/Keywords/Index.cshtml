@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Keywords>
+
+@{
+    ViewData["Title"] = "關鍵字管理";
+}
+
+<div class="mt-2" id="cr-key" style="display:none;">
+    <a asp-action="Create" class="btn btn-outline-primary">
+        <i class="fa-solid fa-square-plus"></i>新增資料
+    </a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-key me-2"></i>關鍵字管理
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+        <table id="example" class="display table table-striped" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Keyword)</th>
+                    <th>@Html.DisplayNameFor(model => model.Views)</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model) {
+                    <tr class="text-center">
+                        <td>@Html.DisplayFor(modelItem => item.Keyword)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Views)</td>
+                        <td>
+                            @* <a asp-action="Details" asp-route-id="@item.KeywordID" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i>詳情</a> *@
+                            <a asp-action="Edit" asp-route-id="@item.KeywordID" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen-to-square"></i>編輯</a>
+                            @* <a asp-action="Delete" asp-route-id="@item.KeywordID" class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-ban"></i>下架</a>*@
+                           
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts{
+    <!-- FixedHeader 套件 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css">
+    <script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#example').DataTable({
+               language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料",
+                },
+                lengthMenu: [5, 10, 25, 50],
+                pageLength: 10,
+                 columnDefs: [
+                    { targets: 0, width: "45%" },
+                    { targets: 1, width: "45%" },
+                    { targets: 2, width: "10%" },
+                 ],
+                 initComplete: function () {
+                    
+                    $('.dataTables_length').after($('#cr-key').show());
+                }
+            });            
+        });
+        $("#example th").css("width", "");
+    </script>
+
+}

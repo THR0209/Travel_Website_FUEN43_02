@@ -1,0 +1,122 @@
+@model IEnumerable<Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsIndexViewModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+	ViewData["Title"] = "最新消息";
+}
+
+<div class="mt-2" id="cr-news" style="display:none;">
+	<a asp-action="Create" class="btn btn-outline-primary"><i class="fa-solid fa-square-plus"></i>新增消息</a>
+</div>
+<div class="card">
+	<div class="card-body">
+		<div class="mb-4 text-center">
+			<span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+				<i class="fa-solid fa-bullhorn me-2"></i>最新消息
+			</span>
+			<div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+		</div>
+		<div class="table-responsive">
+			<table id="newsTable" class="table table-striped align-middle">
+				<thead>
+					<tr>
+						<th style="width: 23%;">
+							@Html.DisplayNameFor(model => model.NewsTitle)
+						</th>
+						<th style="width: 10%;">
+							@Html.DisplayNameFor(model => model.PublishTime)
+						</th>
+						<th style="width: 10%;">
+							@Html.DisplayNameFor(model => model.ExpireTime)
+						</th>
+						<th style="width: 5%;">
+							@Html.DisplayNameFor(model => model.IsActive)
+						</th>
+						<th style="width: 10%;">
+							@Html.DisplayNameFor(model => model.UpdateTime)
+						</th>
+						<th style="width: 7%;">
+							@Html.DisplayNameFor(model => model.EmployeeName)
+						</th>
+						<th style="width: 20%;">操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in Model)
+					{
+						<tr>
+							<td>
+								@Html.DisplayFor(modelItem => item.NewsTitle)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.PublishTime)
+							</td>
+							<td>
+								@Html.DisplayFor(modelItem => item.ExpireTime)
+							</td>
+							 <td class="text-center">
+								@Html.ActiveBadge(item.IsActive)
+							 </td>
+							<td>
+								@Html.DisplayFor(modelItem => item.UpdateTime)
+							</td>
+							<td class="text-center">
+								@Html.DisplayFor(modelItem => item.EmployeeName)
+							</td>
+							<td class="text-center">
+								<a asp-action="Details" asp-route-id="@item.NewsID" class="btn btn-outline-secondary btn-sm mb-1 btn-action"><i class="fa-solid fa-eye"></i>詳情</a>
+								<a asp-controller="NewsTables" asp-action="Edit" asp-route-id="@item.NewsID" class="btn btn-outline-primary btn-sm mb-1 btn-action">
+									<i class="fa-solid fa-pen-to-square"></i>
+									編輯
+								</a>
+								<a asp-action="Delete" asp-route-id="@item.NewsID" class="btn btn-outline-danger btn-sm mb-1 btn-action"><i class="fa-solid fa-trash"></i>刪除</a>
+					
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+    </div>
+</div>
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('#newsTable').DataTable({
+				// dom: 'Bfrtip', 
+				// buttons: ['copy', 'csv', 'pdf', 'print'],
+				language: {
+					search: "搜尋：",
+					lengthMenu: "每頁顯示 _MENU_ 筆",
+					info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+					paginate: {
+						first: "第一頁",
+						last: "最後一頁",
+						next: "下一頁",
+						previous: "上一頁"
+					},
+					zeroRecords: "找不到資料",
+				},
+				pageLength: 10, // 預設每頁10筆
+				lengthMenu: [5, 10, 20, 50],
+				columnDefs: [
+					{ targets:6, orderable: false, searchable: false },
+				]
+				// fixedHeader: true
+			});
+
+			// 顯示成功訊息（延遲一點點，讓 DataTable 先完成）
+			@if (TempData["SuccessMessage"] != null)
+			{
+					<text>
+					setTimeout(function () {
+						alert('@Html.Raw(TempData["SuccessMessage"])')
+					}, 300); // 0.3 秒後顯示
+					</text>
+			}
+
+			$('.dataTables_length').after($('#cr-news').show());
+		});
+	</script>
+
+}

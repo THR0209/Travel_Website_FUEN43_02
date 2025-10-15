@@ -100,23 +100,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\testDBConnection.csproj": {}
+    "C:\\Users\\jim-NB\\Desktop\\Travel_Website_FUEN43_1002\\testDBConnection\\testDBConnection\\testDBConnection.csproj": {}
   },
   "projects": {
-    "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\testDBConnection.csproj": {
+    "C:\\Users\\jim-NB\\Desktop\\Travel_Website_FUEN43_1002\\testDBConnection\\testDBConnection\\testDBConnection.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\testDBConnection.csproj",
+        "projectUniqueName": "C:\\Users\\jim-NB\\Desktop\\Travel_Website_FUEN43_1002\\testDBConnection\\testDBConnection\\testDBConnection.csproj",
         "projectName": "testDBConnection",
-        "projectPath": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\testDBConnection.csproj",
-        "packagesPath": "C:\\Users\\ispan\\.nuget\\packages\\",
-        "outputPath": "D:\\Project\\Travel_Website_FUEN43_02\\testDBConnection\\testDBConnection\\obj\\",
+        "projectPath": "C:\\Users\\jim-NB\\Desktop\\Travel_Website_FUEN43_1002\\testDBConnection\\testDBConnection\\testDBConnection.csproj",
+        "packagesPath": "C:\\Users\\jim-NB\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\jim-NB\\Desktop\\Travel_Website_FUEN43_1002\\testDBConnection\\testDBConnection\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\ispan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\jim-NB\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -149,6 +149,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Google.Cloud.SecretManager.V1": {
+              "target": "Package",
+              "version": "[2.6.0, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.19, )"
@@ -183,7 +187,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

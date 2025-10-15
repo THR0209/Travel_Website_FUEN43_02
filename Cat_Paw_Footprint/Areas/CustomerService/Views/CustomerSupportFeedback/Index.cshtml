@@ -1,0 +1,250 @@
+﻿@using Cat_Paw_Footprint.Areas.CustomerService.ViewModel
+@model IEnumerable<Cat_Paw_Footprint.Areas.CustomerService.ViewModel.CustomerSupportFeedbackViewModel>
+@{
+    ViewData["Title"] = "工單評價維護";
+    var feedbacks = Model ?? Enumerable.Empty<CustomerSupportFeedbackViewModel>();
+}
+
+@section Styles {
+    <style>
+        .star-icon {
+            margin-right: 1px !important;
+            letter-spacing: -2px !important;
+            font-size: 1.3em;
+            vertical-align: middle;
+        }
+
+        .star-group {
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .star-tooltip {
+            background: #fff8dc;
+            border-radius: 6px;
+            padding: 2px 8px;
+            border: 1px solid #ffe066;
+            margin-left: 6px;
+            font-size: 1em;
+            box-shadow: 0 2px 4px rgba(0,0,0,.08);
+            position: relative;
+            top: -2px;
+            display: inline-block;
+        }
+        /* Modal美化略 */
+    </style>
+}
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3; letter-spacing:2px;">
+                <i class="fa-solid fa-star-half-stroke me-2"></i>工單評價維護
+            </span>
+            <div style="width:70px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+        <table id="feedbackTable" class="table table-striped align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>工單編號</th>
+                    <th>評分</th>
+                    <th class="text-center">留言</th>
+                    <th>建立時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 評價詳情 Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header bg-primary text-white rounded-top-4" style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
+                <h5 class="modal-title fw-bold text-white" id="feedbackModalLabel"><i class="fa-solid fa-star me-2"></i>評價詳情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <div class="mb-2"><b>工單編號：</b> <span id="detailTicket" class="text-primary"></span></div>
+                <div class="mb-2 d-flex align-items-center">
+                    <b>評分：</b>
+                    <span id="detailRating" class="align-middle star-group ms-2" tabindex="0"></span>
+                    <span id="detailTooltip" class="star-tooltip ms-2 text-secondary" style="display:none;"></span>
+                </div>
+                <div class="mb-2"><b>留言：</b></div>
+                <div class="border rounded p-3 mb-3 bg-white shadow-sm" id="detailComment"></div>
+                <div class="mb-2 text-muted"><b>建立時間：</b> <span id="detailTime"></span></div>
+            </div>
+            <div class="modal-footer bg-white rounded-bottom-4">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark"></i> 關閉
+                </button>
+                <button type="button" class="btn btn-outline-danger" id="btnDeleteFeedback">
+                    <i class="fa-solid fa-trash"></i> 刪除
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 刪除確認 Modal -->
+<div class="modal fade" id="deleteFeedbackConfirmModal" tabindex="-1" aria-labelledby="deleteFeedbackConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title  text-white" id="deleteFeedbackConfirmModalLabel">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>刪除確認
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body text-center fs-5">
+                確定要刪除此評價？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark"></i> 取消
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteFeedbackConfirmYes">
+                    <i class="fa-solid fa-trash"></i> 確定刪除
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/6a2e8b8a9d.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script>
+        function getStarHtml(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="star-icon" style="color:#f5c518;font-size:1.3em;letter-spacing:-2px;margin-right:1px;user-select:none;">${i <= rating ? '★' : '☆'}</span>`;
+            }
+            return `<span class="star-group" tabindex="0" data-rating="${rating}" style="cursor:pointer;outline:none;">${stars}</span>`;
+        }
+
+        let feedbackDeleteId = null;
+
+        $(document).ready(function () {
+            $('#feedbackTable').DataTable({
+                dom: '<"d-flex justify-content-between align-items-center"lf>tip',
+                ajax: {
+                    url: '/CustomerService/CustomerSupportFeedback/GetAll',
+                    type: 'GET',
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: "ticketID", title: "工單編號", className: "text-center" },
+                    {
+                      data: "feedbackRating",
+                      title: "評分",
+                      className: "text-center",
+                      render: function(data) {
+                            if (!data) return "<span class='text-muted'>-</span>";
+                            return getStarHtml(data) + `<span class="visually-hidden">${data}</span>`;
+                       }
+                    },
+                    { data: "feedbackComment", title: "留言", className: "text-start", render: data => data ? data : "<span class='text-muted'>-</span>" },
+                    {
+                        data: "createTime",
+                        title: "建立時間",
+                        className: "text-center",
+                        render: data => data ? dayjs(data).format("YYYY-MM-DD HH:mm") : ""
+                    },
+                    {
+                        data: null,
+                        title: "操作",
+                        orderable: false,
+                        searchable: false,
+                        className: "text-center",
+                        render: function (data, type, row) {
+                            return `<button class="btn btn-outline-primary me-2 view-detail-btn" data-id="${row.feedbackID}"><i class="fa-solid fa-eye"></i>詳情</button>
+                                    <button class="btn btn-outline-danger btn-delete-feedback" data-id="${row.feedbackID}"><i class="fa-solid fa-trash"></i>刪除</button>`;
+                        }
+                    }
+                ],
+                order: [[0, 'desc']],
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料"
+                }
+            });
+
+            // DataTable搜尋框加原角
+            $('#feedbackTable_filter input[type="search"]').addClass('form-control rounded-pill').css({
+                width: '220px',
+                display: 'inline-block',
+                marginLeft: '8px'
+            });
+
+            // 星星組 hover 顯示 X星（表格內）
+            $(document).on('mouseenter focus', '#feedbackTable .star-group', function () {
+                let rating = $(this).data('rating') || 0;
+                if ($(this).next('.star-tooltip').length === 0) {
+                    $(this).after('<span class="star-tooltip ms-2 text-secondary" style="font-size:1em;position:relative;">' + rating + ' 星</span>');
+                }
+            }).on('mouseleave blur', '#feedbackTable .star-group', function () {
+                $(this).next('.star-tooltip').remove();
+            });
+
+            // 詳情 Modal 開啟
+            $(document).on('click', '.view-detail-btn', function () {
+                const id = $(this).data('id');
+                $.get(`/CustomerService/CustomerSupportFeedback/Details/${id}`, function (data) {
+                    $('#detailTicket').text(data.ticketID || "-");
+                    $('#detailRating').html(getStarHtml(data.feedbackRating)).data('rating', data.feedbackRating);
+                    $('#detailTooltip').hide();
+                    $('#detailComment').text(data.feedbackComment ?? "-");
+                    $('#detailTime').text(data.createTime ? dayjs(data.createTime).format("YYYY-MM-DD HH:mm") : "-");
+                    $('#btnDeleteFeedback').data('id', data.feedbackID);
+                    new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+                }).fail(function () {
+                    alert('無法取得評價詳情');
+                });
+            });
+
+            // 詳情 Modal 星星組 hover
+            $(document).on('mouseenter focus', '#detailRating.star-group, #detailRating .star-group', function () {
+                let rating = $(this).data('rating') || $('#detailRating').data('rating') || 0;
+                $('#detailTooltip').text(rating + ' 星').show();
+            }).on('mouseleave blur', '#detailRating.star-group, #detailRating .star-group', function () {
+                $('#detailTooltip').text('').hide();
+            });
+
+            // 刪除按鈕點擊（詳情Modal和列表二者都用）
+            $(document).on('click', '.btn-delete-feedback, #btnDeleteFeedback', function () {
+                feedbackDeleteId = $(this).data('id');
+                new bootstrap.Modal(document.getElementById('deleteFeedbackConfirmModal')).show();
+            });
+
+            // 確定刪除
+            $('#deleteFeedbackConfirmYes').on('click', function () {
+                if (!feedbackDeleteId) return;
+                $.ajax({
+                    url: `/CustomerService/CustomerSupportFeedback/Delete/${feedbackDeleteId}`,
+                    type: 'DELETE',
+                    success: function (res) {
+                        $('#deleteFeedbackConfirmModal').modal('hide');
+                        $('#feedbackModal').modal('hide');
+                        $('#feedbackTable').DataTable().ajax.reload();
+                    },
+                    error: function () {
+                        $('#deleteFeedbackConfirmModal').modal('hide');
+                        alert('刪除失敗');
+                    }
+                });
+            });
+        });
+    </script>
+}

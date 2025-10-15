@@ -1,0 +1,65 @@
+﻿@model Cat_Paw_Footprint.Areas.Admin.ViewModel.NewsDeleteViewModel
+
+@{
+    ViewData["Title"] = "刪除最新消息";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-danger text-white fw-bold">
+                    <i class="fa-solid fa-trash-can me-2"></i> 刪除最新消息
+                </div>
+                <div class="card-body">
+                    <h5 class="mb-4 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>你確定要刪除嗎？</h5>
+                    <dl class="row">
+                        <dt class="col-sm-3 fw-semibold mt-3">標題</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.NewsTitle)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">內容</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.NewsContent)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">發布時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.PublishTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">到期時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.ExpireTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">是否啟用</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.IsActive)
+                            {
+                                <span class="badge bg-success">啟用</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">停用</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3 fw-semibold">建立時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.CreateTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">修改時間</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.UpdateTime)</dd>
+
+                        <dt class="col-sm-3 fw-semibold">員工名稱</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.EmployeeName)</dd>
+                    </dl>
+                    <form asp-action="Delete" class="mt-4" onsubmit="return confirm('你確定要刪除這筆資料嗎？');">
+                        <input type="hidden" asp-for="NewsID" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> 回上一頁
+                            </a>
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="fa-solid fa-trash-can"></i> 刪除
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

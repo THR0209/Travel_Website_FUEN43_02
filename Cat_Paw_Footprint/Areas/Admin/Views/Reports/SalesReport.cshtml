@@ -1,0 +1,226 @@
+﻿@{
+    ViewData["Title"] = "銷售報表";
+}
+
+
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <div class="position-relative mb-4">
+            <h2 class="text-center mb-0">
+                銷售報表
+            </h2>
+            <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard"
+               class="btn btn-outline-primary position-absolute end-0 top-50 translate-middle-y me-2">
+                <i class="fa-solid fa-chart-line"></i> 回到儀表板
+            </a>
+        </div>
+        <div class="row g-4 align-items-stretch">
+            <!-- 銷售額趨勢卡片 -->
+            <div class="col-md-6 col-12">
+                <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                    <div class="card-header text-center fw-bold fs-3">
+                        📊 銷售額趨勢
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="row mb-3 justify-content-center">
+                            <div class="col-md-6 col-sm-12 mb-2">
+                                <select id="chartType" class="form-select" style="background-color:#F5F7FA;">
+                                    <option value="bar" selected>柱狀圖</option>
+                                    <option value="line">折線圖</option>
+                                    <option value="pie">圓餅圖</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 col-sm-12 mb-2">
+                                <select id="timeRange" class="form-select" style="background-color:#F5F7FA;">
+                                    <option value="day">日報表</option>
+                                    <option value="month" selected>月報表</option>
+                                    <option value="quarter">季報表</option>
+                                    <option value="year">年報表</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                            <canvas id="salesChart" width="1000" height="400" style="max-width:100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 訂單數趨勢卡片 -->
+            <div class="col-md-6 col-12">
+                <div class="card shadow-sm" style="background-color:#F5F7FA;">
+                    <div class="card-header text-center fw-bold fs-3">
+                        🛒 訂單數趨勢
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <!-- 空白選單區塊（可移除或留空，讓高度一致） -->
+                        <div class="row mb-3 justify-content-center" style="visibility:hidden;">
+                            <div class="col-md-6 col-sm-12 mb-2">
+                                <select class="form-select"></select>
+                            </div>
+                            <div class="col-md-6 col-sm-12 mb-2">
+                                <select class="form-select"></select>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                            <canvas id="orderCountChart" width="1000" height="400" style="max-width:100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // === 銷售額圖表 ===
+        let ctxSales = document.getElementById('salesChart').getContext('2d');
+        let salesChart;
+
+        function initSalesChart(type, labels = [], data = []) {
+            if (salesChart) salesChart.destroy();
+
+            let datasetConfig = {
+                label: '銷售額',
+                data: data,
+                borderWidth: 1
+            };
+
+            if (type === "pie") {
+                datasetConfig.backgroundColor = [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 159, 64, 0.7)'
+                ];
+            } else {
+                datasetConfig.backgroundColor = 'rgba(54, 162, 235, 0.7)';
+                datasetConfig.borderColor = 'rgba(54, 162, 235, 1)';
+            }
+
+            salesChart = new Chart(ctxSales, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [datasetConfig]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                font: { size: 12, weight: 'bold' }
+                            }},
+                        title: { display: true, text: '銷售額統計',font: { size: 20, weight: 'bold' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let value = context.raw || 0;
+                                    return `銷售額: ${value.toLocaleString()} 元`;
+                                }
+                            }
+                        }
+                    },
+                    scales: type !== "pie" ? {
+                        x: { title: { display: true, text: '時間區間' } },
+                        y: { beginAtZero: true, title: { display: true, text: '銷售額 (元)' } }
+                    } : {}
+                }
+            });
+        }
+
+        function loadSalesData(groupBy) {
+            fetch(`/Admin/Reports/GetSalesReport?groupBy=${groupBy}`)
+                .then(r => r.json())
+                .then(data => {
+                    let labels = data.map(d => d.x);
+                    let values = data.map(d => d.y);
+                    let chartType = document.getElementById('chartType').value;
+                    initSalesChart(chartType, labels, values);
+                })
+                .catch(err => console.error("載入銷售報表錯誤:", err));
+        }
+
+        // === 訂單數圖表 ===
+        let ctxOrders = document.getElementById('orderCountChart').getContext('2d');
+        let orderChart;
+
+                function initOrderChart(type, labels = [], data = []) {
+            if (orderChart) orderChart.destroy();
+
+            orderChart = new Chart(ctxOrders, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '訂單數',
+                        data: data,
+                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 12, weight: 'bold' }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '訂單數統計',
+                            font: { size: 20, weight: 'bold' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let value = context.raw || 0;
+                                    return `訂單數: ${value}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: type !== "pie" ? {
+                        x: { title: { display: true, text: '時間區間' } },
+                        y: { beginAtZero: true, title: { display: true, text: '訂單數' } }
+                    } : {}
+                }
+            });
+        }
+
+        function loadOrderData(groupBy) {
+            fetch(`/Admin/Reports/GetOrderCountReport?groupBy=${groupBy}`)
+                .then(r => r.json())
+                .then(data => {
+                    let labels = data.map(d => d.x);
+                    let values = data.map(d => d.y);
+                    let chartType = document.getElementById('chartType').value;
+                    initOrderChart(chartType, labels, values);
+                })
+                .catch(err => console.error("載入訂單數報表錯誤:", err));
+        }
+
+        // === 綁定事件 ===
+        document.getElementById('timeRange').addEventListener('change', function () {
+            loadSalesData(this.value);
+            loadOrderData(this.value);
+        });
+
+        document.getElementById('chartType').addEventListener('change', function () {
+            let range = document.getElementById('timeRange').value;
+            loadSalesData(range);
+            loadOrderData(range);
+        });
+
+        // 預設載入月報表
+        loadSalesData("month");
+        loadOrderData("month");
+    </script>
+}

@@ -1,0 +1,621 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomerService.ViewModel.FAQServiceDashboardViewModel.FAQViewModel>
+
+@{
+    ViewData["Title"] = "FAQ 管理";
+}
+
+<div class="mt-2" id="cr-faq" style="display:none;">
+    <button class="btn btn-outline-primary" id="btnFaqNew">
+        <i class="fa-solid fa-square-plus"></i> 新增 FAQ
+    </button>
+</div>
+
+
+<div class="card mb-5 shadow-sm rounded-3">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3;">
+                <i class="fa-solid fa-circle-question me-2"></i> FAQs維護
+            </span>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
+        </div>
+        <div class="table-responsive">
+            <table id="faqTable" class="table table-striped align-middle" style="width:100%;">
+                <thead class="table-primary">
+                    <tr>
+                        <th>ID</th>
+                        <th>問題</th>
+                        <th>答案</th>
+                        <th>分類</th>
+                        <th>狀態</th>
+                        <th>熱門</th>
+                        <th>排序</th>
+                        <th>建立時間</th>
+                        <th>最後更新</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-fixed top-0 end-0 p-3">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="toast text-bg-success border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">@TempData["SuccessMessage"]</div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="toast text-bg-danger border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">@TempData["ErrorMessage"]</div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- FAQ 新增/編輯 Modal -->
+<div class="modal fade" id="faqModal" tabindex="-1" aria-labelledby="faqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:700px;">
+        <div class="modal-content">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-primary text-white fw-bold" style="background:linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
+                    <i class="fa-solid fa-circle-question me-2"></i> FAQ 資訊
+                </div>
+                <div class="card-body">
+                    <form id="faqForm" class="row g-3">
+                        <input type="hidden" id="faqID" />
+                        <div class="mb-3 mt-5">
+                            <label class="form-label fw-semibold">分類</label>
+                            <select id="faqFormCategory" class="form-select"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">狀態</label>
+                            <select id="faqFormStatus" class="form-select">
+                                <option value="上架">上架</option>
+                                <option value="下架">下架</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">問題</label>
+                            <input id="faqFormQuestion" type="text" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">答案</label>
+                            <textarea id="faqFormAnswer" class="form-control" rows="10"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">熱門</label>
+                            <select id="faqFormIsHot" class="form-select">
+                                <option value="false">否</option>
+                                <option value="true">是</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">排序值</label>
+                            <input id="faqFormHotOrder" type="number" class="form-control" min="0" value="0" />
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fa-solid fa-xmark"></i> 取消
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="faqModalSave">
+                                <i class="fa-solid fa-floppy-disk"></i> 儲存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ 分類管理 Accordion 收合區塊 -->
+
+<div class="accordion mb-4" id="faqCategoryAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="faqCategoryHeading">
+            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faqCategoryCollapse">
+                <i class="fa-solid fa-folder-tree me-2"></i> FAQ 分類管理
+            </button>
+        </h2>
+        <div id="faqCategoryCollapse" class="accordion-collapse collapse">
+            <div class="accordion-body">
+                <button class="btn btn-outline-primary mb-3" id="btnAddCategory">
+                    <i class="fa-solid fa-square-plus"></i> 新增分類
+                </button>
+                <div class="table-responsive">
+                    <table id="categoryTable" class="table table-striped align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>#</th>
+                                <th>分類名稱</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ 分類新增/編輯 Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-primary text-white fw-bold" style="background:linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
+                    <i class="fa-solid fa-folder-tree me-2"></i> 分類資訊
+                </div>
+                <div class="card-body">
+                    <form id="categoryForm">
+                        <input type="hidden" id="categoryID" />
+                        <div class="mb-3 mt-5">
+                            <label class="form-label fw-semibold">分類名稱</label>
+                            <input id="categoryFormName" type="text" class="form-control" required />
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fa-solid fa-xmark"></i> 取消
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="categoryModalSave">
+                                <i class="fa-solid fa-floppy-disk"></i> 儲存
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 刪除確認 Modal（共用） -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger">
+                <h5 class="modal-title text-white" id="deleteConfirmModalLabel">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>刪除確認
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+            </div>
+            <div class="modal-body text-center fs-5" id="deleteConfirmModalBody">
+                <!-- 動態插入訊息 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark"></i> 取消
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteConfirmModalYes">
+                    <i class="fa-solid fa-trash"></i> 確定刪除
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script>
+        // Toast自動顯示
+        document.addEventListener("DOMContentLoaded", function () {
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            var toastList = toastElList.map(function (toastEl) {
+                var t = new bootstrap.Toast(toastEl);
+                t.show();
+                return t;
+            });
+        });
+
+        function showToast(message, type = "success") {
+            let $container = $(".toast-container");
+            if ($container.length === 0) {
+                $container = $('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
+                $("body").append($container);
+            }
+            const $toast = $(`
+                <div class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `);
+            $container.append($toast);
+            const bsToast = new bootstrap.Toast($toast[0]);
+            bsToast.show();
+            $toast.on('hidden.bs.toast', function () {
+                $(this).remove();
+            });
+        }
+
+        function statusRender(status) {
+            if (status) {
+                return `<span class="badge bg-success text-center">上架</span>`;
+            } else {
+                return `<span class="badge bg-warning text-center">下架</span>`;
+            }
+        }
+
+        // 刪除Modal邏輯（FAQ/分類共用）
+        let deleteAction = null;
+        function openDeleteModal(msg, onConfirm) {
+            $('#deleteConfirmModalBody').html(msg);
+            deleteAction = onConfirm;
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
+        }
+        $('#deleteConfirmModalYes').on('click', function() {
+            if (typeof deleteAction === 'function') deleteAction();
+            bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+        });
+
+        // FAQ刪除
+        function deleteFaq(id) {
+            openDeleteModal("確定要刪除這筆 FAQ 嗎？", function() {
+                $.ajax({
+                    url: `/CustomerService/FAQs/api/${id}`,
+                    type: 'DELETE',
+                    success: function (res) {
+                        if (res.message && (res.message.indexOf("已刪除") > -1 || res.message.indexOf("已刪除!") > -1)) {
+                            showToast("FAQ 已成功刪除！", "success");
+                            $('#faqTable').DataTable().ajax.reload();
+                        } else {
+                            showToast("操作失敗：" + (res.message || ""), "danger");
+                        }
+                    },
+                    error: function (xhr) {
+                        var msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "發生錯誤，請稍後再試。";
+                        showToast(msg, "danger");
+                    }
+                });
+            });
+        }
+
+        // FAQ DataTable
+        $(document).ready(function () {
+            $('#faqTable').DataTable({
+                ajax: {
+                    type: 'GET',
+                    url: '/CustomerService/FAQs/api',
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: "faqid", visible: false },
+                    { data: "question", title: "問題", width: "15%", className: "dt-body-left" },
+                    {
+                        data: "answer",
+                        title: "答案",
+                        width: "17%",
+                        className: "dt-body-left",
+                        render: function(data, type, row) {
+                            if (type === 'display') {
+                                return data ? data : '';
+                            }
+                            return data;
+                        }
+                    },
+                    { data: "categoryName", title: "分類", width: "10%", className: "dt-body-center" },
+                    {
+                        data: "isActive",
+                        title: "狀態",
+                        width: "6%",
+                        render: statusRender,
+                        className: "dt-center"
+                    },
+                    {
+                        data: "isHot",
+                        title: "熱門",
+                        width: "6%",
+                        render: function(val) {
+                            return val ? '<span class="badge bg-danger">熱門</span>' : '';
+                        },
+                        className: "dt-center"
+                    },
+                    {
+                        data: "hotOrder",
+                        title: "排序",
+                        width: "6%",
+                        className: "dt-center"
+                    },
+                    {
+                        data: "createTime",
+                        title: "建立時間",
+                        width: "10%",
+                        render: function (data) {
+                            return data ? dayjs(data).format("YYYY-MM-DD HH:mm") : "";
+                        },
+                        className: "dt-body-left"
+                    },
+                    {
+                        data: "updateTime",
+                        title: "最後更新",
+                        width: "10%",
+                        render: function (data) {
+                            return data ? dayjs(data).format("YYYY-MM-DD HH:mm") : "";
+                        },
+                        className: "dt-body-left"
+                    },
+                    {
+                        data: null,
+                        title: "操作",
+                        orderable: false,
+                        searchable: false,
+                        width: "16%",
+                        className: "dt-body-center",
+                        render: function (data, type, row) {
+                            return `
+                                <button type="button" class="btn btn-outline-primary btn-faq-edit" data-id="${row.faqid}">
+                                    <i class="fa-solid fa-pen-to-square"></i>編輯
+                                </button>
+                                <button type="button" onclick="deleteFaq(${row.faqid})" class="btn btn-outline-danger">
+                                    <i class="fa-solid fa-trash"></i>刪除
+                                </button>
+                            `;
+                        }
+                    }
+                ],
+                order: [[0, 'desc']],
+                language: {
+                    search: "搜尋：",
+                    lengthMenu: "每頁顯示 _MENU_ 筆",
+                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    paginate: {
+                        first: "第一頁",
+                        last: "最後一頁",
+                        next: "下一頁",
+                        previous: "上一頁"
+                    },
+                    zeroRecords: "找不到資料",
+                }
+            });
+            $('.dataTables_length').after($('#cr-faq').show());
+        });
+
+        // FAQ Modal CKEditor 5 啟用
+        let faqEditor = null;
+                function initFaqCKEditor() {
+            if (faqEditor) {
+                faqEditor.destroy().then(() => {
+                    faqEditor = null;
+                    createEditor();
+                });
+            } else {
+                createEditor();
+            }
+            function createEditor() {
+                ClassicEditor
+                    .create(document.querySelector('#faqFormAnswer'), {
+                        language: 'zh',
+                        toolbar: [
+                            "undo", "redo", "|",
+                            "heading", "|",
+                            "bold", "italic", "link", "blockQuote", "|",
+                            "bulletedList", "numberedList", "|",
+                            "insertTable", "mediaEmbed"
+                        ]
+                    })
+                    .then(editor => faqEditor = editor)
+                    .catch(error => {
+                        console.error('CKEditor 啟動失敗', error);
+                        showToast('CKEditor 啟動失敗，請檢查頁面元素與設定！', 'danger');
+                    });
+            }
+        }
+        $('#faqModal').on('shown.bs.modal', function () {
+            setTimeout(initFaqCKEditor, 100);
+        });
+
+        // FAQ Modal 新增
+        $('#btnFaqNew').on('click', function () {
+            $('#faqID').val('');
+            $('#faqFormCategory').val('');
+            $('#faqFormStatus').val('');
+            $('#faqFormIsHot').val('false');
+            $('#faqFormHotOrder').val(0);
+            $('#faqFormQuestion').val('');
+            if (faqEditor) {
+                faqEditor.setData('');
+            } else {
+                $('#faqFormAnswer').val('');
+            }
+            $('#faqModalLabel').text('新增 FAQ');
+            $('#faqModal').modal('show');
+        });
+
+        // FAQ Modal 編輯
+        $('#faqTable').on('click', '.btn-faq-edit', function () {
+            var id = $(this).data('id');
+            $.getJSON(`/CustomerService/FAQs/api/${id}`, function (faq) {
+                $('#faqID').val(faq.faqid);
+                $('#faqFormCategory').val(faq.categoryID);
+                $('#faqFormStatus').val(faq.isActive ? '上架' : '下架');
+                $('#faqFormQuestion').val(faq.question);
+                if (faqEditor) {
+                    faqEditor.setData(faq.answer || '');
+                } else {
+                    $('#faqFormAnswer').val(faq.answer);
+                }
+                $('#faqModalLabel').text('編輯 FAQ');
+                $('#faqModal').modal('show');
+            });
+        });
+
+        // FAQ Modal 儲存
+        $('#faqModalSave').on('click', function () {
+            var id = $('#faqID').val();
+            var answer = faqEditor ? faqEditor.getData() : $('#faqFormAnswer').val();
+            var vm = {
+                FAQID: id ? parseInt(id) : 0,
+                CategoryID: Number($('#faqFormCategory').val()),
+                IsActive: $('#faqFormStatus').val() === '上架',
+                Question: $('#faqFormQuestion').val().trim(),
+                Answer: answer,
+                IsHot: $('#faqFormIsHot').val() === 'true',
+                HotOrder: Number($('#faqFormHotOrder').val()) || 0
+            };
+            if (!vm.CategoryID || !vm.Question || !vm.Answer) {
+                showToast('資料不完整', 'danger');
+                return;
+            }
+            var ajax = id ? $.ajax({ url: `/CustomerService/FAQs/api/${id}`, type: "PUT", contentType: "application/json", data: JSON.stringify(vm) })
+                        : $.ajax({ url: "/CustomerService/FAQs/api", type: "POST", contentType: "application/json", data: JSON.stringify(vm) });
+            ajax.done(function () {
+                $('#faqModal').modal('hide');
+                $('#faqTable').DataTable().ajax.reload();
+                showToast('FAQ 新增成功!', 'success');
+            }).fail(function () {
+                showToast('儲存失敗', 'danger');
+            });
+        });
+
+        // FAQ分類管理 (原 JS 不變)
+        $(function () {
+            var categoryModal = new bootstrap.Modal(document.getElementById('categoryModal'), { focus: false });
+            var state = { categories: [] };
+            var editingCategoryId = null;
+
+            var api = {
+                getCategories: () => $.getJSON("/CustomerService/FAQs/api/categories"),
+                createCategory: vm => $.ajax({ url: "/CustomerService/FAQs/api/categories", type: "POST", contentType: "application/json", data: JSON.stringify(vm) }),
+                updateCategory: (id, vm) => $.ajax({ url: `/CustomerService/FAQs/api/categories/${id}`, type: "PUT", contentType: "application/json", data: JSON.stringify(vm) }),
+                deleteCategory: id => $.ajax({ url: `/CustomerService/FAQs/api/categories/${id}`, type: "DELETE" })
+            };
+
+            function escapeHtml(s) {
+                if (!s) return '';
+                return String(s).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+            }
+
+            function renderCategoryOptions() {
+                var options = '<option value="">請選擇</option>';
+                state.categories.forEach(function (c) {
+                    options += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
+                });
+                $('#faqFormCategory').html(options);
+            }
+
+            function initCategoryDataTable() {
+                if ($.fn.DataTable.isDataTable('#categoryTable')) $('#categoryTable').DataTable().destroy();
+                $('#categoryTable').DataTable({
+                    paging: true,
+                    searching: false,
+                    ordering: false,
+                    info: true,
+                    autoWidth: false,
+                    dom: 'tip',
+                    language: {
+                        search: "搜尋：",
+                        lengthMenu: "每頁顯示 _MENU_ 筆",
+                        info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                        paginate: {
+                            first: "第一頁",
+                            last: "最後一頁",
+                            next: "下一頁",
+                            previous: "上一頁"
+                        },
+                        zeroRecords: "找不到資料",
+                    },
+                    data: state.categories,
+                    columns: [
+                        { data: null, render: (d, t, r, m) => m.row + 1, className: "dt-body-center" },
+                        { data: "name", render: escapeHtml, className: "dt-body-center" },
+                        {
+                            data: null,
+                            orderable: false,
+                            className: "dt-body-center",
+                            render: function (data, type, row) {
+                                return `
+                                    <button class="btn btn-outline-primary btn-cat-edit" data-id="${row.id}"><i class="fa-solid fa-pen-to-square"></i>編輯</button>
+                                    <button type="button" class="btn btn-outline-danger btn-cat-del" data-id="${row.id}"><i class="fa-solid fa-trash"></i>刪除</button>
+                                `;
+                            }
+                        }
+                    ]
+                });
+            }
+
+            function renderCategoryTable() {
+                if ($.fn.DataTable.isDataTable('#categoryTable')) {
+                    var table = $('#categoryTable').DataTable();
+                    table.clear().rows.add(state.categories).draw();
+                } else {
+                    initCategoryDataTable();
+                }
+            }
+
+            function fetchAndRenderCategories() {
+                api.getCategories().done(function (cats) {
+                    state.categories = $.map(cats, c => ({ id: String(c.id), name: c.name }));
+                    renderCategoryTable();
+                    renderCategoryOptions();
+                });
+            }
+
+            function openCategoryModal(cat) {
+                editingCategoryId = cat ? cat.id : null;
+                $('#categoryID').val(cat ? cat.id : "");
+                $('#categoryFormName').val(cat ? cat.name : '');
+                categoryModal.show();
+            }
+
+            $('#btnAddCategory').on('click', () => openCategoryModal(null));
+            $('#categoryModalSave').on('click', function () {
+                var name = $('#categoryFormName').val().trim();
+                if (!name) {
+                    showToast('請輸入分類名稱', 'danger');
+                    return;
+                }
+                var $btn = $(this).prop('disabled', true);
+                var vm = { categoryID: $('#categoryID').val() || undefined, categoryName: name };
+                var ajax = editingCategoryId ? api.updateCategory(editingCategoryId, vm) : api.createCategory(vm);
+                ajax.done(() => {
+                    categoryModal.hide();
+                    fetchAndRenderCategories();
+                    showToast('分類新增成功!', 'success');
+                })
+                .fail(() => showToast('儲存分類失敗', 'danger'))
+                .always(() => $btn.prop('disabled', false));
+            });
+
+            $('#categoryTable').on('click', '.btn-cat-edit', function () {
+                var id = $(this).data('id');
+                var cat = state.categories.find(c => String(c.id) === String(id));
+                openCategoryModal(cat);
+            });
+            $('#categoryTable').on('click', '.btn-cat-del', function () {
+                var id = $(this).data('id');
+                openDeleteModal('確定要刪除此分類？', function() {
+                    api.deleteCategory(id)
+                        .done(function (res) {
+                            if (res.message && (res.message.indexOf("已刪除") > -1 || res.message.indexOf("已刪除!") > -1)) {
+                                showToast("分類已成功刪除！", "success");
+                                fetchAndRenderCategories();
+                            } else {
+                                showToast("操作失敗：" + (res.message || ""), "danger");
+                            }
+                        })
+                        .fail(function (xhr) {
+                            var msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : "刪除分類失敗";
+                            showToast(msg, "danger");
+                        });
+                });
+            });
+
+            fetchAndRenderCategories();
+        });
+    </script>
+}

@@ -1,0 +1,239 @@
+﻿@model Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.RestaurantsViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <h2 class="mb-3">新增美食</h2>
+        <h6 class="text-muted mb-4">美食詳細資訊</h6>
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row g-4">
+                <!-- 左半部 -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="RestaurantName" class="control-label"></label>
+                        <input asp-for="RestaurantName" class="form-control" />
+                        <span asp-validation-for="RestaurantName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RestaurantAddr" class="control-label"></label>
+                        <input asp-for="RestaurantAddr" class="form-control" />
+                        <span asp-validation-for="RestaurantAddr" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RestaurantLat" class="control-label"></label>
+                            <input asp-for="RestaurantLat" class="form-control" />
+                            <span asp-validation-for="RestaurantLat" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="RestaurantLng" class="control-label"></label>
+                            <input asp-for="RestaurantLng" class="form-control" />
+                            <span asp-validation-for="RestaurantLng" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <!-- 介紹放左下 -->
+                    <div class="mb-3">
+                        <label asp-for="RestaurantDesc" class="control-label"></label>
+                        <textarea asp-for="RestaurantDesc" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="RestaurantDesc" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- 右半部 -->
+                <div class="col-md-6">
+
+                    <div class="mb-3">
+                        <label asp-for="IsActive" class="control-label"></label>
+                        <select asp-for="IsActive" class="form-select">
+                            <option value="true" selected="@(Model != null && Model.IsActive == true ? "selected" : null)">上架</option>
+                            <option value="false" selected="@(Model != null && Model.IsActive == false ? "selected" : null)">下架</option>
+                        </select>
+                        <span asp-validation-for="IsActive" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="RegionID" class="control-label"></label>
+                        <select asp-for="RegionID" class="form-select" asp-items="ViewBag.RegionID">
+                            <option value="">請選擇</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DistrictID" class="control-label"></label>
+                        <select asp-for="DistrictID" class="form-select" asp-items="ViewBag.DistrictID">
+                            <option value="">請選擇</option>
+                        </select>
+                    </div>                    
+
+                    <!-- 關鍵字放右上 -->
+                    <div class="mb-3">
+                        <label asp-for="KeywordID" class="control-label">選擇關鍵字</label>
+                        <!-- 一般下拉選單 -->
+                        <select id="keywordSelect" class="form-select" asp-items="ViewBag.KeywordID">
+                            <option value="">請選擇</option>
+                        </select>
+                        <!-- 選擇結果顯示區 -->
+                        <ul id="selectedKeywords" class="mt-2"></ul>
+                        <!-- 隱藏欄位容器 (動態生成) -->
+                        <div id="keywordHiddenInputs"></div>
+                        <span asp-validation-for="KeywordID" class="text-danger"></span>
+                    </div>
+
+                    <!-- 圖片上傳放右下 -->
+                    <div class="mb-3">
+                        <label asp-for="Picture" class="control-label"></label>
+                        <input asp-for="Picture" type="file" class="form-control" multiple onchange="previewImages(event)" />
+                        <span asp-validation-for="Picture" class="text-danger"></span>
+                        <!-- 預覽區 -->
+                        <div id="previewArea" class="mt-2 d-flex flex-wrap"></div>
+                    </div>
+                </div>
+
+                <!-- 按鈕區 -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-outline-primary">確認</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">返回</a>
+                </div>
+
+                
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        let selected = [];
+
+        // 下拉選單選擇事件
+        $("#keywordSelect").change(function () {
+            let val = $(this).val();
+            let text = $("#keywordSelect option:selected").text();
+
+            if (val && !selected.includes(val)) {
+                selected.push(val);
+
+                // 加到顯示清單
+                $("#selectedKeywords").append(
+                     `<span class="badge bg-primary me-2 p-2 d-inline-flex align-items-center" data-id="${val}">
+                        ${text}
+                        <button type="button" class="btn-close btn-close-white ms-2 remove-keyword" data-id="${val}" style="font-size:0.6rem;"></button>
+                    </span>`
+                );
+
+                // 生成隱藏欄位
+                $("#keywordHiddenInputs").append(
+                    `<input type="hidden" name="KeywordID" value="${val}" id="hidden-${val}" />`
+                );
+            }
+        });
+
+        // 點 X 移除
+        $(document).on("click", ".remove-keyword", function () {
+            let id = $(this).data("id").toString();
+
+            // 從陣列移除
+            selected = selected.filter(x => x !== id);
+
+            // 移除清單 & 對應隱藏欄位
+            $(this).closest("span").remove();
+            $(`#hidden-${id}`).remove();
+        });
+
+         // 限制檔案大小 (2MB)
+        const MAX_SIZE = 2 * 1024 * 1024;
+
+        function previewImages(event) {
+            let files = event.target.files;
+            let previewArea = document.getElementById("previewArea");
+
+            // 清空舊的預覽
+            previewArea.innerHTML = "";
+
+            // 用來追蹤有效檔案
+            let validFiles = [];
+
+            Array.from(files).forEach((file, index) => {
+                // 檢查檔案型別
+                if (!file.type.startsWith("image/")) {
+                    alert(`${file.name} 不是圖片檔案，已跳過`);
+                    return;
+                }
+
+                // 檢查檔案大小
+                if (file.size > MAX_SIZE) {
+                    alert(`${file.name} 超過 2MB，已跳過`);
+                    return;
+                }
+
+                validFiles.push(file);
+
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    // 圖片容器
+                    let container = document.createElement("div");
+                    container.style.position = "relative";
+                    container.style.display = "inline-block";
+                    container.style.margin = "5px";
+
+                    // 圖片
+                    let img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.style.width = "150px";
+                    img.style.height = "100px";
+                    img.style.objectFit = "cover";
+                    img.style.border = "1px solid #ccc";
+                    img.style.borderRadius = "5px";
+
+                    // 刪除按鈕
+                    let btn = document.createElement("button");
+                    btn.innerText = "X";
+                    btn.type = "button";
+                    btn.style.position = "absolute";
+                    btn.style.top = "2px";
+                    btn.style.right = "2px";
+                    btn.style.background = "rgba(255,0,0,0.7)";
+                    btn.style.color = "white";
+                    btn.style.border = "none";
+                    btn.style.borderRadius = "50%";
+                    btn.style.width = "20px";
+                    btn.style.height = "20px";
+                    btn.style.cursor = "pointer";
+                    btn.onclick = function () {
+                        container.remove();
+                        validFiles = validFiles.filter(f => f !== file);
+                        updateInputFiles(event.target, validFiles);
+                    };
+
+                    container.appendChild(img);
+                    container.appendChild(btn);
+                    previewArea.appendChild(container);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 更新 input files
+            updateInputFiles(event.target, validFiles);
+        }
+
+        // 讓 input[type=file] 的 FileList 可以被更新
+        function updateInputFiles(input, files) {
+            const dataTransfer = new DataTransfer();
+            files.forEach(f => dataTransfer.items.add(f));
+            input.files = dataTransfer.files;
+        }
+
+
+    </script>
+
+}

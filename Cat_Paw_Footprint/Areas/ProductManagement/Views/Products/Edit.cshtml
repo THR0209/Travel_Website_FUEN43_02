@@ -1,79 +1,973 @@
-﻿@model Cat_Paw_Footprint.Models.Products
+﻿@using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
+@model Cat_Paw_Footprint.Areas.ProductManagement.ViewModel.ProductEditViewModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "編輯產品";
 }
 
-<h1>Edit</h1>
+@if (ViewBag.ModelErrors != null)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var err in ViewBag.ModelErrors)
+            {
+                <li><strong>@err.Key</strong>:
+                    @foreach (var msg in err.Errors)
+                    {
+                        @msg <br />
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
 
-<h4>Products</h4>
+@section Styles {
+    <!-- DataTables (統一 1.13.7) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/1.7.0/css/select.dataTables.min.css" />
+
+    <!-- CKEditor -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/css/myckeditor.css" rel="stylesheet" />
+
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+}
+
+<a asp-action="Index" class="btn btn-outline-primary float-end">返回上頁</a>
+<h1 class="ms-3">更新行程內容</h1>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ProductID" />
-            <div class="form-group">
-                <label asp-for="ProductName" class="control-label"></label>
-                <input asp-for="ProductName" class="form-control" />
-                <span asp-validation-for="ProductName" class="text-danger"></span>
+
+<form asp-action="Edit" enctype="multipart/form-data">
+    <!-- 🔑 ProductID 必須隱藏送出 -->
+    <input type="hidden" asp-for="Product.ProductID" />
+
+    <!-- 左右欄位（跟 Create.cshtml 一樣，這裡省略） -->
+    <div class="row">
+        <div class="col-md-4">
+            <!-- 基本資料 (圖片, 名稱, 代碼...) -->
+            <div class="card p-3 ms-3 h-100">
+                <label class="mb-1">產品封面照： </label>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group mb-3">
+                    @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
+                    {
+                        <!-- 把 byte[] 轉成 base64 並顯示 -->
+                        var base64 = "data:image/png;base64," + Convert.ToBase64String(Model.Product.ProductImage);
+                        <img src="@base64" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
+                    }
+                    else
+                    {
+                        <!-- 沒有圖片就顯示預設圖 -->
+                        <img src="@Url.Content("~/images/NoImage.png")" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
+                    }
+                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" id="uploadImage" />
+                    <!-- 使用asp-for同時會使 id 和 name 兩個成為asp-for的值，且如果asp-for的值有.的話，在轉換成id時會被轉成_ ，name不會影響 -->
+                </div>
+
+                @* <div class="form-group mb-3">
+                    @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
+                    {
+                        <img src="@Url.Action("GetProductImage", "Products", new { area = "ProductManagement", id = Model.Product.ProductID })"
+                             style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
+                    }
+                    else
+                    {
+                        <img src="@Url.Content("~/images/NoImage.png")"
+                             style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
+                    }
+                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" />
+                </div> *@
+
+                @* <div class="form-group mb-3">
+                    <label asp-for="Product.ProductCode" class="control-label mb-1">產品編號：</label>
+                    <input asp-for="Product.ProductCode" class="form-control" />
+                    <span asp-validation-for="Product.ProductCode" class="text-danger"></span>
+                </div> *@
+
+                <div class="form-group mb-3">
+                    <label asp-for="Product.ProductName" class="control-label mb-1">產品名稱：</label>
+                    <input asp-for="Product.ProductName" class="form-control" />
+                    <span asp-validation-for="Product.ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Product.RegionID" class="control-label mb-1">出團地區：</label>
+                    <select asp-for="Product.RegionID" class="form-select" asp-items="ViewBag.RegionID">
+                        <option value="">請選擇地區</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Product.ProductPrice" class="control-label mb-1">產品價格：</label>
+                    <input asp-for="Product.ProductPrice" class="form-control" />
+                    <span asp-validation-for="Product.ProductPrice" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Product.StartDate" class="control-label mb-1">出發時間：</label>
+                    <input asp-for="Product.StartDate" class="form-control" />
+                    <span asp-validation-for="Product.StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Product.EndDate" class="control-label mb-1">返程時間：</label>
+                    <input asp-for="Product.EndDate" class="form-control" />
+                    <span asp-validation-for="Product.EndDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ProductAnalysis.ReleaseDate" class="control-label mb-1">預計上架時間：</label>
+                    <input type="datetime-local" asp-for="ProductAnalysis.ReleaseDate" class="form-control" value="@Model.ProductAnalysis?.ReleaseDate?.ToString("yyyy-MM-ddTHH:mm")" />
+                    <span asp-validation-for="ProductAnalysis.ReleaseDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Product.MaxPeople" class="control-label mb-1">人數上限：</label>
+                    <input asp-for="Product.MaxPeople" class="form-control" />
+                    <span asp-validation-for="Product.MaxPeople" class="text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="RegionID" class="control-label"></label>
-                <select asp-for="RegionID" class="form-control" asp-items="ViewBag.RegionID"></select>
-                <span asp-validation-for="RegionID" class="text-danger"></span>
+        </div>
+        <div class="col-md-8">
+            <!-- 描述 / 注意事項 -->
+            <div class="card p-3 ms-3 d-flex flex-column h-100">
+                <div class="form-group mb-3">
+                    <label asp-for="Product.ProductDesc" class="control-label mb-1">產品描述：</label>
+                    <textarea asp-for="Product.ProductDesc" class="form-control" id="editor"></textarea>
+                    <span asp-validation-for="Product.ProductDesc" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3 mt-2">
+                    <label asp-for="Product.ProductNote" class="control-label mb-1">注意事項：</label>
+                    <textarea asp-for="Product.ProductNote" class="form-control" id="editor2"></textarea>
+                    <span asp-validation-for="Product.ProductNote" class="text-danger"></span>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="ProductDesc" class="control-label"></label>
-                <input asp-for="ProductDesc" class="form-control" />
-                <span asp-validation-for="ProductDesc" class="text-danger"></span>
+        </div>
+    </div>
+
+    <hr />
+
+    <!-- 四大區塊 -->
+    <div class="row">
+        <div class="col-md-6">
+            <!-- 🏨 住宿資訊 (Hotel Modal) -->
+            <div class="card p-3 ms-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fa fa-hotel"></i> 住宿資訊</h4>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#hotelModal">新增住宿</button>
+                </div>
+                <div id="selectedHotels" class="mb-3 mt-3">
+                    <h6 class="text-danger">目前尚未新增住宿資訊</h6>
+                </div>
+                <input type="hidden" name="SelectedHotelIds" />
             </div>
-            <div class="form-group">
-                <label asp-for="ProductPrice" class="control-label"></label>
-                <input asp-for="ProductPrice" class="form-control" />
-                <span asp-validation-for="ProductPrice" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <!-- 🚉 交通資訊 -->
+            <div class="card p-3 ms-3">
+                @* Card Header *@
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0"><i class="fa-solid fa-train-subway"></i> 交通資訊</h4>
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#transportModal"><i class="fa-solid fa-square-plus"></i> 新增交通</button>
+                </div>
+                @* 顯示已選內容的區塊 *@
+                <div id="selectedTransports" class="mb-3 mt-3">
+                    <h6 class="text-danger">目前尚未新增交通資訊</h6>
+                </div>
+                <input type="hidden" name="SelectedTransportIds" />
             </div>
-            <div class="form-group">
-                <label asp-for="ProductNote" class="control-label"></label>
-                <input asp-for="ProductNote" class="form-control" />
-                <span asp-validation-for="ProductNote" class="text-danger"></span>
+        </div>
+    </div>
+
+    <hr />
+
+    <!-- 🍽️ 餐廳 / 景點區塊 (同 Create.cshtml) -->
+    <div class="row mt-3">
+        <!-- 左側 Card -->
+        <div class="col-md-6">
+            <div class="card p-3 ms-3">
+                @* Card Header *@
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0"><i class="fa-solid fa-utensils"></i> 餐點資訊</h4>
+                </div>
+
+                @* 早餐 *@
+                <div class="border rounded p-2 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0"><i class="fa-solid fa-mug-saucer"></i> 早餐</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary open-restaurant-modal" data-meal="breakfast" data-bs-toggle="modal" data-bs-target="#restaurantModal">
+                            <i class="fa-solid fa-square-plus"></i> 新增早餐餐廳
+                        </button>
+                    </div>
+                    <div id="selectedRestaurantsBreakfast" class="mb-2">
+                        <h6 class="text-danger">目前尚未新增早餐</h6>
+                    </div>
+                    <input type="hidden" name="SelectedRestaurantsBreakfast" />
+                </div>
+
+                @* 午餐 *@
+                <div class="border rounded p-2 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0"><i class="fa-solid fa-burger"></i> 午餐</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary open-restaurant-modal" data-meal="lunch" data-bs-toggle="modal" data-bs-target="#restaurantModal">
+                            <i class="fa-solid fa-square-plus"></i> 新增午餐餐廳
+                        </button>
+                    </div>
+                    <div id="selectedRestaurantsLunch" class="mb-2">
+                        <h6 class="text-danger">目前尚未新增午餐</h6>
+                    </div>
+                    <input type="hidden" name="SelectedRestaurantsLunch" />
+                </div>
+
+                @* 晚餐 *@
+                <div class="border rounded p-2 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0"><i class="fa-solid fa-bowl-food"></i> 晚餐</h5>
+                        <button type="button" class="btn btn-sm btn-outline-primary open-restaurant-modal" data-meal="dinner" data-bs-toggle="modal" data-bs-target="#restaurantModal">
+                            <i class="fa-solid fa-square-plus"></i> 新增晚餐餐廳
+                        </button>
+                    </div>
+                    <div id="selectedRestaurantsDinner" class="mb-2">
+                        <h6 class="text-danger">目前尚未新增晚餐</h6>
+                    </div>
+                    <input type="hidden" name="SelectedRestaurantsDinner" />
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+
+        <!-- 右側 Card -->
+        <div class="col-md-6">
+            <div class="card p-3 ms-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0"><i class="fa-solid fa-archway"></i> 景點資訊</h4>
+                    <button type="button" id="addDayBtn" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-square-plus"></i> 新增天數
+                    </button>
+                </div>
+
+                <!-- 這裡放所有天數 -->
+                <div id="daysContainer">
+                    <h4 class="text-danger">目前尚未新增景點資訊</h4>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="EndDate" class="control-label"></label>
-                <input asp-for="EndDate" class="form-control" />
-                <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+
+        <!-- 把送出按鈕放這裡 -->
+        <div class="d-flex justify-content-end align-items-center mt-3">
+            <div class="form-check form-switch me-5">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="Product.IsActive"
+                       value="true"
+                       @(Model.Product.IsActive ?? false ? "checked" : "") />
+                <input type="hidden" name="Product.IsActive" value="false" />
+                <label class="form-check-label">上架</label>
             </div>
-            <div class="form-group">
-                <label asp-for="MaxPeople" class="control-label"></label>
-                <input asp-for="MaxPeople" class="form-control" />
-                <span asp-validation-for="MaxPeople" class="text-danger"></span>
+            <input type="submit" value="更新資料" class="btn btn-outline-primary" />
+        </div>
+
+    </div>
+</form>
+
+<!-- Hotel Modal -->
+<div class="modal fade" id="hotelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">選擇飯店</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="form-group">
-                <label asp-for="ProductImage" class="control-label"></label>
-                <input asp-for="ProductImage" class="form-control" />
-                <span asp-validation-for="ProductImage" class="text-danger"></span>
+            <div class="modal-body">
+                <table id="hotelsTable" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>地址</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
-            <div class="form-group">
-                <label asp-for="ProductCode" class="control-label"></label>
-                <input asp-for="ProductCode" class="form-control" />
-                <span asp-validation-for="ProductCode" class="text-danger"></span>
+            <div class="modal-footer">
+                <button type="button" id="confirmHotels" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<!-- Location Modal -->
+<div class="modal fade" id="locationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">選擇景點</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table id="locationsTable" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>地址</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="confirmLocations" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
 </div>
 
+<!-- Restaurant Modal -->
+<div class="modal fade" id="restaurantModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">選擇餐廳</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table id="restaurantsTable" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>地址</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="clearRestaurants" class="btn btn-outline-danger">清空全部</button>
+                <button type="button" id="confirmRestaurants" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transportation Modal -->
+<div class="modal fade" id="transportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">選擇交通方式</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table id="transportsTable" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>描述</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="confirmTransports" class="btn btn-outline-primary" data-bs-dismiss="modal">確認選擇</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery UI (Sortable) -->
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <!-- CKEditor -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+
+    <script>
+        // ====== 後端帶入的初始資料，統一轉成 { id, orderIndex } ======
+        let selectedHotels = JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedHotelIds ?? new List<OrderedItem>()))')
+                                .map(x => ({ id: x.id, orderIndex: x.orderIndex }));
+
+        let selectedTransports = JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedTransportationIds ?? new List<int>()))');
+
+        let selectedRestaurants = {
+            breakfast: JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedRestaurantsBreakfast ?? new List<OrderedItem>()))')
+                        .map(x => ({ id: x.id, orderIndex: x.orderIndex })),
+            lunch: JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedRestaurantsLunch ?? new List<OrderedItem>()))')
+                        .map(x => ({ id: x.id, orderIndex: x.orderIndex })),
+            dinner: JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedRestaurantsDinner ?? new List<OrderedItem>()))')
+                        .map(x => ({ id: x.id, orderIndex: x.orderIndex }))
+        };
+
+        let currentMealType = null;
+
+        let selectedLocations = JSON.parse('@Html.Raw(Json.Serialize(Model.SelectedLocations ?? new List<DayLocations>()))')
+                                .map(day => ({
+                                    dayNumber: day.dayNumber,  // ✅ 改成 dayNumber
+                                    locations: (day.locations || []).map(x => ({ id: x.id, orderIndex: x.orderIndex }))
+                                }));
+
+
+
+
+        let dayCount = 0;
+        let currentDay = null;
+        let selectedLocationsByDay = {};
+
+        // ===== 全域變數 =====
+        let hotelTable = null;
+        let transportTable = null;
+        let restaurantTable = null;
+        let locationTable = null;
+
+        // ===== Lazy Init DataTables =====
+        // 🏨 飯店
+        // $('#hotelModal').on('shown.bs.modal', function () {
+        //     if (!hotelTable) {
+        //         hotelTable = $('#hotelsTable').DataTable({
+        //             ajax: { url: '/ProductManagement/Products/GetHotels', type: 'GET', dataSrc: 'data' },
+        //             columns: [
+        //                 { data: "hotelID", render: d => `<input type="checkbox" class="hotel-checkbox" value="${d}">` },
+        //                 { data: "hotelID" }, { data: "hotelName" }, { data: "hotelAddr" }
+        //             ]
+        //         }).on('draw.dt', function () { renderHotels(hotelTable); });
+        //     } else {
+        //         hotelTable.draw();
+        //     }
+        // });
+
+        // 🚉 交通
+        // $('#transportModal').on('shown.bs.modal', function () {
+        //     if (!transportTable) {
+        //         transportTable = $('#transportsTable').DataTable({
+        //             ajax: { url: '/ProductManagement/Products/GetTransportations', type: 'GET', dataSrc: 'data' },
+        //             columns: [
+        //                 { data: "transportID", render: d => `<input type="checkbox" class="transport-checkbox" value="${d}">` },
+        //                 { data: "transportID" }, { data: "transportName" }, { data: "transportDesc" }
+        //             ]
+        //         }).on('draw.dt', function () { renderTransports(transportTable); });
+        //     } else {
+        //         transportTable.draw();
+        //     }
+        // });
+
+        // 🍽️ 餐廳
+        // $('#restaurantModal').on('shown.bs.modal', function () {
+        //     if (!restaurantTable) {
+        //         restaurantTable = $('#restaurantsTable').DataTable({
+        //             ajax: { url: '/ProductManagement/Products/GetRestaurants', type: 'GET', dataSrc: 'data' },
+        //             columns: [
+        //                 { data: "restaurantID", render: d => `<input type="checkbox" class="restaurant-checkbox" value="${d}">` },
+        //                 { data: "restaurantID" }, { data: "restaurantName" }, { data: "restaurantAddr" }
+        //             ]
+        //         }).on('draw.dt', function () {
+        //             ["breakfast","lunch","dinner"].forEach(m => renderRestaurants(m, restaurantTable));
+        //         });
+        //     } else {
+        //         restaurantTable.draw();
+        //     }
+        // });
+
+        // 🏞 景點
+        // $('#locationModal').on('shown.bs.modal', function () {
+        //     if (!locationTable) {
+        //         locationTable = $('#locationsTable').DataTable({
+        //             ajax: { url: '/ProductManagement/Products/GetLocations', type: 'GET', dataSrc: 'data' },
+        //             columns: [
+        //                 { data: "locationID", render: d => `<input type="checkbox" class="location-checkbox" value="${d}">` },
+        //                 { data: "locationID" }, { data: "locationName" }, { data: "locationAddr" }
+        //             ]
+        //         }).on('draw.dt', function () {
+        //             if (selectedLocations.length > 0) {
+        //                 selectedLocations.forEach(day => {
+        //                     addDayBlock(day.dayNumber);
+        //                     renderLocations(day.dayNumber, locationTable, day.locations);
+        //                     dayCount = Math.max(dayCount, day.dayNumber);
+        //                 });
+        //             }
+        //         });
+        //     } else {
+        //         locationTable.draw();
+        //     }
+        // });
+
+        // ====== 共用 Hidden Inputs 方法 ======
+        function updateOrderedHiddenField(name, items) {
+            $(`input[name^="${name}"]`).remove();
+            items.forEach((item, index) => {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: `${name}[${index}].ID`,
+                    value: item.id
+                }).appendTo('form');
+
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: `${name}[${index}].OrderIndex`,
+                    value: item.orderIndex ?? (index + 1)
+                }).appendTo('form');
+            });
+        }
+
+        function updateIntListHiddenField(name, items) {
+            $(`input[name^="${name}"]`).remove();
+            items.forEach((id, index) => {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: `${name}[${index}]`,
+                    value: id
+                }).appendTo('form');
+            });
+        }
+
+        function updateLocationsHiddenField(dayNum, items) {
+            // 先刪除舊的 input
+            $(`input[name^="SelectedLocations[${dayNum - 1}]"]`).remove();
+
+            // DayNumber
+            $('<input>').attr({
+                type: 'hidden',
+                name: `SelectedLocations[${dayNum - 1}].DayNumber`,
+                value: dayNum
+            }).appendTo('form');
+
+            // Locations
+            items.forEach((item, index) => {
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: `SelectedLocations[${dayNum - 1}].Locations[${index}].ID`,
+                    value: item.id
+                }).appendTo('form');
+
+                $('<input>').attr({
+                    type: 'hidden',
+                    name: `SelectedLocations[${dayNum - 1}].Locations[${index}].OrderIndex`,
+                    value: item.orderIndex
+                }).appendTo('form');
+            });
+        }
+
+
+        // ====== Render Functions ======
+        function renderHotels(table) {
+            $('#selectedHotels').empty();
+            if (!selectedHotels || selectedHotels.length === 0) {
+                $('#selectedHotels').html('<h4 class="text-danger">目前尚未新增住宿資訊</h4>');
+                return;
+            }
+            let arr = [];
+            selectedHotels.sort((a, b) => a.orderIndex - b.orderIndex)
+                .forEach((item, i) => {
+                    let hotel = table.rows().data().toArray().find(r => r.hotelID == item.id);
+                    if (hotel) {
+                        $('#selectedHotels').append(`
+                            <div class="list-group-item p-2 border rounded mb-1" data-id="${hotel.hotelID}">
+                                <strong class="item-index">第 ${i + 1} 天</strong><br/>
+                                <strong>名稱：</strong>${hotel.hotelName}<br/>
+                                <strong>地址：</strong>${hotel.hotelAddr}
+                            </div>`);
+                        arr.push({ id: hotel.hotelID, orderIndex: i + 1 });
+                    }
+                });
+            updateOrderedHiddenField("SelectedHotelIds", arr);
+            $('#selectedHotels').sortable({
+                update: function () {
+                    let arr = [];
+                    $('#selectedHotels .list-group-item').each(function (i) {
+                        arr.push({ id: $(this).data('id'), orderIndex: i + 1 });
+                        $(this).find(".item-index").text(`第 ${i + 1} 天`);
+                    });
+                    updateOrderedHiddenField("SelectedHotelIds", arr);
+                }
+            });
+        }
+
+        function renderTransports(table) {
+            $('#selectedTransports').empty();
+            if (!selectedTransports || selectedTransports.length === 0) {
+                $('#selectedTransports').html('<h4 class="text-danger">目前尚未新增交通資訊</h4>');
+                return;
+            }
+            updateIntListHiddenField("SelectedTransportationIds", selectedTransports);
+            selectedTransports.forEach((id, index) => {
+                let transport = table.rows().data().toArray().find(r => r.transportID == id);
+                if (transport) {
+                    $('#selectedTransports').append(`
+                        <div class="p-2 border rounded mb-1" data-id="${transport.transportID}">
+                            <strong>第 ${index + 1} 種</strong><br/>
+                            <strong>名稱：</strong>${transport.transportName}<br/>
+                            <strong>描述：</strong>${transport.transportDesc}
+                        </div>`);
+                }
+            });
+        }
+
+        function renderRestaurants(mealType, table) {
+            let mealLabel = { breakfast: "早餐", lunch: "午餐", dinner: "晚餐" };
+            let $container = $(`#selectedRestaurants${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`);
+            $container.empty();
+            let arr = selectedRestaurants[mealType] || [];
+            if (arr.length === 0) {
+                $container.html(`<h6 class="text-danger">目前尚未新增${mealLabel[mealType]}</h6>`);
+                return;
+            }
+            let items = [];
+            arr.sort((a, b) => a.orderIndex - b.orderIndex)
+                .forEach((item, i) => {
+                    let restaurant = table.rows().data().toArray().find(r => r.restaurantID == item.id);
+                    if (restaurant) {
+                        $container.append(`
+                            <div class="restaurant-item p-2 border rounded mb-1" data-id="${restaurant.restaurantID}">
+                                <strong class="item-index">第 ${i + 1} 天</strong><br/>
+                                <strong>名稱：</strong>${restaurant.restaurantName}<br/>
+                                <strong>地址：</strong>${restaurant.restaurantAddr}
+                            </div>`);
+                        items.push({ id: restaurant.restaurantID, orderIndex: i + 1 });
+                    }
+                });
+            updateOrderedHiddenField(`SelectedRestaurants${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`, items);
+            $container.sortable({
+                update: function () {
+                    let arr = [];
+                    $container.find(".restaurant-item").each(function (i) {
+                        arr.push({ id: $(this).data('id'), orderIndex: i + 1 });
+                        $(this).find('.item-index').text(`第 ${i + 1} 天`);
+                    });
+                    updateOrderedHiddenField(`SelectedRestaurants${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`, arr);
+                }
+            });
+        }
+
+        function addDayBlock(dayNum) {
+            let dayHtml = `
+                <div class="day-block border rounded p-2 mb-3" data-day="${dayNum}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0"><i class="fa-solid fa-sun"></i> 第 <span class="day-index">${dayNum}</span> 天</h5>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-day ms-auto me-2">
+                                <i class="fa-solid fa-trash"></i> 刪除
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary open-location-modal"
+                                data-day="${dayNum}" data-bs-toggle="modal" data-bs-target="#locationModal">
+                            <i class="fa-solid fa-square-plus"></i> 新增景點
+                        </button>
+                    </div>
+                    <div id="selectedLocationsDay${dayNum}" class="mb-2">
+                        <h6 class="text-danger">目前尚未新增景點</h6>
+                    </div>
+                </div>`;
+            if (dayNum === 1) $('#daysContainer').empty();
+            $('#daysContainer').append(dayHtml);
+        }
+
+        function renderLocations(dayNum, table, arr) {
+            let $container = $(`#selectedLocationsDay${dayNum}`);
+            $container.empty();
+            if (!arr || arr.length === 0) {
+                $container.html(`<h6 class="text-danger">目前尚未新增景點</h6>`);
+                return;
+            }
+            arr.forEach((item, i) => {
+                let location = table.rows().data().toArray().find(r => r.locationID == item.id);
+                if (location) {
+                    $container.append(`
+                        <div class="location-item p-2 border rounded mb-1" data-id="${location.locationID}">
+                            <strong class="item-index">第 ${i + 1} 個景點</strong><br/>
+                            <strong>名稱：</strong>${location.locationName}<br/>
+                            <strong>地址：</strong>${location.locationAddr}
+                        </div>`);
+                }
+            });
+            updateLocationsHiddenField(dayNum, arr);
+            $container.sortable({
+                update: function () {
+                    let items = [];
+                    $container.find(".location-item").each(function (i) {
+                        items.push({ id: $(this).data("id"), orderIndex: i + 1 });
+                        $(this).find(".item-index").text(`第 ${i + 1} 個景點`);
+                    });
+                    updateLocationsHiddenField(dayNum, items);
+                }
+            });
+        }
+
+        // ➕ 新增天數
+        $('#addDayBtn').on('click', function () {
+            dayCount++;
+            addDayBlock(dayCount);
+        });
+
+        // 🗑️ 刪除天數
+        $(document).on('click', '.remove-day', function () {
+            $(this).closest('.day-block').remove();
+            $('#daysContainer .day-block').each(function (index) {
+                $(this).find('.day-index').text(index + 1);
+                $(this).attr('data-day', index + 1);
+                $(this).find('input[type="hidden"]').attr('name', `SelectedLocationsDay${index + 1}`);
+                $(this).find('div[id^="selectedLocationsDay"]').attr('id', `selectedLocationsDay${index + 1}`);
+            });
+            dayCount = $('#daysContainer .day-block').length;
+
+            if (dayCount === 0) {
+                $('#daysContainer').html(`<h4 class="text-danger">目前尚未新增景點資訊</h4>`);
+            }
+        });
+
+        // ====== 初始化 ======
+        $(document).ready(function () {
+            // Hotels
+            var hotelTable = $('#hotelsTable').DataTable({
+                ajax: { url: '/ProductManagement/Products/GetHotels', type: 'GET', dataSrc: 'data' },
+                columns: [
+                    { data: "hotelID", render: d => `<input type="checkbox" class="hotel-checkbox" value="${d}">` },
+                    { data: "hotelID" }, { data: "hotelName" }, { data: "hotelAddr" }
+                ]
+            }).on('draw.dt', function () { renderHotels(hotelTable); });
+
+            // Transports
+            var transportTable = $('#transportsTable').DataTable({
+                ajax: { url: '/ProductManagement/Products/GetTransportations', type: 'GET', dataSrc: 'data' },
+                columns: [
+                    { data: "transportID", render: d => `<input type="checkbox" class="transport-checkbox" value="${d}">` },
+                    { data: "transportID" }, { data: "transportName" }, { data: "transportDesc" }
+                ]
+            }).on('draw.dt', function () { renderTransports(transportTable); });
+
+            // Restaurants
+            var restaurantTable = $('#restaurantsTable').DataTable({
+                ajax: { url: '/ProductManagement/Products/GetRestaurants', type: 'GET', dataSrc: 'data' },
+                columns: [
+                    { data: "restaurantID", render: d => `<input type="checkbox" class="restaurant-checkbox" value="${d}">` },
+                    { data: "restaurantID" }, { data: "restaurantName" }, { data: "restaurantAddr" }
+                ]
+            }).on('draw.dt', function () {
+                ["breakfast","lunch","dinner"].forEach(m => renderRestaurants(m, restaurantTable));
+            });
+
+            // Locations
+            var locationTable = $('#locationsTable').DataTable({
+                ajax: { url: '/ProductManagement/Products/GetLocations', type: 'GET', dataSrc: 'data' },
+                columns: [
+                    { data: "locationID", render: d => `<input type="checkbox" class="location-checkbox" value="${d}">` },
+                    { data: "locationID" }, { data: "locationName" }, { data: "locationAddr" }
+                ]
+            }).on('draw.dt', function () {
+                console.log("DataTable rows:", locationTable.rows().data().toArray());
+                console.log("selectedLocations:", selectedLocations);
+                if (selectedLocations.length > 0) {
+                    selectedLocations.forEach(day => {
+                        addDayBlock(day.dayNumber);
+                        renderLocations(day.dayNumber, locationTable, day.locations);
+                        dayCount = Math.max(dayCount, day.dayNumber);
+                    });
+                }
+            });
+
+            // ====== Modal 確認事件 ======
+
+        // 住宿
+        $('#confirmHotels').on('click', function () {
+            selectedHotels = [];
+            $('#hotelsTable .hotel-checkbox:checked').each(function (i) {
+                selectedHotels.push({ id: parseInt($(this).val()), orderIndex: i + 1 });
+            });
+
+            // 更新 hidden inputs
+            updateOrderedHiddenField("SelectedHotelIds", selectedHotels);
+
+            renderHotels(hotelTable);  // ✅ 重新渲染
+            $('#hotelModal').modal('hide');
+        });
+
+
+        // 交通
+        $('#confirmTransports').on('click', function () {
+            selectedTransports = [];
+            $('#transportsTable .transport-checkbox:checked').each(function () {
+                selectedTransports.push(parseInt($(this).val()));
+            });
+
+            // 更新 hidden inputs (單純 int 陣列)
+            updateIntListHiddenField("SelectedTransportationIds", selectedTransports);
+
+            renderTransports(transportTable);  // ✅ 重新渲染
+            $('#transportModal').modal('hide');
+        });
+
+        // 餐廳
+        $('.open-restaurant-modal').on('click', function () {
+            currentMealType = $(this).data('meal');
+            $('#restaurantsTable .restaurant-checkbox').prop('checked', false);
+            selectedRestaurants[currentMealType].forEach(id => {
+                $('#restaurantsTable .restaurant-checkbox[value="' + id + '"]').prop('checked', true);
+            });
+        });
+
+        $('#confirmRestaurants').on('click', function () {
+            let mealType = currentMealType; // 例如 "breakfast", "lunch", "dinner"
+            selectedRestaurants[mealType] = [];
+            $('#restaurantsTable .restaurant-checkbox:checked').each(function (i) {
+                selectedRestaurants[mealType].push({ id: parseInt($(this).val()), orderIndex: i + 1 });
+            });
+
+            // 更新 hidden inputs
+            updateOrderedHiddenField(`SelectedRestaurants${mealType}`, selectedRestaurants[mealType]);
+
+            renderRestaurants(mealType, restaurantTable);  // ✅ 重新渲染
+            $('#restaurantModal').modal('hide');
+        });
+
+        // 景點
+        // 打開景點選單
+        $(document).on('click', '.open-location-modal', function () {
+            currentDay = $(this).data('day');
+            $('#locationsTable .location-checkbox').prop('checked', false);
+
+            if (selectedLocationsByDay[currentDay]) {
+                let selectedIds = selectedLocationsByDay[currentDay].map(x => String(x.id));
+                $('#locationsTable .location-checkbox').each(function () {
+                    if (selectedIds.includes($(this).val())) {
+                        $(this).prop('checked', true);
+                    }
+                });
+            }
+        });
+
+        $('#confirmLocations').on('click', function () {
+            let dayNum = currentDay;
+            let arr = [];
+            $('#locationsTable .location-checkbox:checked').each(function (i) {
+                arr.push({ id: parseInt($(this).val()), orderIndex: i + 1 });
+            });
+
+            // 檢查是否已有該天的物件
+            let dayObj = selectedLocations.find(d => d.dayNumber == dayNum);
+            if (dayObj) {
+                dayObj.locations = arr;
+            } else {
+                selectedLocations.push({ dayNumber: dayNum, locations: arr });
+            }
+
+            renderLocations(dayNum, locationTable, arr);  // ✅ 重新渲染
+            $('#locationModal').modal('hide');
+        });
+
+        // 🏨 飯店 Modal 打開時 → 勾選已選飯店
+        $('#hotelModal').on('shown.bs.modal', function () {
+            $('#hotelsTable .hotel-checkbox').each(function () {
+                let id = parseInt($(this).val());
+                if (selectedHotels.some(h => h.id === id)) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        });
+
+        // 🚌 交通 Modal 打開時 → 勾選已選交通
+        $('#transportModal').on('shown.bs.modal', function () {
+            $('#transportsTable .transport-checkbox').each(function () {
+                let id = parseInt($(this).val());
+                if (selectedTransports.includes(id)) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        });
+
+        // 🍴 餐廳 Modal 打開時 → 勾選已選餐廳
+        // ⚠️ 需要一個全域變數 currentMeal 來記錄目前是 breakfast / lunch / dinner
+        $('#restaurantModal').on('shown.bs.modal', function () {
+            $('#restaurantsTable .restaurant-checkbox').each(function () {
+                let id = parseInt($(this).val());
+                if (selectedRestaurants[currentMealType].some(r => r.id === id)) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        });
+
+        // 🏞 景點 Modal 打開時 → 勾選已選景點
+        // ⚠️ 需要一個全域變數 currentDay 來記錄目前操作的天數
+        $('#locationModal').on('shown.bs.modal', function () {
+            let dayObj = selectedLocations.find(d => d.dayNumber == currentDay);
+            let ids = dayObj ? dayObj.locations.map(l => l.id) : [];
+
+            $('#locationsTable .location-checkbox').each(function () {
+                let id = parseInt($(this).val());
+                if (ids.includes(id)) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        });
+
+        $('#locationsTable').on('change', '.location-checkbox', function () {
+            let dayNum = currentDay; // 你當前選擇的天數
+            let selected = [];
+
+            $('#locationsTable .location-checkbox:checked').each(function (i) {
+                selected.push({ id: parseInt($(this).val()), orderIndex: i + 1 });
+            });
+
+            updateLocationsHiddenField(dayNum, selected);
+        });
+        });
+
+        // 綁定檔案上傳 input 的 change 事件
+        document.getElementById('uploadImage').addEventListener('change', function (event) {
+            const file = event.target.files[0]; // 取得使用者選的檔案
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // 將讀取結果設定到 <img> 的 src
+                    document.getElementById('previewImage').src = e.target.result;
+                };
+                reader.readAsDataURL(file); // 轉成 base64
+            }
+        });
+
+    </script>
 }
+
+

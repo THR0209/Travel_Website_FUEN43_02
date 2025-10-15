@@ -1,0 +1,48 @@
+﻿@using Cat_Paw_Footprint.Areas.Employee.ViewModel
+@model Cat_Paw_Footprint.Areas.Employee.ViewModel.VendorAdminViewModel
+@{
+    ViewData["Title"] = "廠商註冊";
+}
+
+
+
+<!-- 顯示 ModelState 的整體錯誤 -->
+<div asp-validation-summary="All" class="text-danger" role="alert"></div>
+
+<div class="row justify-content-center">
+    <div class="card" style="max-width:500px;">
+        <div class="card-body">
+            <div class="mb-4 text-center">
+                <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                    <i class="fa-solid fa-user-tie me-2"></i>註冊廠商帳號
+                </span>
+                <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+            </div>
+                <form asp-area="Employee" asp-controller="VendorAdmin" asp-action="VendorRegister" method="post">
+                    @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="CompanyName" class="form-label"></label>
+                            <input asp-for="CompanyName" class="form-control" />
+                            <span asp-validation-for="CompanyName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">註冊</button>
+                            <a asp-action="VendorList" class="btn btn-outline-secondary btn-sm">返回列表</a>
+                        </div>
+                </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

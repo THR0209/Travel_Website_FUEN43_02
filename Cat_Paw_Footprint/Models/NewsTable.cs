@@ -9,21 +9,23 @@ public partial class NewsTable
 	[Key]
 	public int NewsID { get; set; }
 
-    public string? NewsTitle { get; set; }
+	public string? NewsTitle { get; set; }
 
-    public string? NewsContent { get; set; }
+	public string? NewsContent { get; set; }
 
-    public DateTime? PublishTime { get; set; }
+	public DateTime? PublishTime { get; set; }
 
-    public DateTime? ExpireTime { get; set; }
+	public DateTime? ExpireTime { get; set; }
 
-    public bool? IsActive { get; set; }
+	public bool IsActive { get; set; }
 
-    public DateTime? CreateTime { get; set; }
+	public DateTime? CreateTime { get; set; }
 
-    public DateTime? UpdateTime { get; set; }
+	public DateTime? UpdateTime { get; set; }
 
-    public int? EmployeeID { get; set; }
+	public int? EmployeeID { get; set; }
 
-    public virtual EmployeeProfile? Employee { get; set; }
+	public virtual EmployeeProfile? Employee { get; set; }
+
+	public virtual ICollection<NewsPics> NewsPics { get; set; } = new List<NewsPics>();
 }

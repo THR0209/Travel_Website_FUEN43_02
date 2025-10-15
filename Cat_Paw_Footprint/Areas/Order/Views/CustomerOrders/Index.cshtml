@@ -1,0 +1,468 @@
+﻿@{
+    ViewData["Title"] = "訂單顯示";
+}
+
+<div id="app" class="container py-4" v-cloak>
+    <h2 class="mb-3">行程 / 地點</h2>
+
+    <div class="d-flex gap-2 align-items-center mb-3">
+        <input v-model="q" class="form-control" placeholder="搜尋：商品 / 訂單 / 客戶">
+        <button class="btn btn-outline-secondary" v-on:click ="q=''">清除</button>
+        <div class="btn-group ms-auto">
+            <button class="btn btn-outline-primary" :class="{active:view==='card'}" v-on:click="switchToCard">卡片</button>
+            <button class="btn btn-outline-primary" :class="{active:view==='table'}" v-on:click="switchToTable">表格</button>
+        </div>
+    </div>
+    <div class="row g-2 align-items-end mb-2" v-if="view==='table'">
+        <div class="col-auto">
+            <label class="form-label mb-1">排序欄位</label>
+            <select class="form-select form-select-sm" v-model="sortBy">
+                <option value="createTime">建立時間</option>
+                <option value="totalAmount">總金額</option>
+                <option value="customerName">客戶</option>
+                <option value="status">狀態</option>
+                <option value="orderCode">訂單編號</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">順序</label>
+            <select class="form-select form-select-sm" v-model="sortDir">
+                <option value="desc">↓</option>
+                <option value="asc">↑</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">起日</label>
+            <input type="date" class="form-control form-control-sm" v-model="filterStart">
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">迄日</label>
+            <input type="date" class="form-control form-control-sm" v-model="filterEnd">
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1">狀態</label>
+            <select class="form-select form-select-sm" v-model="filterStatus">
+                <option value="">全部</option>
+                <option value="已付款">已付款</option>
+                <option value="未付款">未付款</option>
+                <option value="已取消">已取消</option>
+                <option value="錯誤">錯誤</option>
+            </select>
+        </div>
+    </div>
+    <!-- 卡片 -->
+    <div v-if="view==='card'" class="row g-3">
+        <div v-for="p in filteredProducts" :key="p.productId" class="col-12 col-sm-6 col-md-4 col-xl-3">
+            <div class="card h-100 shadow-sm product-card">
+                <img :src="p.imageUrl" class="card-img-top" :alt="p.productName" style="height:180px;object-fit:cover">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="card-title mb-0">{{ p.productName || ('商品 ' + p.productId) }}</h5>
+                        <span class="badge text-bg-light">{{ p.count }} 筆</span>
+                    </div>
+                    <button class="btn btn-primary mt-auto" v-on:click ="openOrders(p)">查看訂單</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 表格（所有訂單）-->
+    <div v-else class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th v-on:click="setSort('orderCode')" role="button" style="cursor:pointer">訂單編號<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('totalAmount')" role="button" style="cursor:pointer">總金額<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('createTime')" role="button" style="cursor:pointer">建立時間<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('customerName')" role="button" style="cursor:pointer">客戶<small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th v-on:click="setSort('status')" role="button" style="cursor:pointer">狀態 <small v-if="sortBy==='status'">{{ sortDir==='asc'?'▲':'▼' }}</small></th>
+                    <th style="width:140px">操作</th>
+                </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+                <tr v-for="o in tableOrders" :key="o.id">
+                    <td class="font-monospace text-center">{{ o.orderCode }}</td>
+                    <td class="text-center">NT$ {{ (o.totalAmount||0).toLocaleString() }}</td>
+                    <td class="text-center">{{ fmt(o.createTime) }}</td>
+                    <td class="text-center">{{ o.customerName }}</td>
+                    <td class="text-center"><span :class="['badge', statusClass(o.statusText)]">{{ o.statusText }}</span></td>
+                    <td class="d-flex gap-2">
+                        <button class="btn btn-sm btn-primary" v-on:click ="openEdit(o.id)">編輯</button>
+                        <button class="btn btn-sm btn-success" v-on:click ="openMail(o.id)">寄信</button>
+                    </td>
+                </tr>
+                <tr v-if="!loadingOrders && filteredOrders.length===0">
+                    <td colspan="6" class="text-center text-muted py-4">尚無資料</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 訂單清單 Modal（點卡片後顯示該商品的訂單）-->
+    <div class="modal fade" id="ordersModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">訂單 — {{ currentProduct?.productName }}</h5>
+                        <small class="text-muted">共 {{ orders.length }} 筆</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div v-if="loadingOrders" class="text-center text-muted py-4">載入中…</div>
+                    <div v-else class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>訂單編號</th>
+                                    <th>總金額</th>
+                                    <th>建立時間</th>
+                                    <th>客戶</th>
+                                    <th>狀態</th>
+                                    <th style="width:140px">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="m_tbody">
+                                <tr v-for="o in tableOrders" :key="o.id">
+                                    <td class="font-monospace text-center">{{ o.orderCode }}</td>
+                                    <td class="text-center">NT$ {{ (o.totalAmount||0).toLocaleString() }}</td>
+                                    <td class="text-center">{{ fmt(o.createTime) }}</td>
+                                    <td class="text-center">{{ o.customerName ?? o.customerId }}</td>
+                                    <td class="text-center"><span :class="['badge', statusClass(o.status)]">{{ o.status }}</span></td>
+                                    <td class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-primary" v-on:click="openEdit(o.id)">編輯</button>
+                                        <button class="btn btn-sm btn-success" v-on:click="openMail(o.id)">寄信</button>
+                                    </td>
+                                </tr>
+
+                                <tr v-if="orders.length===0"><td colspan="6" class="text-center text-muted py-4">尚無資料</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <small class="text-muted">更新時間：{{ new Date().toLocaleString('zh-TW') }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯 Modal（簡版）-->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">編輯訂單</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" v-if="editing">
+                    <div class="mb-2">
+                        <label class="form-label">客戶名稱</label>
+                        <input :value="editing?.customerName" class="form-control" readonly>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">商品ID</label>
+                        <input v-model.number="editing.productId" type="number" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">狀態</label>
+                        <select v-model.number="editing.orderStatusId" class="form-select">
+                            <option v-for="s in statuses" :key="s.id" :value="s.id">{{ s.name }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">總金額</label>
+                        <input v-model.number="editing.totalAmount" type="number" min="0" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">建立時間</label>
+                        <input v-model="editing.createTime" type="datetime-local" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" v-on:click ="saveEdit">儲存</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 寄信 Modal（用你現有 SendAjax）-->
+    <div class="modal fade" id="mailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">寄信 <small class="text-muted" id="mail_hint"></small></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" v-if="mail">
+                    <div class="mb-2">
+                        <label class="form-label">收件者</label>
+                        <input v-model="mail.to" type="email" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">主旨</label>
+                        <input v-model="mail.subject" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">內容 (HTML)</label>
+                        <textarea v-model="mail.body" rows="8" class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" v-on:click ="sendMail">送出</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+
+    <script>
+        (() => {
+          const { createApp, ref, computed, onMounted } = Vue;
+
+          createApp({
+            setup(){
+              const q = ref('');
+              const view = ref('card');                // 'card' | 'table'
+              const products = ref([]);
+              const orders = ref([]);                  // 目前列表（卡片點開的商品 或 表格載入的集合）
+              const currentProduct = ref(null);
+              const loadingOrders = ref(false);
+              const editing = ref(null);               // 單筆編輯資料（由 API getOne 取得）
+              const mail = ref(null);                  // {to, subject, body, orderId}
+              const statuses = ref([]);
+            // ---- 排序 / 篩選 狀態 ----
+              const sortBy = ref('createTime');   // createTime | totalAmount | customerName | status | orderCode
+              const sortDir = ref('desc');        // asc | desc
+              const filterStart = ref('');        // 'YYYY-MM-DD'
+              const filterEnd   = ref('');
+              const filterStatus = ref('');       // '', '已付款', '未付款', '已取消', '錯誤'
+              const apiBase = '/Order/CustomerOrders'; // 你在 Areas 的路徑根
+              const statusOrder = {
+                  '已付款': 1,
+                  '未付款': 2,
+                  '已取消': 3,
+                  '錯誤':   4
+              };
+              onMounted(async ()=>{
+                  try{
+                    const { data } = await axios.get(`${apiBase}/api-json/products`);
+                    products.value = data;
+                  }catch(e){ console.error('load products failed', e); }
+
+                  try{
+                    const st = await axios.get(`${apiBase}/api-json/statuses`);
+                    statuses.value = Array.isArray(st.data) ? st.data : [];
+                  }catch(e){
+                    console.error('load statuses failed', e);
+                    // 後備：避免空白（真的取不到時）
+                    statuses.value = [
+                      { id: 1, name: '已付款' },
+                      { id: 2, name: '未付款' },
+                      { id: 3, name: '已取消' },
+                      { id: 4, name: '錯誤' },
+                    ];
+                  }
+              });
+
+              const filteredProducts = computed(()=>{
+                const s = q.value.trim().toLowerCase();
+                if (!s) return products.value;
+                return products.value.filter(p =>
+                  (p.productName||'').toLowerCase().includes(s)
+                );
+              });
+
+              const filteredOrders = computed(()=>{
+                  const s = q.value.trim().toLowerCase();
+                  const pool = orders.value;
+                  if (!s) return pool;
+                  return pool.filter(o =>
+                    (o.productName||'').toLowerCase().includes(s) ||
+                    (o.orderCode||'').toLowerCase().includes(s)  ||
+                    (o.customerName||'').toLowerCase().includes(s)
+                  );
+              });                
+
+                // 排序
+                const tableOrders = computed(()=>{
+                  const list = [...filteredOrders.value];
+
+                  const dir = (sortDir.value === 'asc') ? 1 : -1;
+                  const key = sortBy.value;
+
+                  list.sort((a,b)=>{
+                    let av = a[key], bv = b[key];
+
+                    // 狀態特別規則：用 statusOrder 做序
+                    if (key === 'status' || key === 'statusText') {
+                      av = statusOrder[a.status || a.statusText] || 999;
+                      bv = statusOrder[b.status || b.statusText] || 999;
+                      return (av - bv) * dir;
+                    }
+
+                    // 金額數字
+                    if (key === 'totalAmount') {
+                      av = Number(av ?? 0); bv = Number(bv ?? 0);
+                      return (av - bv) * dir;
+                    }
+
+                    // 時間：轉毫秒比大小
+                    if (key === 'createTime' || key === 'updateTime') {
+                      const ad = av ? new Date(av).getTime() : 0;
+                      const bd = bv ? new Date(bv).getTime() : 0;
+                      return (ad - bd) * dir;
+                    }
+
+                    // 一般字串：轉小寫比
+                    av = (av ?? '').toString().toLowerCase();
+                    bv = (bv ?? '').toString().toLowerCase();
+                    return (av < bv ? -1 : av > bv ? 1 : 0) * dir;
+                  });
+
+                  return list;
+                });
+
+                    // 表頭點擊切換排序
+                function setSort(key) {
+                    if (sortKey.value === key) {
+                    sortAsc.value = !sortAsc.value;   // 點同一欄就切換方向
+                    } else {
+                    sortKey.value = key;
+                    sortAsc.value = true;
+                    }
+                }
+                function fmt(v){ return v ? new Date(v).toLocaleString('zh-TW') : '' }
+                function statusClass(s){
+                return s==='已付款' ? 'bg-success'
+                        : s==='未付款' ? 'bg-warning'
+                        : s==='已取消' ? 'bg-secondary'
+                        : 'bg-danger';
+                }
+
+                async function openOrders(p){
+                currentProduct.value = p;
+                loadingOrders.value = true;
+                const { data } = await axios.get(`${apiBase}/api-json/by-product/${p.productId}`);
+                orders.value = data.orders;
+                loadingOrders.value = false;
+
+                // 打開 Bootstrap Modal
+                const el = document.getElementById('ordersModal');
+                bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+
+                async function openEdit(id){
+                const { data } = await axios.get(`${apiBase}/get/${id}`); // 你原本就有 Get/{id}
+                editing.value = {
+                      id:            data.id,
+                      customerId:    data.customerId,
+                      customerName:  data.customerName || `客戶 ${data.customerId}`,   // 顯示用
+                      productId:     data.productId,
+                      productName:   data.productName,    // 如要顯示可用
+                      orderStatusId: data.orderStatusId,
+                      statusText:    data.statusText,
+                      totalAmount:   data.totalAmount ?? 0,
+                      createTime:    data.createTime ? toLocalInput(data.createTime) : '',   // 顯示用（唯讀）
+                      updateTime:    data.updateTime ? toLocalInput(data.updateTime) : ''
+                    };
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).show();
+                }
+
+                async function saveEdit(){
+                const p = editing.value;
+                await axios.put(`${apiBase}/api-json/${p.id}`, {
+                    customerID:    p.customerId,
+                    productID:     p.productId,
+                    orderStatusID: p.orderStatusId,
+                    totalAmount:   p.totalAmount,
+                    createTime:    p.createTime,
+                    updateTime:    new Date().toISOString()
+                });
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('editModal')).hide();
+                editing.value = null;
+
+                // 重新載入目前商品的訂單（若在卡片模式）
+                if (currentProduct.value) {
+                    const { data } = await axios.get(`${apiBase}/api-json/by-product/${currentProduct.value.productId}`);
+                    orders.value = data.orders;
+                }
+                }
+
+                async function openMail(id){
+                const { data } = await axios.get(`${apiBase}/api-json/mail-template/${id}`);
+                mail.value = { to: data.to || '', subject: data.subject || '', body: data.body || '', orderId: id };
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('mailModal')).show();
+                }
+
+                async function sendMail(){
+                const fd = new FormData();
+                fd.append('to', mail.value.to);
+                fd.append('subject', mail.value.subject);
+                fd.append('body', mail.value.body);
+                await axios.post(`${apiBase}/send-ajax`, fd);
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('mailModal')).hide();
+                alert('郵件已送出！');
+                mail.value = null;
+                }
+
+                function toLocalInput(dt){
+                const d = new Date(dt);
+                if (isNaN(d.getTime())) return '';
+                const pad = n => n.toString().padStart(2,'0');
+                return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
+                async function loadOrdersAll(){
+                try{
+                    const { data } = await axios.get(`${apiBase}/api-json/orders`, { withCredentials: true });
+                    // 後端回傳是 { orders: [...] }
+                    orders.value = Array.isArray(data?.orders) ? data.orders : [];
+                    console.log('ALL ORDERS COUNT =', orders.value.length);
+                    }catch(err){
+                    console.error('載入全部訂單失敗：', err);
+                    orders.value = [];
+                    }
+                }
+                function setSort(field){
+                  if (sortBy.value === field) {
+                    sortDir.value = (sortDir.value === 'asc' ? 'desc' : 'asc');
+                  } else {
+                    sortBy.value = field;
+                    sortDir.value = 'asc';
+                  }
+                }
+              async function switchToTable(){
+                view.value = 'table';
+                if (orders.value.length === 0) {
+                  await loadOrdersAll();
+                }
+              }
+
+              function switchToCard(){
+                view.value = 'card';
+              }
+
+              return {
+                q, view, products, orders, filteredProducts, filteredOrders,
+                currentProduct, loadingOrders, editing, mail,
+                openOrders, openEdit, saveEdit, openMail, sendMail,
+                fmt, statusClass,switchToCard, switchToTable, loadOrdersAll,sortBy, sortDir, filterStart, filterEnd, filterStatus,
+                setSort,tableOrders,filteredProducts,statuses 
+              };
+            }
+          }).mount('#app');
+        })();
+    </script>
+}

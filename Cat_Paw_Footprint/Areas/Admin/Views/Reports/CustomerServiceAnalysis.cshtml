@@ -1,0 +1,98 @@
+﻿@model IEnumerable<dynamic>
+@{
+    ViewData["Title"] = "客服分析報表";
+}
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-white pb-0 position-relative">
+        <h2 class="text-center mb-5">🎧 客服分析報表</h2>
+        <a asp-area="Admin" asp-controller="Reports" asp-action="Dashboard"
+           class="btn btn-outline-primary position-absolute end-0 top-50 translate-middle-y me-2">
+            <i class="fa-solid fa-chart-line"></i> 回到儀表板
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-12">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-info">
+                        <tr>
+                            <th class="fs-5">案件狀態</th>
+                            <th class="fs-5">案件數量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @{
+                                        var statusName = item.StatusName?.ToString();
+                                        string displayName = statusName switch
+                                        {
+                                            "1" => "待處理",
+                                            "2" => "已完成",
+                                            _ => "其他"
+                                        };
+                                    }
+                                    @displayName
+                                </td>
+                                <td>@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-12">
+                <div class="card shadow-sm p-3 rounded-4">
+                    <h5 class="card-title text-center">案件狀態分佈</h5>
+                    <div class="card-body">
+                        <canvas id="ticketChart" style="max-height:400px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 把後端 Model 轉成 JS array
+        let labels = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(x => x.StatusName)));
+        let counts = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Select(x => x.Count)));
+
+        // ✅ 把數字轉中文
+        labels = labels.map(x => {
+            if (x == "1") return "待處理";
+            if (x == "2") return "已完成";
+            return "其他";
+        });
+
+        new Chart(document.getElementById("ticketChart"), {
+            type: "doughnut",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "案件數",
+                    data: counts,
+                    backgroundColor: [
+                        "rgba(54, 162, 235, 0.7)", // 待處理
+                        "rgba(255, 99, 132, 0.7)", // 已完成
+                        "rgba(255, 206, 86, 0.7)",
+                        "rgba(75, 192, 192, 0.7)",
+                        "rgba(153, 102, 255, 0.7)"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+    </script>
+}

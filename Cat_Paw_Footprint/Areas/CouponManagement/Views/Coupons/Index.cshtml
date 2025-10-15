@@ -1,108 +1,120 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Models.Coupons>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "優惠券管理";
 }
 
-@section Styles {
-    <link href="~/lib/datatables/css/jquery.datatables.min.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.min.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/fixedheader/4.0.2/css/fixedHeader.bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/2.3.3/css/dataTables.dataTables.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/buttons/3.2.4/css/buttons.dataTables.css" rel="stylesheet" />
-}
 
-<h1>優惠券管理</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-square-plus"></i> 新增優惠券</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CouponCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CouponDesc)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiscountType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DiscountValue)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.EndTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CouponCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CouponDesc)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountType)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountValue)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.CouponID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.CouponID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.CouponID">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="mt-2" id="cr-coup" style="display:none;">
+    <a asp-action="Create" class="btn btn-outline-primary">
+        <i class="fa-solid fa-square-plus"></i>新增優惠券
+    </a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="mb-4 text-center">
+            <span class="fw-bold" style="font-size:1.6rem; color:#22b3C1; letter-spacing:2px;">
+                <i class="fa-solid fa-ticket me-2"></i>優惠券管理
+            </span>
+            <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+        </div>
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CouponCode)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DiscountType)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.DiscountValue)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.StartDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.EndTime)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.IsActive)
+                    </th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CouponCode)
+                        </td>
+                        <td>
+                            @if (item.DiscountType == 0)
+                            {
+                                <span>百分比折扣 (%)</span>
+                            }
+                            else
+                            {
+                                <span>固定金額折扣 ($)</span>
+                            }
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DiscountValue)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.StartDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.EndTime)
+                        </td>
+                        <td class="text-center">
+                            @if (item.IsActive == true)
+                            {
+                                <span class="badge bg-success text-center justify-content-between">上架</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-center justify-content-between">下架</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a asp-action="Details" asp-route-id="@item.CouponID" class="btn btn-outline-secondary btn-sm mb-1 ms-auto"><i class="fa-solid fa-eye"></i>檢視</a>
+                            <a asp-action="Edit" asp-route-id="@item.CouponID" class="btn btn-outline-primary btn-sm mb-1 ms-auto"><i class="fa-solid fa-pen-to-square"></i>編輯</a>
+                            <a asp-action="Delete" asp-route-id="@item.CouponID" class="btn btn-outline-danger btn-sm mb-1 ms-auto"><i class="fa-solid fa-ban"></i>下架</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
 @section Scripts {
-    <script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
-
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.3.1/js/dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/fixedheader/4.0.2/js/dataTables.fixedHeader.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.4/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.dataTables.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.2.4/js/buttons.print.min.js"></script>
-
     <script>
         $(document).ready(function (){
-            $('table').DataTable({
-                "language" : {
-                    url: '//cdn.datatables.net/plug-ins/2.3.3/i18n/zh-HANT.json',
-                },
-                layout: {
-                    topStart: {
-                        buttons: ['copy', 'csv', 'pdf', 'print']
-                    }
-                }
+            $('table').dataTable({
+               language: {
+                        search: "搜尋：",
+                            lengthMenu: "每頁顯示 _MENU_ 筆",
+                            info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                            paginate: {
+                                first: "第一頁",
+                                last: "最後一頁",
+                                next: "下一頁",
+                                previous: "上一頁"
+                            },
+                            zeroRecords: "找不到資料",
+                    },
+                    pageLength: 10, // 預設每頁10筆
+                    lengthMenu: [5, 10, 20, 50],
+                    columnDefs: [
+                        { targets: 6, orderable: false, searchable: false },
+                    ]
             });
+            $('.dataTables_length').after($('#cr-coup').show());
+
         });
     </script>
 }

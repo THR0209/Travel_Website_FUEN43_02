@@ -1,0 +1,81 @@
+﻿@{
+    ViewData["Title"] = "我的訂單";
+}
+<div class="container py-4" id="app" v-cloak>
+    <h2 class="mb-3">我的訂單</h2>
+
+    <div class="mb-3 d-flex gap-2">
+        <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
+        <button class="btn btn-outline-secondary" v-on:click ="reload">重新整理</button>
+        <input v-model="q" class="form-control ms-auto" placeholder="搜尋：訂單/商品/狀態">
+    </div>
+
+    <div v-if="items.length===0" class="alert alert-info">目前沒有訂單</div>
+    <div v-else class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>訂單編號</th>
+                    <th>商品</th>
+                    <th>金額</th>
+                    <th>狀態</th>
+                    <th>建立時間</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="o in items" :key="o.id">
+                    <td class="font-monospace">{{ o.orderCode }}</td>
+                    <td>{{ o.productName }}</td>
+                    <td class="text-end">NT$ {{ o.amount.toLocaleString() }}</td>
+                    <td><span class="badge" :class="badge(o.status)">{{ o.status }}</span></td>
+                    <td>{{ fmt(o.createTime) }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <style>[v-cloak] {display: none}</style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script>
+            (() => {
+          const { createApp, ref, computed } = Vue;
+          createApp({
+            setup(){
+              const customerId = ref(0);
+              const items = ref([]);
+              const q = ref('');
+
+              function fmt(v){
+                if(!v) return '';
+                const d = new Date(v);
+                return isNaN(d.getTime()) ? '' : d.toLocaleString('zh-TW');
+              }
+              function badge(s){
+                return s==='已付款' ? 'bg-success' :
+                       s==='未付款' ? 'bg-warning' :
+                       s==='已取消' ? 'bg-secondary' : 'bg-danger';
+              }
+              const filtered = computed(()=>{
+                const s = q.value.trim().toLowerCase();
+                if(!s) return items.value;
+                return items.value.filter(o =>
+                  (o.orderCode||'').toLowerCase().includes(s) ||
+                  (o.productName||'').toLowerCase().includes(s) ||
+                  (o.status||'').toLowerCase().includes(s)
+                );
+              });
+
+              async function reload(){
+                const { data } = await axios.get('/CustomerArea/Order/Orders/api', { params:{ customerId: customerId.value }});
+                items.value = Array.isArray(data) ? data : [];
+              }
+
+              return { customerId, items, q, filtered, reload, fmt, badge };
+            }
+          }).mount('#app');
+        })();
+    </script>
+}

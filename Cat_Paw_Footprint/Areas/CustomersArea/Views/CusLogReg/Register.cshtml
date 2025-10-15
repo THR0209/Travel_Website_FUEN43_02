@@ -1,0 +1,132 @@
+﻿@{
+    ViewData["Title"] = "會員註冊";
+}
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
+@{
+    var tokens = antiforgery.GetAndStoreTokens(Context);
+    ViewData["IsLoginPage"] = true;
+}
+<meta name="csrf-token" content="@tokens.RequestToken" />
+
+<div id="registerApp">
+    <div class="card">
+        <h3 class="text-center mb-4 fw-bold">會員註冊</h3>
+
+        <form v-on:submit.prevent="register">
+            @Html.AntiForgeryToken() <!-- 一定要保留給後端驗證使用 -->
+
+            <div class="mb-3">
+                <label class="form-label">帳號</label>
+                <input type="text" v-model="form.account" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">密碼</label>
+                <input type="password" v-model="form.password" class="form-control" required minlength="6">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">姓名</label>
+                <input type="text" v-model="form.fullName" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">電子郵件</label>
+                <input type="email" v-model="form.email" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">電話</label>
+                <input type="tel" v-model="form.phone" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">地址</label>
+                <input type="text" v-model="form.address" class="form-control" required>
+            </div>
+
+            <div class="d-grid mt-4">
+                <button type="submit" class="btn btn-outline-primary" :disabled="loading">
+                    {{ loading ? "註冊中..." : "註冊" }}
+                </button>
+            </div>
+        </form>
+
+        <div v-if="message" class="mt-4">
+            <div :class="['alert', messageType]">{{ message }}</div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="/CustomersArea/CusLogReg/Login">已有帳號？前往登入</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- 引入 Vue 3 與 Axios -->
+    <script src="https://unpkg.com/vue@3.5.0/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    form: {
+                        account: "",
+                        password: "",
+                        fullName: "",
+                        email: "",
+                        phone: "",
+                        address: ""
+                    },
+                    loading: false,
+                    message: "",
+                    messageType: "" // alert-success / alert-danger
+                };
+            },
+            methods: {
+                async register() {
+                    this.loading = true;
+                    this.message = "";
+
+                    try {
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                                const formData = new FormData();
+        for (const key in this.form) {
+          formData.append(key, this.form[key]);
+        }
+
+        const res = await axios.post("/CustomersArea/CusLogReg/Register", formData, {
+          headers: {
+            "RequestVerificationToken": token
+          }
+        });
+
+                        if (res.data.success) {
+                            this.message = res.data.message;
+                            this.messageType = "alert-success";
+
+                            // 1 秒後導向登入頁
+                            setTimeout(() => {
+                                window.location.href = res.data.redirectUrl;
+                            }, 1000);
+                        }
+                    } catch (err) {
+                        let msg = "註冊失敗，請稍後再試。";
+                        if (err.response && err.response.data && err.response.data.error)
+                            msg = err.response.data.error;
+
+                        this.message = msg;
+                        this.messageType = "alert-danger";
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }).mount("#registerApp");
+    </script>
+}
+
