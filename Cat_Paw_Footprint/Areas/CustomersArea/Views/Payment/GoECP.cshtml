@@ -1,0 +1,21 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.Controllers.GoECPayVm
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <title>導向綠界</title>
+</head>
+<body onload="document.forms[0].submit();">
+    <p>正在導向綠界金流，請稍候…</p>
+    <form method="post" action="@Model.Action">
+        @foreach (var kv in Model.Fields)
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+        <noscript><button type="submit">前往綠界</button></noscript>
+    </form>
+</body>
+</html>

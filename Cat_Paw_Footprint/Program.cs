@@ -17,6 +17,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Cloud.SecretManager.V1;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using static Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController;
 
 
 namespace Cat_Paw_Footprint
@@ -188,6 +189,8 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
 			builder.Services.AddSignalR();
+
+			builder.Services.Configure<ECPayOptions>(builder.Configuration.GetSection("ECPay"));
 
 			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 			builder.Services.AddTransient<IEmailSender, EmailSender>();

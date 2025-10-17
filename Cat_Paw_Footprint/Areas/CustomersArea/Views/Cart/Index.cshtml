@@ -6,8 +6,8 @@
 
     <div class="mb-3 d-flex gap-2">
         <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
-        <button class="btn btn-outline-secondary" v-on:click ="reload">重新整理</button>
-        <button class="btn btn-outline-info" v-on:click="addDemo">加入範例商品</button>
+        <button class="btn btn-outline-secondary" v-on:click="reload">重新整理</button>
+        <button class="btn btn-outline-primary" v-on:click="addDemo">加一個範例商品</button>
     </div>
 
     <div v-if="items.length===0" class="alert alert-info">購物車是空的</div>
@@ -16,9 +16,7 @@
         <table class="table align-middle">
             <thead class="table-light">
                 <tr>
-                    <th style="width:32px">
-                        <input type="checkbox" v-model="checkAll" v-on:change="toggleAll">
-                    </th>
+                    <th style="width:36px"><input type="checkbox" v-model="checkAll" v-on:change="toggleAll"></th>
                     <th>商品</th>
                     <th class="text-end">單價</th>
                     <th class="text-center">數量</th>
@@ -36,30 +34,23 @@
                     <td class="text-end">NT$ {{ it.price.toLocaleString() }}</td>
                     <td class="text-center">
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" v-on:click ="dec(it)">-</button>
-                            <input type="number" class="form-control form-control-sm text-center"
-                                   style="width:72px" v-model.number="it.qty" min="1" v-on:change="update(it)">
-                            <button class="btn btn-outline-secondary" v-on:click="inc(it)">+</button>
+                            <button class="btn btn-outline-secondary" v-on:click="dec(it)">−</button>
+                            <input type="number" class="form-control form-control-sm w-auto text-center"
+                                   v-model.number="it.qty" min="1" v-on:change="update(it)">
+                            <button class="btn btn-outline-secondary" v-on:click="inc(it)">＋</button>
                         </div>
                     </td>
                     <td class="text-end">NT$ {{ (it.price * it.qty).toLocaleString() }}</td>
-                    <td><button class="btn btn-sm btn-outline-danger" v-on:click="remove(it.productId)">移除</button></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" v-on:click="remove(it.productId)">移除</button>
+                    </td>
                 </tr>
             </tbody>
-            <tfoot class="position-sticky bottom-0 bg-white">
+
+            <tfoot>
                 <tr>
-                    <th colspan="4" class="text-end">小計</th>
-                    <th class="text-end">NT$ {{ subtotal.toLocaleString() }}</th>
-                    <th></th>
-                </tr>
-                <tr v-if="discount>0">
-                    <th colspan="4" class="text-end text-success">折扣</th>
-                    <th class="text-end text-success">- NT$ {{ discount.toLocaleString() }}</th>
-                    <th></th>
-                </tr>
-                <tr>
-                    <th colspan="4" class="text-end">總計</th>
-                    <th class="text-end fw-bold">NT$ {{ total.toLocaleString() }}</th>
+                    <th colspan="3" class="text-end">總計</th>
+                    <th class="text-end">NT$ {{ total.toLocaleString() }}</th>
                     <th></th>
                 </tr>
             </tfoot>
@@ -68,21 +59,32 @@
 
     <div class="d-flex gap-2">
         <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
-
-        <!-- 轉帳 -->
-        <button class="btn btn-outline-primary"
-                :disabled="items.length===0 || !customerId"
-                v-on:click="checkout('transfer')">
-            轉帳付款
-        </button>
-
-        <!-- 信用卡 -->
-        <button class="btn btn-primary"
-                :disabled="items.length===0 || !customerId"
-                v-on:click="checkout('card')">
-            線上信用卡
-        </button>
+        <form id="payForm" method="post" action="/CustomersArea/Payment/Create">
+            <input type="hidden" name="orderId" :value="selectedOrderId">
+            <button type="submit" class="btn btn-primary">信用卡付款（綠界）</button>
+        </form>
     </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center my-3">
+        <div class="input-group w-auto">
+            <span class="input-group-text">折價券</span>
+            <input v-model.trim="couponCode" class="form-control" placeholder="輸入折價碼…">
+            <button class="btn btn-outline-primary" v-on:click="applyCoupon" :disabled="!couponCode">套用</button>
+            <button class="btn btn-outline-secondary" v-on:click="clearCoupon" :disabled="!couponCode">清除</button>
+        </div>
+        <button class="btn btn-outline-danger ms-auto" :disabled="selected.length===0" v-on:click="batchRemove">刪除選取</button>
+    </div>
+
+    <footer class="card shadow-sm sticky-bottom p-3 bg-white border">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div class="small text-muted" v-if="discountHint">{{ discountHint }}</div>
+            </div>
+            <div class="fs-5">
+                合計：<strong>NT$ {{ finalTotal.toLocaleString() }}</strong>
+            </div>
+        </div>
+    </footer>
+
 </div>
 
 @section Scripts {
@@ -94,71 +96,104 @@
     <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
     <script>
         (() => {
-          const { createApp, ref, onMounted } = Vue;
+            const { createApp, ref, onMounted, computed } = Vue;
 
-          createApp({
-            setup(){
+            createApp({
+              setup(){
+                const customerId = ref(0); // 先用輸入測試，未接登入前暫用
                 const items = ref([]);
-                const subtotal = ref(0);
-                const discount = ref(0);
                 const total = ref(0);
-
-                const selected = ref([]);    // 批次選擇
+                const couponCode = ref('');
+                const discountHint = ref('');
+                const selected = ref([]);
                 const checkAll = ref(false);
 
-                function toggleAll(){
-                  if (checkAll.value) selected.value = items.value.map(x => x.productId);
-                  else selected.value = [];
+                async function addDemo(){
+                  try{
+                    const fp = await axios.get('/CustomersArea/Cart/first-product-id');
+                    const pid = fp.data?.productId;
+                    if (!pid) { alert('找不到任何商品'); return; }
+
+                    await axios.post('/CustomersArea/Cart/add',
+                      new URLSearchParams({ productId: pid, qty: 1 })
+                    );
+                    await reload();
+                  }catch(err){
+                    console.error(err);
+                    alert('加入範例商品失敗：' + (err?.response?.status || ''));
+                  }
                 }
-                function inc(it){ it.qty = Math.max(1, (it.qty||1)+1); update(it); }
-                function dec(it){ it.qty = Math.max(1, (it.qty||1)-1); update(it); }
 
                 async function reload(){
                   const { data } = await axios.get('/CustomersArea/Cart/api');
                   items.value = data.items || [];
-                  subtotal.value = data.subtotal || 0;
-                  discount.value = data.discount || 0;
                   total.value = data.total || 0;
-                  checkAll.value = false;
-                  selected.value = [];
+                  // 回填折扣資訊（若後端有保存在 Session）
+                  couponCode.value = data.coupon?.code || '';
+                  discountHint.value = data.coupon?.hint || '';
                 }
-              async function addDemo(){
-                await axios.post('/CustomersArea/Cart/add-demo');
-                await reload();
-              }
-              async function update(it){
-                await axios.post('/CustomersArea/Cart/update', new URLSearchParams({
-                  productId: it.productId, qty: it.qty
-                }));
-                await reload();
-              }
-              async function remove(productId){
-                await axios.post('/CustomersArea/Cart/remove', new URLSearchParams({ productId }));
-                await reload();
-              }
-              async function clearCart(){
-                await axios.post('/CustomersArea/Cart/clear');
-                await reload();
-              }
-              async function checkout(method){
-                try{
-                  const fd = new URLSearchParams({ customerId: customerId.value, method });
-                  const { data } = await axios.post('/CustomersArea/Cart/checkout', fd);
-                  if (data?.ok && data?.redirect) {
-                    window.location.href = data.redirect;
-                    return;
-                  }
-                  alert('結帳失敗');
-                }catch(err){
-                  console.error(err);
-                  alert('結帳失敗');
+                async function checkout(){
+                  // 後端會從 Session 取當前登入使用者，不再傳 customerId
+                  const res = await axios.post('/CustomersArea/Cart/checkout');
+                  // 結帳後導到我的訂單頁（前台）
+                  window.location.href = '/CustomersArea/Orders';
                 }
-              }
+                function inc(it){ it.qty++; update(it); }
+                function dec(it){ it.qty = Math.max(1, (it.qty || 1)-1); update(it); }
 
-              onMounted(reload);
-              return { items, total, customerId, reload, addDemo, update, remove, clearCart, checkout };
-            }
-          }).mount('#app');
+                async function update(it){
+                  await axios.post('/CustomersArea/Cart/update', new URLSearchParams({
+                    productId: it.productId, qty: it.qty
+                  }));
+                  await reload();
+                }
+
+                async function remove(productId){
+                  await axios.post('/CustomersArea/Cart/remove', new URLSearchParams({ productId }));
+                  await reload();
+                }
+
+                function toggleAll(){
+                  selected.value = checkAll.value ? items.value.map(i=>i.productId) : [];
+                }
+
+                async function batchRemove(){
+                  await axios.post('/CustomersArea/Cart/batch-remove', selected.value);
+                  selected.value = [];
+                  checkAll.value = false;
+                  await reload();
+                }
+
+                async function applyCoupon(){
+                  const res = await axios.post('/CustomersArea/Cart/apply-coupon', new URLSearchParams({ code: couponCode.value }));
+                  discountHint.value = res.data?.hint || '';
+                  await reload();
+                }
+                async function clearCoupon(){
+                  await axios.post('/CustomersArea/Cart/clear-coupon');
+                  couponCode.value = '';
+                  discountHint.value = '';
+                  await reload();
+                }
+
+                const discount = computed(()=> {
+                  // 也可由後端計算後回傳；這裡前端先顯示，後端仍以自己計算為準
+                  // 例：後端會把折扣放在 api 回傳資料 data.coupon，前端只顯示
+                  return 0;
+                });
+                const finalTotal = computed(()=> Math.max(0, total.value - discount.value));
+
+                onMounted(reload);
+
+                return {
+                  items, total, couponCode, discountHint,
+                  selected, checkAll, toggleAll, batchRemove,
+                  inc, dec, update, remove,
+                  applyCoupon, clearCoupon,checkout,
+                  finalTotal,addDemo,customerId
+                };
+              }
+            }).mount('#app');
         })();
     </script>
 }
