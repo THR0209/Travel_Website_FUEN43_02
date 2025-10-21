@@ -88,6 +88,47 @@
     </div>
 </section>
 
+
+<!-- 最新優惠活動 -->
+<section class="section" id="deals" v-cloak>
+    <div class="container" id="promotion-app">
+        <div class="section-title d-flex justify-content-between align-items-center">
+            <h2>最新優惠活動</h2>
+            <a class="link-primary" asp-controller="Promotions" asp-action="Index">全部優惠</a>
+        </div>
+
+      @*   <!-- 載入中 -->
+        <div v-if="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 mb-0 text-muted">載入中...</p>
+        </div> *@
+
+        <!-- 有資料 -->
+        <div v-else-if="promotions.length > 0" class="row g-3 g-md-4">
+            <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100 shadow-sm rounded">
+                    <div class="product-thumb position-relative">
+                        <img :src="p.imageUrl" :alt="p.title" class="w-100 rounded-top">
+                    </div>
+                    <div class="product-body p-3">
+                        <h5 class="product-title mb-1">{{ p.promoName }}</h5>
+                        <p class="product-meta text-muted small mb-1">{{ formatDate(p.startTime) }}</p>
+                        @* <div class="price fw-bold text-primary">NT$ {{ p.price }} 起</div> *@
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <!-- 無資料 -->
+        <div v-else class="text-center text-muted py-5">
+            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
+        </div>
+    </div>
+</section>
+
+
+
 <!-- Deals Grid -->
 <section class="section" id="deals">
     <div class="container">
@@ -174,6 +215,7 @@
     </div>
 </section>
 
+@* 常見問題 *@
 
 <section class="section" id="faqSection">
     <div class="container py-3">
@@ -213,6 +255,34 @@
         </div>
     </div>
 </section>
+
+
+
+@section Scripts {
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const app = Vue.createApp({
+          data() {
+            return {
+              promotions: [],
+              isLoading: true
+            }
+          },
+          mounted() {
+            axios.get('/CustomersArea/Promotions/GetLatestPromotions')
+              .then(res => {
+                this.promotions = res.data
+              })
+              .catch(err => console.error('載入失敗：', err))
+              .finally(() => {
+                this.isLoading = false
+              })
+          }
+        })
+        app.mount('#promotion-app')
+    </script>
+}
 
 
 

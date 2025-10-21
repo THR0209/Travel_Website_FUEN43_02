@@ -29,7 +29,6 @@
     <Folder Include="Areas\CustomersArea\Data\" />
     <Folder Include="Areas\CustomersArea\Models\" />
     <Folder Include="Areas\CustomersArea\Repositories\" />
-    <Folder Include="Areas\CustomersArea\Views\" />
     <Folder Include="Areas\ProductManagement\Data\" />
     <Folder Include="Areas\ProductManagement\ViewModel\" />
     <Folder Include="Areas\TourGuideArea\Data\" />

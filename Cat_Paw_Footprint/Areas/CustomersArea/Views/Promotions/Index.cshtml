@@ -1,0 +1,51 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Models.Promotions>
+
+@{
+    ViewData["Title"] = "優惠活動";
+}
+
+<h1>優惠活動</h1>
+
+<div id="promotion-list" class="container my-5" v-cloak>
+    @* <h2>🔥 最新優惠活動</h2> *@
+    <div class="row g-3 g-md-4">
+        <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
+            <article class="product-card h-100">
+                <div class="product-thumb position-relative">
+                    <img :src="p.imageUrl || '/images/default.jpg'" :alt="p.promoName" class="w-100 rounded-3">
+                </div>
+                <div class="product-body mt-2">
+                    <h5 class="fw-bold">{{ p.promoName }}</h5>
+                    <div class="text-muted small">開始時間：{{ formatDate(p.startTime) }}</div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    @* <script src="~/js/promotions.js"></script> *@
+
+    <script>
+        const app = Vue.createApp({
+          data() {
+            return { promotions: [] }
+          },
+          methods: {
+            formatDate(dateStr) {
+              const date = new Date(dateStr)
+              return date.toLocaleDateString('zh-TW')
+            }
+          },
+          mounted() {
+            axios.get('/CustomersArea/Promotions/GetActivePromotions')
+              .then(res => { this.promotions = res.data })
+              .catch(err => console.error('載入失敗：', err))
+          }
+        })
+
+        app.mount('#promotion-list')
+    </script>
+}
