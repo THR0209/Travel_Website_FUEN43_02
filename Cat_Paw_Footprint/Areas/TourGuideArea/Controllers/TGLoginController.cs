@@ -1,5 +1,5 @@
-﻿//using Cat_Paw_Footprint.Areas.TourGuideArea.Services;
-//using Cat_Paw_Footprint.Areas.TourGuideArea.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.TourGuideArea.Services;
+using Cat_Paw_Footprint.Areas.TourGuideArea.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -10,5 +10,9 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Controllers
 {
 	public class TGLoginController : Controller
 	{
+		public IActionResult Login()
+		{
+			return View();
+		}
 	}
 }
