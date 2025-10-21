@@ -11,7 +11,10 @@ using Cat_Paw_Footprint.Areas.TourGuideArea.Services;
 using Cat_Paw_Footprint.Areas.Vendor.Repositories;
 using Cat_Paw_Footprint.Areas.Vendor.Services;
 using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Hubs;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Repositories;
+using Cat_Paw_Footprint.Services;
 using ClosedXML.Parser;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.SecretManager.V1;
@@ -182,6 +185,10 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<ICusLogRegService, CusLogRegService>();
 			builder.Services.AddScoped<ITGAllRepository, TGAllRepository>();
 			builder.Services.AddScoped<ITGAllService, TGAllService>();
+			builder.Services.AddSignalR();
+			builder.Services.AddScoped<ITalkMessageRepository, TalkMessageRepository>();
+			builder.Services.AddScoped<ITalkMessageService, TalkMessageService>();
+
 			#endregion
 
 			builder.Services.AddHttpContextAccessor();
@@ -198,10 +205,12 @@ namespace Cat_Paw_Footprint
 	Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
 	Cat_Paw_Footprint.Areas.CustomersArea.Services.CustomerEmailSender>();
 
-			var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+
+			var app = builder.Build();
+			app.MapHub<ChatHub>("/chatHub");
+			// Configure the HTTP request pipeline.
+			if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
             }
