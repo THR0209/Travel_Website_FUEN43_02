@@ -31,7 +31,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 		public DateTime? ReleaseDate { get; set; }
 
 		[NotMapped] //不進資料庫
-		public IFormFile? UploadImage { get; set; }    // 上傳用
+		public IFormFile? UploadImage { get; set; }    // 上傳圖片用
 
 		// 多對多：交通方式、景點、飯店、餐廳（橋接表 Products_Transportations）
 		public List<int> SelectedTransportationIds { get; set; } = new List<int>();
@@ -65,6 +65,4 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.ViewModel
 		public int DayNumber { get; set; }
 		public List<OrderedItem> Locations { get; set; } = new();
 	}
-
-
 }

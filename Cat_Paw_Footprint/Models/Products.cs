@@ -48,6 +48,11 @@ public partial class Products
 
 	public byte[]? ProductImage { get; set; }
 
+	public string? ProductImageUrl { get; set; }
+
+	[DisplayName("時刻表")]
+	public int? Timetable { get; set; }
+
 	[DisplayName("產品編號")]
 	public string? ProductCode { get; set; }
 
