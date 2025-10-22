@@ -37,5 +37,14 @@
 
 		/// <summary>拿來對應前端暫存 ID 用的欄位，不會存到資料庫</summary>
 		public string? TempId { get; set; }
+
+		/// <summary>
+		/// 拿來標記是客服端還是客戶端發送的訊息（"Customer" 或 "Admin"），方便前端區分顯示樣式
+		/// </summary>
+		public string SenderType { get; set; }   // "Customer" 或 "Admin"
+		/// <summary>
+		/// 用來顯示發送者名稱（例如客戶名稱或客服人員名稱）
+		/// </summary>
+		public string SentBy { get; set; }       // 發送者名稱
 	}
 }

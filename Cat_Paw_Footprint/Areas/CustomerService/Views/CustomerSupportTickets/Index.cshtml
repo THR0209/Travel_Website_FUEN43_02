@@ -15,6 +15,70 @@
 
 @section Styles {
     <style>
+        /* ================= 聊天輸入區 ================= */
+        .chat-input-area {
+            background: linear-gradient(135deg, #f8fcfe 0%, #eef6f9 100%);
+            border: 1px solid #dce8ef;
+            transition: box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+            .chat-input-area:focus-within {
+                background: #fff;
+                box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.25);
+            }
+
+        .chat-icon-btn,
+        .chat-send-btn {
+            display: flex; /* ✅ 讓內容可用 flex 對齊 */
+            align-items: center; /* ✅ 垂直置中 */
+            justify-content: center; /* ✅ 水平置中 */
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* 附件按鈕 */
+        .chat-icon-btn {
+            background: transparent;
+            color: #7ec8e3;
+            font-size: 1.25rem;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+        }
+
+            .chat-icon-btn:hover {
+                background: #e8f7fb;
+                color: #22b3c1;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            }
+
+        /* 發送按鈕 */
+        .chat-send-btn {
+            background: #7ec8e3;
+            color: #fff;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+        }
+
+            .chat-send-btn:hover {
+                background: #22b3c1;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            }
+
+            .chat-send-btn:active {
+                transform: scale(0.95);
+            }
+
+        /* 讓輸入框乾淨一點 */
+        .chat-input-area input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+
         /* 美化聊天室訊息泡泡 */
         .chat-message-row {
             display: flex;
@@ -64,33 +128,63 @@
                 font-size: 0.95em;
                 margin-right: 8px;
             }
+
+        #imagePreviewModal .btn-light {
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+            #imagePreviewModal .btn-light:hover {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+        #imagePreviewModal img {
+            transition: transform 0.25s ease;
+        }
+
+            #imagePreviewModal img:hover {
+                transform: scale(1.02);
+            }
+
+        #imagePreviewModal .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,.2);
+            background-color: rgba(255,255,255,0.9);
+        }
     </style>
 }
 
-<div class="card">
+<!-- =============================== -->
+<!-- 📊 工單統計 + DataTable 表格 -->
+<!-- =============================== -->
+<div class="card shadow-sm">
     <div class="card-body">
         <div class="mb-4 text-center">
-            <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3; letter-spacing:2px;">
+            <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3;">
                 <i class="fa-solid fa-clipboard-list me-2"></i>工單管理
             </span>
-            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto; border-radius:2px;"></div>
         </div>
+
         <div class="mb-4 d-flex flex-wrap gap-3">
-            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#d9edf7;color:#31708f;">
-                待處理 <span class="fw-bold">@pendingCount</span> 筆
-            </div>
-            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#fcf8e3;color:#8a6d3b;">
-                處理中 <span class="fw-bold">@processingCount</span> 筆
-            </div>
-            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#dff0d8;color:#3c763d;">
-                已完成 <span class="fw-bold">@finishedCount</span> 筆
-            </div>
+            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#d9edf7;color:#31708f;">待處理 <span class="fw-bold">@pendingCount</span></div>
+            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#fcf8e3;color:#8a6d3b;">處理中 <span class="fw-bold">@processingCount</span></div>
+            <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#dff0d8;color:#3c763d;">已完成 <span class="fw-bold">@finishedCount</span></div>
         </div>
+
         <table id="ticketTable" class="table table-striped align-middle">
             <thead class="table-primary text-center">
                 <tr>
                     <th>工單編號</th>
                     <th>主旨</th>
+                    <th>分類</th>
                     <th>客戶</th>
                     <th>狀態</th>
                     <th>優先度</th>
@@ -102,8 +196,9 @@
         </table>
     </div>
 </div>
-
-<!-- 聊天室 Modal -->
+<!-- ===============================
+     💬 聊天室 Modal
+=============================== -->
 <div class="modal fade" id="ticketChatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -125,9 +220,19 @@
                 <div class="border rounded-4 p-3 my-2" id="chatBox"
                      style="height:320px; overflow-y:auto; background:#fff; box-shadow:0 3px 12px #0001;">
                 </div>
-                <div class="input-group mt-3">
-                    <input type="text" id="chatInput" class="form-control rounded-start-pill" placeholder="輸入訊息..." style="font-size:1.1em;" />
-                    <button id="sendBtn" class="btn btn-outline-primary rounded-end-pill px-4">
+                <div class="chat-input-area d-flex align-items-center p-2 rounded-pill shadow-sm mt-3">
+                    <!-- 附件按鈕 -->
+                    <button id="uploadBtn" class="btn chat-icon-btn me-2" title="上傳附件">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="fileInput" class="d-none" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" />
+
+                    <!-- 輸入框 -->
+                    <input type="text" id="chatInput" class="form-control border-0 flex-fill bg-transparent"
+                           placeholder="輸入訊息..." style="font-size:1.05em;" />
+
+                    <!-- 發送按鈕 -->
+                    <button id="sendBtn" class="btn chat-send-btn ms-2">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
                 </div>
@@ -136,7 +241,36 @@
     </div>
 </div>
 
-<!-- 編輯工單 Modal -->
+<!-- ===============================
+     🖼️ 圖片預覽 Modal（含切換箭頭）
+=============================== -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-content bg-transparent border-0 shadow-none">
+            <div class="modal-body p-0 d-flex justify-content-center align-items-center position-relative">
+                <!-- 左右箭頭 -->
+                <button class="btn nav-btn start-0 ms-3" id="prevImageBtn">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <img id="previewImage" src="" alt="preview" class="img-fluid rounded shadow-lg"
+                     style="max-height:90vh; max-width:95vw; object-fit:contain;">
+
+                <button class="btn nav-btn end-0 me-3" id="nextImageBtn">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+
+                <!-- 關閉按鈕 -->
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 bg-light p-3 rounded-circle shadow"
+                        data-bs-dismiss="modal"></button>
+                <div id="imageCounter" class="position-absolute bottom-0 start-50 translate-middle-x text-white fw-bold bg-dark bg-opacity-50 rounded-pill px-3 py-1"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====================== 編輯工單 Modal ====================== -->
 <div class="modal fade" id="editTicketModal" tabindex="-1" aria-labelledby="editTicketModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
@@ -161,6 +295,10 @@
                             <textarea id="editTicketDescription" class="form-control" rows="3" disabled></textarea>
                         </div>
                         <div class="mb-3">
+                            <label for="editTicketType" class="form-label fw-semibold">分類</label>
+                            <select id="editTicketType" name="TicketTypeID" class="form-select"></select>
+                        </div>
+                        <div class="mb-3">
                             <label for="editTicketStatus" class="form-label fw-semibold">狀態</label>
                             <select id="editTicketStatus" name="StatusID" class="form-select"></select>
                         </div>
@@ -183,218 +321,256 @@
     </div>
 </div>
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script>
-        // Razor注入員工ID和姓名（全局可用）
-        const senderId = '@currentEmpId';
-        const senderName = '@currentEmpName';
+        /* ======================================================
+           🧩 基本設定
+        ====================================================== */
+        const senderId = '@currentEmpId';        // 目前登入員工 ID
+        const senderName = '@currentEmpName';    // 目前登入員工名稱
 
-        // DataTable 初始化
+        let currentTicketId = null;              // 當前聊天室的工單ID
+        let connection = null;                   // SignalR 連線
+        let chatModalInstance = null;            // Bootstrap 聊天Modal
+        let imagePreviewModal = null;            // 預覽圖片Modal
+        let imageList = [];                      // 當前聊天室的所有圖片URL
+        let currentImageIndex = 0;               // 目前顯示第幾張圖片
+
+        /* ======================================================
+           🧩 DataTable 初始化
+        ====================================================== */
         $(document).ready(function () {
-
             $('#ticketTable').DataTable({
                 ajax: {
                     url: '/CustomerService/CustomerSupportTickets/GetTickets',
                     type: 'GET',
                     dataSrc: function (json) {
-                        // 只顯示當前登入者的工單（比對 EmployeeID）
                         const empId = '@currentEmpId';
+                        // 僅顯示屬於自己（員工ID相符）的工單
                         return json.filter(x => x.employeeID?.toString() === empId);
                     }
                 },
                 columns: [
-                    { data: "ticketCode", title: "工單編號", width: "10%", className: "text-center" },
-                    { data: "subject", title: "主旨", width: "10%", className: "text-start" },
-                    { data: "customerName", title: "客戶", width: "10%", className: "text-center" },
-                    { data: "statusName", title: "狀態", width: "10%", className: "text-center" },
-                    { data: "priorityName", title: "優先度", width: "10%", className: "text-center" },
+                    { data: "ticketCode", title: "工單編號", className: "text-center" },
+                    { data: "subject", title: "主旨", className: "text-start" },
+                    { data: "ticketTypeName", title: "分類", className: "text-center" },
+                    { data: "customerName", title: "客戶", className: "text-center" },
+                    { data: "statusName", title: "狀態", className: "text-center" },
+                    { data: "priorityName", title: "優先度", className: "text-center" },
                     {
                         data: "createTime",
                         title: "建立時間",
-                        width: "12%",
                         className: "text-center",
                         render: data => data ? dayjs(data).format("YYYY-MM-DD HH:mm") : ""
                     },
                     {
                         data: null,
                         title: "操作",
-                        width: "28%",
-                        orderable: false,
-                        searchable: false,
                         className: "text-center",
-                        render: function (data, type, row) {
-                            return `
-                                <a href="/CustomerService/Mail/Compose?to=${encodeURIComponent(row.customerEmail ?? '')}&subject=${encodeURIComponent('[工單通知] ' + (row.subject || ''))}"
-                                    class="btn btn-outline-success send-mail-btn">
-                                    <i class="fa-solid fa-paper-plane"></i>
-                                    寄信
-                                </a>
-                                <button class="btn btn-outline-secondary open-chat-btn ms-2"
+                        orderable: false,
+                        render: function (row) {
+                            // 🔹 寄信功能：導向信件撰寫頁面 (可自動帶收件人與主旨)
+                            const mailUrl = `/CustomerService/Mail/Compose?to=${encodeURIComponent(row.customerEmail ?? '')}&subject=${encodeURIComponent('[工單通知] ' + (row.subject || ''))}`;
+
+                            // 🔹 寄信按鈕
+                            const mailBtn = `
+                                <a href="${mailUrl}" class="btn btn-outline-success send-mail-btn">
+                                    <i class="fa-solid fa-paper-plane"></i> 寄信
+                                </a>`;
+
+                            // 🔹 聊天室：開啟即時對話Modal
+                            const chatBtn = `
+                                <button class="btn btn-outline-secondary open-chat-btn ms-1"
                                     data-ticketid="${row.ticketID}"
                                     data-ticketcode="${row.ticketCode}"
                                     data-customer="${row.customerName}"
                                     data-subject="${row.subject}"
                                     data-description="${row.description}">
-                                    <i class="fa-solid fa-comments"></i>
-                                    聊天室
-                                </button>
-                                <button class="btn btn-outline-primary ms-2 edit-ticket-btn"
+                                    <i class="fa-solid fa-comments"></i> 聊天室
+                                </button>`;
+
+
+                            // 🔹 編輯工單
+                            const editBtn = `
+                                <button class="btn btn-outline-primary ms-1 edit-ticket-btn"
                                     data-ticketid="${row.ticketID}"
                                     data-ticketcode="${row.ticketCode}"
                                     data-subject="${row.subject}"
                                     data-description="${row.description}"
                                     data-statusid="${row.statusID}"
-                                    data-priorityid="${row.priorityID}">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                    編輯
+                                    data-priorityid="${row.priorityID}"
+                                    data-tickettypeid="${row.ticketTypeID}">
+                                    <i class="fa-solid fa-pen-to-square"></i> 編輯
                                 </button>`;
+
+
+
+                            // 🔹 組合按鈕（按順序：寄信、聊天室、編輯）
+                            return `${mailBtn} ${chatBtn} ${editBtn}`;
                         }
+
                     }
                 ],
                 order: [[0, 'desc']],
                 language: {
                     search: "搜尋：",
-                    lengthMenu: "每頁顯示 _MENU_ 筆",
-                    info: "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
-                    paginate: {
-                        first: "第一頁",
-                        last: "最後一頁",
-                        next: "下一頁",
-                        previous: "上一頁"
-                    },
-                    zeroRecords: "找不到資料"
+                    zeroRecords: "找不到資料",
+                    paginate: { next: "下一頁", previous: "上一頁" }
                 }
             });
         });
 
-         // 聊天室相關
-        let currentTicketId = null;
-        let connection = null;
-        let chatModalInstance = null;
-
+        /* ======================================================
+           🧩 聊天室開啟與 SignalR 建立
+        ====================================================== */
         $(document).on('click', '.open-chat-btn', function () {
             currentTicketId = $(this).data('ticketid');
+
+            // 將工單資訊顯示於Modal標題區
             $('#modalTicketCode').text($(this).data('ticketcode'));
             $('#modalTicketCustomer').text($(this).data('customer'));
             $('#modalTicketSubject').text($(this).data('subject'));
             $('#modalTicketDescription').text($(this).data('description'));
-            if (!chatModalInstance) {
+
+            // 開啟Modal
+            if (!chatModalInstance)
                 chatModalInstance = new bootstrap.Modal(document.getElementById('ticketChatModal'));
-            }
             chatModalInstance.show();
+
+            // 載入歷史訊息
             loadHistory(currentTicketId);
 
+            // 初始化 SignalR 連線
             if (connection) connection.stop();
+            connection = new signalR.HubConnectionBuilder().withUrl("/ticketChatHub").build();
 
-            connection = new signalR.HubConnectionBuilder()
-                .withUrl("/ticketChatHub")
-                .build();
-
-            connection.start().then(function () {
+            connection.start().then(() => {
                 connection.invoke("JoinTicketGroup", currentTicketId);
             });
 
+            // 接收即時訊息
             connection.on("ReceiveMessage", function (msg) {
-                console.log("SignalR msg:", msg);
                 if (msg.ticketID != currentTicketId) return;
-                // 檢查是否有 pending 訊息，若有則覆蓋
-                if (msg.tempId && msg.senderID == senderId) {
+                if (msg.tempId && msg.senderID == senderId)
                     updatePendingMsg(msg.tempId, msg);
-                } else {
+                else
                     appendMsg(msg);
-                }
             });
         });
 
+        // 關閉聊天室時清空內容
         $('#ticketChatModal').on('hidden.bs.modal', function () {
             if (connection) connection.stop();
             $('#chatBox').empty();
         });
 
+        /* ======================================================
+           🧩 檔案上傳與附件預覽
+        ====================================================== */
+        $('#uploadBtn').on('click', () => $('#fileInput').click());
+
+        $('#fileInput').on('change', function (e) {
+            const file = e.target.files[0];
+            if (!file || !currentTicketId) return;
+
+            const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf'];
+            if (!allowed.includes(file.type)) {
+                showAlert('warning', '格式錯誤', '僅支援上傳圖片或 PDF 檔案');
+                e.target.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            $.ajax({
+                url: '/CustomerService/CustomerSupportMessages/UploadAttachment',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: res => {
+                    if (res.success && res.url)
+                        sendChatMsg('', res.url.startsWith('/') ? res.url : '/' + res.url);
+                    else showAlert('error', '上傳失敗', res.message || '上傳失敗');
+                },
+                error: () => showAlert('error', '上傳失敗', '請稍後再試'),
+                complete: () => e.target.value = ''
+            });
+        });
+
+        /* ======================================================
+           🧩 聊天訊息載入與顯示
+        ====================================================== */
         function loadHistory(ticketId) {
-            // 只載入最近 30 筆，必要時可做分頁
             const skip = 0, take = 30;
-            $('#chatBox').html('<div style="text-align:center;padding:50px 0;color:#7ec8e3;font-size:1.3em;"><i class="fa fa-spinner fa-spin"></i> 聊天訊息載入中...</div>');
-            $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, function(msgs){
+            $('#chatBox').html('<div class="text-center text-primary py-4"><i class="fa fa-spinner fa-spin"></i> 載入中...</div>');
+            $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, msgs => {
                 $('#chatBox').empty();
                 msgs.forEach(appendMsg);
             });
         }
 
+        /* ======================================================
+           🧩 訊息顯示（含圖片 / PDF）
+        ====================================================== */
         function appendMsg(msg) {
-            const isMe = msg.senderID == senderId;
+            const isMe = msg.senderID?.toString() === senderId?.toString();
             const alignClass = isMe ? "me" : "other";
-            const bubbleClass = isMe ? "me" : "other";
+            const bubbleClass = alignClass;
             const badgeColor = msg.senderRole === "員工" ? "bg-info text-white" : "bg-secondary text-white";
-            const displayName = `<span class="fw-semibold me-1" style="color:#045;">${msg.senderDisplayName}</span>`;
-            const time = `<span class="text-secondary ms-1">${msg.sentTime ?? ''}</span>`;
-            const badge = `<span class="badge ${badgeColor} rounded-pill px-2 py-1 me-1">${msg.senderRole}</span>`;
+            const sent = msg.sentTime ? msg.sentTime.toString().replace('T', ' ').substring(0, 16) : '';
+
+            const badge = `<span class="badge ${badgeColor} rounded-pill px-2 py-1 me-1">${msg.senderRole ?? ''}</span>`;
+            const displayName = `<span class="fw-semibold me-1" style="color:#045;">${msg.senderDisplayName ?? ''}</span>`;
+            const time = `<span class="text-secondary ms-1">${sent}</span>`;
             const pending = msg.isPending ? `<span class="text-warning ms-2">(傳送中...)</span>` : '';
             const failed = msg.isFailed ? `<span class="text-danger ms-2">(發送失敗)</span>` : '';
 
-            // 用 data-tempid 方便覆蓋 pending 訊息
+            const contentHtml = msg.messageContent ? `<div>${escapeHtml(msg.messageContent)}</div>` : '';
+            let attachHtml = '';
+
+            if (msg.attachmentURL) {
+                const url = msg.attachmentURL;
+                if (/\.(png|jpe?g|gif|webp)$/i.test(url)) {
+                    attachHtml = `<div class="mt-2"><img src="${url}" class="chat-image"
+                        style="max-width:240px;border-radius:8px;box-shadow:0 2px 8px #0002;cursor:zoom-in;"></div>`;
+                } else if (/\.pdf$/i.test(url)) {
+                    attachHtml = `<div class="mt-2"><a href="${url}" target="_blank">
+                        <i class="fa-solid fa-file-pdf me-1"></i> 查看 PDF</a></div>`;
+                } else {
+                    attachHtml = `<div class="mt-2"><a href="${url}" target="_blank">
+                        <i class="fa-solid fa-paperclip me-1"></i> 下載附件</a></div>`;
+                }
+            }
+
             const html = `
             <div class="chat-message-row ${alignClass}" data-tempid="${msg.tempId || ''}">
-                <div class="chat-meta mb-1">
-                    ${badge}${displayName}${time}${pending}${failed}
-                </div>
-                <div class="chat-bubble ${bubbleClass}">
-                    ${msg.messageContent}
-                </div>
-            </div>
-            `;
+                <div class="chat-meta mb-1">${badge}${displayName}${time}${pending}${failed}</div>
+                <div class="chat-bubble ${bubbleClass}">${contentHtml}${attachHtml}</div>
+            </div>`;
             $('#chatBox').append(html);
 
-            // 保持底部空間
-            const scrollHeight = $('#chatBox')[0].scrollHeight;
-            const clientHeight = $('#chatBox')[0].clientHeight;
-            $('#chatBox').scrollTop(scrollHeight - clientHeight + 40);
+            // 自動捲動到底
+            const box = $('#chatBox')[0];
+            $('#chatBox').scrollTop(box.scrollHeight - box.clientHeight + 40);
         }
 
-        // 覆蓋 pending 訊息為正式訊息
-        function updatePendingMsg(tempId, savedMsg) {
-            // 找到對應的 pending 訊息
-            const $pending = $(`[data-tempid="${tempId}"]`);
-                if ($pending.length) {
-                $pending.find('.chat-meta').html(`
-                    <span class="badge bg-info text-white rounded-pill px-2 py-1 me-1">${savedMsg.senderRole}</span>
-                    <span class="fw-semibold me-1" style="color:#045;">${savedMsg.senderDisplayName}</span>
-                    <span class="text-secondary ms-1">${savedMsg.sentTime?.replace('T',' ').substring(0,16) ?? ''}</span>
-                `);
-                $pending.removeAttr('data-tempid');
-                $pending.find('.text-warning').remove(); // 移除「傳送中...」
-            }
-        }
+        /* ======================================================
+           🧩 發送訊息 (含附件)
+        ====================================================== */
+        function sendChatMsg(msgContent = '', attachmentUrl = '') {
+            const msg = msgContent || $('#chatInput').val().trim();
+            if (!msg && !attachmentUrl) return;
 
-        // 標記訊息失敗
-        function markMsgFailed(tempId) {
-            const $pending = $(`[data-tempid="${tempId}"]`);
-            if ($pending.length) {
-                $pending.find('.chat-meta').append(`<span class="text-danger ms-2">(發送失敗)</span>`);
-            }
-        }
-
-        $('#sendBtn').on('click', function () {
-            sendChatMsg();
-        });
-        $('#chatInput').on('keypress', function(e) {
-            if (e.which === 13) sendChatMsg();
-        });
-
-        function sendChatMsg() {
-            const msg = $('#chatInput').val().trim();
-            if (!msg || !currentTicketId || !senderId) return;
-
-            // 產生唯一 tempId（用於 pending 訊息標記）
             const tempId = 'pending_' + Date.now();
 
-            // 1. 立即顯示「傳送中」訊息
             appendMsg({
                 senderID: senderId,
-                senderRole: "員工",
-                senderDisplayName: senderName, // ← 用目前員工名
+                senderRole: "客服人員",
+                senderDisplayName: senderName,
                 sentTime: dayjs().format('YYYY-MM-DD HH:mm'),
                 messageContent: msg,
+                attachmentURL: attachmentUrl,
                 ticketID: currentTicketId,
                 isPending: true,
                 tempId: tempId
@@ -402,57 +578,170 @@
 
             $('#chatInput').val('');
 
-            // 2. 送 AJAX
             const data = {
                 ticketID: parseInt(currentTicketId, 10),
                 senderID: parseInt(senderId, 10),
                 messageContent: msg,
-                tempId: tempId
+                attachmentURL: attachmentUrl,
+                tempId: tempId,
+                SenderType: "Admin",
+                SentBy: senderName
             };
+
             $.ajax({
                 url: '/CustomerService/CustomerSupportMessages/PostMessage',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                // success 不需要覆蓋，直接等 SignalR
-                error: function (xhr) {
+                error: xhr => {
                     markMsgFailed(tempId);
-                    alert('發送失敗：' + xhr.responseText);
+                    showAlert('error', '發送失敗', xhr.responseText || '無法傳送訊息');
                 }
             });
         }
 
-        // appendMsg 支援 pending 狀態
-        function appendMsg(msg) {
-            const isMe = msg.senderID == senderId;
-            const alignClass = isMe ? "me" : "other";
-            const bubbleClass = isMe ? "me" : "other";
-            const badgeColor = msg.senderRole === "員工" ? "bg-info text-white" : "bg-secondary text-white";
-            const displayName = `<span class="fw-semibold me-1" style="color:#045;">${msg.senderDisplayName}</span>`;
-            const time = `<span class="text-secondary ms-1">${msg.sentTime ?? ''}</span>`;
-            const badge = `<span class="badge ${badgeColor} rounded-pill px-2 py-1 me-1">${msg.senderRole}</span>`;
-            const pending = msg.isPending ? `<span class="text-warning ms-2">(傳送中...)</span>` : '';
-            const failed = msg.isFailed ? `<span class="text-danger ms-2">(發送失敗)</span>` : '';
+        /* ======================================================
+           🚀 綁定送出事件（按鈕點擊 / Enter 送出）
+        ====================================================== */
+        $(document).ready(function () {
+            // 點擊送出
+            $(document).on('click', '#sendBtn', function () {
+                if (!currentTicketId) {
+                    showAlert('warning', '尚未選擇工單', '請先開啟聊天室後再傳送訊息');
+                    return;
+                }
+                sendChatMsg(); // 會自動取 #chatInput 的值
+            });
 
-            const html = `
-            <div class="chat-message-row ${alignClass}" data-tempid="${msg.tempId || ''}">
-                <div class="chat-meta mb-1">
-                    ${badge}${displayName}${time}${pending}${failed}
-                </div>
-                <div class="chat-bubble ${bubbleClass}">
-                    ${msg.messageContent}
-                </div>
-            </div>
-            `;
-            $('#chatBox').append(html);
+            // 輸入框按 Enter 送出（Shift+Enter 換行）
+            $(document).on('keydown', '#chatInput', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    $('#sendBtn').click();
+                }
+            });
+        });
 
-            // 保持底部
-            const scrollHeight = $('#chatBox')[0].scrollHeight;
-            const clientHeight = $('#chatBox')[0].clientHeight;
-            $('#chatBox').scrollTop(scrollHeight - clientHeight + 40);
+
+        /* ======================================================
+           📝 編輯工單開啟（載入分類 / 狀態 / 優先度）
+        ====================================================== */
+        $(document).on('click', '.edit-ticket-btn', function () {
+            const ticketId = $(this).data('ticketid');
+            const ticketCode = $(this).data('ticketcode');
+            const subject = $(this).data('subject');
+            const description = $(this).data('description');
+            const typeId = $(this).data('tickettypeid');
+            const statusId = $(this).data('statusid');
+            const priorityId = $(this).data('priorityid');
+
+            // 清空舊資料
+            $('#editTicketType, #editTicketStatus, #editTicketPriority').empty();
+
+            // 帶入工單固定資料
+            $('#editTicketId').val(ticketId);
+            $('#editTicketCode').val(ticketCode);
+            $('#editTicketSubject').val(subject);
+            $('#editTicketDescription').val(description);
+
+            // 從後端一次載入全部選單
+            $.getJSON('/CustomerService/CustomerSupportTickets/GetDropdowns', function (res) {
+                // 分類
+                $.each(res.types, function (_, t) {
+                    $('#editTicketType').append(`<option value="${t.ticketTypeID}">${t.ticketTypeName}</option>`);
+                });
+                $('#editTicketType').val(typeId);
+
+                // 狀態
+                $.each(res.statuses, function (_, s) {
+                    $('#editTicketStatus').append(`<option value="${s.statusID}">${s.statusName}</option>`);
+                });
+                $('#editTicketStatus').val(statusId);
+
+                // 優先度
+                $.each(res.priorities, function (_, p) {
+                    $('#editTicketPriority').append(`<option value="${p.priorityID}">${p.priorityName}</option>`);
+                });
+                $('#editTicketPriority').val(priorityId);
+
+                // 顯示 Modal
+                if (!window.editModal) window.editModal = new bootstrap.Modal(document.getElementById('editTicketModal'));
+                window.editModal.show();
+            });
+        });
+
+
+        $('#editTicketForm').on('submit', function (e) {
+            e.preventDefault();
+            const dto = {
+                TicketID: $('#editTicketId').val(),
+                StatusID: $('#editTicketStatus').val(),
+                PriorityID: $('#editTicketPriority').val(),
+                TicketTypeID: $('#editTicketType').val()
+            };
+            $.ajax({
+                url: '/CustomerService/CustomerSupportTickets/EditTicket',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dto),
+                success: () => {
+                    showAlert('success', '修改成功', '工單資料已更新！'); 
+                    $('#ticketTable').DataTable().ajax.reload(); 
+                    window.editModal.hide(); 
+                },
+                error: () => showAlert('error', '修改失敗', '請稍後再試')
+            });
+        });
+        /* ======================================================
+           🧩 附件圖片預覽與切換（← / →）
+        ====================================================== */
+        $(document).on('click', '.chat-image', function () {
+            const url = $(this).attr('src');
+            imageList = $('#chatBox img.chat-image').map((_, el) => $(el).attr('src')).get();
+            currentImageIndex = imageList.indexOf(url);
+            $('#previewImage').attr('src', url);
+            updateImageCounter();
+            if (!imagePreviewModal)
+                imagePreviewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            imagePreviewModal.show();
+        });
+
+        $('#prevImageBtn').on('click', () => changeImage(-1));
+        $('#nextImageBtn').on('click', () => changeImage(1));
+
+        function changeImage(offset) {
+            if (imageList.length === 0) return;
+            currentImageIndex = (currentImageIndex + offset + imageList.length) % imageList.length;
+            $('#previewImage').attr('src', imageList[currentImageIndex]);
+            updateImageCounter();
         }
 
-        // pending訊息覆蓋
+        function updateImageCounter() {
+            $('#imageCounter').text(`${currentImageIndex + 1} / ${imageList.length}`);
+        }
+
+        // 鍵盤左右切換圖片
+        $(document).on('keydown', function (e) {
+            if (!$('#imagePreviewModal').hasClass('show')) return;
+            if (e.key === 'ArrowLeft') $('#prevImageBtn').click();
+            if (e.key === 'ArrowRight') $('#nextImageBtn').click();
+        });
+
+        /* ======================================================
+           🧩 其他工具函式
+        ====================================================== */
+        function escapeHtml(str) {
+            return (str || '').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        function markMsgFailed(tempId) {
+            const $pending = $(`[data-tempid="${tempId}"]`);
+            if ($pending.length)
+                $pending.find('.chat-meta').append(`<span class="text-danger ms-2">(發送失敗)</span>`);
+        }
+
         function updatePendingMsg(tempId, savedMsg) {
             const $pending = $(`[data-tempid="${tempId}"]`);
             if ($pending.length) {
@@ -465,85 +754,31 @@
             }
         }
 
-        // 標記失敗
-        function markMsgFailed(tempId) {
-            const $pending = $(`[data-tempid="${tempId}"]`);
-            if ($pending.length) {
-                $pending.find('.chat-meta').append(`<span class="text-danger ms-2">(發送失敗)</span>`);
-            }
-        }
-
-        // 編輯工單相關
-        let statusOptions = [];
-        let priorityOptions = [];
-        function loadDropdowns(callback) {
-            $.get('/CustomerService/CustomerSupportTickets/GetDropdowns', function (data) {
-                statusOptions = data.statuses || [];
-                priorityOptions = data.priorities || [];
-                const $status = $('#editTicketStatus');
-                $status.empty();
-                statusOptions.forEach(opt => $status.append(`<option value="${opt.statusID}">${opt.statusName}</option>`));
-                const $priority = $('#editTicketPriority');
-                $priority.empty();
-                priorityOptions.forEach(opt => $priority.append(`<option value="${opt.priorityID}">${opt.priorityName}</option>`));
-                if (callback) callback();
+        // ✅ 統一的 SweetAlert 封裝
+        function showAlert(type, title, text, timer = 2000) {
+            Swal.fire({
+                icon: type,         // success, error, warning, info, question
+                title: title,
+                text: text,
+                timer: timer,
+                showConfirmButton: false,
+                timerProgressBar: true
             });
         }
-        $(document).on('click', '.edit-ticket-btn', function () {
-            let initDropdown = function() {
-                $('#editTicketId').val($(this).data('ticketid'));
-                $('#editTicketCode').val($(this).data('ticketcode'));
-                $('#editTicketSubject').val($(this).data('subject'));
-                $('#editTicketDescription').val($(this).data('description'));
-                $('#editTicketStatus').val($(this).data('statusid'));
-                $('#editTicketPriority').val($(this).data('priorityid'));
-                new bootstrap.Modal(document.getElementById('editTicketModal')).show();
-            }.bind(this);
 
-            if (statusOptions.length === 0 || priorityOptions.length === 0) {
-                loadDropdowns(initDropdown);
-            } else {
-                initDropdown();
-            }
-        });
-
-        // Bootstrap Alert 顯示成功/失敗訊息
-        function showEditTicketAlert(message, type = "success") {
-            const html = `
-                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-            $("#editTicketAlertContainer").html(html);
-            setTimeout(() => {
-                $("#editTicketAlertContainer .alert").alert('close');
-            }, 3000);
+        // ✅ 可選：加強版（含確認按鈕）
+        function showConfirmAlert(title, text, confirmText = "確認", cancelText = "取消", icon = "question") {
+            return Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                showCancelButton: true,
+                confirmButtonText: confirmText,
+                cancelButtonText: cancelText,
+                reverseButtons: true,
+                focusCancel: true
+            });
         }
 
-        $('#editTicketForm').on('submit', function (e) {
-            e.preventDefault();
-            const data = {
-                TicketID: $('#editTicketId').val(),
-                StatusID: $('#editTicketStatus').val(),
-                PriorityID: $('#editTicketPriority').val()
-            };
-            $.ajax({
-                url: '/CustomerService/CustomerSupportTickets/EditTicket',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function (result) {
-                    showEditTicketAlert('工單已更新', 'success');
-                    setTimeout(function() {
-                        $('#editTicketModal').modal('hide');
-                        location.reload();
-                    }, 1200);
-                },
-                error: function () {
-                    showEditTicketAlert('更新失敗，請稍後再試。', 'danger');
-                }
-            });
-        });
     </script>
 }

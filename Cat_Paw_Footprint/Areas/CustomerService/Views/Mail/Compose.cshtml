@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
     <link href="~/js/myckeditor.js" rel="stylesheet" />
 }
+
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-12 d-flex justify-content-center">
@@ -16,8 +17,7 @@
                     <i class="fa-solid fa-paper-plane"></i> 客服發送 Email
                 </div>
                 <div class="card-body">
-                    <!-- Bootstrap Toast -->
-                    <form asp-action="Send" method="post" class="row g-3">
+                    <form id="mailForm" asp-action="Send" method="post" class="row g-3">
                         @Html.AntiForgeryToken()
                         <div class="mb-3 mt-5">
                             <label asp-for="To" class="form-label fw-semibold"></label>
@@ -34,14 +34,7 @@
                             <select id="templateSelect" name="SelectedTemplate" class="form-select">
                                 @foreach (var tpl in Model.Templates)
                                 {
-                                    if (tpl.Id == Model.SelectedTemplate)
-                                    {
-                                        <option value="@tpl.Id" selected>@tpl.Name</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@tpl.Id">@tpl.Name</option>
-                                    }
+                                    <option value="@tpl.Id" selected="@(tpl.Id == Model.SelectedTemplate)">@tpl.Name</option>
                                 }
                             </select>
                         </div>
@@ -65,14 +58,30 @@
     </div>
 </div>
 
-<!-- Toast 容器 -->
-<div class="toast-container position-fixed top-0 end-0 p-3"></div>
-
 @section Scripts {
+    <!-- CKEditor -->
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
     <script src="~/js/myckeditor.js"></script>
+
     <script>
+        /* ======================================================
+           ✅ SweetAlert2 共用提示函式
+        ====================================================== */
+        function showAlert(type, title, text, timer = 2000) {
+            Swal.fire({
+                icon: type, // success, error, warning, info, question
+                title: title,
+                text: text,
+                timer: timer,
+                showConfirmButton: false,
+                timerProgressBar: true
+            });
+        }
+
+        /* ======================================================
+           🧩 套用範本：載入 CKEditor 內容
+        ====================================================== */
         document.getElementById('templateSelect').addEventListener('change', function () {
             const templateId = this.value;
             fetch('@Url.Action("GetTemplateContent", "Mail")', {
@@ -87,43 +96,54 @@
             .then(data => {
                 if (data.ok && window.ckeditor) {
                     window.ckeditor.setData(data.content);
+                    showAlert('info', '已套用範本', '內容已自動載入');
                 }
             });
         });
 
-        // Bootstrap Toast 顯示訊息
-        function showToast(message, type = "success") {
-            let $container = $(".toast-container");
-            if ($container.length === 0) {
-                $container = $('<div class="toast-container position-fixed top-0 end-0 p-3"></div>');
-                $("body").append($container);
-            }
-            const $toast = $(`
-                <div class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `);
-            $container.append($toast);
-            const bsToast = new bootstrap.Toast($toast[0]);
-            bsToast.show();
-            $toast.on('hidden.bs.toast', function () {
-                $(this).remove();
-            });
-        }
+        /* ======================================================
+           💌 送信前 SweetAlert2 確認
+        ====================================================== */
+        const form = document.getElementById('mailForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // 阻止預設送出行為
 
-        // Razor 端訊息自動顯示 Toast（成功/失敗）
+            Swal.fire({
+                icon: 'question',
+                title: '確認發送郵件？',
+                text: '請確認收件者與內容是否正確。',
+                showCancelButton: true,
+                confirmButtonText: '確定發送',
+                cancelButtonText: '取消',
+                reverseButtons: true,
+                focusCancel: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '寄送中...',
+                        text: '系統正在發送郵件，請稍候。',
+                        didOpen: () => Swal.showLoading(),
+                        allowOutsideClick: false
+                    });
+
+                    // 模擬提交表單
+                    form.submit();
+                }
+            });
+        });
+
+        /* ======================================================
+           ✉️ Razor 傳入訊息後端提示
+        ====================================================== */
         $(function () {
             var msg = @Html.Raw(ViewBag.MailOk != null ? "JSON.stringify('" + ViewBag.MailOk.Replace("'", "\\'") + "')" : "null");
             if (msg) {
-                let type = msg.indexOf('失敗') > -1 ? 'danger' : 'success';
-                showToast(msg, type);
+                let type = msg.indexOf('失敗') > -1 ? 'error' : 'success';
+                let title = type === 'error' ? '發送失敗' : '發送成功';
+                showAlert(type, title, msg);
             }
         });
     </script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 }

@@ -22,97 +22,68 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using static Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController;
 
-
 namespace Cat_Paw_Footprint
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-			// 1️⃣ 載入 Google Cloud 金鑰 JSON
+			// 1️⃣ 取得 Google Cloud SQL 連線字串
 			var credential = GoogleCredential.FromFile(@"C:\GoogleCloudSql\Keys\web-travel-ap.json");
-
-			// 2️⃣ 建立 Secret Manager Client
-			var client = new SecretManagerServiceClientBuilder
-			{
-				Credential = credential
-			}.Build();
-
-			// 3️⃣ 讀取 Secret Manager 裡的連線字串
+			var client = new SecretManagerServiceClientBuilder { Credential = credential }.Build();
 			var secretVersionName = new SecretVersionName("web-travel-473102", "sqlserver-connection", "latest");
 			var result = client.AccessSecretVersion(secretVersionName);
 			string connectionStringGoogleDB = result.Payload.Data.ToStringUtf8();
-
 			Console.WriteLine($"✅ 從 Secret Manager 取得連線字串: {connectionStringGoogleDB}");
 
 			// 註冊 DbContext (EF Core)
-			builder.Services.AddDbContext<webtravel2Context>(options =>
-				options.UseSqlServer(connectionStringGoogleDB));
-
-
-			// Add services to the container.
-			//builder.Services.AddDbContext<EmployeeDbContext>(options =>
-			//	options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
-
-			builder.Services.AddDbContext<EmployeeDbContext>(options =>
-				options.UseSqlServer(connectionStringGoogleDB));
-
-			//builder.Services.AddDbContext<webtravel2Context>(options =>
-			//	options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeeConnection")));
-
-			builder.Services.AddDbContext<webtravel2Context>(options =>
-				options.UseSqlServer(connectionStringGoogleDB));
-
-			//var connectionString = builder.Configuration.GetConnectionString("EmployeeConnection") ?? throw new InvalidOperationException("Connection string 'EmployeeConnection' not found.");
-			//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-			//	options.UseSqlServer(connectionString));
-
-			var connectionString = builder.Configuration.GetConnectionString("EmployeeConnection") ?? throw new InvalidOperationException("Connection string 'EmployeeConnection' not found.");
-			builder.Services.AddDbContext<ApplicationDbContext>(options =>
-				options.UseSqlServer(connectionStringGoogleDB));
-
-
+			builder.Services.AddDbContext<webtravel2Context>(options => options.UseSqlServer(connectionStringGoogleDB));
+			builder.Services.AddDbContext<EmployeeDbContext>(options => options.UseSqlServer(connectionStringGoogleDB));
+			builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionStringGoogleDB));
 			builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+			// Identity 註冊
 			builder.Services
-				.AddIdentity<IdentityUser, IdentityRole>(opt => {
-					opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);//鎖定5分鐘
-					opt.Lockout.MaxFailedAccessAttempts = 5;//5次錯誤就鎖定
-					opt.Lockout.AllowedForNewUsers = true;//新用戶也鎖定
-
-
-					opt.SignIn.RequireConfirmedAccount = false; // 註冊不需驗證
+				.AddIdentity<IdentityUser, IdentityRole>(opt =>
+				{
+					opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+					opt.Lockout.MaxFailedAccessAttempts = 5;
+					opt.Lockout.AllowedForNewUsers = true;
+					opt.SignIn.RequireConfirmedAccount = false;
 					opt.Password.RequiredLength = 6;
 				})
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders()
 				.AddDefaultUI();
+
+			// 多身分驗證（Vendor/Customer/Employee）
 			builder.Services.AddAuthentication(options =>
 			{
-				options.DefaultScheme = "VendorAuth"; // �w�]�ϥ� VendorAuth
+				options.DefaultScheme = "VendorAuth";
 				options.DefaultChallengeScheme = "VendorAuth";
 			})
-	.AddCookie("VendorAuth", options =>
-	{
-		options.Cookie.Name = ".CatPaw.Vendor.Auth";
-		options.LoginPath = "/Vendor/VendorHome/Login";   // 非登入時強制跳轉
-		options.AccessDeniedPath = "/Vendor/VendorHome/Denied";// 非權限時強制跳轉
-	})
-	.AddCookie("CustomerAuth", options =>
-	{
-		options.Cookie.Name = ".CatPaw.Customer.Auth";
-		options.LoginPath = "/CustomersArea/Account/Login"; // 非登入時強制跳轉
-		options.AccessDeniedPath = "/CustomersArea/Account/Index";// 非權限時強制跳轉
-	}).AddCookie("EmployeeAuth", options =>
-	{
-		options.Cookie.Name = ".CatPaw.Employee.Auth";
-		options.LoginPath = "/Employee/EmployeeAuth/Login";      // 非登入時強制跳轉
-		options.AccessDeniedPath = "/Home/Index";
-	});
+			.AddCookie("VendorAuth", options =>
+			{
+				options.Cookie.Name = ".CatPaw.Vendor.Auth";
+				options.LoginPath = "/Vendor/VendorHome/Login";
+				options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
+			})
+			.AddCookie("CustomerAuth", options =>
+			{
+				options.Cookie.Name = ".CatPaw.Customer.Auth";
+				options.LoginPath = "/CustomersArea/Account/Login";
+				options.AccessDeniedPath = "/CustomersArea/Account/Index";
+			})
+			.AddCookie("EmployeeAuth", options =>
+			{
+				options.Cookie.Name = ".CatPaw.Employee.Auth";
+				options.LoginPath = "/Employee/EmployeeAuth/Login";
+				options.AccessDeniedPath = "/Home/Index";
+			});
 
-			#region AccessDeniedPath權限進入限制
+			// 授權權限設定
 			builder.Services.AddAuthorization(options =>
 			{
 				options.AddPolicy("Emp.AdminOnly", policy =>
@@ -120,47 +91,48 @@ namespace Cat_Paw_Footprint
 						  .RequireAuthenticatedUser()
 						  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
 
-				options.AddPolicy("AreaAdmin", policy =>//���� �̷s���� �u�f����
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
+				options.AddPolicy("AreaAdmin", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "Admin", "SuperAdmin"));
 
-				options.AddPolicy("AreaCouponManagement", policy =>//�u�f��
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "Sales"));
+				options.AddPolicy("AreaCouponManagement", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "Sales"));
 
-				options.AddPolicy("AreaCustomerService", policy =>//�ȪA
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "CustomerService", "SuperAdmin"));
+				options.AddPolicy("AreaCustomerService", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "CustomerService", "SuperAdmin"));
 
-				options.AddPolicy("AreaOrder", policy =>//�q��
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
+				options.AddPolicy("AreaOrder", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
 
+				options.AddPolicy("AreaProductManagement", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "TourGuide"));
 
-				options.AddPolicy("AreaProductManagement", policy =>//���~
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "ProductPlanner", "SuperAdmin", "TourGuide"));
-
-				options.AddPolicy("AreaTravelManagement", policy =>//�ȹC
-		policy.AddAuthenticationSchemes("EmployeeAuth")
-			  .RequireAuthenticatedUser()
-			  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
+				options.AddPolicy("AreaTravelManagement", policy =>
+					policy.AddAuthenticationSchemes("EmployeeAuth")
+						  .RequireAuthenticatedUser()
+						  .RequireClaim("RoleName", "TourGuide", "SuperAdmin", "ProductPlanner"));
 			});
-            builder.Services.AddDistributedMemoryCache();
-            #endregion
-            builder.Services.AddSession(options =>
+			builder.Services.AddDistributedMemoryCache();
+
+			// 🌟 統一 Session 設定（只呼叫一次 AddSession，避免多次呼叫造成 Session Cookie 混亂）
+			builder.Services.AddSession(options =>
 			{
-				options.Cookie.Name = ".CatPaw.Employee.Session"; // �ۭq���u Session �W��
-				options.IdleTimeout = TimeSpan.FromHours(9);   // �ۭq�O�ɮɶ�
-				options.Cookie.HttpOnly = true;                   // ���� JS �s���A���� XSS
-				options.Cookie.IsEssential = true;                // �קK�Q�s��������
+				options.Cookie.Name = ".CatPaw.Unified.Session";
+				options.IdleTimeout = TimeSpan.FromHours(9);
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
 			});
-			#region 註冊連線層與邏輯層
+
+			#region DI 註冊資料存取層與服務層
 			builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 			builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 			builder.Services.AddScoped<ICustomerAdminRepository, CustomerAdminRepository>();
@@ -173,15 +145,13 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<IFAQRepository, FAQRepository>();
 			builder.Services.AddScoped<ICustomerSupportTicketsRepository, CustomerSupportTicketsRepository>();
 			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
-			builder.Services.AddScoped<ICustomerSupportTicketsRepository, CustomerSupportTicketsRepository>();
-			builder.Services.AddScoped<ICustomerSupportTicketsService, CustomerSupportTicketsService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackService, CustomerSupportFeedbackService>();
 			builder.Services.AddScoped<ICustomerSupportFeedbackRepository, CustomerSupportFeedbackRepository>();
 			builder.Services.AddScoped<ICustomerSupportMessagesRepository, CustomerSupportMessagesRepository>();
 			builder.Services.AddScoped<ICustomerSupportMessagesService, CustomerSupportMessagesService>();
 			builder.Services.AddScoped<ICustomerProfileRepository, CustomerProfileRepository>();
 			builder.Services.AddScoped<IEmployeeMiniRepository, EmployeeMiniRepository>();
-			builder.Services.AddScoped <ICusLogRegRepository, CusLogRegRepository>();
+			builder.Services.AddScoped<ICusLogRegRepository, CusLogRegRepository>();
 			builder.Services.AddScoped<ICusLogRegService, CusLogRegService>();
 			builder.Services.AddScoped<ITGAllRepository, TGAllRepository>();
 			builder.Services.AddScoped<ITGAllService, TGAllService>();
@@ -201,8 +171,12 @@ namespace Cat_Paw_Footprint
 
 			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
-			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,CustomerEmailSender>();
-			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
+
+
+			builder.Services.AddTransient<
+				Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
+				Cat_Paw_Footprint.Areas.CustomersArea.Services.CustomerEmailSender>();
+			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 
 
 			var app = builder.Build();
@@ -219,26 +193,31 @@ namespace Cat_Paw_Footprint
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
 
-            app.UseRouting();
-			app.UseSession(); // �ҥ� Session �����n��
+			app.UseRouting();
+
+			// 必須在 authentication 之前啟用 Session Middleware
+			app.UseSession();
+
+			// 🌟 Claims→Session同步：每次 request 只要 claims 有就同步 Session（客戶/員工/供應商）
 			app.Use(async (context, next) =>
 			{
 				var path = context.Request.Path.Value ?? "";
-
+				// 員工區 Session 轉換
 				if (path.StartsWith("/Employee", StringComparison.OrdinalIgnoreCase) ||
 					path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase) ||
 					path.StartsWith("/CouponManagement", StringComparison.OrdinalIgnoreCase) ||
 					path.StartsWith("/ProductManagement", StringComparison.OrdinalIgnoreCase))
 				{
 					if (context.User?.Identity?.IsAuthenticated == true &&
-						context.User.Identity.AuthenticationType == "EmployeeAuth" &&
-						string.IsNullOrEmpty(context.Session.GetString("EmpId")))
+						context.User.Identity.AuthenticationType == "EmployeeAuth")
 					{
 						var claims = context.User.Claims;
-						context.Session.SetString("EmpId", claims.FirstOrDefault(c => c.Type == "EmployeeID")?.Value ?? "");
+						var empId = claims.FirstOrDefault(c => c.Type == "EmployeeID")?.Value ?? "";
+						if (!string.IsNullOrEmpty(empId))
+							context.Session.SetString("EmpId", empId);
 						context.Session.SetString("EmpRoleId", claims.FirstOrDefault(c => c.Type == "RoleID")?.Value ?? "");
 						context.Session.SetString("EmpRoleName", claims.FirstOrDefault(c => c.Type == "RoleName")?.Value ?? "");
 						context.Session.SetString("EmpName", claims.FirstOrDefault(c => c.Type == "EmployeeName")?.Value ?? "");
@@ -246,21 +225,38 @@ namespace Cat_Paw_Footprint
 						context.Session.SetString("Login", "True");
 					}
 				}
+				// 客戶區 Session 轉換
+				if (path.StartsWith("/CustomersArea", StringComparison.OrdinalIgnoreCase))
+				{
+					if (context.User?.Identity?.IsAuthenticated == true &&
+						context.User.Identity.AuthenticationType == "CustomerAuth")
+					{
+						var claims = context.User.Claims;
+						var customerId = claims.FirstOrDefault(c => c.Type == "CustomerId")?.Value ?? "";
+						if (!string.IsNullOrEmpty(customerId))
+							context.Session.SetString("CustomerID", customerId);
+						context.Session.SetString("CustomerName", claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "");
+					}
+				}
+				// 供應商區 Session 轉換（如有供應商區域自行補充）
+				// if (path.StartsWith("/Vendor", StringComparison.OrdinalIgnoreCase)) { ... }
 
 				await next();
 			});
-			app.UseAuthentication();// �b Authorization ���e
+
+			app.UseAuthentication();
 			app.UseAuthorization();
+
 			app.MapControllerRoute(
 				name: "areas",
 				pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 			app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();
+				name: "default",
+				pattern: "{controller=Home}/{action=Index}/{id?}");
+			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
 
 			app.Run();
 		}
-    }
+	}
 }

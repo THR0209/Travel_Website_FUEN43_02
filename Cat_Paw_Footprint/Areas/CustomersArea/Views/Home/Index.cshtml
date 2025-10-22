@@ -3,6 +3,58 @@
     ViewData["Title"] = "首頁";
 }
 
+@section Styles {
+    <style>
+        /* 統一標題風格 */
+        .section-title h2 {
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .section-title div {
+            width: 60px;
+            height: 3px;
+            background: #7ec8e3;
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+
+        /* 手風琴樣式 */
+        .accordion-button {
+            background-color: #f7fbff;
+            color: #2255aa;
+            border-radius: 12px !important;
+            transition: all .3s;
+        }
+
+            .accordion-button:not(.collapsed) {
+                background-color: #e6f4ff;
+                color: #226dd3;
+                box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
+            }
+
+            .accordion-button:focus {
+                box-shadow: 0 0 0 0.25rem rgba(34,109,211,0.2);
+                border-color: #7ec8e3;
+            }
+
+        .accordion-body {
+            background: #fff;
+            border-radius: 0 0 12px 12px;
+            color: #444;
+        }
+
+        .accordion-item {
+            border: 1px solid #d8ebff;
+        }
+
+        .accordion-button::after {
+            filter: hue-rotate(180deg);
+        }
+    </style>
+}
+
 <!-- Hero -->
 <section class="hero mt-3">
     <!-- 以貓為主題的 Banner 圖片（可改成本機 /uploads/banner-cat.jpg） -->
@@ -23,14 +75,18 @@
 </section>
 
 <!-- Trending Slider (Swiper) -->
+<!-- 本週熱門商品 -->
 <section class="section" id="popular">
     <div class="container">
-        <div class="section-title">
-            <h2>🔥 本週熱門商品</h2>
-            <div class="d-flex align-items-center gap-2">
-                <div class="swiper-prev btn btn-outline-secondary btn-sm rounded-pill">◀</div>
-                <div class="swiper-next btn btn-outline-secondary btn-sm rounded-pill">▶</div>
-            </div>
+        <div class="section-title text-center mb-5">
+            <h2 class="fw-bold" style="letter-spacing:2px;">
+                <i class="fa-solid fa-fire me-2"></i>本週熱門商品
+            </h2>
+            <div style="width:60px; height:3px; margin:10px auto 0; border-radius:2px;"></div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mb-3">
+            <div class="swiper-prev btn btn-outline-secondary btn-sm rounded-pill">◀</div>
+            <div class="swiper-next btn btn-outline-secondary btn-sm rounded-pill">▶</div>
         </div>
         <div class="swiper" aria-label="熱門行程輪播">
             <div class="swiper-wrapper">
@@ -132,9 +188,11 @@
 <!-- Deals Grid -->
 <section class="section" id="deals">
     <div class="container">
-        <div class="section-title">
-            <h2>精選特惠</h2>
-            <a href="#" class="link-primary">全部優惠</a>
+        <div class="section-title text-center mb-5">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#7ec8e3;">
+                <i class="fa-solid fa-gift me-2"></i> 精選特惠
+            </h2>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
         <div class="row g-3 g-md-4">
             <!-- 6 張商品卡 -->
@@ -225,9 +283,6 @@
             </h2>
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
-        <h4 class="fw-bold mb-3" style="color:#168c9c;">
-            <i class="fa-regular fa-lightbulb me-2"></i> 熱門常見問題
-        </h4>
         <div id="homeHotFaqAccordion"></div>
         <div class="mt-4 text-center">
             <a href="/CustomersArea/FrontFAQs/Index"
@@ -281,6 +336,24 @@
           }
         })
         app.mount('#promotion-app')
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const hash = window.location.hash;
+            if (hash === '#faqSection') {
+                const faqTarget = document.querySelector(hash);
+                if (faqTarget) {
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: faqTarget.offsetTop - 60,
+                            behavior: 'smooth'
+                        });
+                    }, 300);
+                }
+            }
+        });
+
+
     </script>
 }
 
