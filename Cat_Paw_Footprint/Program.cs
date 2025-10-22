@@ -173,10 +173,11 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
-			builder.Services.AddTransient<
-				Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
-				Cat_Paw_Footprint.Areas.CustomersArea.Services.CustomerEmailSender>();
 			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
+			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CustomerEmailSender>();
+			// 其它註冊...
+			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
+
 
 
 			var app = builder.Build();
