@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "購物車";
 }
-<div class="container py-4" id="app" v-cloak>
+<div class="container py-4" id="cartApp" v-cloak>
     <h2 class="mb-3">購物車</h2>
 
     <div class="mb-3 d-flex gap-2">
@@ -61,7 +61,10 @@
         <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
         <form id="payForm" method="post" action="/CustomersArea/Payment/Create">
             <input type="hidden" name="orderId" :value="selectedOrderId">
-            <button type="submit" class="btn btn-primary">信用卡付款（綠界）</button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" v-on:click="payByCredit" :disabled="items.length===0">信用卡付款</button>
+                <button class="btn btn-outline-primary" v-on:click="payByTransfer" :disabled="items.length===0">轉帳匯款</button>
+            </div>
         </form>
     </div>
     <div class="d-flex flex-wrap gap-2 align-items-center my-3">
@@ -86,7 +89,7 @@
     </footer>
 
 </div>
-
+<script>console.log('Scripts section loaded ✅');</script>
 @section Scripts {
     <style>
         [v-cloak] {
@@ -124,6 +127,63 @@
                   }
                 }
 
+                async function payByTransfer(){
+                  const customerId = 123; // 之後改登入者ID
+                  // A) 先建訂單（未付款）
+                  await axios.post('/CustomersArea/Cart/checkout', new URLSearchParams({ customerId }));
+
+                  // B) 寄信（匯款帳號）
+                  await axios.post('/CustomersArea/Payment/Transfer', new URLSearchParams({ customerId }));
+
+                  alert('已寄出匯款資訊，請於期限內完成轉帳。');
+                  window.location.href = '/CustomersArea/Orders';
+                }
+
+                async function payByCredit(){
+                  // 這裡 demo 用測試 customerId，之後請改成登入者ID
+                  const customerId = 123;
+                  // 後端會 Redirect 到 /CustomersArea/Payment/Create → GoECPay 自動送出
+                  const form = document.createElement('form');
+                  form.method = 'post';
+                  form.action = '/CustomersArea/Payment/CheckoutCredit';
+                  form.innerHTML = `<input name="customerId" value="${customerId}">`;
+                  document.body.appendChild(form);
+                  form.submit();
+                }
+
+                async function checkout(){
+                  try{
+                    const res = await axios.post('/CustomersArea/Cart/checkout', new URLSearchParams({
+                      customerId: customerId.value   // 若你已經改成從登入取，就移除此欄位
+                    }));
+                    const orderIds = res.data?.orderIds || [];
+                    if(orderIds.length === 0){
+                      alert('已建立訂單，但未取得訂單編號');
+                      return;
+                    }
+
+                    // 方式 1：直接建立 form 送到 Payment/Create（建議）
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/CustomersArea/Payment/Create';
+
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'orderId';
+                    input.value = orderIds[0]; // 只拿第一筆去付款
+                    form.appendChild(input);
+
+                    document.body.appendChild(form);
+                    form.submit();
+
+                    // 方式 2：若你還是想先回到「我的訂單」頁，就改成下面這行
+                    // window.location.href = '/CustomersArea/Orders';
+                  }catch(e){
+                    console.error(e);
+                    alert('結帳失敗：' + (e.response?.data?.error || ''));
+                  }
+                }
+
                 async function reload(){
                   const { data } = await axios.get('/CustomersArea/Cart/api');
                   items.value = data.items || [];
@@ -131,12 +191,6 @@
                   // 回填折扣資訊（若後端有保存在 Session）
                   couponCode.value = data.coupon?.code || '';
                   discountHint.value = data.coupon?.hint || '';
-                }
-                async function checkout(){
-                  // 後端會從 Session 取當前登入使用者，不再傳 customerId
-                  const res = await axios.post('/CustomersArea/Cart/checkout');
-                  // 結帳後導到我的訂單頁（前台）
-                  window.location.href = '/CustomersArea/Orders';
                 }
                 function inc(it){ it.qty++; update(it); }
                 function dec(it){ it.qty = Math.max(1, (it.qty || 1)-1); update(it); }
@@ -169,6 +223,7 @@
                   discountHint.value = res.data?.hint || '';
                   await reload();
                 }
+
                 async function clearCoupon(){
                   await axios.post('/CustomersArea/Cart/clear-coupon');
                   couponCode.value = '';
@@ -190,10 +245,10 @@
                   selected, checkAll, toggleAll, batchRemove,
                   inc, dec, update, remove,
                   applyCoupon, clearCoupon,checkout,
-                  finalTotal,addDemo,customerId
+                        finalTotal,addDemo,customerId,payByCredit,payByTransfer
                 };
               }
-            }).mount('#app');
+            }).mount('#cartApp');
         })();
     </script>
 }

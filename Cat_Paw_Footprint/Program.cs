@@ -201,10 +201,8 @@ namespace Cat_Paw_Footprint
 
 			builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
-			builder.Services.AddTransient<
-	Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
-	Cat_Paw_Footprint.Areas.CustomersArea.Services.CustomerEmailSender>();
-
+			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,CustomerEmailSender>();
+			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
 
 
 			var app = builder.Build();

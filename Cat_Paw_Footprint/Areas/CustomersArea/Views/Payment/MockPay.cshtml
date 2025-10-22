@@ -1,86 +1,88 @@
 ﻿@{
     ViewData["Title"] = "信用卡付款";
 }
-<div class="container py-4" id="payApp" v-cloak>
-    <h2 class="mb-3">信用卡付款</h2>
+<div class="container py-4 d-flex justify-content-center" id="payApp" v-cloak>
+    <div style="width:100%; max-width:600px;">
+        <h2 class="mb-3">信用卡付款</h2>
 
-    <div class="card p-3">
-        <label class="form-label">持卡人姓名</label>
-        <input v-model="name" class="form-control" placeholder="與卡片相同姓名">
+        <div class="card p-3 shadow">
+            <label class="form-label">持卡人姓名</label>
+            <input v-model="name" class="form-control" placeholder="與卡片相同姓名">
 
-        <div class="row mt-3 g-2">
-            <div class="col-12"><label class="form-label">卡號</label></div>
-            <div class="col"><input class="form-control text-center" maxlength="4" v-model="c1" v-on:input="nextIfFull($event, 'c2')"></div>
-            <div class="col"><input class="form-control text-center" maxlength="4" v-model="c2" ref="c2Ref" v-on:input="nextIfFull($event, 'c3')"></div>
-            <div class="col"><input class="form-control text-center" maxlength="4" v-model="c3" ref="c3Ref" v-on:input="nextIfFull($event, 'c4')"></div>
-            <div class="col"><input class="form-control text-center" maxlength="4" v-model="c4" ref="c4Ref"></div>
-        </div>
-
-        <div class="row mt-3 g-2">
-            <div class="col-6">
-                <label class="form-label">有效期限（輸入 4 碼）</label>
-                <input class="form-control text-center" maxlength="4" v-model="expRaw" v-on:input="expRaw = expRaw.replace(/[^0-9]/g,'').slice(0,4)">
-                <div class="form-text">顯示：{{ expFormatted }}</div>
-            </div>
-            <div class="col-6">
-                <label class="form-label">安全碼（CVV）</label>
-                <input class="form-control text-center" maxlength="4" v-model="cvv" v-on:input="cvv = cvv.replace(/[^0-9]/g,'').slice(0,4)">
-            </div>
-        </div>
-        <hr class="my-4">
-
-        <h5 class="mb-2">發票資訊</h5>
-        <div class="row g-3">
-            <div class="col-12 col-md-6">
-                <label class="form-label">發票類型</label>
-                <select class="form-select" v-model="invoice.type">
-                    <option value="none">不開立</option>
-                    <option value="donation">捐贈發票</option>
-                    <option value="vat">統一編號</option>
-                    <option value="triple">三聯式發票</option>
-                    <option value="carrier">載具</option>
-                </select>
+            <div class="row mt-3 g-2">
+                <div class="col-12"><label class="form-label">卡號</label></div>
+                <div class="col"><input class="form-control text-center" maxlength="4" v-model="c1" v-on:input="nextIfFull($event, 'c2')"></div>
+                <div class="col"><input class="form-control text-center" maxlength="4" v-model="c2" ref="c2Ref" v-on:input="nextIfFull($event, 'c3')"></div>
+                <div class="col"><input class="form-control text-center" maxlength="4" v-model="c3" ref="c3Ref" v-on:input="nextIfFull($event, 'c4')"></div>
+                <div class="col"><input class="form-control text-center" maxlength="4" v-model="c4" ref="c4Ref"></div>
             </div>
 
-            <!-- 捐贈 -->
-            <div class="col-12 col-md-6" v-if="invoice.type==='donation'">
-                <label class="form-label">捐贈碼（愛心碼）</label>
-                <input class="form-control" v-model="invoice.donationCode" placeholder="請輸入捐贈碼">
-            </div>
-
-            <!-- 統編 -->
-            <div class="col-12 col-md-6" v-if="invoice.type==='vat'">
-                <label class="form-label">統一編號</label>
-                <input class="form-control" v-model="invoice.vatNumber" maxlength="8" placeholder="8 碼數字">
-            </div>
-
-            <!-- 三聯 -->
-            <div class="col-12" v-if="invoice.type==='triple'">
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">公司抬頭</label>
-                        <input class="form-control" v-model="invoice.tripleTitle">
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label">統一編號</label>
-                        <input class="form-control" v-model="invoice.tripleVat" maxlength="8">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">郵寄地址</label>
-                        <input class="form-control" v-model="invoice.tripleAddress">
-                    </div>
+            <div class="row mt-3 g-2">
+                <div class="col-6">
+                    <label class="form-label">有效期限（輸入 4 碼）</label>
+                    <input class="form-control text-center" maxlength="4" v-model="expRaw" v-on:input="expRaw = expRaw.replace(/[^0-9]/g,'').slice(0,4)">
+                    <div class="form-text">顯示：{{ expFormatted }}</div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label">安全碼（CVV）</label>
+                    <input class="form-control text-center" maxlength="4" v-model="cvv" v-on:input="cvv = cvv.replace(/[^0-9]/g,'').slice(0,4)">
                 </div>
             </div>
+            <hr class="my-4">
 
-            <!-- 載具 -->
-            <div class="col-12 col-md-6" v-if="invoice.type==='carrier'">
-                <label class="form-label">載具條碼 / 手機載具</label>
-                <input class="form-control" v-model="invoice.carrier" placeholder="例如：/ABC1234 或  /XXXXXX">
+            <h5 class="mb-2">發票資訊</h5>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">發票類型</label>
+                    <select class="form-select" v-model="invoice.type">
+                        <option value="none">不開立</option>
+                        <option value="donation">捐贈發票</option>
+                        <option value="vat">統一編號</option>
+                        <option value="triple">三聯式發票</option>
+                        <option value="carrier">載具</option>
+                    </select>
+                </div>
+
+                <!-- 捐贈 -->
+                <div class="col-12 col-md-6" v-if="invoice.type==='donation'">
+                    <label class="form-label">捐贈碼（愛心碼）</label>
+                    <input class="form-control" v-model="invoice.donationCode" placeholder="請輸入捐贈碼">
+                </div>
+
+                <!-- 統編 -->
+                <div class="col-12 col-md-6" v-if="invoice.type==='vat'">
+                    <label class="form-label">統一編號</label>
+                    <input class="form-control" v-model="invoice.vatNumber" maxlength="8" placeholder="8 碼數字">
+                </div>
+
+                <!-- 三聯 -->
+                <div class="col-12" v-if="invoice.type==='triple'">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">公司抬頭</label>
+                            <input class="form-control" v-model="invoice.tripleTitle">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">統一編號</label>
+                            <input class="form-control" v-model="invoice.tripleVat" maxlength="8">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">郵寄地址</label>
+                            <input class="form-control" v-model="invoice.tripleAddress">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 載具 -->
+                <div class="col-12 col-md-6" v-if="invoice.type==='carrier'">
+                    <label class="form-label">載具條碼 / 手機載具</label>
+                    <input class="form-control" v-model="invoice.carrier" placeholder="例如：/ABC1234 或  /XXXXXX">
+                </div>
             </div>
-        </div>
-        <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-secondary" v-on:click="goCart">返回購物車</button>
-            <button class="btn btn-primary" :disabled="!canPay" v-on:click="pay">付款</button>
+            <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-secondary" v-on:click="goCart">返回購物車</button>
+                <button class="btn btn-primary" :disabled="!canPay" v-on:click="pay">付款</button>
+            </div>
         </div>
     </div>
 </div>

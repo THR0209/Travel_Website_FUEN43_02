@@ -1,11 +1,10 @@
 ﻿@{
     ViewData["Title"] = "我的訂單";
-    Layout = "~/Views/Shared/_CusLayout.cshtml";
 }
-<div class="container py-4" id="app" v-cloak>
-    <h2 class="mb-3">我的訂單</h2>
+<div class="container py-4" id="orderApp" v-cloak>
+    <h2>我的訂單</h2>
 
-    <div class="mb-3 d-flex gap-2 align-items-center">
+    <div class="d-flex gap-2 mb-3 align-items-center">
         <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
         <button class="btn btn-outline-secondary" v-on:click="reload">搜尋</button>
         <a href="/CustomersArea/Cart" class="btn btn-outline-secondary ms-auto">回購物車</a>
@@ -37,7 +36,7 @@
                     </td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" v-on:click="detail(o.id)">明細</button>
-                        <button type="submit" class="btn btn-sm btn-primary" :disabled="o.status !== '未付款'">信用卡付款</button>
+                        <button type="submit" class="btn btn-sm btn-primary" :disabled="o.status !== '未付款'">信用卡</button>
                     </td>
                 </tr>
                 <tr v-if="sortedOrders.length===0">
@@ -88,7 +87,13 @@
     <style>
         [v-cloak] {
             display: none
-        }</style>
+        }
+
+        .container-fluid.p-0 {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    </style>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
     <script>
@@ -155,7 +160,7 @@
 
               return { customerId, list, reload, toLocal, doSort, sortIcon, sortedOrders, detail , detailObj, };
             }
-          }).mount('#app');
+          }).mount('#orderApp');
         })();
     </script>
 }

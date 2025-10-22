@@ -108,25 +108,33 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		public async Task<IActionResult> Checkout([FromForm] int customerId)
 		{
 			var items = GetCart();
-			if (items.Count == 0) return BadRequest(new { ok = false, error = "購物車是空的" });
+			if (items.Count == 0)
+				return BadRequest(new { ok = false, error = "購物車是空的" });
 
 			var now = DateTime.Now;
+			var created = new List<Cat_Paw_Footprint.Models.CustomerOrders>();
+
 			foreach (var it in items)
 			{
-				_db.CustomerOrders.Add(new Models.CustomerOrders
+				var order = new Cat_Paw_Footprint.Models.CustomerOrders
 				{
-					CustomerID = customerId,      // 後續可改用登入 ID
+					CustomerID = customerId,     // 之後可換成登入用戶 ID
 					ProductID = it.ProductId,
-					OrderStatusID = 2,            // 未付款
+					OrderStatusID = 2,           // 2 = 未付款
 					TotalAmount = it.Price * it.Qty,
 					CreateTime = now,
 					UpdateTime = now
-				});
+				};
+				created.Add(order);
+				_db.CustomerOrders.Add(order);
 			}
-			await _db.SaveChangesAsync();
+
+			await _db.SaveChangesAsync(); // 這裡才會有 OrderID
 
 			SaveCart(new List<CartItem>());
-			return Ok(new { ok = true });
+
+			// 回傳所有新建立的訂單編號，常見做法是用第一筆去付款
+			return Ok(new { ok = true, orderIds = created.Select(o => o.OrderID).ToList() });
 		}
 		// 批次刪除（接收 body: [1,2,3]）
 		[HttpPost("batch-remove")]
@@ -152,7 +160,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			else
 				return BadRequest(new { ok = false, error = "折價碼無效" });
 
-			HttpContext.Session.SetString("CART_COUPON", System.Text.Json.JsonSerializer.Serialize(coupon));
+			HttpContext.Session.SetString("CART_COUPON", JsonSerializer.Serialize(coupon));
 			return Ok(new { ok = true, hint = coupon.Hint });
 		}
 
