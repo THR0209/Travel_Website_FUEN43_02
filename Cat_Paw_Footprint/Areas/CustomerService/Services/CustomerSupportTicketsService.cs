@@ -79,20 +79,22 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 		/// </summary>
 		public async Task AddAsync(CustomerSupportTicketViewModel vm)
 		{
-			// 建議這裡產生 TicketCode，而不是用 vm.TicketCode。
+			// 加入除錯訊息，確認資料傳遞狀況
+			Console.WriteLine($"[AddAsync] vm.EmployeeID={vm.EmployeeID}, vm.TicketCode={vm.TicketCode}");
 			var entity = new CustomerSupportTickets
 			{
 				CustomerID = vm.CustomerID,
-				EmployeeID = vm.EmployeeID,
+				EmployeeID = vm.EmployeeID, // ★
 				Subject = vm.Subject,
 				TicketTypeID = vm.TicketTypeID,
 				Description = vm.Description,
 				StatusID = vm.StatusID,
 				PriorityID = vm.PriorityID,
-				CreateTime = DateTime.Now,
-				UpdateTime = DateTime.Now,
-				TicketCode = vm.TicketCode // 建議改為 GenerateTicketCode()（如有）
+				CreateTime = vm.CreateTime ?? DateTime.Now,
+				UpdateTime = vm.UpdateTime ?? DateTime.Now,
+				TicketCode = vm.TicketCode // ★
 			};
+			Console.WriteLine($"[AddAsync] entity.EmployeeID={entity.EmployeeID}, entity.TicketCode={entity.TicketCode}");
 			await _repo.AddAsync(entity);
 		}
 

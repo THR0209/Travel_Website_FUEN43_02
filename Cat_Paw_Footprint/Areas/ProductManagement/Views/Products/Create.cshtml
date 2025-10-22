@@ -83,6 +83,16 @@
                     </div>
 
                     <div class="form-group mb-3">
+                        <label asp-for="Product.Timetable" class="control-label mb-1">時刻表：</label>
+                        <select asp-for="Product.Timetable" class="form-select">
+                            <option value="0">無</option>
+                            <option value="1">台鐵</option>
+                            <option value="2">高鐵</option>
+                            <option value="3">航空</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
                         <label asp-for="Product.ProductPrice" class="control-label mb-1">產品價格：</label>
                         <input asp-for="Product.ProductPrice" class="form-control" />
                         <span asp-validation-for="Product.ProductPrice" class="text-danger"></span>
@@ -484,6 +494,20 @@
         }
     </script>
 
+    <script>
+        function convertName(mealType) {
+            if(mealType == "breakfast") {
+                return "早餐";
+            }
+            else if (mealType == "lunch") {
+                return "午餐";
+            }
+            else if (mealType == "dinner") {
+                return "晚餐";
+            }
+        }
+    </script>
+
 
     <!-- 預覽上傳圖片 -->
     <script>
@@ -550,6 +574,11 @@
                         arr.push({ id: hotel.hotelID, orderIndex: index + 1 });
                     }
                 });
+
+                if ( arr.length === 0 ) {
+                    $('#selectedHotels').html(`<h4 class="text-danger">目前尚未新增住宿資訊</h4>`);
+                }
+
 
                 updateOrderedHiddenField("SelectedHotelIds", arr);
                 $('#selectedHotels').sortable("refresh");
@@ -618,6 +647,10 @@
                     }
                 });
 
+                if (arr.length === 0) {
+                    $container.html(`<h6 class="text-danger">目前尚未新增${convertName(currentMealType)}</h6>`)
+                }
+
                 updateOrderedHiddenField(`SelectedRestaurants${capitalize(currentMealType)}`, arr);
                 bootstrap.Modal.getOrCreateInstance('#restaurantModal').hide();
             });
@@ -674,7 +707,14 @@
                         `);
                         arr.push(parseInt(transport.transportID));
                     }
+                    else {
+                        $container.html(`<h6 class="text-danger">目前尚未新增交通資訊</h6>`);
+                    }
                 });
+
+                if ( arr.length === 0 ) {
+                    $('#selectedTransports').html(`<h4 class="text-danger">目前尚未新增交通資訊</h4>`);
+                }
 
                 updateIntListHiddenField("SelectedTransportationIds", arr);
                 bootstrap.Modal.getOrCreateInstance('#transportModal').hide();

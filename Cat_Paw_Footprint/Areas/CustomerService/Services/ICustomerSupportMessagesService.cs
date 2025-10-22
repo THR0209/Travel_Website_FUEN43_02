@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 {
 	/// <summary>
-	/// 客戶服務訊息服務介面，定義訊息的查詢與新增方法（ViewModel 版本）
+	/// 客戶服務訊息服務介面，定義訊息的查詢與新增方法（共用於前台與後台）
 	/// </summary>
 	public interface ICustomerSupportMessagesService
 	{

@@ -3,7 +3,7 @@
 namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 {
 	/// <summary>
-	/// 客戶服務工單服務介面，定義工單的 CRUD 及查詢方法（ViewModel 版本）
+	/// 客戶服務工單服務介面，定義工單的 CRUD 及查詢方法（共用於前台與後台）
 	/// </summary>
 	public interface ICustomerSupportTicketsService
 	{
@@ -36,5 +36,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 		/// 檢查指定工單是否存在
 		/// </summary>
 		Task<bool> ExistsAsync(int id);
+
 	}
 }

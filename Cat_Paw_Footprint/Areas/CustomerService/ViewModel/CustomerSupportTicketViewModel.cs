@@ -34,5 +34,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.ViewModel
 		public string? PriorityName => Priority?.PriorityDesc ?? "";
 		public string? StatusName => Status?.StatusDesc ?? "";
 		public string? TicketTypeName => TicketType?.TicketTypeName ?? "";
+		public string EmployeeDisplayName => !string.IsNullOrEmpty(EmployeeName) ? EmployeeName : "尚未指派";
 	}
 }

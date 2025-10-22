@@ -1,0 +1,30 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController.GoECPayVm
+@{
+    Layout = null;
+}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+</head>
+<body>
+    <p>正在前往綠界付款頁，請稍候…</p>
+
+    <form id="ecpay" method="post" action="@Model.Action">
+        @foreach (var kv in Model.Fields)
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+    </form>
+
+    <script>
+        // 建議用 id 來取，較穩定
+        document.getElementById('ecpay')?.submit();
+    </script>
+    <noscript>
+        您的瀏覽器未啟用 JavaScript，請手動點擊送出以前往綠界。
+        <button type="submit" form="ecpay">送出</button>
+    </noscript>
+</body>
+</html>

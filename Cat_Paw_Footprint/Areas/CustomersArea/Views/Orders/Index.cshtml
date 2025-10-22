@@ -1,81 +1,166 @@
 ﻿@{
     ViewData["Title"] = "我的訂單";
 }
-<div class="container py-4" id="app" v-cloak>
-    <h2 class="mb-3">我的訂單</h2>
+<div class="container py-4" id="orderApp" v-cloak>
+    <h2>我的訂單</h2>
 
-    <div class="mb-3 d-flex gap-2">
+    <div class="d-flex gap-2 mb-3 align-items-center">
         <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
-        <button class="btn btn-outline-secondary" v-on:click ="reload">重新整理</button>
-        <input v-model="q" class="form-control ms-auto" placeholder="搜尋：訂單/商品/狀態">
+        <button class="btn btn-outline-secondary" v-on:click="reload">搜尋</button>
+        <a href="/CustomersArea/Cart" class="btn btn-outline-secondary ms-auto">回購物車</a>
     </div>
 
-    <div v-if="items.length===0" class="alert alert-info">目前沒有訂單</div>
-    <div v-else class="table-responsive">
-        <table class="table align-middle">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>訂單編號</th>
-                    <th>商品</th>
-                    <th>金額</th>
-                    <th>狀態</th>
-                    <th>建立時間</th>
+                    <th v-on:click="doSort('orderCode')" class="cursor-pointer text-center">訂單編號 {{ sortIcon('orderCode') }}</th>
+                    <th v-on:click="doSort('amount')" class="cursor-pointer text-center">總金額 {{ sortIcon('amount') }}</th>
+                    <th v-on:click="doSort('createTime')" class="cursor-pointer text-center">建立時間 {{ sortIcon('createTime') }}</th>
+                    <th v-on:click="doSort('customerName')" class="cursor-pointer text-center">客戶 {{ sortIcon('customerName') }}</th>
+                    <th v-on:click="doSort('status')" class="cursor-pointer text-center">狀態 {{ sortIcon('status') }}</th>
+                    <th style="width:140px">操作</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="o in items" :key="o.id">
-                    <td class="font-monospace">{{ o.orderCode }}</td>
-                    <td>{{ o.productName }}</td>
-                    <td class="text-end">NT$ {{ o.amount.toLocaleString() }}</td>
-                    <td><span class="badge" :class="badge(o.status)">{{ o.status }}</span></td>
-                    <td>{{ fmt(o.createTime) }}</td>
+                <tr v-for="o in sortedOrders" :key="o.id">
+                    <td class="font-monospace text-center">{{ o.orderCode }}</td>
+                    <td class="text-center">NT$ {{ (o.amount||0).toLocaleString() }}</td>
+                    <td class="text-center">{{ toLocal(o.createTime) }}</td>
+                    <td class="text-center">{{ o.customerName ?? ('客戶 ' + o.customerId) }}</td>
+                    <td class="text-center">
+                        <span class="badge"
+                              :class="o.status==='已付款' ? 'bg-success' : (o.status==='未付款' ? 'bg-warning' : (o.status==='已取消' ? 'bg-secondary' : 'bg-danger'))">
+                            {{ o.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" v-on:click="detail(o.id)">明細</button>
+                        <button type="submit" class="btn btn-sm btn-primary" :disabled="o.status !== '未付款'">信用卡</button>
+                    </td>
+                </tr>
+                <tr v-if="sortedOrders.length===0">
+                    <td colspan="6" class="text-center text-muted py-4">尚無訂單</td>
                 </tr>
             </tbody>
         </table>
     </div>
+    <!-- 明細 Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" v-if="detailObj">
+                <div class="modal-header">
+                    <h5 class="modal-title">訂單明細 — {{ detailObj.orderCode }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <dl class="row">
+                        <dt class="col-4">商品</dt>
+                        <dd class="col-8">{{ detailObj.product }}</dd>
+
+                        <dt class="col-4">金額</dt>
+                        <dd class="col-8">NT$ {{ (detailObj.amount||0).toLocaleString() }}</dd>
+
+                        <dt class="col-4">狀態</dt>
+                        <dd class="col-8">{{ detailObj.status }}</dd>
+
+                        <dt class="col-4">客戶</dt>
+                        <dd class="col-8">{{ detailObj.customer }}</dd>
+
+                        <dt class="col-4">建立時間</dt>
+                        <dd class="col-8">{{ toLocal(detailObj.createTime) }}</dd>
+
+                        <dt class="col-4">更新時間</dt>
+                        <dd class="col-8">{{ toLocal(detailObj.updateTime) }}</dd>
+                    </dl>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+
 @section Scripts {
-    <style>[v-cloak] {display: none}</style>
+    <style>
+        [v-cloak] {
+            display: none
+        }
+
+        .container-fluid.p-0 {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    </style>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
     <script>
-            (() => {
-          const { createApp, ref, computed } = Vue;
+        (() => {
+          const { createApp, ref, computed, onMounted } = Vue;
+
           createApp({
             setup(){
               const customerId = ref(0);
-              const items = ref([]);
-              const q = ref('');
+              const list = ref([]);
 
-              function fmt(v){
-                if(!v) return '';
-                const d = new Date(v);
-                return isNaN(d.getTime()) ? '' : d.toLocaleString('zh-TW');
+              const sort = ref({ key: 'createTime', dir: 'desc' });
+              const detailObj = ref(null);
+
+              async function detail(id){
+                try{
+                  const { data } = await axios.get(`/CustomersArea/Orders/api/${id}`);
+                  detailObj.value = data;
+                  bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
+                }catch(e){
+                  console.error(e);
+                  alert('讀取明細失敗');
+                }
               }
-              function badge(s){
-                return s==='已付款' ? 'bg-success' :
-                       s==='未付款' ? 'bg-warning' :
-                       s==='已取消' ? 'bg-secondary' : 'bg-danger';
+              function doSort(col){
+                if (sort.value.key === col) {
+                  sort.value.dir = (sort.value.dir === 'asc') ? 'desc' : 'asc';
+                } else {
+                  sort.value.key = col;
+                  sort.value.dir = 'asc';
+                }
               }
-              const filtered = computed(()=>{
-                const s = q.value.trim().toLowerCase();
-                if(!s) return items.value;
-                return items.value.filter(o =>
-                  (o.orderCode||'').toLowerCase().includes(s) ||
-                  (o.productName||'').toLowerCase().includes(s) ||
-                  (o.status||'').toLowerCase().includes(s)
-                );
+              function sortIcon(col){
+                if (sort.value.key !== col) return '↕';
+                return sort.value.dir === 'asc' ? '▲' : '▼';
+              }
+
+              const sortedOrders = computed(() => {
+                const arr = [...(list.value || [])];
+                const { key, dir } = sort.value;
+                return arr.sort((a,b)=>{
+                  const va = a?.[key] ?? '';
+                  const vb = b?.[key] ?? '';
+                  if (va < vb) return dir === 'asc' ? -1 : 1;
+                  if (va > vb) return dir === 'asc' ?  1 : -1;
+                  return 0;
+                });
               });
 
+              function toLocal(v){ return v ? new Date(v).toLocaleString('zh-TW') : '' }
+
               async function reload(){
-                const { data } = await axios.get('/CustomerArea/Order/Orders/api', { params:{ customerId: customerId.value }});
-                items.value = Array.isArray(data) ? data : [];
+                try{
+                  const { data } = await axios.get('/CustomersArea/Orders/api', { params:{ customerId: customerId.value } });
+                  list.value = Array.isArray(data) ? data : [];
+                }catch(e){
+                  console.error(e);
+                  alert('讀取訂單失敗');
+                  list.value = [];
+                }
               }
 
-              return { customerId, items, q, filtered, reload, fmt, badge };
+              onMounted(reload);
+
+              return { customerId, list, reload, toLocal, doSort, sortIcon, sortedOrders, detail , detailObj, };
             }
-          }).mount('#app');
+          }).mount('#orderApp');
         })();
     </script>
 }

@@ -1,127 +1,254 @@
-﻿using Cat_Paw_Footprint.Areas.Order.Services;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Cat_Paw_Footprint.Areas.Order.Services;
 
-namespace Cat_Paw_Footprint.Areas.CustomersArea.PaymentControllers
+namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
-    [Area("CustomersArea")]
-    [Route("CustomersArea/[controller]")]
-    public class PaymentController : Controller
-    {
-        private readonly webtravel2Context _db;
+	[Area("CustomersArea")] // ← 必須和資料夾名一樣
+	[Route("CustomersArea/[controller]")] // → URL 會是 /CustomersArea/Payment/...
+	public class PaymentController : Controller
+	{
+		private readonly webtravel2Context _db;
+		private readonly ECPayOptions _opt;
+        private readonly ICustomerLevelService _levelSvc;
         private readonly IEmailSender _sender;
-        public PaymentController(webtravel2Context db, IEmailSender sender)
-        {
-            _db = db; _sender = sender;
+		public class ECPayOptions
+		{
+			public bool IsStage { get; set; } = true;
+			public string MerchantID { get; set; } = "";
+			public string HashKey { get; set; } = "";
+			public string HashIV { get; set; } = "";
+			public string ReturnURL { get; set; } = "";       // 後端回呼
+			public string OrderResultURL { get; set; } = "";  // 前端導回（付款完成）
+			public string ClientBackURL { get; set; } = "";   // 取消時返回
+		}
+		public PaymentController(webtravel2Context db, IEmailSender sender, IOptions<ECPayOptions> opt , ICustomerLevelService levelSvc)
+		{
+			_db = db;
+			_sender = sender;
+			_opt = opt.Value;
+            _levelSvc = levelSvc;
         }
-        public class BankTransferDto
+		// /CustomersArea/Payment
+		[HttpGet("")]              // GET /CustomersArea/Payment
+		public IActionResult Index()
+				=> View("MockPay");    // 明確指向 Views/Payment/MockPay.cshtml
+
+		[HttpGet("MockPay")]       // GET /CustomersArea/Payment/MockPay
+		public IActionResult MockPay()
+			=> View();             //        [HttpPost("PayMock")]
+
+		public IActionResult PayMock([FromBody] CardPayDto dto)
+		{
+			// TODO：這裡可呼叫金流沙盒 API；示範直接通過
+			if (string.IsNullOrWhiteSpace(dto.Card) || string.IsNullOrWhiteSpace(dto.Exp) || string.IsNullOrWhiteSpace(dto.Cvc))
+				return BadRequest(new { ok = false, error = "資料不完整" });
+
+			// 這裡你可以：建立付款紀錄、更新訂單狀態=已付款 …
+			return Ok(new { ok = true });
+		}
+
+		public class CardPayDto
+		{
+			public string Card { get; set; } = "";
+			public string Exp { get; set; } = "";
+			public string Cvc { get; set; } = "";
+			public string Invoice { get; set; } = "";
+		}
+
+        [HttpPost("Transfer")]
+        public async Task<IActionResult> Transfer([FromForm] int customerId)
         {
-            public int CustomerId { get; set; }       // 之後可改成從 User 取
-            public string Email { get; set; } = "";
-            public string? InvoiceType { get; set; }  // 發票資訊（後面信用卡也沿用）
-            public string? TaxId { get; set; }
+            var email = await _db.CustomerProfile
+                .Where(c => c.CustomerID == customerId)
+                .Select(c => c.Email)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrWhiteSpace(email))
+                return BadRequest(new { ok = false, error = "找不到客戶 Email" });
+
+            var html = $@"
+<table width='100%' cellpadding='0' cellspacing='0' style='font-family:Arial,sans-serif;color:#333'>
+<tr><td align='center'>
+  <table width='600' style='max-width:600px;border:1px solid #eee;border-radius:8px;overflow:hidden'>
+    <tr><td style='background:#0d6efd;color:#fff;padding:16px 20px;font-size:18px;font-weight:700'>
+      匯款資訊通知
+    </td></tr>
+    <tr><td style='padding:20px;line-height:1.7'>
+      親愛的顧客您好，<br>
+      感謝您的訂購，請於 3 日內完成匯款以保留名額：<br><br>
+      <b>銀行：</b> 台灣銀行 004<br>
+      <b>帳號：</b> 123-456-789-012<br>
+      <b>戶名：</b> 貓爪足跡股份有限公司<br><br>
+      完成後請回覆此信件或提供匯款後五碼，以便對帳。<br><br>
+      祝您旅途愉快！
+    </td></tr>
+    <tr><td style='background:#f8f9fa;padding:16px 20px;font-size:12px;color:#666'>
+      本信由系統發送，請勿直接回覆；若有問題請來信客服：support@example.com
+    </td></tr>
+  </table>
+</td></tr></table>";
+
+            await _sender.SendAsync(email, "【匯款資訊】貓爪足跡", html);
+            return Ok(new { ok = true });
+        }
+        private string CashierUrl => _opt.IsStage
+            ? "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"
+            : "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5";        // 1) 前端按「信用卡付款」→ 從購物車讀資料 → 呼叫 Create (回自動送出的 GoECPay View)
+
+        [HttpPost("CheckoutCredit")]
+        public IActionResult CheckoutCredit([FromForm] int customerId)
+        {
+            var cartJson = HttpContext.Session.GetString("CART_ITEMS");
+            if (string.IsNullOrWhiteSpace(cartJson))
+                return BadRequest("購物車是空的");
+
+            var snapKey = "CART_SNAP_" + Guid.NewGuid().ToString("N");
+            HttpContext.Session.SetString(snapKey, cartJson);
+
+            return RedirectToAction(nameof(Create), new { customerId, snapKey });
         }
 
-        [HttpPost("BankTransfer")]
-        public async Task<IActionResult> BankTransfer([FromBody] BankTransferDto dto)
+        // 2) 建立綠界交易，送出自動表單
+        [HttpGet("Create")]
+        public IActionResult Create([FromQuery] int customerId, [FromQuery] string snapKey)
         {
-            // 1) 基本驗證
-            if (dto.CustomerId <= 0 || string.IsNullOrWhiteSpace(dto.Email))
-                return BadRequest(new { ok = false, error = "參數不完整" });
+            var cartJson = HttpContext.Session.GetString(snapKey);
+            if (string.IsNullOrWhiteSpace(cartJson)) return BadRequest("購物車快照遺失");
 
-            // 2) 取購物車（沿用 Cart 的 session 或者另外傳 items，這裡示例直接從 DB 建立 1 筆測試）
-            var now = DateTime.Now;
-            var cartItems = HttpContext.Session.GetString("CART_ITEMS");
-            if (string.IsNullOrEmpty(cartItems))
-                return BadRequest(new { ok = false, error = "購物車是空的" });
+            var items = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new();
+            if (items.Count == 0) return BadRequest("購物車為空");
 
-            var items = System.Text.Json.JsonSerializer.Deserialize<List<dynamic>>(cartItems) ?? new();
+            var total = items.Sum(x => x.Price * x.Qty);
+            if (total <= 0) return BadRequest("金額錯誤");
 
-            // 3) 建立訂單（每個商品一筆或合成一筆，看你規格。這裡用「每個商品一筆」）
-            var createdOrders = new List<CustomerOrders>();
-            foreach (var it in items)
+            var itemNames = string.Join("#", items.Select(x => $"{x.ProductName}x{x.Qty}"));
+
+            var dict = new SortedDictionary<string, string>
             {
-                var order = new CustomerOrders
+                ["MerchantID"] = _opt.MerchantID,
+                ["MerchantTradeNo"] = $"C{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(100, 999)}",
+                ["MerchantTradeDate"] = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"),
+                ["PaymentType"] = "aio",
+                ["TotalAmount"] = total.ToString(),
+                ["TradeDesc"] = "Cat Paw Footprint 訂單付款",
+                ["ItemName"] = itemNames,
+                ["ReturnURL"] = _opt.ReturnURL,
+                ["OrderResultURL"] = _opt.OrderResultURL,
+                ["ClientBackURL"] = _opt.ClientBackURL,
+                ["ChoosePayment"] = "Credit",
+                ["EncryptType"] = "1"
+            };
+
+            // ★ 自訂欄位固定這樣對應：CF1=customerId、CF2=snapKey
+            dict["CustomField1"] = customerId.ToString();
+            dict["CustomField2"] = snapKey;
+
+            dict["CheckMacValue"] = MakeCheckMac(dict, _opt.HashKey, _opt.HashIV);
+
+            return View("GoECPay", new GoECPayVm { Action = CashierUrl, Fields = dict });
+        }
+
+
+        // 3) 綠界後端回呼：驗證成功 → 這裡才建立訂單、狀態=已付款
+        [HttpPost("Return")]
+        public async Task<IActionResult> Return()
+        {
+            var form = Request.Form.ToDictionary(k => k.Key, v => v.Value.ToString());
+            if (!form.TryGetValue("CheckMacValue", out var macRtn))
+                return Content("0|CheckMacValue missing");
+
+            var verify = new SortedDictionary<string, string>(
+                form.Where(kv => kv.Key != "CheckMacValue").ToDictionary(k => k.Key, v => v.Value)
+            );
+            var mac = MakeCheckMac(verify, _opt.HashKey, _opt.HashIV);
+            if (!string.Equals(mac, macRtn, StringComparison.OrdinalIgnoreCase))
+                return Content("0|CheckMac錯誤");
+
+            var ok = form.TryGetValue("RtnCode", out var code) && code == "1";
+            if (!ok) return Content("1|OK"); // 失敗就不建單，但仍回 1|OK
+
+            // ★ 對應 Create 時的設定
+            var customerId = form.TryGetValue("CustomField1", out var cf1) ? int.Parse(cf1) : 0;
+            var snapKey = form.TryGetValue("CustomField2", out var cf2) ? cf2 : "";
+
+            if (customerId > 0 && !string.IsNullOrWhiteSpace(snapKey))
+            {
+                var cartJson = HttpContext.Session.GetString(snapKey);
+                if (!string.IsNullOrWhiteSpace(cartJson))
                 {
-                    CustomerID = dto.CustomerId,
-                    ProductID = (int)it.GetProperty("ProductId").GetInt32(),
-                    OrderStatusID = 2,                   // 2=未付款
-                    TotalAmount = (int)it.GetProperty("Price").GetInt32() * (int)it.GetProperty("Qty").GetInt32(),
-                    CreateTime = now,
-                    UpdateTime = now
-                };
-                _db.CustomerOrders.Add(order);
-                createdOrders.Add(order);
+                    var items = System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new();
+                    var now = DateTime.Now;
+
+                    foreach (var it in items)
+                    {
+                        _db.CustomerOrders.Add(new Cat_Paw_Footprint.Models.CustomerOrders
+                        {
+                            CustomerID = customerId,
+                            ProductID = it.ProductId,
+                            OrderStatusID = 1, // 已付款
+                            TotalAmount = it.Price * it.Qty,
+                            CreateTime = now,
+                            UpdateTime = now
+                        });
+                    }
+                    await _db.SaveChangesAsync();
+
+                    // 清掉快照與購物車
+                    HttpContext.Session.Remove(snapKey);
+                    HttpContext.Session.Remove("CART_ITEMS");
+
+                    // ★ 重算升等
+                    await _levelSvc.RecalculateAndUpdateAsync(customerId);
+                }
             }
-            await _db.SaveChangesAsync();
 
-            // 清空購物車
-            HttpContext.Session.Remove("CART_ITEMS");
-
-            // 4) 寄信（銀行帳號可放 appsettings 或 DB）
-            var bankInfo = @"銀行：XXX 商業銀行 代碼 999
-分行：台北分行
-戶名：貓爪足跡股份有限公司
-帳號：999-999-999999";
-            var lines = new List<string> {
-            "親愛的顧客您好：",
-            "",
-            "您選擇「轉帳付款」，以下是匯款資訊：",
-            bankInfo,
-            "",
-            "您的訂單："
-        };
-            foreach (var o in createdOrders)
-            {
-                var code = $"ORD-{o.CreateTime:yyyyMMdd-HHmmss}-{o.OrderID}";
-                lines.Add($"• {code} 金額 NT$ {(o.TotalAmount ?? 0):N0}");
-            }
-            lines.Add("");
-            lines.Add("請於 3 天內完成付款並回覆帳號後五碼，我們將盡速為您出貨。");
-            lines.Add("貓爪足跡 敬上");
-
-            await _sender.SendAsync(dto.Email, "轉帳付款資訊", string.Join("<br/>", lines)); // 用 HTML 換行
-
-            return Ok(new { ok = true, count = createdOrders.Count });
+            return Content("1|OK");
         }
-        // GET: /CustomerArea/Order/Payment/MockPay?total=12345&ids=1,2,3
-        [HttpGet("MockPay")]
-        public IActionResult MockPay([FromQuery] int total, [FromQuery] string ids)
+
+        // 4) 前端導回頁：導到「我的訂單」
+        [HttpPost("Result")]
+        public IActionResult Result() => Redirect("/CustomersArea/Orders");
+
+        // ===== 工具/型別 =====
+
+        private static string MakeCheckMac(SortedDictionary<string, string> fields, string hashKey, string hashIV)
         {
-            ViewData["Total"] = total;
-            ViewData["Ids"] = ids ?? "";
-            return View();
+            var sb = new StringBuilder();
+            sb.Append($"HashKey={hashKey}");
+            foreach (var kv in fields.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)))
+                sb.Append($"&{kv.Key}={kv.Value}");
+            sb.Append($"&HashIV={hashIV}");
+
+            var encoded = System.Web.HttpUtility.UrlEncode(sb.ToString()).ToLower();
+            var fixedStr = encoded.Replace("%2d", "-").Replace("%5f", "_").Replace("%2e", ".")
+                                  .Replace("%21", "!").Replace("%2a", "*").Replace("%28", "(").Replace("%29", ")");
+
+            using var sha = SHA256.Create();
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(fixedStr));
+            var outSB = new StringBuilder();
+            foreach (var b in bytes) outSB.Append(b.ToString("X2"));
+            return outSB.ToString();
         }
 
-        // POST: /CustomerArea/Order/Payment/Confirm
-        [HttpPost("Confirm")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Confirm([FromForm] string ids)
+        private class CartItem
         {
-            if (string.IsNullOrWhiteSpace(ids)) return RedirectToAction("Index", "Orders", new { area = "CustomersArea" });
-
-            var idArr = ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                           .Select(s => int.TryParse(s, out var x) ? x : 0)
-                           .Where(x => x > 0)
-                           .ToArray();
-
-            if (idArr.Length == 0) return RedirectToAction("Index", "Orders", new { area = "CustomersArea" });
-
-            var orders = await _db.CustomerOrders
-                .Where(o => idArr.Contains(o.OrderID))
-                .ToListAsync();
-
-            var now = DateTime.Now;
-            foreach (var o in orders)
-            {
-                o.OrderStatusID = 1; // 1 = 已付款（依你的資料表）
-                o.UpdateTime = now;
-            }
-            await _db.SaveChangesAsync();
-
-            return RedirectToAction("Index", "Orders", new { area = "CustomersArea" });
+            public int ProductId { get; set; }
+            public string ProductName { get; set; } = "";
+            public int Price { get; set; }
+            public int Qty { get; set; }
         }
-    }
+
+        public class GoECPayVm
+		{
+			public string Action { get; set; } = "";
+			public SortedDictionary<string, string> Fields { get; set; } = new();
+		}
+	}
 }
+

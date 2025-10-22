@@ -1,4 +1,5 @@
-﻿using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.Helper;
+using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -40,7 +41,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 			.Select(p => new {
 				p.ProductID,
 				p.ProductCode,
-				p.ProductImage,
+				p.ProductImageUrl,
 				p.ProductName,
 				p.ProductPrice,
 				StartDate = p.StartDate.HasValue ? p.StartDate.Value.ToString() : "",
@@ -69,17 +70,6 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 
 			var product = await _context.Products
 				.Where(p => p.ProductID == id)
-				//.Join(_context.Regions, p => p.RegionID, r => r.RegionID, (p, r) => new {p,r})
-				//.Include(p => p.Region)
-				//.Include(p => p.ProductHotels)
-				//	.ThenInclude(ph => ph.Hotel)
-				//.Include(p => p.ProductRestaurants)
-				//	.ThenInclude(pr => pr.Restaurant)
-				//.Include(p => p.ProductsTransportations)
-				//	.ThenInclude(pt => pt.Transport)
-				//.Include(p => p.ProductLocations)
-				//	.ThenInclude(pl => pl.Location)
-				//.Include(p => p.ProductAnalyses)
 				.FirstOrDefaultAsync();
 
 			if (product == null)
@@ -190,9 +180,13 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 				/* 將圖片轉成二進位並存進資料庫 */
 				if (vm.UploadImage != null && vm.UploadImage.Length > 0)
 				{
-					using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
-					vm.Product.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
+					//using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
+					//vm.Product.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
+
+					// 拿到圖片 URL
+					vm.Product.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(vm.UploadImage);
 				}
+
 				// ===== 1. 存主表Products並產生ProductID =====
 
 				vm.Product.ProductCode = await GenerateProductCodeAsync();
@@ -346,10 +340,6 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 			{
 				Product = product,
 
-				//ReleaseDate = product.ProductAnalyses
-				//	.Select(p => p.ReleaseDate)
-				//	.FirstOrDefault(),
-
 				ProductAnalysis = _context.ProductAnalysis
 					.Where(p => p.ProductID == id)
 					.Select(t => new ProductAnalysis
@@ -456,9 +446,11 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 
 				if (vm.UploadImage != null && vm.UploadImage.Length > 0)
 				{
-					using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
-					entity.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
-				}
+					//using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
+					//entity.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
+
+                    vm.Product.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(vm.UploadImage);
+                }
 
 				_context.Products.Update(entity);
 

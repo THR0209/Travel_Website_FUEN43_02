@@ -1,0 +1,1154 @@
+﻿@{
+    // 設定此頁面的標題 (Razor 語法)
+    ViewData["Title"] = "客服中心";
+}
+
+@section Styles {
+    <style>
+        /* ====================== 全域樣式 ====================== */
+        /* 背景主色與容器寬度限制 */
+        body {
+            background: #f7fbfd;
+        }
+
+        .support-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ====================== 卡片樣式 ====================== */
+        /* 共用卡片樣式 (支援卡片與工單卡片) */
+        .support-card, .ticket-card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 14px #0001;
+            background: #fff;
+            transition: all .25s ease;
+        }
+
+            /* 卡片懸浮時的互動樣式 */
+            .support-card:hover, .ticket-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px #0002;
+            }
+
+        /* ====================== 版面留白與呼吸空間 ====================== */
+
+        /* 整體容器上下增加空間 */
+        #chatApp {
+            margin-top: 64px !important;
+            margin-bottom: 80px !important;
+        }
+
+            /* 標題列與內容的距離稍微拉開 */
+            #chatApp .d-flex.mb-4 {
+                margin-bottom: 2.5rem !important;
+            }
+
+        /* 三欄之間與頁面邊界再多一點間距 */
+        .equal-row {
+            gap: 2rem !important;
+            margin-top: 0.5rem;
+        }
+
+        /* 各卡片增加內距，看起來不那麼擠 */
+        .support-card, .ticket-card {
+            padding: 1.5rem !important;
+        }
+
+        /* Modal 的上下 padding 更柔和（避免貼邊） */
+        .modal-body {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+
+        /* ========== 工單卡片貓掌堆疊效果 + 閃光動畫 ========== */
+        .ticket-grid {
+            position: relative;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 1.5rem 1rem 2rem;
+            scrollbar-gutter: stable both-edges;
+            perspective: 1000px;
+            transition: max-height 0.5s ease;
+        }
+
+        /* 疊層外層容器 */
+        .ticket-card-wrapper {
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        /* 每張卡片本體 */
+        .ticket-card {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+            padding: 1.2rem;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+            position: relative;
+            z-index: 5;
+            cursor: pointer;
+            transform-origin: center bottom;
+            overflow: hidden; /* 讓閃光不超出邊框 */
+        }
+
+        /* 疊層：每張卡往下疊 */
+        .ticket-card-wrapper:nth-child(n+2) {
+            margin-top: -2.3rem;
+        }
+
+        /* 微旋轉創造層次 */
+        .ticket-card-wrapper:nth-child(odd) .ticket-card {
+            transform: rotate(-1.2deg);
+        }
+
+        .ticket-card-wrapper:nth-child(even) .ticket-card {
+            transform: rotate(1.2deg);
+        }
+
+        /* 滑鼠懸浮效果：卡片微微浮起 */
+        .ticket-card:hover {
+            transform: rotate(0deg) scale(1.03) translateY(-6px);
+            z-index: 10;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+        }
+
+        /* 陰影動畫（像貓掌壓著） */
+        .ticket-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05) inset;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ticket-card:hover::before {
+            opacity: 1;
+        }
+
+        /* ✨ 閃光特效 (hover 時閃過一條柔光) */
+        .ticket-card::after {
+            content: '🐾';
+            position: absolute;
+            font-size: 2rem;
+            right: 12px;
+            top: 10px;
+            opacity: 0;
+            transform: scale(0.5) rotate(-10deg);
+            transition: all 0.4s ease;
+        }
+
+        .ticket-card:hover::after {
+            opacity: 0.9;
+            transform: scale(1) rotate(10deg);
+        }
+
+        @@keyframes card-shine {
+            0%
+
+        {
+            left: -80%;
+            opacity: 0;
+        }
+
+        30% {
+            opacity: 1;
+        }
+
+        100% {
+            left: 120%;
+            opacity: 0;
+        }
+
+        }
+
+        /* 標題樣式 */
+        .ticket-card h5 {
+            font-size: 1.05rem;
+            color: #007b9c;
+        }
+
+        /* 狀態徽章微調 */
+        .badge.bg-info {
+            background-color: #5ab8d5 !important;
+        }
+
+        /* 美化滾動條 */
+        .ticket-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .ticket-grid::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.15);
+            border-radius: 10px;
+        }
+
+        /* ✅ hover 才顯示的查看對話按鈕 */
+        .ticket-chat-btn {
+            position: absolute;
+            bottom: 12px;
+            right: 14px;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            font-size: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.25s ease;
+            opacity: 0; /* 預設隱藏 */
+            transform: scale(0.9); /* 稍微縮小 */
+            pointer-events: none; /* 防止 hover 時誤觸 */
+        }
+
+        /* hover 卡片時淡入 */
+        .ticket-card:hover .ticket-chat-btn {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* 按鈕 hover 效果 */
+        .ticket-chat-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+        }
+
+        .ticket-chat-btn i {
+            margin: 0;
+        }
+
+        /* 小螢幕：改為直排 */
+        @@media (max-width: 768px) {
+            .ticket-card-wrapper:nth-child(n+2)
+
+        {
+            margin-top: 1rem;
+        }
+
+        .ticket-card {
+            transform: none !important;
+        }
+
+        .ticket-grid:hover .ticket-card-wrapper,
+        .ticket-grid:active .ticket-card-wrapper {
+            transform: none;
+        }
+
+        }
+        /* ========== 展開／收起動畫 ========== */
+        .ticket-fade-enter-active,
+        .ticket-fade-leave-active {
+            transition: all 0.35s ease;
+        }
+
+        .ticket-fade-enter-from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.98);
+        }
+
+        .ticket-fade-leave-to {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+        }
+
+        /* ====================== 聊天訊息 ====================== */
+        #chatModal .modal-content {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        /* 讓上方標題列與下方背景更協調 */
+        #chatModal .modal-header {
+            border-top-left-radius: 1rem !important;
+            border-top-right-radius: 1rem !important;
+        }
+
+        #chatModal .modal-body {
+            background: #f0f8fa;
+            height: 60vh;
+            overflow-y: hidden;
+            position: relative;
+            scrollbar-gutter: stable both-edges;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+        
+        /* 聊天訊息列：採用直列排列，區分自己與他人對齊方式 */
+        .chat-message-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+            /* 自己的訊息靠右 */
+            .chat-message-row.me {
+                align-items: flex-end;
+            }
+
+            /* 其他人的訊息靠左 */
+            .chat-message-row.other {
+                align-items: flex-start;
+            }
+
+        /* 聊天泡泡基本樣式 */
+        .chat-bubble {
+            max-width: 72%;
+            padding: 12px 18px;
+            border-radius: 1.4em;
+            box-shadow: 0 2px 8px #0002;
+            font-size: 1.08em;
+            word-break: break-word;
+        }
+
+            /* 自己訊息的顏色與圓角調整 */
+            .chat-bubble.me {
+                background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
+                color: #fff;
+                border-bottom-right-radius: .3em;
+            }
+
+            /* 他人訊息的顏色與圓角調整 */
+            .chat-bubble.other {
+                background: #f4f7fa;
+                color: #234;
+                border-bottom-left-radius: .3em;
+            }
+
+        /* 訊息 metadata（例如姓名、時間、身分） */
+        .chat-meta {
+            font-size: 0.9em;
+            opacity: .7;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .empty-chat-placeholder {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            min-height: 55vh;
+            color: #666;
+            text-align: center;
+        }
+
+            .empty-chat-placeholder i {
+                font-size: 2.5rem;
+                color: #9ab;
+                margin-bottom: .75rem;
+            }
+        /* 讓客服資訊永遠在最上方顯示 */
+        .ticket-info-bar {
+            font-size: 0.95rem;
+            color: #234;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .spinner-border {
+            animation-duration: 0.8s !important;
+        }
+
+
+        /* ====================== 星級評價 ====================== */
+        /* 星星互動樣式（若未使用 JS 控制，僅外觀） */
+        .star {
+            cursor: pointer;
+            font-size: 1.8rem;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+            .star.active {
+                color: #f4b400;
+            }
+
+        /* ====================== 三欄布局 ====================== */
+        /* 使用彈性盒三欄排版，會根據寬度換行 */
+        .equal-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: stretch; 
+        }
+
+        .equal-col {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            /* 每欄內的卡片讓內容垂直填滿 */
+            .equal-col > .support-card {
+                flex: 1; 
+                display: flex;
+                flex-direction: column;
+                justify-content: center; 
+            }
+
+        /* 行動裝置斷點：窄螢幕時改為直列 */
+        @@media (max-width: 992px) {
+            .equal-row
+
+        {
+            flex-direction: column;
+        }
+
+        }
+
+        /* ====================== 附件預覽 ====================== */
+        .attach-preview {
+            margin-top: 8px;
+        }
+
+            .attach-preview img {
+                max-width: 220px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px #0002;
+            }
+
+            /* PDF 或一般附件的顯示方式 */
+            .attach-preview .pdf {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            /* ====================== 下拉選單顏色調整 ====================== */
+            .form-select,
+            .form-select option {
+                color: #222 !important;                /* 黑色文字 */
+                background-color: #fff !important;     /* 白色背景 */
+            }
+
+            /* hover 或 focus 時，讓使用者更容易看見選取效果 */
+            .form-select option:hover,
+            .form-select option:focus {
+                background-color: #e8f4ff !important;  /* 淺藍背景 */
+                color: #000 !important;                /* 黑字 */
+            }
+
+            /* 讓整個下拉框聚焦時邊框呈現主題色 */
+            .form-select:focus {
+                border-color: #7ec8e3 !important;
+                box-shadow: 0 0 0 0.15rem rgba(126, 200, 227, .25);
+            }
+
+            /* ====================== 輸入欄位顏色統一 ====================== */
+            .form-control {
+                color: #222 !important; /* 黑色文字 */
+                background-color: #fff !important; /* 白底 */
+                border-color: #ccc !important; /* 預設灰框 */
+                transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+
+                /* 聚焦時顯示主題藍色外框 */
+                .form-control:focus {
+                    border-color: #7ec8e3 !important;
+                    box-shadow: 0 0 0 0.15rem rgba(126, 200, 227, .25);
+                }
+
+                /* Placeholder 顏色柔和一點 */
+                .form-control::placeholder {
+                    color: #999;
+                }
+
+        /* ====================== 圖片預覽 ======================*/
+        #imagePreviewModal .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        #imagePreviewModal .btn-light {
+            opacity: 0.8;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+            #imagePreviewModal .btn-light:hover {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+        #imagePreviewModal img {
+            transition: transform 0.25s ease;
+        }
+
+            #imagePreviewModal img:hover {
+                transform: scale(1.02);
+            }
+        /* ====================== 禁用訊息區樣式 ====================== */
+        /* 完成工單或不可輸入時，顯示禁用提示 */
+        .chat-disabled {
+            background: #eef1f4;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            color: #888;
+            font-size: 0.95rem;
+        }
+    </style>
+}
+
+<!-- ====================== 主內容 ====================== -->
+<div id="chatApp" class="container mt-4 support-container">
+
+    <!-- 標題列：頁面標題和建立新工單按鈕 -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-primary"><i class="fa-solid fa-headset me-2"></i> 客服中心</h3>
+        <!-- 建立新工單會觸發 Vue 方法 openNewTicketModal -->
+        <button class="btn btn-outline-primary" v-on:click="openNewTicketModal">
+            <i class="fa-solid fa-plus"></i> 建立新工單
+        </button>
+    </div>
+
+    <!-- ====================== 三欄內容 ====================== -->
+    <div class="equal-row">
+        <!-- 我的工單欄位 -->
+        <div class="equal-col">
+            <div class="support-card p-3 mb-3">
+                <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-paw"></i> 我的客服紀錄</h5>
+
+                <!-- 若有工單，使用卡片網格列出所有 ticket -->
+                <div v-if="tickets.length > 0" class="ticket-grid">
+                    <transition-group name="ticket-fade" tag="div">
+                        <div v-for="t in showAll ? tickets : tickets.slice(0, 2)"
+                             :key="t.ticketID" class="ticket-card-wrapper">
+                            <div class="ticket-card border-0 shadow-sm p-3 position-relative">
+                                <h5 class="fw-bold mb-2 text-primary">
+                                    <i class="fa-solid fa-clipboard-list"></i> {{ t.subject }}
+                                </h5>
+
+                                <div class="text-secondary small mb-2">
+                                    狀態：
+                                    <span :class="{
+                        'badge bg-success': t.statusName === '已完成',
+                        'badge bg-info text-white': t.statusName === '處理中',
+                        'badge bg-secondary': t.statusName !== '已完成' && t.statusName !== '處理中'
+                    }">
+                                        {{ t.statusName }}
+                                    </span>
+                                    ｜建立時間：{{ formatTime(t.createTime) }}
+                                </div>
+
+                                <!-- ✅ 小型懸浮按鈕 -->
+                                <button class="btn btn-outline-primary btn-sm ticket-chat-btn"
+                                        v-on:click.stop="openChat(t)"
+                                        title="查看對話">
+                                    <i class="fa-solid fa-comments"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </transition-group>
+
+                    <!-- 查看更多 / 收起按鈕 -->
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary btn-sm rounded-pill"
+                                v-if="tickets.length > 2"
+                                v-on:click="showAll = !showAll">
+                            {{ showAll ? '收起工單' : '查看更多工單' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 若無工單，顯示空狀態提示 -->
+                <div v-else class="text-center py-5 opacity-75">
+                    <img src="/front-end/assets/images/cutservice.png" style="width:200px">
+                    <p class="mt-3 text-muted">目前尚無工單，點右上角建立新工單 🐾</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 常見問題欄位 -->
+        <div class="equal-col">
+            <div class="support-card p-4 mb-3 text-center">
+                <i class="fa-solid fa-circle-question fa-3x text-primary mb-3"></i>
+                <h5 class="fw-bold text-primary">常見問題</h5>
+                <p class="text-muted">查看常見問題以獲得即時解答</p>
+                <a href="/CustomersArea/FrontFAQs/Index" class="btn btn-outline-primary px-4 rounded-pill shadow-sm">
+                    <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> 前往常見問題
+                </a>
+            </div>
+        </div>
+
+        <!-- 服務時間欄位 -->
+        <div class="equal-col">
+            <div class="support-card p-4 mb-3 text-center">
+                <i class="fa-solid fa-calendar-days fa-3x text-primary mb-3"></i>
+                <h5 class="fw-bold text-primary mb-3">服務時間</h5>
+                <p class="mb-1 text-muted"><i class="fa-regular fa-calendar-days me-1"></i> 週一～週五</p>
+                <p class="text-muted"><i class="fa-regular fa-clock me-1"></i> 09:00 - 18:00</p>
+                <div class="mt-3">
+                    <small class="text-secondary">（例假日暫停服務）</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ====================== 聊天室 Modal ====================== -->
+    <div class="modal fade" id="chatModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Modal 標題列：顯示選取之工單主旨 -->
+                <div class="modal-header text-white"
+                     style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
+                    <h5 class="modal-title mb-0">
+                        <i class="fa-solid fa-comments me-2"></i>{{ selectedTicket.subject }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- ✅ 新增：工單資訊列（固定在標題下方） -->
+                <div class="ticket-info-bar text-dark px-4 py-2"
+                     style="background:#ecf9fc; border-bottom:1px solid #d4edf3;">
+                    <b>客服人員：</b>{{ selectedTicket.employeeName || '尚未指派' }}
+                    <b class="ms-3">狀態：</b>{{ selectedTicket.statusName }}
+                    <b class="ms-3">建立時間：</b>{{ formatTime(selectedTicket.createTime) }}
+                </div>
+
+                <!-- ✅ 載入中提示 -->
+                <div v-if="isLoadingMessages"
+                     class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center"
+                     style="background: rgba(255, 255, 255, 0.75); z-index: 100;">
+                    <div class="mb-3 fs-2 animate__animated animate__pulse animate__infinite">🐾</div>
+                    <strong class="text-primary fs-5">正在載入對話內容...</strong>
+                </div>
+
+
+                <!-- Modal 內容區：工單聊天內容 -->
+                <div class="modal-body" style="background:#f0f8fa; height:60vh; overflow-y:hidden; position:relative;">
+                    <!-- 聊天內容：以 messages 陣列呈現 -->
+                    <div v-if="messages.length === 0" class="empty-chat-placeholder mt-4">
+                        <div>
+                            <i class="fa-regular fa-comments"></i>
+                            <p>尚無對話內容，開始與客服聊天吧！</p>
+                        </div>
+                    </div>
+
+                    <div v-for="msg in messages"
+                         :key="msg.messageID"
+                         :class="['chat-message-row', msg.senderRole === '客戶' ? 'me' : 'other']">
+                        <div class="chat-meta mb-1">
+                            <span class="badge"
+                                  :class="msg.senderRole === '員工'
+                              ? 'bg-info text-white'
+                              : 'bg-secondary text-white'">
+                                {{ msg.senderRole === '員工' ? '客服人員' : '我' }}
+                            </span>
+                            <span class="fw-semibold">{{ msg.senderDisplayName }}</span>
+                            <span class="text-secondary small">{{ formatTime(msg.sentTime) }}</span>
+                        </div>
+
+                        <!-- 訊息泡泡 -->
+                        <div class="chat-bubble" :class="msg.senderRole === '客戶' ? 'me' : 'other'">
+                            <div v-if="msg.messageContent">{{ msg.messageContent }}</div>
+
+                            <div v-if="msg.attachmentURL" class="attach-preview">
+                                <!-- 圖片 -->
+                                <img v-if="isImage(msg.attachmentURL)"
+                                     :src="msg.attachmentURL"
+                                     alt="image"
+                                     class="rounded shadow-sm"
+                                     style="max-width: 220px; cursor: zoom-in;"
+                                     v-on:click="openImagePreview(msg.attachmentURL)" />
+
+                                <!-- PDF -->
+                                <a v-else-if="isPdf(msg.attachmentURL)"
+                                   :href="msg.attachmentURL"
+                                   target="_blank"
+                                   class="text-primary d-inline-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-file-pdf"></i> 查看 PDF
+                                </a>
+
+                                <!-- 其他附件 -->
+                                <a v-else
+                                   :href="msg.attachmentURL"
+                                   target="_blank"
+                                   class="text-primary d-inline-flex align-items-center gap-1">
+                                    <i class="fa-solid fa-paperclip"></i> 下載附件
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 已完成工單顯示評價 -->
+                    <div v-if="selectedTicket.statusName === '已完成'"
+                         class="text-center my-3 p-3 bg-white rounded shadow-sm">
+                        <h6 class="fw-bold text-success mb-2">
+                            <i class="fa-solid fa-check-circle me-1"></i> 此工單已完成
+                        </h6>
+
+                        <div v-if="hasFeedback">
+                            <div class="mb-2">
+                                <i v-for="n in 5" :key="n"
+                                   class="fa-star"
+                                   :class="{ 'fa-solid text-warning': n <= feedback.rating,
+                                         'fa-regular text-secondary': n > feedback.rating }"></i>
+                            </div>
+                            <p v-if="feedback.comment" class="text-muted fst-italic mb-1">
+                                評價內容：「{{ feedback.comment }}」
+                            </p>
+                            <p v-if="feedback.createTime"
+                               class="small text-secondary mb-2">
+                                評價時間：{{ formatTime(feedback.createTime) }}
+                            </p>
+                        </div>
+
+                        <div class="chat-disabled mt-2">
+                            <i class="fa-solid fa-circle-info me-1"></i>
+                            此工單已完成，若有其他問題請建立新工單。
+                        </div>
+                    </div>
+
+                    <!-- 隱藏的檔案輸入欄位 -->
+                    <input ref="fileInput" type="file"
+                           accept=".png,.jpg,.jpeg,.gif,.webp,.pdf"
+                           class="d-none"
+                           v-on:change="handleFile" />
+                </div>
+
+                <!-- ✅ 固定在底部的輸入欄位 -->
+                <div v-if="selectedTicket.statusName !== '已完成'"
+                     class="modal-footer bg-white border-top p-3">
+                    <div class="input-group">
+                        <button class="btn btn-outline-secondary"
+                                title="上傳附件"
+                                v-on:click.prevent="triggerFile">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </button>
+                        <input v-model="newMessage"
+                               type="text"
+                               class="form-control"
+                               placeholder="輸入訊息..."
+                               v-on:keyup.enter="sendMessage" />
+                        <button class="btn btn-outline-primary px-4"
+                                v-on:click="sendMessage">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== 圖片預覽 Modal ====================== -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-body p-0 d-flex justify-content-center align-items-center position-relative">
+                    <!-- 左右切換箭頭 -->
+                    <button v-if="imageList.length > 1"
+                            class="btn btn-light position-absolute top-50 start-0 translate-middle-y rounded-circle shadow"
+                            style="width:48px;height:48px;"
+                            v-on:click="prevImage">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <img :src="previewImageUrl"
+                         alt="preview"
+                         class="img-fluid rounded shadow-lg"
+                         style="max-height:90vh; max-width:95vw; object-fit:contain;">
+
+                    <button v-if="imageList.length > 1"
+                            class="btn btn-light position-absolute top-50 end-0 translate-middle-y rounded-circle shadow"
+                            style="width:48px;height:48px;"
+                            v-on:click="nextImage">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+
+                    <!-- 關閉按鈕 -->
+                    <button type="button"
+                            class="btn-close position-absolute top-0 end-0 m-3 bg-light p-3 rounded-circle shadow"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== 建立新工單 Modal ====================== -->
+    <div class="modal fade" id="newTicketModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background: linear-gradient(90deg, rgb(126, 200, 227) 60%, rgb(180, 225, 235) 100%);">
+                    <h5 class="modal-title"><i class="fa-solid fa-plus me-2"></i> 建立新工單</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- 新工單表單：主旨、描述、分類 -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">主旨</label>
+                        <input v-model="newTicket.subject" type="text" class="form-control" placeholder="請輸入問題主旨">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">問題描述</label>
+                        <textarea v-model="newTicket.description" rows="4" class="form-control"
+                                  placeholder="請詳細描述您的問題..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">分類</label>
+                        <select v-model="newTicket.ticketTypeID" class="form-select">
+                            <option value="" disabled>請選擇分類</option>
+                            <option v-for="c in ticketTypes" :value="c.categoryID">
+                                {{ c.categoryName }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">取消</button>
+                    <!-- submitNewTicket 會驗證與呼叫後端建立工單 -->
+                    <button class="btn btn-outline-primary" v-on:click="submitNewTicket"><i class="fa-solid fa-paper-plane me-1"></i> 送出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ====================== Vue 腳本 ====================== -->
+@section Scripts {
+    <script>
+        const { createApp, ref, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const tickets = ref([]);
+                const selectedTicket = ref({});
+                const messages = ref([]);
+                const feedback = ref({ rating: 0, comment: '', createTime: '' });
+                const hasFeedback = ref(false);
+                const newMessage = ref('');
+                const fileInput = ref(null);
+                const newTicket = ref({ subject: '', description: '', ticketTypeID: '' });
+                const ticketTypes = ref([]);
+                const previewImageUrl = ref('');
+                const imageList = ref([]);
+                const currentImageIndex = ref(0);
+                const showAll = ref(false);
+                const isLoadingMessages = ref(false);
+                let imagePreviewModal;
+                let newTicketModal;
+                let chatModal;
+
+                
+                onMounted(async () => {
+                    await loadTickets();
+                    await loadTicketCategories();
+                    setTimeout(() => {
+                        chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+                        newTicketModal = new bootstrap.Modal(document.getElementById('newTicketModal'));
+                    }, 200);
+                    imagePreviewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+
+                    // 支援鍵盤 ← → 切換圖片
+                    document.addEventListener('keydown', e => {
+                        if (!imagePreviewModal || document.getElementById('imagePreviewModal').classList.contains('show') === false)
+                            return;
+                        if (e.key === 'ArrowLeft') prevImage();
+                        if (e.key === 'ArrowRight') nextImage();
+                    });
+                });
+
+                // ====================== 工單載入 ======================
+                async function loadTickets() {
+                    try {
+                        const res = await axios.get('/CustomersArea/CustomerService/GetTickets');
+                        if (res.data.success) tickets.value = res.data.tickets;
+                    } catch (err) {
+                        showAlert('error', '載入失敗', '無法取得工單資料');
+                    }
+                }
+
+                async function loadTicketCategories() {
+                    try {
+                        const res = await axios.get('/CustomersArea/CustomerService/GetTicketTypes');
+                        if (res.data.success) ticketTypes.value = res.data.categories;
+                    } catch (err) {
+                        showAlert('error', '載入失敗', '無法取得分類資料');
+                    }
+                }
+
+                // ====================== 開啟新工單 ======================
+                function openNewTicketModal() {
+                    if (ticketTypes.value.length === 0) loadTicketCategories();
+                    newTicket.value = { subject: '', description: '', ticketTypeID: '' };
+                    newTicketModal.show();
+                }
+
+                async function submitNewTicket() {
+                    if (!newTicket.value.subject || !newTicket.value.description || !newTicket.value.ticketTypeID) {
+                        showAlert('warning', '請完整填寫', '主旨、描述與分類皆為必填');
+                        return;
+                    }
+
+                    const payload = {
+                        subject: newTicket.value.subject.trim(),
+                        description: newTicket.value.description.trim(),
+                        ticketTypeID: parseInt(newTicket.value.ticketTypeID)
+                    };
+
+                    try {
+                        const res = await axios.post('/CustomersArea/CustomerService/CreateTicket', payload);
+                        if (res.data.success) {
+                            showAlert('success', '建立成功', '已成功建立工單');
+                            newTicketModal.hide();
+                            await loadTickets();
+                        } else {
+                            showAlert('error', '建立失敗', res.data.message || '發生未知錯誤');
+                        }
+                    } catch (err) {
+                        console.error('建立工單失敗', err);
+                        showAlert('error', '錯誤', '建立工單時發生錯誤，請稍後再試。');
+                    }
+                }
+
+                // ====================== 開啟聊天室 ======================
+                async function openChat(ticket) {
+                    selectedTicket.value = ticket;
+                    await nextTick();
+
+                    if (!chatModal) {
+                        chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+                    }
+
+                    chatModal.show();
+                    messages.value = []; // 清空舊資料
+                    isLoadingMessages.value = true; // ⏳ 顯示載入中
+
+                    try {
+                        const res = await axios.get('/CustomersArea/CustomerService/GetMessages', {
+                            params: { ticketId: ticket.ticketID }
+                        });
+
+                        if (res.data.success) {
+                            messages.value = res.data.messages;
+                            await nextTick();
+
+                            const modalBody = document.querySelector('#chatModal .modal-body');
+                            modalBody.style.overflowY = messages.value.length > 0 ? 'auto' : 'hidden';
+                            scrollToBottom();
+                        }
+                    } catch (err) {
+                        showAlert('error', '載入失敗', '無法載入聊天內容');
+                    } finally {
+                        // ✅ 延遲關閉載入提示
+                        setTimeout(() => {
+                            isLoadingMessages.value = false;
+                        }, 300);
+                    }
+
+                    // ✅ 已完成工單載入評價
+                    if (ticket.statusName === '已完成') {
+                        try {
+                            const fbStatus = await axios.get('/CustomersArea/CustomerService/GetFeedbackStatus', {
+                                params: { ticketId: ticket.ticketID }
+                            });
+                            if (fbStatus.data.success && fbStatus.data.hasFeedback) {
+                                hasFeedback.value = true;
+                                const fbDetail = await axios.get('/CustomersArea/CustomerService/GetFeedbackDetail', {
+                                    params: { ticketId: ticket.ticketID }
+                                });
+                                if (fbDetail.data.success) feedback.value = fbDetail.data.feedback;
+                            } else {
+                                hasFeedback.value = false;
+                                feedback.value = { rating: 0, comment: '', createTime: '' };
+                            }
+                        } catch (err) {
+                            showAlert('error', '錯誤', '載入評價失敗');
+                        }
+                    } else {
+                        hasFeedback.value = false;
+                        feedback.value = { rating: 0, comment: '', createTime: '' };
+                    }
+                }
+
+
+
+                // ====================== 傳送訊息 ======================
+                async function sendMessage(attachmentUrl = '') {
+                    try {
+                        // 🔹 如果傳進來的是事件物件（例如 click 事件），直接忽略
+                        if (attachmentUrl && typeof attachmentUrl !== 'string') {
+                            console.warn('[sendMessage] 非字串 attachmentUrl，已忽略:', attachmentUrl);
+                            attachmentUrl = '';
+                        }
+
+                        // 🔹 檢查是否選取工單
+                        if (!selectedTicket.value || !selectedTicket.value.ticketID) {
+                            showAlert('warning', '請先選擇工單', '請先開啟一個客服對話');
+                            return;
+                        }
+
+                        // 🔹 檢查訊息內容或附件
+                        const content = (newMessage.value || '').trim();
+                        if (!content && !attachmentUrl) {
+                            showAlert('info', '沒有輸入內容', '請輸入訊息或上傳附件');
+                            return;
+                        }
+
+                        // 🔹 準備 payload
+                        const payload = {
+                            ticketID: selectedTicket.value.ticketID,
+                            messageContent: content,
+                            attachmentURL: attachmentUrl || ''
+                        };
+
+                        console.log('[sendMessage] payload', payload);
+
+                        // 🔹 發送到後端
+                        const res = await axios.post(
+                            '/CustomersArea/CustomerService/SendMessage',
+                            payload,
+                            { headers: { 'Content-Type': 'application/json' } }
+                        );
+
+                        if (res.data.success) {
+                            // ✅ 即時更新聊天訊息
+                            messages.value.push({
+                                senderRole: '客戶',
+                                senderDisplayName: '我',
+                                messageContent: content,
+                                attachmentURL: attachmentUrl,
+                                sentTime: new Date().toISOString()
+                            });
+                            newMessage.value = '';
+                            await nextTick(); scrollToBottom();
+                        } else {
+                            showAlert('error', '傳送失敗', res.data.message || '請稍後再試');
+                        }
+                    } catch (err) {
+                        showAlert('error', '錯誤', '訊息傳送失敗，請稍後再試');
+                    }
+                }
+
+                // ====================== 附件類型判斷 ======================
+                function isImage(url) {
+                    return /\.(png|jpe?g|gif|webp)$/i.test(url);
+                }
+
+                function isPdf(url) {
+                    return /\.pdf$/i.test(url);
+                }
+
+                // ====================== 圖片預覽 ======================
+                function openImagePreview(url) {
+                    // 收集目前聊天室所有圖片（照順序）
+                    imageList.value = messages.value
+                        .filter(m => m.attachmentURL && isImage(m.attachmentURL))
+                        .map(m => m.attachmentURL);
+
+                    // 找出目前圖片索引
+                    currentImageIndex.value = imageList.value.indexOf(url);
+                    previewImageUrl.value = url;
+
+                    imagePreviewModal.show();
+                }
+                        // 上一張
+                function prevImage() {
+                    if (imageList.value.length === 0) return;
+                    currentImageIndex.value =
+                        (currentImageIndex.value - 1 + imageList.value.length) % imageList.value.length;
+                    previewImageUrl.value = imageList.value[currentImageIndex.value];
+                }
+
+                // 下一張
+                function nextImage() {
+                    if (imageList.value.length === 0) return;
+                    currentImageIndex.value = (currentImageIndex.value + 1) % imageList.value.length;
+                    previewImageUrl.value = imageList.value[currentImageIndex.value];
+                }
+                // ====================== 上傳附件 ======================
+                function triggerFile() {
+                    fileInput.value?.click();
+                }
+
+                async function handleFile(e) {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    // 🔹 檢查工單
+                    if (!selectedTicket.value.ticketID) {
+                        showAlert('warning', '請先選擇工單', '開啟對話後再上傳附件');
+                        e.target.value = ''; // reset
+                        return;
+                    }
+
+                    // 🔹 可接受檔案類型
+                    const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf'];
+                    if (!allowed.includes(file.type)) {
+                        showAlert('warning', '格式錯誤', '僅支援上傳圖片或 PDF');
+                        e.target.value = '';
+                        return;
+                    }
+
+                    const form = new FormData();
+                    form.append('file', file);
+
+                    try {
+                        const resp = await axios.post('/CustomersArea/CustomerService/UploadAttachment', form, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+
+                        if (resp.data.success) {
+                            showAlert('success', '上傳成功', '附件已加入訊息');
+                            // ✅ 傳入字串 URL 給 sendMessage
+                            await sendMessage(resp.data.url);
+                        } else {
+                            showAlert('error', '上傳失敗', resp.data.message || '請稍後再試');
+                        }
+                    } catch (err) {
+                            showAlert('error', '錯誤', '上傳附件時發生錯誤');
+                    } finally {
+                        e.target.value = ''; // 清空 input
+                    }
+                }
+
+
+                // ====================== 工具方法 ======================
+                function scrollToBottom() {
+                    const el = document.querySelector('#chatModal .modal-body');
+                    if (el) el.scrollTop = el.scrollHeight;
+                }
+
+                function formatTime(iso) {
+                    return iso ? new Date(iso).toLocaleString() : '';
+                }
+
+                return {
+                    tickets, selectedTicket, messages, newMessage,showAll,
+                    feedback, hasFeedback, fileInput, ticketTypes, newTicket,
+                    openChat, sendMessage, triggerFile, handleFile,
+                    formatTime, openNewTicketModal, submitNewTicket,
+                    isImage, isPdf, openImagePreview, previewImageUrl,
+                    imageList, currentImageIndex, prevImage, nextImage,
+                    isLoadingMessages
+                };
+
+                /* ✅ SweetAlert2 共用方法 */
+                function showAlert(type, title, text, timer = 2000) {
+                    Swal.fire({
+                        icon: type,
+                        title,
+                        text,
+                        timer,
+                        showConfirmButton: false,
+                        timerProgressBar: true
+                    });
+                }
+            }
+        }).mount('#chatApp');
+    </script>
+}

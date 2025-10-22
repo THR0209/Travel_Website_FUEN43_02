@@ -1,85 +1,98 @@
-﻿using Cat_Paw_Footprint.Areas.CustomerService.Services; // 匯入客戶服務訊息相關服務介面
-using Cat_Paw_Footprint.Areas.CustomerService.ViewModel; // 匯入客戶服務訊息 ViewModel
-using Microsoft.AspNetCore.Mvc; // 匯入 MVC 控制器相關功能
-using Microsoft.AspNetCore.SignalR;
+﻿using Cat_Paw_Footprint.Areas.CustomerService.Services; // 匯入客戶服務相關服務
+using Cat_Paw_Footprint.Areas.CustomerService.ViewModel; // 匯入 ViewModel
+using Microsoft.AspNetCore.Mvc; // 匯入 MVC 控制器
+using Microsoft.AspNetCore.SignalR; // 匯入 SignalR 即時通訊
+using Microsoft.AspNetCore.Hosting; // IWebHostEnvironment
+using Microsoft.AspNetCore.Http; // IFormFile
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 {
-	// 設定此 Controller 屬於 CustomerService 區域
 	[Area("CustomerService")]
-	// 設定路由格式為 CustomerService/[controller]/[action]，controller 會自動替換成 CustomerSupportMessages
 	[Route("CustomerService/[controller]/[action]")]
-	// 註明這是一個 API Controller，會自動處理模型驗證錯誤並回傳 JSON
 	[ApiController]
 	public class CustomerSupportMessagesController : ControllerBase
 	{
-		// 宣告私有欄位，用來儲存注入的客戶服務訊息服務
-		private readonly ICustomerSupportMessagesService _service;
-		// 加入 SignalR Hub
-		private readonly IHubContext<TicketChatHub> _hubContext;
+		private readonly ICustomerSupportMessagesService _service; // 注入訊息服務
+		private readonly IHubContext<TicketChatHub> _hubContext; // SignalR Hub
+		private readonly IChatAttachmentService _attachmentService; // 共用附件上傳服務
+		private readonly IWebHostEnvironment _env; // 環境物件，用來取 wwwroot 路徑
 
-		// 建構式注入服務和 SignalR Hub
 		public CustomerSupportMessagesController(
 			ICustomerSupportMessagesService service,
-			IHubContext<TicketChatHub> hubContext)
+			IHubContext<TicketChatHub> hubContext,
+			IChatAttachmentService attachmentService,
+			IWebHostEnvironment env 
+		)
 		{
 			_service = service;
 			_hubContext = hubContext;
+			_attachmentService = attachmentService;
+			_env = env;
 		}
 
 		/// <summary>
-		/// 取得指定工單的訊息，支援分頁
-		/// GET /CustomerService/CustomerSupportMessages/GetMessages?ticketId={ticketId}&skip={skip}&take={take}
+		/// 取得指定工單的訊息（支援分頁）
+		/// GET /CustomerService/CustomerSupportMessages/GetMessages?ticketId={id}&skip={skip}&take={take}
 		/// </summary>
-		/// <param name="ticketId">工單 ID</param>
-		/// <param name="skip">跳過的筆數 (預設 0)</param>
-		/// <param name="take">取得的筆數 (預設 30)</param>
-		/// <returns>訊息列表 (JSON)</returns>
-		[HttpGet]
 		[HttpGet]
 		public async Task<IActionResult> GetMessages(int ticketId, int skip = 0, int take = 30)
 		{
 			try
 			{
-				// 依工單 ID 取得訊息列表，並進行分頁 (skip, take)
 				var msgs = await _service.GetByTicketIdAsync(ticketId, skip, take);
-				return Ok(msgs); // 回傳 200 OK 與訊息 JSON
+				return Ok(msgs);
 			}
 			catch (Exception ex)
 			{
-				// 直接把 exception 內容回傳，方便前端 debug
 				return StatusCode(500, ex.ToString());
 			}
 		}
 
 		/// <summary>
-		/// 新增客服訊息
+		/// 新增客服訊息（包含文字或附件）
 		/// POST /CustomerService/CustomerSupportMessages/PostMessage
 		/// </summary>
-		/// <param name="vm">訊息資料 (ViewModel)</param>
-		/// <returns>新增結果 (JSON)</returns>
 		[HttpPost]
 		public async Task<IActionResult> PostMessage([FromBody] CustomerSupportMessageViewModel vm)
 		{
-			// 檢查訊息內容是否為空白，若是則回傳 400 BadRequest
-			if (string.IsNullOrWhiteSpace(vm.MessageContent))
-				return BadRequest("訊息內容不可空白");
+			if (string.IsNullOrWhiteSpace(vm.MessageContent) && string.IsNullOrWhiteSpace(vm.AttachmentURL))
+				return BadRequest("訊息內容或附件不可皆為空白");
 
 			try
 			{
-				// 新增訊息
 				var result = await _service.AddAsync(vm);
-				result.TempId = vm.TempId; // ← 保證回傳 tempId 給前端
-										   // 若有 SignalR 廣播，請用 result（含 tempId）廣播
-				await _hubContext.Clients.Group($"ticket-{vm.TicketID}").SendAsync("ReceiveMessage", result);
-				return Ok(result); // 回傳 200 OK 與新增結果 JSON
+				result.TempId = vm.TempId;
+
+				// SignalR 廣播給群組 (ticket-<id>)
+				await _hubContext.Clients.Group($"ticket-{vm.TicketID}")
+					.SendAsync("ReceiveMessage", result);
+
+				return Ok(result);
 			}
 			catch (Exception ex)
 			{
-				// 發生例外時，回傳 500 伺服器錯誤與例外訊息
 				return StatusCode(500, ex.ToString());
+			}
+		}
+
+		/// <summary>
+		/// 上傳附件 API（共用 Service）
+		/// POST /CustomerService/CustomerSupportMessages/UploadAttachment
+		/// </summary>
+		[HttpPost("UploadAttachment")]
+		public async Task<IActionResult> UploadAttachment(IFormFile file)
+		{
+			try
+			{
+				var url = await _attachmentService.SaveFileAsync(file);
+				return Ok(new { success = true, url });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { success = false, message = ex.Message });
 			}
 		}
 	}

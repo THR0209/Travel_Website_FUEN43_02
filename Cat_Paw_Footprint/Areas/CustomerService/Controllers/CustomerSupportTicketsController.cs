@@ -10,18 +10,13 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 {
 	// 設定此 Controller 屬於 CustomerService 區域
 	[Area("CustomerService")]
-	// 需員工身份驗證且符合 AreaCustomerService 授權政策
 	[Authorize(AuthenticationSchemes = "EmployeeAuth", Policy = "AreaCustomerService")]
-	// 路由格式：CustomerService/[controller]/[action]
 	[Route("CustomerService/[controller]/[action]")]
 	public class CustomerSupportTicketsController : Controller
 	{
-		// 注入工單服務
 		private readonly ICustomerSupportTicketsService _service;
-		// 注入資料庫 DbContext
 		private readonly webtravel2Context _context;
 
-		// 建構式注入服務與 DbContext
 		public CustomerSupportTicketsController(ICustomerSupportTicketsService service, webtravel2Context context)
 		{
 			_service = service;
@@ -33,9 +28,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		/// </summary>
 		public async Task<IActionResult> Index()
 		{
-			// 取得目前登入員工 ID
 			var empId = User.FindFirst("EmployeeID")?.Value;
-			// 篩選屬於此員工的工單
 			var tickets = (await _service.GetAllAsync())
 				.Where(t => t.EmployeeID?.ToString() == empId);
 			return View(tickets);
@@ -48,37 +41,36 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetTickets()
 		{
-			// 使用 EF 取得工單及關聯資料
 			var tickets = await _context.CustomerSupportTickets
-				.Include(t => t.Employee)
-					.ThenInclude(e => e.EmployeeProfile)
+				.Include(t => t.Employee).ThenInclude(e => e.EmployeeProfile)
 				.Include(t => t.Customer)
 				.Include(t => t.TicketType)
 				.Include(t => t.Status)
 				.Include(t => t.Priority)
 				.Select(t => new
 				{
-					ticketID = t.TicketID != null ? t.TicketID : 0,
+					ticketID = t.TicketID,
 					ticketCode = t.TicketCode ?? "",
-					customerID = t.CustomerID != null ? t.CustomerID : 0,
-					customerName = t.Customer != null && t.Customer.CustomerName != null ? t.Customer.CustomerName : "",
-					customerEmail = t.Customer != null && t.Customer.Email != null ? t.Customer.Email : "", // 顯示客戶 Email
-					employeeID = t.EmployeeID != null ? t.EmployeeID : 0,
-					employeeName = t.Employee != null && t.Employee.EmployeeProfile != null && t.Employee.EmployeeProfile.EmployeeName != null
-						? t.Employee.EmployeeProfile.EmployeeName : "",
+					customerID = t.CustomerID ?? 0,
+					customerName = t.Customer != null ? t.Customer.CustomerName : "",
+					customerEmail = t.Customer != null ? t.Customer.Email : "",
+					employeeID = t.EmployeeID ?? 0,
+					employeeName = (t.Employee != null && t.Employee.EmployeeProfile != null && !string.IsNullOrEmpty(t.Employee.EmployeeProfile.EmployeeName))
+						? t.Employee.EmployeeProfile.EmployeeName
+						: "尚未指派",
 					subject = t.Subject ?? "",
 					description = t.Description ?? "",
-					ticketTypeID = t.TicketTypeID != null ? t.TicketTypeID : 0,
-					ticketTypeName = t.TicketType != null && t.TicketType.TicketTypeName != null ? t.TicketType.TicketTypeName : "",
-					statusID = t.StatusID != null ? t.StatusID : 0,
-					statusName = t.Status != null && t.Status.StatusDesc != null ? t.Status.StatusDesc : "",
-					priorityID = t.PriorityID != null ? t.PriorityID : 0,
-					priorityName = t.Priority != null && t.Priority.PriorityDesc != null ? t.Priority.PriorityDesc : "",
+					ticketTypeID = t.TicketTypeID ?? 0,
+					ticketTypeName = t.TicketType != null ? t.TicketType.TicketTypeName : "",
+					statusID = t.StatusID ?? 0,
+					statusName = t.Status != null ? t.Status.StatusDesc : "",
+					priorityID = t.PriorityID ?? 0,
+					priorityName = t.Priority != null ? t.Priority.PriorityDesc : "",
 					createTime = t.CreateTime.HasValue ? t.CreateTime.Value.ToString("yyyy-MM-dd HH:mm:ss") : ""
 				})
 				.ToListAsync();
 
-			return Json(tickets); // 回傳 JSON 格式
+			return Json(tickets);
 		}
 
 		/// <summary>
@@ -98,7 +90,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				t.CustomerID,
 				customerName = t.CustomerName ?? "",
 				t.EmployeeID,
-				employeeName = t.EmployeeName ?? "",
+				employeeName = !string.IsNullOrEmpty(t.EmployeeName) ? t.EmployeeName : "尚未指派",
 				t.Subject,
 				t.Description,
 				t.TicketTypeID,
@@ -115,7 +107,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		}
 
 		/// <summary>
-		/// 新增工單，處理人員自動取目前登入者
+		/// 新增工單，分配給待處理工單最少的 CustomerService 員工
 		/// POST: /CustomerService/CustomerSupportTickets/CreateTicket
 		/// </summary>
 		[HttpPost]
@@ -123,22 +115,38 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		{
 			if (!ModelState.IsValid) return BadRequest(ModelState);
 
-			// 取得目前登入員工 ID
-			var empIDStr = User.FindFirst("EmployeeID")?.Value;
-			if (string.IsNullOrEmpty(empIDStr) || !int.TryParse(empIDStr, out int employeeID))
-				return BadRequest("無法取得登入員工ID");
+			var customerServiceRoleName = "CustomerService";
+			var customerServiceEmployees = await _context.Employees
+				.Include(e => e.EmployeeProfile)
+				.Include(e => e.Role)
+				.Where(e => e.Role != null && e.Role.RoleName == customerServiceRoleName)
+				.ToListAsync();
 
-			// 產生 TicketCode (格式: CST+年月日+當日流水號4碼)
+			if (!customerServiceEmployees.Any())
+				return BadRequest("找不到 CustomerService 員工，請聯絡管理員");
+
+			var pendingStatusDesc = "待處理";
+			var empWithTicketCounts = customerServiceEmployees
+				.Select(emp => new
+				{
+					emp.EmployeeID,
+					PendingCount = _context.CustomerSupportTickets
+						.Count(t => t.EmployeeID == emp.EmployeeID && t.Status.StatusDesc == pendingStatusDesc)
+				})
+				.OrderBy(x => x.PendingCount)
+				.ToList();
+
+			var selectedEmpId = empWithTicketCounts.First().EmployeeID;
+
 			var today = DateTime.Now.Date;
 			var countToday = await _context.CustomerSupportTickets
 				.CountAsync(t => t.CreateTime.HasValue && t.CreateTime.Value.Date == today);
-			var newCode = $"CST{today:yyMMdd}{(countToday + 1).ToString("D4")}";
+			var newCode = $"CST{today:yyMMdd}{(countToday + 1):D4}";
 
-			// 建立新工單實體
 			var entity = new CustomerSupportTickets
 			{
 				CustomerID = vm.CustomerID,
-				EmployeeID = employeeID,
+				EmployeeID = selectedEmpId,
 				Subject = vm.Subject,
 				TicketTypeID = vm.TicketTypeID,
 				Description = vm.Description,
@@ -149,7 +157,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				TicketCode = newCode
 			};
 
-			// 呼叫 Service 新增工單
 			await _service.AddAsync(new CustomerSupportTicketViewModel
 			{
 				CustomerID = entity.CustomerID,
@@ -164,10 +171,8 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				TicketCode = entity.TicketCode
 			});
 
-			// 取得新增的工單完整資料
 			var createdTicket = (await _service.GetAllAsync()).OrderByDescending(t => t.TicketID).FirstOrDefault();
 
-			// 回傳 DataTables 所需欄位
 			return Json(new
 			{
 				success = true,
@@ -191,12 +196,13 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		[HttpPost]
 		public async Task<IActionResult> EditTicket([FromBody] CustomerSupportTicketViewModel vm)
 		{
-			// 只允許修改狀態及優先度
 			var ticket = await _service.GetByIdAsync(vm.TicketID);
 			if (ticket == null) return NotFound();
 
 			ticket.StatusID = vm.StatusID;
 			ticket.PriorityID = vm.PriorityID;
+			ticket.TicketTypeID = vm.TicketTypeID;
+
 			await _service.UpdateAsync(ticket);
 
 			return Json(new { success = true });
@@ -213,7 +219,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			{
 				if (!await _service.ExistsAsync(id)) return NotFound(new { success = false, message = "工單不存在" });
 
-				// 檢查是否有關聯回饋資料
 				bool hasFeedback = await _context.CustomerSupportFeedback.AnyAsync(f => f.TicketID == id);
 				if (hasFeedback)
 				{
@@ -243,7 +248,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		[HttpGet]
 		public async Task<IActionResult> GetDropdowns()
 		{
-			// 顯示連線字串（除錯用）
 			Console.WriteLine("Using DB: " + _context.Database.GetDbConnection().ConnectionString);
 
 			var customers = await _context.CustomerProfile

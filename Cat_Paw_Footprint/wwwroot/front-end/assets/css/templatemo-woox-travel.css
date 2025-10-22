@@ -128,18 +128,30 @@ img {
 }
 
 .btn-outline-primary {
-    color: #7ec8e3;
-    border-color: #7ec8e3;
-    background: transparent;
+    color: #7ec8e3 !important;
+    border-color: #7ec8e3 !important;
+    background: transparent !important;
+    transition: all 0.25s ease !important;
 }
 
     .btn-outline-primary:hover {
-        color: #fff;
-        background-color: #1da0aa;
-        border-color: #1da0aa;
-        box-shadow: 0 0.125rem 0.25rem 0 rgba(105, 108, 255, 0.4);
-        transform: translateY(-1px);
+        color: #fff !important;
+        background-color: #66bcd9 !important;
+        border-color: #66bcd9 !important;
+        box-shadow: 0 0.125rem 0.4rem 0 rgba(102, 188, 217, 0.45) !important;
+        transform: translateY(-1px) !important;
     }
+
+    .btn-outline-primary:active {
+        background-color: #5ab3cf !important;
+        border-color: #5ab3cf !important;
+        box-shadow: 0 0.125rem 0.3rem rgba(90, 179, 207, 0.45) inset !important;
+        transform: translateY(0) !important;
+    }
+
+.bg-primary {
+    background-color: #7ec8e3 !important;
+}
 
 #app {
     min-height: 100vh;

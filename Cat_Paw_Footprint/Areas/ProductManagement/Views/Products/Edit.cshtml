@@ -55,11 +55,11 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group mb-3">
-                    @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
+                    @if (Model.Product.ProductImageUrl != null && Model.Product.ProductImageUrl != "")
                     {
                         <!-- 把 byte[] 轉成 base64 並顯示 -->
-                        var base64 = "data:image/png;base64," + Convert.ToBase64String(Model.Product.ProductImage);
-                        <img src="@base64" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
+                        @* var base64 = "data:image/png;base64," + Convert.ToBase64String(Model.Product.ProductImage); *@
+                        <img src="@Model.Product.ProductImageUrl" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
                     }
                     else
                     {
@@ -69,20 +69,6 @@
                     <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" id="uploadImage" />
                     <!-- 使用asp-for同時會使 id 和 name 兩個成為asp-for的值，且如果asp-for的值有.的話，在轉換成id時會被轉成_ ，name不會影響 -->
                 </div>
-
-                @* <div class="form-group mb-3">
-                    @if (Model.Product.ProductImage != null && Model.Product.ProductImage.Length > 0)
-                    {
-                        <img src="@Url.Action("GetProductImage", "Products", new { area = "ProductManagement", id = Model.Product.ProductID })"
-                             style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
-                    }
-                    else
-                    {
-                        <img src="@Url.Content("~/images/NoImage.png")"
-                             style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
-                    }
-                    <input type="file" asp-for="UploadImage" class="form-control" accept="image/*" />
-                </div> *@
 
                 @* <div class="form-group mb-3">
                     <label asp-for="Product.ProductCode" class="control-label mb-1">產品編號：</label>

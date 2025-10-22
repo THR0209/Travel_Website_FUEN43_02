@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.19" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="4.8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.19" />
@@ -29,16 +30,15 @@
     <Folder Include="Areas\CustomersArea\Data\" />
     <Folder Include="Areas\CustomersArea\Models\" />
     <Folder Include="Areas\CustomersArea\Repositories\" />
-    <Folder Include="Areas\CustomersArea\Views\" />
     <Folder Include="Areas\ProductManagement\Data\" />
     <Folder Include="Areas\ProductManagement\ViewModel\" />
     <Folder Include="Areas\TourGuideArea\Data\" />
     <Folder Include="Areas\TourGuideArea\Models\" />
-    <Folder Include="Areas\TourGuideArea\ViewModel\" />
     <Folder Include="Areas\TourGuideArea\Views\" />
     <Folder Include="Areas\TravelManagement\Data\" />
     <Folder Include="Areas\TravelManagement\Views\Shared\" />
     <Folder Include="Views\Shared\test\" />
+    <Folder Include="wwwroot\uploads\group_photos\" />
   </ItemGroup>
 
   <ItemGroup>
