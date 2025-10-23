@@ -63,6 +63,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "景點圖片")]
 		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
 
+		[Display(Name = "景點圖片")]
+		public List<string>? PictureUrl { get; set; } = new List<string>();
+
 		// 舊圖片的 ID，用來刪除對應圖片
 		public List<int>? PictureIds { get; set; }
 

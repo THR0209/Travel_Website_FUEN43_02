@@ -57,6 +57,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[NotMapped] // 不會影響資料庫
 		public string IsActiveText => (bool)IsActive ? "啟用" : "停用";
 
+		[Display(Name = "住宿圖片")]
+		public List<string>? PictureUrl { get; set; } = new List<string>();
+
 		//多張圖片，用 IFormFile 來接收
 		[Display(Name = "住宿圖片")]
 		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();

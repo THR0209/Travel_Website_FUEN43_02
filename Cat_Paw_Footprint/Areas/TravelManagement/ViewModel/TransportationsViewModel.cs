@@ -35,6 +35,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "交通圖片")]
 		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
 
+		[Display(Name = "交通圖片")]
+		public List<string>? PictureUrl { get; set; } = new List<string>();
+
 		// 圖片Base64字串清單（顯示用）
 		public List<string> PictureBase64 { get; set; } = new();
 

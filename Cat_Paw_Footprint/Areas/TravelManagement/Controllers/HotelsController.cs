@@ -1,4 +1,5 @@
-﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.Helper;
+using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -159,13 +160,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					{
 						if (file.Length > 0) // 確保有檔案
 						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
 							var pic = new HotelPics
 							{
 								HotelID = hotel.HotelID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file)
 							};
 
 							_context.HotelPics.Add(pic);
@@ -247,8 +245,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 				// 圖片
 				PictureIds = hotels.HotelPics.Select(p => p.HotelPicID).ToList(),
-				PictureBase64 = hotels.HotelPics
-					   .Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture))
+				PictureUrl = hotels.HotelPics
+					   .Select(p => p.PictureUrl)
 					   .ToList()
 			};
 
@@ -311,13 +309,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					{
 						if (file.Length > 0)
 						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
 							var pic = new HotelPics
 							{
 								HotelID = hotel.HotelID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file)
 							};
 							_context.HotelPics.Add(pic);
 						}

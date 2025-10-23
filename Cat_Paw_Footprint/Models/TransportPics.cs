@@ -12,5 +12,7 @@ public partial class TransportPics
 
     public byte[]? Picture { get; set; }
 
-    public virtual Transportations? Transport { get; set; }
+	public string? PictureUrl { get; set; }
+
+	public virtual Transportations? Transport { get; set; }
 }

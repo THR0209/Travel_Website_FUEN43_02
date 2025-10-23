@@ -1,4 +1,5 @@
-﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.Helper;
+using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -162,14 +163,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					foreach (var file in model.Picture)
 					{
 						if (file.Length > 0) // 確保有檔案
-						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
+						{		
 							var pic = new LocationPics
 							{
 								LocationID = location.LocationID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file),
 							};
 
 							_context.LocationPics.Add(pic);
@@ -250,8 +248,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 				// 圖片
 				PictureIds = locations.LocationPics.Select(p => p.LocationPicID).ToList(),
-				PictureBase64 = locations.LocationPics
-					   .Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture))
+				PictureUrl = locations.LocationPics
+					   .Select(p => p.PictureUrl)
 					   .ToList()
 			};
 
@@ -315,13 +313,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					{
 						if (file.Length > 0)
 						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
 							var pic = new LocationPics
 							{
 								LocationID = locations.LocationID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file),
 							};
 							_context.LocationPics.Add(pic);
 						}
