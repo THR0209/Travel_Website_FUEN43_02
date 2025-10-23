@@ -1,6 +1,31 @@
-﻿@{
+﻿@section Styles {
+    <style></style>
+}
+
+@{
     ViewData["Title"] = "自由行專區";
 }
 
-自由行
+<div id="app">
+    自由行
+    @* <h1>{{message}}</h1> *@
+</div>
+
+
+@section Scripts{
+    <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
+    <script>
+        var vueApp={
+            data(){
+                return{ //model
+                    message:"Hello Vue!"
+                };
+            },
+            methods:{ //controller
+
+            }
+        };
+        var app=Vue.createApp(vueApp).mount("#app"); //View
+    </script>
+}
 
