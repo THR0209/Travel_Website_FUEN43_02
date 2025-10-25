@@ -1,7 +1,9 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomersArea.ViewModel;
+using Cat_Paw_Footprint.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using Cat_Paw_Footprint.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
@@ -9,6 +11,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 	[AllowAnonymous]
 	public class TravelController : Controller
 	{
+		private readonly webtravel2Context _context;
+
+		// 建構子：注入資料庫 Context
+		public TravelController(webtravel2Context context)
+		{
+			_context = context;
+		}
+
 		//主頁面 View (顯示 Vue 畫面)
 		public IActionResult Index()
 		{
@@ -38,10 +48,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					RegionName = h.Region.RegionName,
 					DistrictID = h.DistrictID,
 					DistrictName = h.District.DistrictName,
+					// 此行必須要有 HotelPics.PictureUrl 屬性才會成功傳出多張圖。
 					PictureUrl = h.HotelPics.Select(p => p.PictureUrl).ToList()
 				}).ToListAsync();
 
-			return Json(data);
+			return Json(data);  // 回傳 JSON 格式資料
 		}
 
 		//取得【景點資料】（給 Vue3 呼叫用）
@@ -67,11 +78,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					RegionName = l.Region.RegionName,
 					DistrictID = l.DistrictID,
 					DistrictName = l.District.DistrictName,
+					// 此行必須要 LocationPics.PictureUrl 屬性才會成功傳出多張圖。
 					PictureUrl = l.LocationPics.Select(p => p.PictureUrl).ToList()
 				}).ToListAsync();
 
-			return Json(data);
+			return Json(data);  // 回傳 JSON 格式資料
 		}
+
 		//取得【美食資料】（給 Vue3 呼叫用）
 		[HttpGet("/api/restaurants")]
 		public async Task<IActionResult> GetRestaurants()
@@ -95,10 +108,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					RegionName = r.Region.RegionName,
 					DistrictID = r.DistrictID,
 					DistrictName = r.District.DistrictName,
+					// 此行必須要 RestaurantPics.PictureUrl 屬性才會成功傳出多張圖。
 					PictureUrl = r.RestaurantPics.Select(p => p.PictureUrl).ToList()
 				}).ToListAsync();
 
-			return Json(data);
+			return Json(data);  // 回傳 JSON 格式資料
 		}
 
 	}
