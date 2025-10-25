@@ -1,49 +1,7 @@
 ﻿@section Styles {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" >
-    <style >
-        body {
-            background-color: #f8f8f8;
-        }
-        
-        .top-buttons {
-            position: sticky; /* 黏在畫面頂部 */
-            top: 86px; /* ← 根據你的導覽列高度調整 */
-            z-index: 1020; /* 確保在卡片上層 */
-            background-color: white;
-            padding: 12px 0;
-            border-bottom: 1px solid #ddd;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* 略帶陰影區分上方與下方內容 */
-        }
-
-            /* 按鈕外觀 */
-            .top-buttons button {
-                border-radius: 50px;
-                padding: 8px 20px;
-                transition: 0.2s;
-            }
-
-                /* 滑鼠滑過的輕微陰影 */
-                .top-buttons button:hover {
-                    transform: scale(1.05);
-                }
-
-        .card {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.3s;
-        }
-
-            .card:hover {
-                transform: scale(1.03);
-            }
-
-        .carousel-item img {
-            object-fit: cover;
-            width: 100%;
-            height: 180px;
-        }
-    </style>
+    <link href="~/css/travel.css" rel="stylesheet" />
+    <style ></style>
 }
 
 @{
