@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>群組聊天室</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            margin: 0
+        }
+
+        header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0;
+            border-top: 1px solid #fafafa
+        }
+
+        .chat {
+            padding: 16px;
+            max-height: calc(100vh - 120px);
+            overflow: auto
+        }
+
+        .side {
+            padding: 16px;
+            border-left: 1px solid #eee
+        }
+
+        .msg {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 8px
+        }
+
+        .meta {
+            font-size: .85rem;
+            color: #666;
+            margin-bottom: 4px
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px
+        }
+
+        input,
+        button,
+        textarea {
+            padding: .6rem .7rem;
+            font-size: 1rem
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 70px
+        }
+
+        .muted {
+            color: #666
+        }
+
+        .err {
+            color: #b00020;
+            margin-top: .5rem
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <div>
+                <strong>{{ groupName }}</strong>
+                <span class="muted">（代碼：{{ groupCode }}）</span>
+            </div>
+            <div class="muted">導遊：{{ guideName || guideAccount }}</div>
+        </header>
+
+        <main>
+            <section class="chat">
+                <div v-for="item in feed" :key="item._k" class="msg">
+                    <div class="meta">{{ item.sender }} · {{ item.time }}</div>
+                    <div v-if="item.type==='text'">{{ item.content }}</div>
+                    <div v-else-if="item.type==='photo'"><img :src="item.url"
+                            style="max-width:100%;border-radius:8px" /></div>
+                    <div v-else-if="item.type==='location'">📍 {{ item.lat }}, {{ item.lng }}</div>
+                </div>
+
+                <h4>發送文字</h4>
+                <textarea v-model.trim="text"></textarea>
+                <div class="row">
+                    <button @click="sendText" :disabled="!text">送出</button>
+                    <span class="err" v-if="errText">{{ errText }}</span>
+                </div>
+            </section>
+
+            <aside class="side">
+                <h4>上傳照片（提供已存 URL）</h4>
+                <input v-model.trim="photoUrl" placeholder="/uploads/group_photos/xxx.jpg" />
+                <div class="row">
+                    <button @click="sendPhoto" :disabled="!photoUrl">上傳</button>
+                </div>
+
+                <h4 style="margin-top:24px">設定集合地</h4>
+                <input v-model.number="lat" type="number" step="0.000001" placeholder="緯度" />
+                <input v-model.number="lng" type="number" step="0.000001" placeholder="經度" />
+                <div class="row">
+                    <button @click="setLocation" :disabled="!lat || !lng">發布集合地</button>
+                </div>
+
+                <p class="muted" style="margin-top:24px"><a href="group-list.html">← 返回群組清單</a></p>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    guideId: localStorage.getItem('guideId') || '',
+                    guideAccount: localStorage.getItem('guideAccount') || '',
+                    guideName: localStorage.getItem('guideName') || '',
+                    groupId: Number(localStorage.getItem('groupId') || 0),
+                    groupCode: localStorage.getItem('groupCode') || '',
+                    groupName: localStorage.getItem('groupName') || '',
+                    connection: null,
+                    feed: [],
+                    text: '', errText: '',
+                    photoUrl: '',
+                    lat: null, lng: null
+                }
+            },
+            mounted() { this.loadHistory(); this.initSignalR(); },
+            methods: {
+                pushFeed(item) {
+                    if (!item.content && item.type === 'text') return;
+                    this.feed.push({ _k: crypto.randomUUID(), ...item });
+                },
+                async initSignalR() {
+                    if (!this.groupCode) { alert('缺少 groupCode'); return; }
+                    this.connection = new signalR.HubConnectionBuilder().withUrl('/chathub').build();
+
+                    console.log("🎯 嘗試連線到 /chathub...");
+                    this.connection = new signalR.HubConnectionBuilder()
+                        .withUrl('/chathub')
+                        .configureLogging(signalR.LogLevel.Information) // 👈 可顯示更多細節
+                        .build();
+
+                    this.connection.on('ReceiveMessage', (msg) => {
+                        this.pushFeed({
+                            type: 'text',
+                            sender: msg.SenderType,
+                            time: (msg.UploadTime && !isNaN(new Date(msg.UploadTime))) ? new Date(msg.UploadTime).toLocaleString() : '',
+                            content: msg.Content
+                        });
+                    });
+
+                    this.connection.on('ReceivePhoto', (p) => {
+                        this.pushFeed({
+                            type: 'photo',
+                            sender: 'Photo',
+                            time: (p.UploadTime && !isNaN(new Date(p.UploadTime))) ? new Date(p.UploadTime).toLocaleString() : '',
+                            url: p.Url
+                        });
+                    });
+
+                    this.connection.on('ReceiveLocation', (l) => {
+                        this.pushFeed({
+                            type: 'location',
+                            sender: 'Location',
+                            time: (l.UploadTime && !isNaN(new Date(p.UploadTime))) ? new Date(l.UploadTime).toLocaleString() : '',
+                            lat: l.Latitude, lng: l.Longitude
+                        });
+                    });
+                    // 監控連線狀態
+                    this.connection.onclose((err) => console.error("❌ SignalR 連線中斷:", err));
+                    this.connection.onreconnecting(() => console.warn("⚠️ SignalR 嘗試重新連線中..."));
+                    this.connection.onreconnected(() => console.log("✅ SignalR 已重新連線"));
+
+                    await this.connection.start();
+                    await this.connection.invoke('JoinGroup', this.groupCode);
+                },
+                async loadHistory() {
+                    try {
+                        const res = await axios.get(`/api/TourGuideArea/TGMessageApi/GetHistory/${this.groupCode}`);
+                        console.log(res.data);
+                        if (res.data && Array.isArray(res.data)) {
+                            res.data.forEach(m => {
+                                this.pushFeed({
+                                    type: 'text',
+                                    sender: m.senderType || '未知',
+                                    time: (m.sendTime && !isNaN(new Date(m.sendTime))) ? new Date(m.sendTime).toLocaleString() : '',
+                                    content: m.content
+                                });
+                            });
+                            console.log(`✅ 已載入 ${res.data.length} 筆歷史訊息`);
+                        }
+                    } catch (err) {
+                        console.error("❌ 載入歷史訊息失敗", err);
+                    }
+                },
+
+                async sendText() {
+                    this.errText = '';
+                    try {
+                        const payload = {
+                            groupId: Number(this.groupId),
+                            groupCode: this.groupCode,
+                            senderType: 'Guide',
+                            senderId: Number(this.guideId),
+                            guideId: Number(this.guideId),
+                            content: this.text,
+                            message: this.text
+                        };
+                        await axios.post('/api/TourGuideArea/TGMessageApi/SendMessage', payload);
+                        // ✅ 自己立即顯示訊息
+                        this.pushFeed({
+                            type: 'text',
+                            sender: '自己',
+                            time: new Date().toLocaleString(),
+                            content: this.text
+                        });
+                        this.text = '';
+                    } catch (e) { this.errText = '發送失敗'; }
+                },
+
+                async sendPhoto() {
+                    try {
+                        const payload = {
+                            groupCode: this.groupCode,
+                            uploaderType: 'Guide',
+                            uploaderId: this.guideId ? Number(this.guideId) : 0,
+                            photoUrl: this.photoUrl
+                        };
+                        await axios.post('/api/TourGuideArea/TGMessageApi/UploadPhoto', payload);
+                        this.photoUrl = '';
+                    } catch (e) { alert('上傳失敗'); }
+                },
+
+                async setLocation() {
+                    try {
+                        const payload = {
+                            groupCode: this.groupCode,
+                            groupId: this.groupId,
+                            senderType: 'Guide',
+                            guideId: this.guideId ? Number(this.guideId) : null,
+                            latitude: this.lat,
+                            longitude: this.lng,
+                            note: '集合地'
+                        };
+                        await axios.post('/api/TourGuideArea/TGMessageApi/SetLocation', payload);
+                        this.lat = null; this.lng = null;
+                    } catch (e) { alert('設定失敗'); }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+﻿@{
+    ViewData["Title"] = "修改個人資料";
+}
+
+<div id="editApp" class="container mt-5" style="max-width:500px;">
+    <h2 class="text-center mb-4">修改個人資料</h2>
+
+    <div v-if="loading" class="text-center text-secondary">載入中...</div>
+
+    <!-- 重要：用 v-on:submit.prevent，Razor 不會吃掉 -->
+    <form v-if="!loading" v-on:submit.prevent="saveProfile" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label">姓名</label>
+            <input type="text" class="form-control" v-model="form.fullName" placeholder="請輸入姓名" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">電話</label>
+            <input type="tel" class="form-control" v-model="form.phone" placeholder="例如 0912345678" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">地址</label>
+            <input type="text" class="form-control" v-model="form.address" placeholder="請輸入地址">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">身分證號</label>
+            <input type="text" class="form-control" v-model="form.IDNumber" maxlength="10" placeholder="例如 A123456789">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" :disabled="saving">
+            {{ saving ? "儲存中..." : "儲存修改" }}
+        </button>
+    </form>
+
+    <div class="text-center mt-3">
+        <span :style="{ color: messageColor }">{{ message }}</span>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+          data() {
+            return {
+              loading: true,
+              saving: false,
+              message: "",
+              messageColor: "#555",
+              form: { fullName: "", phone: "", address: "", IDNumber: "" }
+            };
+          },
+          async mounted() {
+            try {
+              const res = await axios.get("/CustomersArea/CusLogReg/GetProfile");
+              if (res.data?.success && res.data?.data) {
+                const d = res.data.data;
+                this.form.fullName = d.fullName || "";
+                this.form.phone = d.phone || "";
+                this.form.address = d.address || "";
+                this.form.IDNumber = d.idNumber || "";
+              } else {
+                this.message = res.data?.error || "載入資料失敗";
+                this.messageColor = "red";
+              }
+            } catch (e) {
+              this.message = "伺服器錯誤，無法載入資料";
+              this.messageColor = "red";
+            } finally {
+              this.loading = false;
+            }
+          },
+          methods: {
+            async saveProfile() {const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            try {
+                const res = await axios.post('/CustomersArea/CusLogReg/EditProfile', this.form, {
+                    headers: { 'RequestVerificationToken': token }
+                });
+                this.message = res.data.message || '更新成功';
+                this.messageColor = 'green';
+            } catch (err) {
+                this.message = err.response?.data?.error || '伺服器錯誤';
+                this.messageColor = 'red';
+            }
+            }
+          }
+        }).mount("#editApp");
+    </script>
+}
