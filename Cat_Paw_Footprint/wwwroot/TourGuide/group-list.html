@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>我的群組</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            padding: 20px;
+            max-width: 900px;
+            margin: auto
+        }
+
+        h2 {
+            margin: 0 0 1rem
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: .5rem
+        }
+
+        label {
+            display: block;
+            margin: .5rem 0 .25rem
+        }
+
+        input,
+        button {
+            padding: .5rem .6rem
+        }
+
+        .muted {
+            color: #666
+        }
+
+        .err {
+            color: #b00020
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h2>導遊群組 <span class="muted" v-if="guideName">（{{ guideName }}）</span></h2>
+        <div class="row">
+            <section>
+                <h3>群組清單</h3>
+                <div class="err" v-if="error">{{ error }}</div>
+                <table v-if="groups.length">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>代碼</th>
+                            <th>名稱</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="g in groups" :key="g.groupId">
+                            <td>{{ g.groupId }}</td>
+                            <td>{{ g.groupCode }}</td>
+                            <td>{{ g.groupName }}</td>
+                            <td>
+                                <button @click="enterChat(g)">進入聊天室</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-else class="muted">尚無群組</div>
+            </section>
+
+            <section>
+                <h3>建立新群組</h3>
+                <label>名稱</label>
+                <input v-model.trim="form.groupName" placeholder="例如：東京五日遊" />
+                <label>目的地（選填）</label>
+                <input v-model.trim="form.destination" />
+                <label>開始（選填）</label>
+                <input v-model="form.start" type="date" />
+                <label>結束（選填）</label>
+                <input v-model="form.end" type="date" />
+                <button @click="createGroup" :disabled="creating">{{ creating?'建立中…':'建立群組' }}</button>
+                <div class="err" v-if="createError">{{ createError }}</div>
+            </section>
+        </div>
+        <p><a href="login.html">登出 / 重新登入</a></p>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    guideId: localStorage.getItem('guideId') || '',
+                    guideName: localStorage.getItem('guideName') || '',
+                    groups: [],
+                    error: '', creating: false, createError: '',
+                    form: { groupName: '', destination: '', start: '', end: '' }
+                }
+            },
+            mounted() { this.fetchGroups(); },
+            methods: {
+                async fetchGroups() {
+                    this.error = '';
+                    if (!this.guideId) { this.error = '缺少 guideId，請在登入後保存或改為用 account 取回 guideId。'; return; }
+                    try {
+                        const { data } = await axios.get(`/api/TourGuideArea/TGGroupApi/GetGroupsByGuideId/${this.guideId}`);
+                        this.groups = data || [];
+                    } catch (e) { this.error = '讀取群組失敗'; }
+                },
+                async createGroup() {
+                    this.createError = ''; if (!this.form.groupName) { this.createError = '群組名稱不得為空'; return; }
+                    this.creating = true;
+                    try {
+                        const payload = {
+                            guideId: Number(this.guideId),
+                            groupName: this.form.groupName,
+                            destination: this.form.destination || null,
+                            start: this.form.start || null,
+                            end: this.form.end || null
+                        };
+                        const { data } = await axios.post('/api/TourGuideArea/TGGroupApi/CreateGroup', payload);
+                        if (!data || data.success === false) { this.createError = data?.message || '建立失敗'; return; }
+                        // 若回傳含 groupCode，直接 push；否則重新抓清單
+                        if (data.groupId) {
+                            await this.fetchGroups();
+                        }
+                        this.form = { groupName: '', destination: '', start: '', end: '' };
+                    } catch (e) { this.createError = '伺服器錯誤'; }
+                    finally { this.creating = false; }
+                },
+                enterChat(g) {
+                    // 將群組資訊帶去聊天室
+                    localStorage.setItem('groupId', g.groupId);
+                    localStorage.setItem('groupCode', g.groupCode);
+                    localStorage.setItem('groupName', g.groupName);
+                    location.href = 'chat.html';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

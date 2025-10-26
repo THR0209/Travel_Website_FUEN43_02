@@ -256,6 +256,7 @@ namespace Cat_Paw_Footprint
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
+			app.MapControllers();
 
 			app.Run();
 		}

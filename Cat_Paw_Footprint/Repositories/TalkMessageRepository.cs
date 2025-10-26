@@ -239,6 +239,14 @@ namespace Cat_Paw_Footprint.Repositories
 			return await _db.TourGroups
 				.FirstOrDefaultAsync(g => g.GroupId == groupId);
 		}
+		public async Task<IEnumerable<GroupMessages>> GetHistoryByGroupCodeAsync(string groupCode)
+		{
+			return await _db.GroupMessages
+				.Include(m => m.Group)
+				.Where(m => m.Group.GroupCode == groupCode)
+				.OrderBy(m => m.SendTime)
+				.ToListAsync();
+		}
 
 	}
 }

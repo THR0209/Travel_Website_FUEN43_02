@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>導遊登入</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto
+        }
+
+        label {
+            display: block;
+            margin: .5rem 0 .25rem
+        }
+
+        input,
+        button {
+            padding: .6rem .8rem;
+            font-size: 1rem
+        }
+
+        button {
+            margin-top: .8rem
+        }
+
+        .err {
+            color: #b00020;
+            margin-top: .6rem
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h2>導遊登入</h2>
+        <label>帳號</label>
+        <input v-model.trim="account" autocomplete="username" />
+        <label>密碼</label>
+        <input v-model="password" type="password" autocomplete="current-password" />
+        <button @click="login" :disabled="loading">{{ loading?'登入中…':'登入' }}</button>
+        <div class="err" v-if="error">{{ error }}</div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() { return { account: '', password: '', loading: false, error: '' } },
+            methods: {
+                async login() {
+                    this.error = ''; if (!this.account || !this.password) { this.error = '帳號或密碼不得為空'; return; }
+                    this.loading = true;
+                    try {
+                        const { data } = await axios.post('/api/TourGuideArea/TGLoginApi/Login', {
+                            account: this.account, password: this.password
+                        });
+                        if (!data || data.success === false) { this.error = data?.message || '登入失敗'; return; }
+                        // 可另外打 API 取導遊ID；若你有 account→guideId 的對照，可在登入回傳一起給
+                        localStorage.setItem('guideAccount', data.account || this.account);
+                        localStorage.setItem('guideName', data.guideName || '');
+                        // 這裡預留 guideId；若你已有，可在登入回傳一起存
+                        localStorage.setItem('guideId', data.guideId || '');
+                        location.href = 'group-list.html';
+                    } catch (e) { this.error = '伺服器錯誤'; }
+                    finally { this.loading = false; }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
