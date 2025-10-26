@@ -61,13 +61,26 @@
                         <!-- Bootstrap 輪播 -->
                         <div :id="'carousel-'+item.id" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-inner">
+
+                                <!-- 判斷是否有圖片，沒有則顯示預設圖片 -->
                                 <div v-if="!item.pictureUrl || item.pictureUrl.length===0">
-                                    <img src="https://via.placeholder.com/300x180?text=No+Image" class="d-block w-100" />
+
+                                    <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
+                                    <div class="pic">
+                                        <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100" alt="圖片" />
+                                    </div>
                                 </div>
+
+                                <!-- 有圖片則顯示輪播 -->
                                 <div v-else v-for="(pic, i) in item.pictureUrl" :key="i"
                                      class="carousel-item" :class="{'active': i===0}">
-                                    <img :src="pic || 'https://via.placeholder.com/300x180?text=No+Image'" alt="圖片">
+
+                                    <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
+                                    <div class="pic">
+                                        <img :src="pic || '/images/noimage.png'" alt="圖片">
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                         <div class="card-body text-center">
