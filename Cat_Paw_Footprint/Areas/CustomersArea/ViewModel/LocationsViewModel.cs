@@ -5,6 +5,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 {
 	public class LocationsViewModel
 	{
+		[Display(Name ="景點ID")]
 		public int LocationID { get; set; }
 
 		[Display(Name = "景點名稱")]
@@ -29,7 +30,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 		public virtual Districts? District { get; set; }
 
 		[Display(Name = "縣市")]
-		public int? DistrictID { get; set; }
+		public int? DistrictID { get; set; } // 從 Districts 轉換過來		
+
 
 		[Display(Name = "縣市")]
 		public string? DistrictName { get; set; }
@@ -38,7 +40,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 		public virtual Regions? Region { get; set; }
 
 		[Display(Name = "地區")]
-		public int? RegionID { get; set; }
+		public int? RegionID { get; set; } // 從 Regions 轉換過來
 
 		[Display(Name = "地區")]
 		public string? RegionName { get; set; }
@@ -49,12 +51,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 		[Display(Name = "瀏覽數")]
 		public int? Views { get; set; }
 
-		//多張圖片，用 IFormFile 來接收
-		[Display(Name = "景點圖片")]
-		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
-
 		[Display(Name = "景點圖片")]
 		public List<string>? PictureUrl { get; set; } = new List<string>();
 
+		//多張圖片，用 IFormFile 來接收
+		[Display(Name = "景點圖片")]
+		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
 	}
 }

@@ -41,6 +41,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 		[Display(Name = "地區")]
 		public string? RegionName { get; set; }
 
+		[Display(Name = "評分")]
+		public decimal? Rating { get; set; }
+
+		[Display(Name = "瀏覽數")]
+		public int? Views { get; set; }
+
 		[Display(Name = "住宿圖片")]
 		public List<string>? PictureUrl { get; set; } = new List<string>();
 
