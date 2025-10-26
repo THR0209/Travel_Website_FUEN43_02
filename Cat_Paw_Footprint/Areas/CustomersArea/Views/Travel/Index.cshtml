@@ -1,5 +1,4 @@
-﻿@section Styles {
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" >
+﻿@section Styles {    
     <link href="~/css/travel.css" rel="stylesheet" />
     <style ></style>
 }
@@ -10,23 +9,54 @@
 
 <div id="app">
     <div class="row">
-        <!-- 上方按鈕 -->
+
+        <!-- 上方 - 保留凍結效果 -->
         <div class="top-buttons sticky-top bg-white shadow-sm py-3 z-3">
-            <div class="d-flex justify-content-center gap-3">
-                <button v-for="btn in buttons" :key="btn.type"
-                        class="btn rounded-pill"
-                        :class="{'btn-warning': currentType===btn.type, 'btn-outline-secondary': currentType!==btn.type}"
-                        @@click="changeType(btn.type)">
-                    {{ btn.label }}
+            <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <!-- 搜尋框 -->
+                <input type="text" v-model="keyword" placeholder="搜尋名稱或地區"
+                       class="form-control w-25" />
+
+                <!-- 地區篩選 -->
+                <select class="form-select w-25" v-model="selectedRegion" @@change ="selectedDistrict=''">
+                    <option value="">🌎 全部地區</option>
+                    <option v-for="region in regions" :key="region" :value="region">{{ region }}</option>
+                </select>
+
+                <!-- 縣市篩選 -->
+                <select class="form-select w-25" v-model="selectedDistrict">
+                    <option value="">🏞️ 全部縣市</option>
+                    <option v-for="district in availableDistricts" :key="district" :value="district">{{ district }}</option>
+                </select>
+
+                <!-- 分類按鈕 - (景點、美食、住宿) -->
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <button v-for="btn in buttons" :key="btn.type"
+                            class="btn rounded-pill"
+                            :class="{'btn-warning': currentType===btn.type, 'btn-outline-secondary': currentType!==btn.type}"
+                            @@click ="changeType(btn.type)">
+                        {{ btn.label }}
+                    </button>
+                </div>
+
+                <!-- ⭐ 單鍵排序切換 -->
+                <button class="btn"
+                        :class="sortDesc ? 'btn-warning' : 'btn-outline-primary'"
+                        @@click ="toggleSort">
+                    ⭐ 排序：{{ sortDesc ? '高→低' : '低→高' }}
                 </button>
+
             </div>
         </div>
 
-        <!-- 左側顯示卡片 (動態載入區) -->
+        <!-- 左下側顯示卡片 (動態載入區) -->
         <div class="col-md-8">
             <div class="row">
-                <div v-for="(item, index) in items" :key="index" class="col-md-4 mb-4">
-                    <div class="card">
+                <div v-for="(item, index) in filteredItems" :key="index" class="col-md-3 mb-4">
+
+                    <!-- 新增點擊開啟 Modal-->
+                    <div class="card" @@click="openModal(item)">                        
 
                         <!-- Bootstrap 輪播 -->
                         <div :id="'carousel-'+item.id" class="carousel slide" data-bs-ride="carousel">
@@ -42,7 +72,6 @@
                         </div>
                         <div class="card-body text-center">
                             <h5 class="card-title">{{ item.name }}</h5>
-                            <p class="text-muted">{{ item.regionName }} - {{ item.districtName }}</p>
                             <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p>
                         </div>
                     </div>
@@ -65,27 +94,31 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
+    </div>
+
+    <!-- 詳細內容 Modal（點圖片顯示詳情）-->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="detailModalLabel">{{ modalData.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>                    
+                    <p class="mt-3">{{ modalData.desc }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 
 @section Scripts{
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
-
-    @* <script>
-        var vueApp={
-            data(){
-                return{ //model
-                    message:"Hello Vue!"
-                };
-            },
-            methods:{ //controller
-
-            }
-        };
-        var app=Vue.createApp(vueApp).mount("#app"); //View
-    </script> *@
+    
     <script>
         const { createApp } = Vue;
 
@@ -98,15 +131,62 @@
                         { label: "住宿", type: "hotels" }
                     ],
                     currentType: "locations",
-                    items: []
+                    items: [],
+                    keyword: "",       // 搜尋關鍵字
+                    modalData: {},     // Modal 詳情資料
+                    sortDesc: true ,    // 排序狀態（true = 高→低）
+
+                    /* ✅ 新增地區 / 縣市綁定欄位 */
+                    selectedRegion: "離島",   // 預設地區
+                    selectedDistrict: "",     // 預設不選縣市
+                    regions: ["北部", "中部", "南部", "東部", "離島"],
+                    districtsByRegion: {
+                        "北部": ["台北市", "新北市", "基隆市", "桃園市", "新竹縣", "新竹市", "宜蘭縣"],
+                        "中部": ["苗栗縣", "台中市", "彰化縣", "南投縣", "雲林縣"],
+                        "南部": ["嘉義縣", "嘉義市", "台南市", "高雄市", "屏東縣"],
+                        "東部": ["台東縣", "花蓮縣"],
+                        "離島": ["澎湖", "金門", "馬祖", "綠島", "蘭嶼", "小琉球"]
+                    }
                 }
             },
+
+            computed: {
+                /* 根據選擇的地區動態顯示縣市 */
+                availableDistricts() {
+                    return this.selectedRegion
+                        ? this.districtsByRegion[this.selectedRegion]
+                        : Object.values(this.districtsByRegion).flat();
+                },
+
+                /* 綜合搜尋 + 篩選功能 */
+                filteredItems() {
+                    const key = this.keyword.toLowerCase();
+                    return this.items.filter(x => {
+                        const matchKeyword =
+                            !this.keyword ||
+                            (x.name && x.name.toLowerCase().includes(key)) ||
+                            (x.regionName && x.regionName.toLowerCase().includes(key)) ||
+                            (x.districtName && x.districtName.toLowerCase().includes(key));
+
+                        const matchRegion =
+                            !this.selectedRegion || x.regionName === this.selectedRegion;
+
+                        const matchDistrict =
+                            !this.selectedDistrict || x.districtName === this.selectedDistrict;
+
+                        return matchKeyword && matchRegion && matchDistrict;
+                    });
+                }
+
+            },
+
             methods: {
                 // 改變分類 (景點/美食/住宿)
                 async changeType(type) {
                     this.currentType = type;
                     await this.fetchData();
                 },
+
                 // 取得資料 (Ajax 呼叫 Controller)
                 async fetchData() {
                     const res = await fetch(`/api/${this.currentType}`, {
@@ -120,17 +200,40 @@
                     this.items = json.map(x => ({
                         id: x.hotelID || x.locationID || x.restaurantID,
                         name: x.hotelName || x.locationName || x.restaurantName,
+                        addr: x.hotelAddr || x.locationAddr || x.restaurantAddr,     
+                        desc: x.hotelDesc || x.locationDesc || x.restaurantDesc,     
                         regionName: x.regionName,
                         districtName: x.districtName,
                         rating: x.rating,
                         views: x.views,
                         pictureUrl: x.pictureUrl || []
                     }));
+                },
+                // 單鍵切換排序方向 - 評分排序（高→低) <-> (低→高）
+                toggleSort() {
+                    this.sortDesc = !this.sortDesc; // 切換狀態
+                    if (this.sortDesc) {
+                        this.items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                    } else {
+                        this.items.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+                    }
+                },
+
+                // Modal 顯示
+                openModal(item) {
+                    this.modalData = item;
+                    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                    modal.show();
                 }
-            },
+
+            },            
+
             mounted() {
-                // 預設載入景點
-                this.fetchData();
+                // 預設載入
+                this.fetchData().then(() => {
+                    // 資料載入後，保持離島預設狀態
+                    this.selectedRegion = "離島";
+                });
             }
         }).mount("#app");
     </script>
