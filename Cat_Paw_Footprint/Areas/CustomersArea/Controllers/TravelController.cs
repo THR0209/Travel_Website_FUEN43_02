@@ -115,5 +115,46 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
+		// 儲存行程 (接收前端 JSON)
+		[HttpPost]
+		public IActionResult SaveTrip([FromBody] TripProjectViewModel data)
+		{
+			var project = new CustomerTripProjects
+			{
+				CustomerID = data.CustomerID,
+				ProjectName = data.ProjectName,
+				StartDate = DateTime.Now,
+				EndDate = DateTime.Now.AddDays(3),
+				CreateTime = DateTime.Now,
+				UpdateTime = DateTime.Now
+			};
+			_context.CustomerTripProjects.Add(project);
+			_context.SaveChanges();
+
+			foreach (var item in data.TripDetails)
+			{
+				var detail = new TripProjectDetails
+				{
+					ProjectID = project.ProjectID,
+					TripDate = DateTime.Now,
+					TripSequence = item.TripSequence,
+					TripType = item.TripType,
+					StartTime = DateTime.Now,
+					StayMinute = 60,
+					Notes = ""
+				};
+
+				if (item.TripType == "景點") detail.LocationID = item.TripTargetID;
+				if (item.TripType == "美食") detail.RestaurantID = item.TripTargetID;
+				if (item.TripType == "住宿") detail.HotelID = item.TripTargetID;
+
+				_context.TripProjectDetails.Add(detail);
+			}
+			_context.SaveChanges();
+
+			return Ok();
+		}
+
+
 	}
 }

@@ -110,3 +110,8 @@ input.form-control {
     transition: 0.3s;
     filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.5));
 }
+
+/* 新增：行程拖曳游標樣式 */
+.drag-handle {
+    cursor: grab;
+}

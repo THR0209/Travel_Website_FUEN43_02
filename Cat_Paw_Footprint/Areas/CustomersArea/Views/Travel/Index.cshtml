@@ -55,37 +55,45 @@
             <div class="row">
                 <div v-for="(item, index) in filteredItems" :key="index" class="col-md-3 mb-4">
 
-                    <!-- 新增點擊開啟 Modal-->
-                    <div class="card" @@click="openModal(item)">                        
+                    <div class="card position-relative">
+                        <!-- 右上角＋鍵 -->
+                        <button class="btn btn-sm btn-success position-absolute top-0 end-0 m-2"
+                                @@click.stop="addToTrip(item)">
+                            ＋
+                        </button>
 
-                        <!-- Bootstrap 輪播 -->
-                        <div :id="'carousel-'+item.id" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
+                        <!-- 點擊開啟 Modal-->
+                        <div @@click="openModal(item)">                        
 
-                                <!-- 判斷是否有圖片，沒有則顯示預設圖片 -->
-                                <div v-if="!item.pictureUrl || item.pictureUrl.length===0">
+                            <!-- Bootstrap 輪播 -->
+                            <div :id="'carousel-'+item.id" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
 
-                                    <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
-                                    <div class="pic">
-                                        <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100" alt="圖片" />
+                                    <!-- 判斷是否有圖片，沒有則顯示預設圖片 -->
+                                    <div v-if="!item.pictureUrl || item.pictureUrl.length===0">
+
+                                        <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
+                                        <div class="pic">
+                                            <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100" alt="圖片" />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- 有圖片則顯示輪播 -->
-                                <div v-else v-for="(pic, i) in item.pictureUrl" :key="i"
-                                     class="carousel-item" :class="{'active': i===0}">
+                                    <!-- 有圖片則顯示輪播 -->
+                                    <div v-else v-for="(pic, i) in item.pictureUrl" :key="i"
+                                         class="carousel-item" :class="{'active': i===0}">
 
-                                    <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
-                                    <div class="pic">
-                                        <img :src="pic || '/images/noimage.png'" alt="圖片">
+                                        <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
+                                        <div class="pic">
+                                            <img :src="pic || '/images/noimage.png'" alt="圖片">
+                                        </div>
                                     </div>
-                                </div>
 
+                                </div>
                             </div>
-                        </div>
-                        <div class="card-body text-center">
-                            <h5 class="card-title">{{ item.name }}</h5>
-                            <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p>
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ item.name }}</h5>
+                                <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,12 +102,39 @@
 
         <!-- 右側排行程與地圖 -->
         <div class="col-md-4">
+
+            <!-- 排行程 -->
             <div class="card mb-3">
-                <div class="card-header bg-primary text-white">排行程</div>
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span>排行程</span>
+                    <!-- 🟢 新增清空按鈕 -->
+                    <button class="btn btn-sm btn-danger" @@click="clearTrip">清空</button>
+                </div>
                 <div class="card-body">
-                    <p>這裡可以顯示使用者的行程計畫。</p>
+                    <!-- 🟢 使用 vuedraggable 可拖曳排序 -->
+                    <draggable v-model="tripList" item-key="id" handle=".drag-handle">
+                        <template #item="{ element, index }">
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <span>
+                                    <i class="bi bi-list drag-handle me-2"></i>
+                                    {{ index + 1 }}. {{ element.name }}（{{ element.typeLabel }}）
+                                </span>
+                                <button class="btn btn-sm btn-outline-danger" @@click="removeFromTrip(index)">✖</button>
+                            </div>
+                        </template>
+                    </draggable>
+                    <div v-if="tripList.length === 0" class="text-muted text-center">
+                        尚未加入任何行程
+                    </div>
+
+                    <!-- 🟢 儲存行程 -->
+                    <button v-if="tripList.length > 0" class="btn btn-success w-100 mt-3" @@click="saveTrip">
+                        💾 儲存行程
+                    </button>
                 </div>
             </div>
+
+            <!-- 行程地圖 -->
             <div class="card">
                 <div class="card-header bg-success text-white">行程地圖</div>
                 <div class="card-body">
@@ -131,11 +166,15 @@
 @section Scripts{
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
-    
+    <!-- 支援拖曳排序 -->
+    <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/vuedraggable@next"></script>
+
     <script>
         const { createApp } = Vue;
 
-        createApp({
+        const app = createApp({
+            components: { draggable: vuedraggable },
             data() {
                 return {
                     buttons: [
@@ -159,7 +198,8 @@
                         "南部": ["嘉義縣", "嘉義市", "台南市", "高雄市", "屏東縣"],
                         "東部": ["台東縣", "花蓮縣"],
                         "離島": ["澎湖", "金門", "馬祖", "綠島", "蘭嶼", "小琉球"]
-                    }
+                    },
+                    tripList: []    //行程清單
                 }
             },
 
@@ -237,6 +277,48 @@
                     this.modalData = item;
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
                     modal.show();
+                },
+
+                /* 🟢 新增：加入行程 */
+                addToTrip(item) {
+                    const exists = this.tripList.some(x => x.id === item.id && x.type === this.currentType);
+                    if (!exists) {
+                        this.tripList.push({
+                            id: item.id,
+                            name: item.name,
+                            type: this.currentType,
+                            typeLabel: this.buttons.find(b => b.type === this.currentType).label
+                        });
+                    }
+                },
+
+                /* 🟢 新增：刪除行程 */
+                removeFromTrip(index) {
+                    this.tripList.splice(index, 1);
+                },
+
+                /* 🟢 新增：清空行程 */
+                clearTrip() {
+                    this.tripList = [];
+                },
+
+                /* 🟢 新增：儲存行程 */
+                async saveTrip() {
+                    const payload = {
+                        customerID: 1, // 之後改登入者ID
+                        projectName: "我的自由行",
+                        tripDetails: this.tripList.map((item, idx) => ({
+                            tripSequence: idx + 1,
+                            tripType: item.typeLabel,
+                            tripTargetID: item.id
+                        }))
+                    };
+                    const res = await fetch('/Travel/SaveTrip', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) alert('✅ 行程已儲存！');
                 }
 
             },            
