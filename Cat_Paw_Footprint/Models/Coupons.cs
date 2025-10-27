@@ -5,7 +5,7 @@ using System.ComponentModel;
 
 namespace Cat_Paw_Footprint.Models;
 
-[DateRange("StartDate", "EndDate", ErrorMessage = "啟用時間不可晚於到期時間")]
+[DateRange("StartDate", "EndTime", ErrorMessage = "啟用時間不可晚於結束時間")]
 public partial class Coupons
 {
 	public int CouponID { get; set; }
