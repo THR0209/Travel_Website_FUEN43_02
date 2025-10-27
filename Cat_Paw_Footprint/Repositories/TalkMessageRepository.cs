@@ -51,7 +51,7 @@ namespace Cat_Paw_Footprint.Repositories
 			{
 				GroupId = group.GroupId,
 				CustomerId = JoinerId.ToString(),
-				JoinTime = DateTime.UtcNow
+				JoinTime = DateTime.UtcNow.AddHours(8)
 			};
 			_db.TourGroupMembers.Add(newMember);
 			await _db.SaveChangesAsync();
@@ -68,14 +68,14 @@ namespace Cat_Paw_Footprint.Repositories
 				.FirstOrDefaultAsync(g => g.GroupId == group.GroupId && g.DeviceId == DeviceId);
 			if (existingGuest != null)
 			{
-				return "您已經是此群組的成員";
+				return "歡迎回來";
 			}
 			var newGuest = new TourGroupGuests
 			{
 				GroupId = group.GroupId,
 				TemporaryName = JoinerName,
 				DeviceId = DeviceId,
-				JoinTime = DateTime.UtcNow,
+				JoinTime = DateTime.UtcNow.AddHours(8),
 				IsMember = false
 			};
 			_db.TourGroupGuests.Add(newGuest);

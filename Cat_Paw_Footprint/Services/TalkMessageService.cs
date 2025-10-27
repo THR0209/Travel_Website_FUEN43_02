@@ -17,7 +17,7 @@ namespace Cat_Paw_Footprint.Services
 			_hub = hub;
 		}
 
-		public async Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto)
+		public async Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto)// 發送群組訊息
 		{
 			// 1) 先寫資料庫
 			var entity = await _repo.InsertMessageAsync(dto);
@@ -45,7 +45,7 @@ namespace Cat_Paw_Footprint.Services
 				Message = "訊息發送成功"
 			};
 		}
-		public async Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto)
+		public async Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto)// 上傳群組照片
 		{
 			var photo = await _repo.InsertPhotoAsync(dto);
 
@@ -66,7 +66,7 @@ namespace Cat_Paw_Footprint.Services
 				Message = "照片上傳成功"
 			};
 		}
-		public async Task<GroupLocationResponseDto> SetLocationAsync(GroupLocationRequestDto dto)
+		public async Task<GroupLocationResponseDto> SetLocationAsync(GroupLocationRequestDto dto)// 設定群組集合地點
 		{
 			var location = await _repo.InsertLocationAsync(dto);
 
@@ -85,9 +85,17 @@ namespace Cat_Paw_Footprint.Services
 				Message = "集合地點設定成功"
 			};
 		}
-		public async Task<IEnumerable<GroupMessages>> GetHistoryAsync(string groupCode)
+		public async Task<IEnumerable<GroupMessages>> GetHistoryAsync(string groupCode)// 取得群組歷史訊息
 		{
 			return await _repo.GetHistoryByGroupCodeAsync(groupCode);
+		}
+		public async Task<string> JoinGroupbyCustomerAsync(string GroupCode, int JoinerId, string? JoinerName)// 會員加入團體
+		{
+			return await _repo.AddCusToGroupAsync(GroupCode, JoinerId, JoinerName);
+		}
+		public async Task<string> JoinGuestbyDeviceAsync(string groupCode, string? temporaryName, string deviceId)// 遊客加入團體
+		{
+			return await _repo.AddGuestToGroupAsync(groupCode, temporaryName, deviceId);
 		}
 
 	}

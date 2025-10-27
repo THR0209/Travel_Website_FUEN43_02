@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>訪客聊天室</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            margin: 0;
+            background: #f7f8fa;
+        }
+
+        header {
+            background: #fff;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        main {
+            padding: 16px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .chat-box {
+            height: 65vh;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #fff;
+            margin-bottom: 12px;
+        }
+
+        .msg {
+            margin-bottom: .75rem;
+        }
+
+            .msg.me {
+                text-align: right;
+            }
+
+        .bubble {
+            display: inline-block;
+            padding: .6rem .9rem;
+            border-radius: 1rem;
+            max-width: 75%;
+            word-break: break-word;
+        }
+
+        .me .bubble {
+            background-color: #8f94fb;
+            color: #fff;
+        }
+
+        .other .bubble {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+        }
+
+        input,
+        button {
+            padding: .6rem;
+            font-size: 1rem;
+        }
+
+        input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #8f94fb;
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            button:hover {
+                background: #6c6ffb;
+            }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h4>🐾 群組聊天室</h4>
+            <span style="color:#888">代碼：{{ groupCode }}</span>
+        </header>
+
+        <main>
+            <div class="chat-box" ref="chatBox">
+                <div v-for="m in messages" :key="m._k" class="msg" :class="m.senderType === 'Guest' ? 'me' : 'other'">
+                    <div class="bubble">{{ m.content }}</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <input v-model.trim="text" @keyup.enter="sendText" placeholder="輸入訊息..." />
+                <button @click="sendText">發送</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    groupCode: localStorage.getItem("CatPaw_GroupCode") || "",
+                    deviceId: localStorage.getItem("CatPaw_DeviceId") || "",
+                    messages: [],
+                    text: ""
+                };
+            },
+            async mounted() {
+                if (!this.groupCode || !this.deviceId) {
+                    alert("❌ 資料遺失，請重新加入群組");
+                    location.href = "/CustomersArea/guest-join.html";
+                    return;
+                }
+
+                // 1️⃣ 建立 SignalR 連線
+                this.connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/chatHub") // 路徑要和 Program.cs 一樣
+                    .build();
+
+                // 2️⃣ 監聽從伺服器來的新訊息事件
+                this.connection.on("ReceiveMessage", (message) => {
+                    console.log("📩 收到新訊息:", message);
+                    this.messages.push({
+                        _k: crypto.randomUUID(),
+                        senderType: message.senderType,
+                        content: message.content
+                    });
+                    this.$nextTick(() => this.scrollToBottom());
+                });
+
+                // 3️⃣ 啟動連線並加入群組
+                try {
+                    await this.connection.start();
+                    console.log("✅ 已連線到 ChatHub");
+
+                    await this.connection.invoke("JoinGroup", this.groupCode);
+                    console.log(`✅ 已加入群組 ${this.groupCode}`);
+
+                    // 4️⃣ 載入歷史紀錄
+                    await this.loadHistory();
+
+                } catch (err) {
+                    console.error("❌ Hub 連線失敗:", err);
+                }
+            },
+            methods: {
+                scrollToBottom() {
+                    this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
+                },
+                async loadHistory() {
+                    try {
+                        const res = await axios.get(`/api/TalkMessageApi/GetHistory/${this.groupCode}`);
+                        if (Array.isArray(res.data)) {
+                            this.messages = res.data.map(x => ({
+                                _k: crypto.randomUUID(),
+                                senderType: x.senderType,
+                                content: x.content
+                            }));
+                            this.$nextTick(() => this.scrollToBottom());
+                        }
+                    } catch (err) {
+                        console.error("❌ 載入歷史訊息失敗", err);
+                    }
+                },
+                async sendText() {
+                    if (!this.text.trim()) return;
+                    const payload = {
+                        GroupCode: this.groupCode,
+                        SenderType: "Guest",
+                        Content: this.text,
+                        GuestId: this.deviceId
+                    };
+                    try {
+                        await axios.post("/api/TalkMessageApi/Send", payload, {
+                            headers: { "Content-Type": "application/json" }
+                        });
+                        this.messages.push({
+                            _k: crypto.randomUUID(),
+                            senderType: "Guest",
+                            content: this.text
+                        });
+                        this.text = "";
+                        this.$nextTick(() => this.scrollToBottom());
+                    } catch (err) {
+                        alert("❌ 發送失敗");
+                        console.error(err);
+                    }
+                }
+            }
+        }).mount("#app");
+    </script>
+</body>
+
+</html>

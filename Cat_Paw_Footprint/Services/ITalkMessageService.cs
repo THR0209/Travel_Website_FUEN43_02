@@ -5,10 +5,14 @@ namespace Cat_Paw_Footprint.Services
 {
 	public interface ITalkMessageService
 	{
-		Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto);
-		Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto);
-		Task<GroupLocationResponseDto> SetLocationAsync(GroupLocationRequestDto dto); 
-		Task<IEnumerable<GroupMessages>> GetHistoryAsync(string groupCode);
+		Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto);//發訊息
+		Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto);//上傳照片
+		Task<GroupLocationResponseDto> SetLocationAsync(GroupLocationRequestDto dto); //設定位置
+		Task<IEnumerable<GroupMessages>> GetHistoryAsync(string groupCode);//取得歷史訊息
+		Task<string> JoinGroupbyCustomerAsync(string GroupCode, int JoinerId, string? JoinerName);//會員加入團體
+		Task<string> JoinGuestbyDeviceAsync(string groupCode, string deviceId, string? temporaryName);//遊客加入團體
+
+
 
 	}
 }
