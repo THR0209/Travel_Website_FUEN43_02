@@ -4,172 +4,285 @@
 
 @section Styles {
     <style>
+        /* ========== 全站底色與字體 ========== */
         body {
-            background: #f4f8fb;
+            background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+            font-family: "Poppins", "Noto Sans TC", sans-serif;
+            color: #333;
+            overflow-x: hidden;
         }
 
-        /* 統一寬度樣式 */
-        .faq-section {
-            max-width: 1100px;
-            margin: 0 auto;
+        /* ========== Hero 區 ========== */
+        .faq-hero {
+            position: relative;
+            text-align: center;
+            padding: 6rem 1rem 5rem;
+            background: linear-gradient(135deg, #b8e2ff, #eaf6ff);
+            border-radius: 0 0 80px 80px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            /* 修改：允許子元素超出 hero 顯示（避免搜尋結果被裁切） */
+            overflow: visible;
         }
 
-        /* 標題區 */
-        .faq-header {
-            background: linear-gradient(135deg, #eaf6ff, #f9f9fd);
-            border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 2.5rem 2rem 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-            .faq-header h2 {
-                letter-spacing: 2px;
-                color: #7ec8e3;
+            .faq-hero::before {
+                content: "🐾";
+                position: absolute;
+                font-size: 8rem;
+                opacity: 0.07;
+                left: 10%;
+                top: 20%;
+                transform: rotate(-20deg);
             }
 
+            .faq-hero::after {
+                content: "🐾";
+                position: absolute;
+                font-size: 10rem;
+                opacity: 0.06;
+                right: 12%;
+                bottom: 15%;
+                transform: rotate(25deg);
+            }
+
+            .faq-hero h2 {
+                font-size: 2.6rem;
+                font-weight: 800;
+                color: #1d6ecf;
+                letter-spacing: 1.5px;
+                margin-bottom: 0.8rem;
+            }
+
+            .faq-hero p {
+                color: #4a5568;
+                font-size: 1.1rem;
+                margin-bottom: 2.5rem;
+            }
+
+        /* ========== 搜尋框 ========== */
+        .faq-search-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 新增：內層容器，作為絕對定位參考並限制寬度 */
+        .faq-search-inner {
+            position: relative;
+            width: 90%;
+            max-width: 640px;
+        }
+
         .faq-search-box {
-            border-radius: 40px;
-            border: 1px solid #d5e5f7;
-            font-size: 1.25rem;
-            padding: 1rem 2.5rem;
-            background: #fff;
-            margin-top: 1.2rem;
-            transition: all .2s;
+            width: 100%;
+            height: 65px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            padding: 0 3.5rem 0 2.5rem; /* 右側留空給 clear 按鈕 */
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 1100; /* 確保輸入本身在搜尋結果上層（視情況可調） */
         }
 
             .faq-search-box:focus {
-                border-color: #226dd3;
-                box-shadow: 0 0 0 3px rgba(34, 109, 211, 0.1);
+                border-color: #7ec8e3;
+                box-shadow: 0 0 0 5px rgba(126, 200, 227, 0.2);
+                outline: none;
             }
 
-        .faq-search-wrapper {
-            position: relative;
-            width: 100%;
+        #faqClearBtn {
+            position: absolute;
+            right: 0.9rem; /* 固定距離 */
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none;
+            z-index: 1200; /* 高於輸入框，確保可點擊 */
         }
 
+            #faqClearBtn i {
+                font-size: 1.2rem;
+                color: #666;
+            }
+
+            #faqClearBtn:hover i {
+                color: #ff5c5c;
+            }
+
+        /* ========== 搜尋結果框 ========== */
         .faq-search-result-box {
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
             top: calc(100% + 10px);
+            left: 0;
+            right: 0;
             background: #fff;
-            width: 90%;
-            max-height: 300px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             display: none;
-            z-index: 999;
-            text-align: left;
+            z-index: 1300; /* 提高 z-index，確保不會被下方區塊蓋住 */
+            width: auto; /* 使用 left/right */
+            max-width: none;
+            max-height: 340px;
         }
 
         .faq-search-result-item {
-            padding: 0.8rem 1.2rem;
-            border-bottom: 1px solid #f0f4fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #eef3f9;
             cursor: pointer;
-            transition: background .2s;
+            transition: background 0.25s;
+            text-align: left;
         }
 
             .faq-search-result-item:hover {
                 background: #f3f9ff;
             }
 
-            .faq-search-result-item:last-child {
-                border-bottom: none;
+        /* ========== 熱門問題區 ========== */
+        .faq-popular-section {
+            margin-top: -1.5rem;
+            padding: 3rem 1rem;
+        }
+
+        .faq-popular-inner {
+            background: #fff;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: visible;
+            z-index: 1;
+        }
+
+            .faq-popular-inner h4 {
+                color: #3388cc;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
             }
 
-        /* 熱門問題 */
         .faq-popular-carousel {
             display: flex;
             gap: 1.5rem;
             overflow-x: auto;
-            padding-bottom: 1rem;
+            padding: 1rem;
+            overflow-y: visible;
+            padding-bottom: 0.5rem;
         }
 
         .faq-popular-item {
             flex: 0 0 320px;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-            padding: 1.5rem;
-            margin-right: .5rem;
+            background: #fff;
+            border-radius: 20px;
+            border: 2px solid #f0f6ff;
+            padding: 1.4rem 1.6rem;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s;
             cursor: pointer;
-            transition: all .2s;
+            position: relative; /* 使 z-index 可生效 */
+            z-index: 1;
         }
 
             .faq-popular-item:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 8px 18px rgba(34, 109, 211, 0.12);
+                transform: translateY(-5px);
+                border-color: #7ec8e3;
+                box-shadow: 0 10px 28px rgba(126, 200, 227, 0.25);
+                z-index: 30; /* 提升在視覺上的層級，避免被相鄰元素蓋住 */
             }
 
         .faq-answer-preview {
-            color: #666;
+            color: #555;
             font-size: 0.95rem;
-            margin-top: .5rem;
-            max-height: 3.6rem;
+            /* margin-top: 0.6rem;
+            max-height: 3.6rem; */
             overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        /* 分類卡片 */
+        /* ========== FAQ 分類卡片 ========== */
+        .faq-category-section {
+            background: linear-gradient(180deg, #f9fcff, #fff);
+            padding: 4rem 1rem;
+        }
+
         .faq-category-card {
-            background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all .25s;
-            border: 1px solid #eaf2ff;
+            background: #fff;
+            border-radius: 50%;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0efff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
         }
 
             .faq-category-card:hover {
-                background: linear-gradient(135deg, #dceeff, #f6faff);
-                transform: translateY(-3px);
-                box-shadow: 0 6px 16px rgba(34, 109, 211, 0.12);
+                transform: translateY(-8px) scale(1.03);
+                background: linear-gradient(135deg, #d9f1ff, #f7fbff);
+                box-shadow: 0 10px 22px rgba(34, 109, 211, 0.12);
             }
 
         .faq-category-icon {
-            font-size: 1.9rem;
+            font-size: 2.2rem;
             color: #7ec8e3;
-            margin-bottom: .3rem;
+            margin-bottom: 0.4rem;
+            transition: transform 0.4s ease;
         }
 
-        /* 問題卡片 */
+        .faq-category-card:hover .faq-category-icon {
+            transform: scale(1.15) rotate(10deg);
+        }
+
+        .faq-category-card .fw-bold {
+            color: #2255aa;
+            font-size: 0.95rem;
+        }
+
+        /* ========== FAQ 詳細卡片 ========== */
         .faq-card {
             background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem 1.5rem;
-            margin-bottom: 1.25rem;
-            transition: box-shadow .2s, transform .2s;
+            border-radius: 18px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.4rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
             .faq-card:hover {
-                box-shadow: 0 6px 18px rgba(34, 109, 211, 0.10);
-                transform: translateY(-2px);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(126, 200, 227, 0.15);
             }
 
         .faq-card-question {
+            padding: 1.3rem 1.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             font-weight: 600;
             color: #2255aa;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 1.1rem;
         }
 
         .faq-card-answer {
             display: none;
-            margin-top: 1rem;
+            padding: 1.4rem 1.6rem 1.8rem;
             color: #444;
-            line-height: 1.6;
+            background: url('https://cdn-icons-png.flaticon.com/512/1076/1076928.png') no-repeat 95% 90%/50px;
+            background-color: #fcfdff;
+            border-top: 1px solid #e6f1ff;
+            line-height: 1.8;
         }
 
         .faq-card.open .faq-card-answer {
             display: block;
+            animation: fadeIn 0.4s ease;
         }
 
         .faq-card.open .faq-icon i {
@@ -177,52 +290,85 @@
         }
 
         .faq-icon i {
-            transition: transform .3s;
-            color: #2255aa;
+            transition: transform 0.3s;
+            color: #3388cc;
         }
 
-        .faq-section h4 {
-            margin-bottom: 1.5rem;
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== 響應式 ========== */
+        @@media (max-width: 768px) {
+            .faq-hero {
+                padding: 4rem 1rem 3rem;
+                border-radius: 0 0 50px 50px;
+            }
+
+                .faq-hero h2 {
+                    font-size: 2.1rem;
+                }
+
+            .faq-category-card {
+                width: 110px;
+                height: 110px;
+            }
+
+            .faq-popular-item {
+                flex: 0 0 85%;
+            }
         }
     </style>
 }
 
-<div class="container py-5">
-    <!-- 常見問題標題區 -->
-    <div class="faq-section faq-header text-center">
-        <h2 class="fw-bold mb-3">常見問題</h2>
 
-        <div class="faq-search-wrapper position-relative d-inline-block w-100">
-            <input type="text" id="faqSearch" class="faq-search-box form-control" placeholder="🔍 搜尋常見問題...">
+<!-- ====================== FAQ 頁面結構 ====================== -->
+<div class="faq-hero">
+    <h2>常見問題</h2>
+    <p>找不到答案嗎？搜尋一下或看看熱門問題吧！</p>
+    <div class="faq-search-wrapper">
+        <div class="faq-search-inner">
+            <input type="text" id="faqSearch" class="faq-search-box" placeholder="🔍 搜尋常見問題...">
+            <button id="faqClearBtn" type="button" aria-label="清除搜尋"><i class="fas fa-times"></i></button>
             <div id="faqSearchResults" class="faq-search-result-box"></div>
         </div>
     </div>
+</div>
 
-    <!-- 熱門常見問題 -->
-    <div class="faq-section mb-5">
-        <h4 class="fw-bold mb-3"><i class="fas fa-fire text-danger"></i> 熱門常見問題</h4>
+<!-- 熱門常見問題 -->
+<div class="faq-section faq-popular-section">
+    <div class="faq-popular-inner">
+        <h4><i class="fas fa-fire text-danger"></i> 熱門常見問題</h4>
         <div class="faq-popular-carousel" id="hotFaqCarousel"></div>
-    </div>
-
-    <!-- 問題分類 -->
-    <div class="faq-section mb-5">
-        <h4 class="fw-bold mb-3"><i class="fas fa-list text-primary"></i> 問題分類</h4>
-        <div class="row g-3" id="faqCategories"></div>
-    </div>
-
-    <!-- FAQ 詳細列表 -->
-    <div class="faq-section">
-        <div id="faqDetailList"></div>
     </div>
 </div>
 
+<!-- FAQ 分類 -->
+<div class="faq-section faq-category-section">
+    <h4 class="fw-bold text-primary mb-4 text-center"><i class="fas fa-list"></i> 問題分類</h4>
+    <div class="row g-4 justify-content-center" id="faqCategories"></div>
+</div>
+
+<!-- FAQ 詳細列表 -->
+<div class="faq-section">
+    <div id="faqDetailList"></div>
+</div>
+
+<!-- ✅ 保留原 JS 完整不動 -->
 @section Scripts {
     <script>
+        // 原本的 jQuery / AJAX 程式碼原封不動
         let allFaqs = [];
         let categories = [];
-
         $(function () {
-            // 熱門FAQ
             $.getJSON('/CustomersArea/FrontFAQs/api/hot', function (faqs) {
                 let html = "";
                 faqs.forEach((faq, idx) => {
@@ -230,37 +376,24 @@
                         <div class="faq-popular-item" tabindex="0" role="button" data-idx="${idx}">
                             <div class="fw-bold mb-2"><i class="fas fa-question-circle text-primary me-2"></i>${faq.question}</div>
                             <div class="faq-answer-preview">${faq.answer}</div>
-                        </div>
-                    `;
+                        </div>`;
                 });
                 $('#hotFaqCarousel').html(html);
-
                 $('#hotFaqCarousel .faq-popular-item').on('click', function () {
                     const idx = $(this).data('idx');
                     showFaqDetail([faqs[idx]], "熱門常見問題");
                 });
             });
+            $.getJSON('/CustomersArea/FrontFAQs/api/all', function (faqs) { allFaqs = faqs; });
+            $.getJSON('/CustomersArea/FrontFAQs/api/categories', function (cats) { categories = cats; renderCategories(); });
 
-            // 全部FAQ
-            $.getJSON('/CustomersArea/FrontFAQs/api/all', function (faqs) {
-                allFaqs = faqs;
-            });
-
-            // FAQ分類
-            $.getJSON('/CustomersArea/FrontFAQs/api/categories', function (cats) {
-                categories = cats;
-                renderCategories();
-            });
-
-            // 搜尋功能
             $('#faqSearch').on('input', function () {
                 const kw = $(this).val().toLowerCase().trim();
                 const $box = $('#faqSearchResults');
+                const $clearBtn = $('#faqClearBtn');
 
-                if (!kw) {
-                    $box.hide().empty();
-                    return;
-                }
+                if (kw) $clearBtn.show(); else $clearBtn.hide();
+                if (!kw) { $box.hide().empty(); return; }
 
                 const result = allFaqs.filter(f =>
                     (f.question && f.question.toLowerCase().includes(kw)) ||
@@ -272,40 +405,60 @@
                     return;
                 }
 
-                let html = result.slice(0, 6).map((f, idx) => `
+                let html = result.slice(0, 3).map((f, idx) => `
                     <div class="faq-search-result-item" data-id="${idx}">
                         <i class="fas fa-question-circle text-primary me-2"></i>${f.question}
-                    </div>
-                `).join('');
-
+                    </div>`).join('');
                 $box.html(html).show();
 
-                // 點擊某個項目顯示完整內容
+                // ✅ 點擊項目時才顯示搜尋結果
                 $('.faq-search-result-item').on('click', function () {
                     const id = $(this).data('id');
                     $box.hide();
-                    showFaqDetail([result[id]], "搜尋結果");
-                    $('html, body').animate({
-                        scrollTop: $('#faqDetailList').offset().top - 100
-                    }, 500);
+                    showFaqDetail([result[id]], `搜尋結果`); // ← 移除 (1筆)
                 });
             });
 
-            // 點擊其他地方關閉搜尋框結果
+            $('#faqSearch').on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const kw = $(this).val().toLowerCase().trim();
+                    if (!kw) return;
+
+                    const result = allFaqs.filter(f =>
+                        (f.question && f.question.toLowerCase().includes(kw)) ||
+                        (f.answer && f.answer.toLowerCase().includes(kw))
+                    );
+
+                    const $box = $('#faqSearchResults');
+                    $box.hide(); // 避免重複顯示
+                    if (result.length > 0) {
+                        showFaqDetail(result, `搜尋結果`); // ✅ 移除筆數顯示
+                    } else {
+                        $box.html('<div class="p-3 text-muted">查無相關問題</div>').show();
+                    }
+                }
+            });
+
+
+
             $(document).on('click', function (e) {
-                if (!$(e.target).closest('#faqSearch, #faqSearchResults').length) {
+                if (!$(e.target).closest('#faqSearch, #faqSearchResults, #faqClearBtn').length) {
                     $('#faqSearchResults').hide();
                 }
             });
+            $('#faqClearBtn').on('click', function () {
+                $('#faqSearch').val('');
+                $('#faqSearchResults').hide().empty();
+                $(this).hide();
+            });
         });
-
-        // FAQ分類渲染
         function renderCategories() {
-            let icons = ['fa-folder', 'fa-tags', 'fa-life-ring', 'fa-user-circle', 'fa-cube', 'fa-credit-card', 'fa-truck', 'fa-envelope'];
+            let icons = ['fa-paw', 'fa-cat', 'fa-fish', 'fa-bone', 'fa-heart', 'fa-house', 'fa-sun', 'fa-moon'];
             let html = '';
             categories.forEach((cat, i) => {
                 html += `
-                    <div class="col-6 col-md-4 col-lg-3">
+                    <div class="col-6 col-md-4 col-lg-3 text-center">
                         <div class="faq-category-card" data-id="${cat.id}">
                             <div class="faq-category-icon fa ${icons[i % icons.length]}"></div>
                             <div class="fw-bold">${cat.name}</div>
@@ -313,7 +466,6 @@
                     </div>`;
             });
             $('#faqCategories').html(html);
-
             $('.faq-category-card').on('click', function () {
                 const catid = $(this).data('id');
                 const result = allFaqs.filter(f => f.categoryID == catid);
@@ -321,30 +473,41 @@
                 showFaqDetail(result, catName);
             });
         }
+function showFaqDetail(faqs, title) {
+    // 🔹 筆數顯示
+    const countText = faqs.length > 0 ? `（${faqs.length} 筆）` : '';
 
-        // FAQ詳細渲染（卡片式）
-        function showFaqDetail(faqs, title) {
-            let html = `<h4 class="fw-bold mb-4"><i class="fas fa-question text-primary"></i> ${title}</h4>`;
-            if (faqs.length === 0) {
-                html += '<div class="alert alert-warning">查無相關問題</div>';
-            } else {
-                faqs.forEach((faq, idx) => {
-                    html += `
-                        <div class="faq-card" data-id="${idx}">
-                            <div class="faq-card-question">
-                                <span><i class="fas fa-question-circle me-2 text-primary"></i>${faq.question}</span>
-                                <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
-                            </div>
-                            <div class="faq-card-answer">${faq.answer}</div>
-                        </div>`;
-                });
-            }
-            $('#faqDetailList').html(html);
+    let html = `
+        <h4 class="fw-bold mb-4 text-primary">
+            <i class="fa-solid fa-lightbulb text-warning"></i>  ${title}${countText}
+        </h4>`;
 
-            // 卡片展開/收合
-            $('.faq-card').on('click', function () {
-                $(this).toggleClass('open');
-            });
-        }
+    if (faqs.length === 0) {
+        html += '<div class="alert alert-warning">查無相關問題</div>';
+    } else {
+        faqs.forEach((faq, idx) => {
+            html += `
+                <div class="faq-card" data-id="${idx}">
+                    <div class="faq-card-question">
+                        <span><i class="fas fa-question-circle me-2 text-primary"></i>${faq.question}</span>
+                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-card-answer">${faq.answer}</div>
+                </div>`;
+        });
+    }
+
+    $('#faqDetailList').html(html);
+
+    // 啟用展開/收合
+    $('.faq-card').on('click', function () {
+        $(this).toggleClass('open');
+    });
+
+    // 🔹 自動捲動至 FAQ 區塊
+    $('html, body').animate({ scrollTop: $('#faqDetailList').offset().top - 100 }, 500);
+}
+
+
     </script>
 }
