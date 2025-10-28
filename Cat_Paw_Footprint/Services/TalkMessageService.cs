@@ -22,23 +22,20 @@ namespace Cat_Paw_Footprint.Services
 			// 1) 先寫資料庫
 			var entity = await _repo.InsertMessageAsync(dto);
 			Console.WriteLine($"📡 廣播中 → GroupCode={dto.GroupCode}, SenderType={dto.SenderType}, Content={dto.Content}");
+
 			// 2) 成功後推播到 SignalR 群組
 			await _hub.Clients.Group(dto.GroupCode).SendAsync("ReceiveMessage", new
 			{
+				UserName = entity.UserName,
 				SenderType = dto.SenderType,
 				Content = entity.Content,
 				SendTime = entity.SendTime
 			});
-			// 再額外發給自己（Caller），讓發送者也能看到訊息
-			await _hub.Clients.All.SendAsync("ReceiveMessage", new
-			{
-				SenderType = dto.SenderType,
-				Content = entity.Content,
-				SendTime = entity.SendTime
-			});
+
 			// 3) 回傳結果 DTO（給 Controller 用）
 			return new GroupMessageResponseDto
 			{
+				
 				MessageId = entity.MessageId,
 				SentAt = entity.SendTime,
 				Success = true,
@@ -96,6 +93,10 @@ namespace Cat_Paw_Footprint.Services
 		public async Task<string> JoinGuestbyDeviceAsync(string groupCode, string? temporaryName, string deviceId)// 遊客加入團體
 		{
 			return await _repo.AddGuestToGroupAsync(groupCode, temporaryName, deviceId);
+		}
+		public async Task<List<NewHistoryAsyncDto>> GetNewHistoryAsync(string groupCode)// 新版取得歷史訊息(替換上方原本取得歷史訊息)
+		{
+			return await _repo.GetNewHistoryByGroupCodeAsync(groupCode);
 		}
 
 	}

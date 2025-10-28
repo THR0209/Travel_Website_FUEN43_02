@@ -55,7 +55,11 @@
             max-width: 75%;
             word-break: break-word;
         }
-
+        .meta {
+            font-size: .85rem;
+            color: #666;
+            margin-bottom: 4px
+        }
         .me .bubble {
             background-color: #8f94fb;
             color: #fff;
@@ -95,20 +99,46 @@
             button:hover {
                 background: #6c6ffb;
             }
+        .leave-btn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+            .leave-btn:hover {
+                background: #ff4b4b;
+            }
     </style>
 </head>
 
 <body>
     <div id="app">
         <header>
-            <h4>🐾 群組聊天室</h4>
-            <span style="color:#888">代碼：{{ groupCode }}</span>
+            <h4>🐾 群組聊天室<span style="color:#888">代碼：{{ groupCode }}</span></h4>
+            
+            <button @click="leaveChat" class="leave-btn">離開</button>
         </header>
 
         <main>
-            <div class="chat-box" ref="chatBox">
-                <div v-for="m in messages" :key="m._k" class="msg" :class="m.senderType === 'Guest' ? 'me' : 'other'">
-                    <div class="bubble">{{ m.content }}</div>
+            <div class="chat-box">
+                <div v-for="m in messages" :key="m._k"
+                     class="msg"
+                     :class="m.messagename === temporaryName? 'me' : 'other'">
+                    <div class="bubble">
+                        <div class="meta">{{ m.messagename }} · {{ m.sender }} · {{ m.time }}</div>
+                        <div v-if="m.type === 'text'">{{ m.content }}</div>
+                        <div v-else-if="m.type === 'photo'">
+                            <img :src="m.url" style="max-width:100%;border-radius:8px;" />
+                        </div>
+                        <div v-else-if="m.type === 'location'">
+                            📍 {{ m.lat }}, {{ m.lng }}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -120,100 +150,196 @@
     </div>
 
     <script>
-        const { createApp } = Vue;
+        document.addEventListener("DOMContentLoaded", () => {
+            const { createApp } = Vue;
+            const hasCustomer = localStorage.getItem("CatPaw_CustomerId");
+            const hasDevice = localStorage.getItem("CatPaw_DeviceId");
+            const temporaryName = localStorage.getItem("CatPaw_TemporaryName") || "訪客";
+            (function checkIdentity() {
+                // ⚙️ 如果沒有任何身份 → 退回加入頁
+                if (!hasCustomer && !hasDevice) {
+                    console.warn("⚠️ 無有效身份，導回訪客加入頁");
+                    window.location.href = "/CustomersArea/guest-join.html";
+                    return;
+                }
+
+                // ⚙️ 如果會員登入，使用會員名稱代替訪客暱稱
+                if (hasCustomer) {
+                    const customerName = localStorage.getItem("CatPaw_CustomerName") || "會員";
+                    localStorage.setItem("CatPaw_TemporaryName", customerName);
+                    console.log(`👤 已切換為會員模式：${customerName}`);
+                }
+
+                // ⚙️ 不再導向別的 HTML（因為共用一頁）
+            })();
         createApp({
             data() {
+                
+                
+
                 return {
                     groupCode: localStorage.getItem("CatPaw_GroupCode") || "",
-                    deviceId: localStorage.getItem("CatPaw_DeviceId") || "",
+                    customerId: hasCustomer || null,
+                    deviceId: hasDevice || null,
+                    senderType: hasCustomer ? "Customer" : "Guest",
+                    temporaryName,
+                    connection: null,
                     messages: [],
                     text: ""
                 };
             },
-            async mounted() {
-                if (!this.groupCode || !this.deviceId) {
-                    alert("❌ 資料遺失，請重新加入群組");
-                    location.href = "/CustomersArea/guest-join.html";
-                    return;
-                }
-
-                // 1️⃣ 建立 SignalR 連線
-                this.connection = new signalR.HubConnectionBuilder()
-                    .withUrl("/chatHub") // 路徑要和 Program.cs 一樣
-                    .build();
-
-                // 2️⃣ 監聽從伺服器來的新訊息事件
-                this.connection.on("ReceiveMessage", (message) => {
-                    console.log("📩 收到新訊息:", message);
-                    this.messages.push({
-                        _k: crypto.randomUUID(),
-                        senderType: message.senderType,
-                        content: message.content
-                    });
-                    this.$nextTick(() => this.scrollToBottom());
-                });
-
-                // 3️⃣ 啟動連線並加入群組
-                try {
-                    await this.connection.start();
-                    console.log("✅ 已連線到 ChatHub");
-
-                    await this.connection.invoke("JoinGroup", this.groupCode);
-                    console.log(`✅ 已加入群組 ${this.groupCode}`);
-
-                    // 4️⃣ 載入歷史紀錄
-                    await this.loadHistory();
-
-                } catch (err) {
-                    console.error("❌ Hub 連線失敗:", err);
-                }
+            mounted() {
+                this.loadHistory();
+                this.initSignalR();
             },
             methods: {
-                scrollToBottom() {
-                    this.$refs.chatBox.scrollTop = this.$refs.chatBox.scrollHeight;
+                pushFeed(item) {
+                    if (item.type === 'text' && !item.content) return;
+                    this.messages.push({ _k: crypto?.randomUUID?.() || Date.now().toString(), ...item });
+                    this.$nextTick(() => {
+                        const box = document.querySelector('.chat-box');
+                        if (box) box.scrollTop = box.scrollHeight;
+                    });
                 },
-                async loadHistory() {
+
+                async initSignalR() {
+                    if (!this.groupCode) { alert('缺少 groupCode'); return; }
+
+                    console.log("🎯 嘗試連線到 /chatHub...");
+                   
+                    this.connection = new signalR.HubConnectionBuilder()
+                        .withUrl('/chatHub')
+                        .configureLogging(signalR.LogLevel.Information)
+                        .build();
+
+                    // 接收文字
+                    this.connection.on('ReceiveMessage', (msg) => {
+                        console.log("📩 收到新訊息:", msg);
+                        this.pushFeed({
+                            messagename: msg.userName || msg.UserName || '匿名',
+                            type: 'text',
+                            sender: msg.senderType || msg.SenderType,
+                            time: msg.sendTime ? new Date(msg.sendTime).toLocaleString() :
+                                msg.SendTime ? new Date(msg.SendTime).toLocaleString() : '',
+                            content: msg.content || msg.Content || ''
+                        });
+                    });
+
+                    // 接收照片
+                    this.connection.on('ReceivePhoto', (p) => {
+
+                        this.pushFeed({
+                            messagename: p.UserName || '匿名',
+                            type: 'photo',
+                            sender: p.SenderType || 'Guest',
+                            time: p.UploadTime ? new Date(p.UploadTime).toLocaleString() : '',
+                            url: p.PhotoUrl || p.Url
+                        });
+                    });
+
+                    // 接收定位
+                    this.connection.on('ReceiveLocation', (l) => {
+                        this.pushFeed({
+                            messagename: l.UserName || '匿名',
+                            type: 'location',
+                            sender: l.SenderType || 'Guest',
+                            time: l.SendTime ? new Date(l.SendTime).toLocaleString() : '',
+                            lat: l.Latitude,
+                            lng: l.Longitude
+                        });
+                    });
+
+                    this.connection.onclose(err => console.error("❌ SignalR 連線中斷:", err));
+                    this.connection.onreconnecting(() => console.warn("⚠️ SignalR 嘗試重新連線中..."));
+                    this.connection.onreconnected(() => console.log("✅ SignalR 已重新連線"));
+
                     try {
-                        const res = await axios.get(`/api/TalkMessageApi/GetHistory/${this.groupCode}`);
-                        if (Array.isArray(res.data)) {
-                            this.messages = res.data.map(x => ({
-                                _k: crypto.randomUUID(),
-                                senderType: x.senderType,
-                                content: x.content
-                            }));
-                            this.$nextTick(() => this.scrollToBottom());
-                        }
+                        await this.connection.start();
+                        await this.connection.invoke('JoinGroup', this.groupCode);
+                        console.log("✅ 已成功連線並加入群組");
                     } catch (err) {
-                        console.error("❌ 載入歷史訊息失敗", err);
+                        console.error("❌ SignalR 連線失敗:", err);
                     }
                 },
-                async sendText() {
-                    if (!this.text.trim()) return;
-                    const payload = {
-                        GroupCode: this.groupCode,
-                        SenderType: "Guest",
-                        Content: this.text,
-                        GuestId: this.deviceId
-                    };
+
+                async loadHistory() {
+                    if (!this.groupCode) { alert('缺少 groupCode'); return; }
                     try {
-                        await axios.post("/api/TalkMessageApi/Send", payload, {
-                            headers: { "Content-Type": "application/json" }
+                        const res = await axios.get(`/api/TalkMessageApi/GetHistory/${this.groupCode}`);
+                        const msgs = Array.isArray(res.data) ? res.data : [];
+                        msgs.forEach(m => {
+                            this.pushFeed({
+                                messagename: m.userName || '匿名',
+                                type: 'text',
+                                sender: m.senderType || 'Guest',
+                                time: new Date(m.sendTime).toLocaleString(),
+                                content: m.content || ''
+                            });
                         });
-                        this.messages.push({
-                            _k: crypto.randomUUID(),
-                            senderType: "Guest",
-                            content: this.text
-                        });
-                        this.text = "";
-                        this.$nextTick(() => this.scrollToBottom());
                     } catch (err) {
-                        alert("❌ 發送失敗");
-                        console.error(err);
+                        console.error("❌ 載入歷史訊息失敗:", err);
+                    }
+                },
+
+                async sendText() {
+                    if (!this.text) return;
+
+                    try {
+                        const payload = {
+                            groupCode: this.groupCode,
+                            senderType: this.senderType,   // "Guide" / "Guest" / "Customer"
+                            content: this.text
+
+                        };
+
+                        // 判斷類型自動附加對應 ID
+                        if (this.senderType === "Customer" && this.customerId) {
+                            payload.customerId = this.customerId;
+                        } else if (this.senderType === "Guest" && this.deviceId) {
+                            // 假設你的後端會根據 DeviceId 轉出 GuestId
+                            payload.deviceId = this.deviceId;
+                        } else if (this.senderType === "Guide" && this.guideId) {
+                            payload.guideId = this.guideId;
+                        }
+
+                        await axios.post('/api/TalkMessageApi/Send', payload);
+
+
+                        this.text = "";
+                    } catch (err) {
+                        console.error("❌ 發送訊息失敗:", err);
+                    }
+                },
+                leaveChat() {
+                    if (confirm("確定要離開聊天室嗎？")) {
+                        // 清除與群組、訪客相關的資訊
+                        localStorage.removeItem("CatPaw_GroupCode");
+                        localStorage.removeItem("CatPaw_TemporaryName");
+                        localStorage.removeItem("groupCode");
+                        localStorage.removeItem("groupId");
+                        localStorage.removeItem("groupName");
+                        localStorage.removeItem("guideAccount");
+                        localStorage.removeItem("guideId");
+                        localStorage.removeItem("guideName");
+                        localStorage.removeItem("CatPaw_CustomerId");
+
+                        // 可選：若想讓後端知道訪客離線
+                        const baseUrl = window.location.origin;
+
+                        // 依身份決定跳轉
+                        if (this.senderType === "Guest") {
+                            window.location.href = `${baseUrl}/CustomersArea/guest-join.html`;
+                        } else if (this.senderType === "Customer") {
+                            localStorage.removeItem("CatPaw_DeviceId");
+                            window.location.href = `${baseUrl}/CustomersArea/home`;
+                        } else {
+                            window.location.href = `${baseUrl}/`;
+                        }
                     }
                 }
             }
-        }).mount("#app");
+        }).mount("#app");});
     </script>
-</body>
+    </body>
 
 </html>

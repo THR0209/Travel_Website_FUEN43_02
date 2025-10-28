@@ -45,7 +45,7 @@ namespace Cat_Paw_Footprint.Repositories
 				.FirstOrDefaultAsync(m => m.GroupId == group.GroupId && m.CustomerId == JoinerId.ToString());
 			if (existingMember != null)
 			{
-				return "您已經是此群組的成員";
+				return "歡迎回來";
 			}
 			var newMember = new TourGroupMembers
 			{
@@ -68,6 +68,12 @@ namespace Cat_Paw_Footprint.Repositories
 				.FirstOrDefaultAsync(g => g.GroupId == group.GroupId && g.DeviceId == DeviceId);
 			if (existingGuest != null)
 			{
+				if (!string.IsNullOrEmpty(JoinerName) && existingGuest.TemporaryName != JoinerName)
+				{
+					existingGuest.TemporaryName = JoinerName;
+					existingGuest.LastActive = DateTime.UtcNow.AddHours(8); // 可順便更新最後活動時間
+					await _db.SaveChangesAsync();
+				}
 				return "歡迎回來";
 			}
 			var newGuest = new TourGroupGuests
@@ -111,8 +117,13 @@ namespace Cat_Paw_Footprint.Repositories
 
 				case "Guest":
 					// 這裡假設 dto.GuestId 是 Guid 或 string（你可以依情況調整）
-					if (Guid.TryParse(dto.GuestId?.ToString(), out Guid guestGuid))
-						message.GuestId = guestGuid;
+					if (!string.IsNullOrEmpty(dto.DeviceId))
+					{
+						var guest = await _db.TourGroupGuests
+							.FirstOrDefaultAsync(g => g.DeviceId == dto.DeviceId && g.GroupId == group.GroupId);
+						if (guest != null)
+							message.GuestId = guest.GuestId;
+					}
 					break;
 
 				case "Guide":
@@ -126,6 +137,47 @@ namespace Cat_Paw_Footprint.Repositories
 			// 4️⃣ 寫入資料庫
 			_db.GroupMessages.Add(message);
 			await _db.SaveChangesAsync();
+
+
+			// 🔍 根據 SenderType 查詢姓名
+			string? userName = null;
+
+			switch (dto.SenderType)
+			{
+				case "Customer":
+					if (!string.IsNullOrEmpty(dto.CustomerId))
+					{
+						userName = await _db.Customers
+							.Where(c => c.CustomerID == int.Parse(dto.CustomerId))
+							.Select(c => c.CustomerProfile.CustomerName)
+							.FirstOrDefaultAsync();
+					}
+					break;
+
+				case "Guest":
+					if (!string.IsNullOrEmpty(dto.DeviceId))
+					{
+						userName = await _db.TourGroupGuests
+							.Where(g => g.DeviceId == dto.DeviceId && g.GroupId == group.GroupId)
+							.Select(g => g.TemporaryName)
+							.FirstOrDefaultAsync();
+					}
+					break;
+
+				case "Guide":
+					if (dto.GuideId.HasValue)
+					{
+						userName = await _db.Employees
+							.Where(e => e.EmployeeID == dto.GuideId)
+							.Select(e => e.EmployeeProfile.EmployeeName)
+							.FirstOrDefaultAsync();
+					}
+					break;
+			}
+
+			// ✅ 將姓名暫存在 message 物件中（不進資料庫，只回傳給上層）
+			message.UserName = userName ?? "匿名";
+
 
 			// 5️⃣ 回傳已儲存的訊息
 			return message;
@@ -246,6 +298,62 @@ namespace Cat_Paw_Footprint.Repositories
 				.Where(m => m.Group.GroupCode == groupCode)
 				.OrderBy(m => m.SendTime)
 				.ToListAsync();
+		}
+		public async Task<List<NewHistoryAsyncDto>> GetNewHistoryByGroupCodeAsync(string groupCode)// 新版取得歷史訊息(替換上方原本取得歷史訊息)
+		{
+			var messages = await _db.GroupMessages
+				.Include(m => m.Group)
+				.Where(m => m.Group.GroupCode == groupCode)
+				.OrderBy(m => m.SendTime)
+				.ToListAsync();
+			var result = new List<NewHistoryAsyncDto>();
+
+			foreach (var m in messages)
+			{
+				string userName="";
+				switch (m.SenderType)
+				{
+					case "Customer":
+						if (int.TryParse(m.CustomerId, out var cid))
+						{
+							userName = await _db.Customers
+								.Where(c => c.CustomerID == cid)
+								.Select(c => c.CustomerProfile.CustomerName)
+								.FirstOrDefaultAsync() ?? "(會員)";
+						}
+						else
+						{
+							userName = "(無效會員)";
+						}
+					break;
+					case "Guest":
+						userName = await _db.TourGroupGuests
+							.Where(g => g.GuestId == m.GuestId)
+							.Select(g => g.TemporaryName)
+							.FirstOrDefaultAsync() ?? "(訪客)";
+					break;
+					case "Guide":
+						userName = await _db.Employees
+						   .Where(e => e.EmployeeID == m.GuideId)
+						   .Select(e => e.EmployeeProfile.EmployeeName)
+						   .FirstOrDefaultAsync() ?? "(導遊)";
+					break;
+				}
+				result.Add(new NewHistoryAsyncDto
+				{
+					MessageId = m.MessageId,
+					UserName = userName,
+					GroupId = m.GroupId,
+					SenderType = m.SenderType,
+					CustomerId = m.CustomerId,
+					GuestId = m.GuestId,
+					GuideId = m.GuideId,
+					Content = m.Content,
+					SendTime = m.SendTime.AddHours(8)
+				});
+			}
+			return result;
+
 		}
 
 	}

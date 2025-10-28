@@ -26,8 +26,8 @@ namespace Cat_Paw_Footprint.ViewModel
 	{
 		public int GroupId { get; set; }
 		public string GroupCode { get; set; } = null!;// 加入代碼(給遊客/其他導遊)
-		public string Message { get; set; }
-		string? JoinerName { get; set; }
+		public string? Message { get; set; }
+		public string? JoinerName { get; set; }
 		public string? CustomerId { get; set; }// 會員ID
 		public Guid? GuestId { get; set; }// 遊客ID
 		public int? GuideId { get; set; }// 導遊ID
@@ -36,10 +36,12 @@ namespace Cat_Paw_Footprint.ViewModel
 		public int SenderId { get; set; }
 		public string? Content { get; set; }            // 文字(可空，若只傳圖片)
 		public string? PhotoUrl { get; set; }           // 圖片URL(可選)
+		public string? DeviceId { get; set; }
 	}
 
 	public class GroupMessageResponseDto// 發送訊息回應
 	{
+		
 		public bool Success { get; set; }
 		public string Message { get; set; } = null!;
 		public long MessageId { get; set; }
@@ -139,5 +141,18 @@ namespace Cat_Paw_Footprint.ViewModel
 		public string GroupCode { get; set; } = null!;
 		public string GroupName { get; set; } = null!;
 		public List<GroupMessageResponseDto> Messages { get; set; } = new();
+	}
+
+	public class NewHistoryAsyncDto
+	{
+		public int MessageId { get; set; }// 主鍵訊息ID
+		public string UserName { get; set; } = null!;// 使用者名稱
+		public int GroupId { get; set; }// 團體ID
+		public string SenderType { get; set; } = null!;// 發送者類型 (Customer / Guest / Guide)
+		public string? CustomerId { get; set; }// 會員ID
+		public Guid? GuestId { get; set; }// 遊客ID
+		public int? GuideId { get; set; }// 導遊ID
+		public string? Content { get; set; }// 訊息內容
+		public DateTime SendTime { get; set; }// 發送時間
 	}
 }

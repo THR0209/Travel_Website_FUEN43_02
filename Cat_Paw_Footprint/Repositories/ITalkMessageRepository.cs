@@ -35,5 +35,6 @@ namespace Cat_Paw_Footprint.Repositories
 		Task<List<TourGroups>> GetTourGroupsByGuideIdAsync(int guideId);
 		Task<TourGroups?> GetGroupByIdAsync(int groupId);// 根據群組Id取得群組詳細資訊
 		Task<IEnumerable<GroupMessages>> GetHistoryByGroupCodeAsync(string groupCode);
+		Task<List<NewHistoryAsyncDto>> GetNewHistoryByGroupCodeAsync(string groupCode);// 新版取得歷史訊息(替換上方原本取得歷史訊息)
 	}
 }

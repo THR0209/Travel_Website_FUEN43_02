@@ -130,6 +130,7 @@
     </div>
 
     <script>
+
         const { createApp } = Vue;
         createApp({
             data() {
@@ -165,6 +166,7 @@
 
                     this.connection.on('ReceiveMessage', (msg) => {
                         this.pushFeed({
+                            messagename: msg.UserName || '匿名',
                             type: 'text',
                             sender: msg.SenderType,
                             time: (msg.UploadTime && !isNaN(new Date(msg.UploadTime))) ? new Date(msg.UploadTime).toLocaleString() : '',

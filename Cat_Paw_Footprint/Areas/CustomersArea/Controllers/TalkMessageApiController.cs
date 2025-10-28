@@ -1,10 +1,12 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomersArea.ViewModel;
 using Cat_Paw_Footprint.Services;
 using Cat_Paw_Footprint.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
+
 	[Route("api/[controller]/[action]")]
 	[ApiController]
 	public class TalkMessageApiController: ControllerBase
@@ -15,7 +17,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_service = service;
 		}
 		[HttpPost]
-		public async Task<IActionResult> JoinAsCustomer([FromBody] CusJoinDto dto)//會員加入群組
+		[Authorize(AuthenticationSchemes = "CustomerAuth")]
+		public async Task<IActionResult> JoinAsCustomer([FromBody] string GroupCode)//會員加入群組
 		{
 			// 1️⃣ 從登入 Cookie 中讀取 Claims
 			var idClaim = User.FindFirst("CustomerId");
@@ -28,19 +31,46 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			string? customerName = nameClaim?.Value;
 
 			// 2️⃣ 呼叫 Service 寫入資料庫
-			var result = await _service.JoinGroupbyCustomerAsync(dto.GroupCode, customerId, customerName);
+			var result = await _service.JoinGroupbyCustomerAsync(GroupCode, customerId, customerName);
 			if (result == "成功加入群組")
 			{
-				Console.WriteLine($"✅ 會員 {customerId} 成功加入群組 {dto.GroupCode}");
+				Console.WriteLine($"✅ 會員 {customerId} 成功加入群組 {GroupCode}");
 			}
 			else
 			{
-				Console.WriteLine($"❌ 會員 {customerId} 加入群組 {dto.GroupCode} 失敗: {result}");
+				Console.WriteLine($"❌ 會員 {customerId} 加入群組 {GroupCode} 失敗: {result}");
 			}
 			return Ok(new { message = result });
 		}
+		[HttpGet]
+		[Authorize(AuthenticationSchemes = "CustomerAuth")]
+		public IActionResult GetCustomerInfo()
+		{
+			// 從 cookie（ClaimsPrincipal）取出登入者資訊
+			var idClaim = User.FindFirst("CustomerId");
+			var nameClaim = User.FindFirst("FullName");
+			var accountClaim = User.FindFirst("Account");
+			var emailClaim = User.FindFirst("Email");
 
-		
+			if (idClaim == null)
+			{
+				return Unauthorized(new { success = false, message = "尚未登入" });
+			}
+
+			// 回傳簡單資訊
+			return Ok(new
+			{
+				success = true,
+				data = new
+				{
+					customerId = idClaim.Value,
+					fullName = nameClaim?.Value ?? "(未命名)",
+					account = accountClaim?.Value ?? "",
+					email = emailClaim?.Value ?? ""
+				}
+			});
+		}
+
 		[HttpPost]
 		public async Task<IActionResult> JoinAsGuest([FromBody] GuestJoinDto dto)// 訪客加入群組
 		{
@@ -48,7 +78,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				return BadRequest(new { message = "資料不完整" });
 
 			var result = await _service.JoinGuestbyDeviceAsync(dto.GroupCode, dto.TemporaryName, dto.DeviceId);
-			if (result == "成功加入群組")
+			if (result != "此群組不存在")
 			{
 				Console.WriteLine($"✅ 訪客 {dto.DeviceId} 成功加入群組 {dto.GroupCode}");
 
@@ -81,25 +111,28 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		[HttpGet("{groupCode}")]
 		public async Task<IActionResult> GetHistory(string groupCode)
 		{
-			try
-			{
-				var history = await _service.GetHistoryAsync(groupCode);
-				if (history == null || !history.Any())
+			try 
+			{ 
+				var HistoryMessages = await _service.GetNewHistoryAsync(groupCode);
+				Console.WriteLine($"✅ 取得群組 {groupCode} 歷史訊息成功，共 {HistoryMessages.Count} 筆");
+				if (HistoryMessages == null || HistoryMessages.Count == 0)
+				{
 					return Ok(new List<object>());
-
-				var safeList = history.Select(m => new {
-					m.MessageId,
-					m.SenderType,
-					m.Content,
+				}
+				var safeList = HistoryMessages.Select(m => new
+				{
+					m.MessageId,// 只回傳必要欄位，避免敏感資訊外洩
+					m.SenderType,//類型
+					m.Content,//內容
+					m.UserName,//歷史發訊息者名稱
 					SendTime = m.SendTime.ToString("yyyy-MM-dd HH:mm:ss")
 				});
-
 				return Ok(safeList);
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"❌ 取得歷史訊息失敗: {ex}");
-				return StatusCode(500, new { message = "伺服器錯誤", error = ex.Message });
+				Console.WriteLine($"❌ 取得群組 {groupCode} 歷史訊息失敗: {ex.Message}");
+				return StatusCode(500, new { message = "伺服器錯誤，無法取得歷史訊息" });
 			}
 		}
 		[HttpPost]
