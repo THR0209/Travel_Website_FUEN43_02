@@ -983,6 +983,22 @@ Header Style
     list-style: none;
 }
 
+.navbar-nav {
+    flex-wrap: nowrap;
+}
+
+    .navbar-nav .nav-link {
+        font-size: 0.95rem;
+        padding: 0.4rem 0.8rem;
+        white-space: nowrap;
+    }
+
+.brand-logo span {
+    font-size: 1.6rem;
+    white-space: nowrap;
+}
+
+
 .no-gap {
     margin-top: 0 !important;
     padding-top: 0 !important;
@@ -1034,6 +1050,12 @@ Header Style
     align-items: center !important;
     width: 100%;
     padding: 8px 16px; /* 可調整與整體一致 */
+}
+
+.dropdown-item i {
+    width: 1.5em; /* 統一寬度 */
+    text-align: center; /* 讓 icon 置中 */
+    display: inline-block;
 }
 
 .header-area .main-nav .nav li a.active::after {

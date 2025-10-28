@@ -5,7 +5,6 @@
     <h2 class="mb-3">購物車</h2>
 
     <div class="mb-3 d-flex gap-2">
-        <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
         <button class="btn btn-outline-secondary" v-on:click="reload">重新整理</button>
         <button class="btn btn-outline-primary" v-on:click="addDemo">加一個範例商品</button>
     </div>
@@ -57,30 +56,44 @@
         </table>
     </div>
 
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
-        <form id="payForm" method="post" action="/CustomersArea/Payment/Create">
-            <input type="hidden" name="orderId" :value="selectedOrderId">
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" v-on:click="payByCredit" :disabled="items.length===0">信用卡付款</button>
-                <button class="btn btn-outline-primary" v-on:click="payByTransfer" :disabled="items.length===0">轉帳匯款</button>
-            </div>
-        </form>
-    </div>
     <div class="d-flex flex-wrap gap-2 align-items-center my-3">
         <div class="input-group w-auto">
-            <span class="input-group-text">折價券</span>
-            <input v-model.trim="couponCode" class="form-control" placeholder="輸入折價碼…">
-            <button class="btn btn-outline-primary" v-on:click="applyCoupon" :disabled="!couponCode">套用</button>
-            <button class="btn btn-outline-secondary" v-on:click="clearCoupon" :disabled="!couponCode">清除</button>
+            <span class="input-group-text">我的優惠券</span>
+            <select class="form-select" v-model="selectedCouponCode">
+                <option value="" disabled>請選擇可用的優惠券</option>
+                <option v-for="c in coupons" :key="c.couponId" :value="c.couponCode">
+                    {{ c.name || ('優惠券#' + c.couponId) }}（代碼: {{ c.couponCode }}）
+                </option>
+            </select>
+            <button class="btn btn-outline-primary" v-on:click="applySelectedCoupon" :disabled="!selectedCouponCode">套用</button>
+            <button class="btn btn-outline-secondary" v-on:click="clearCoupon">清除</button>
         </div>
+
         <button class="btn btn-outline-danger ms-auto" :disabled="selected.length===0" v-on:click="batchRemove">刪除選取</button>
+        <span class="text-success ms-2" v-if="discountHint">{{ discountHint }}</span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
+
+        <!-- 只把勾選的商品送去模擬付款 -->
+        <form id="payCreditForm" method="post" action="/CustomersArea/Payment/CheckoutCredit">
+            <!-- 一定要在 form 裡面產生真正的 input，template 有時被瀏覽器忽略 -->
+            <div style="display:none">
+                <input v-for="pid in selected" :key="'sel-'+pid" type="hidden"  name="productIds" :value="pid" />
+            </div>
+            <div class="d-flex gap-2">
+                <!-- submit 沒問題；但禁用條件要確認有勾選 -->
+                <button type="submit" class="btn btn-primary" :disabled="items.length===0 || selected.length===0">信用卡付款</button>
+                <button type="button" class="btn btn-outline-primary" :disabled="items.length===0 || selected.length===0" v-on:click="payByTransfer">轉帳匯款</button>
+            </div>
+        </form>
     </div>
 
     <footer class="card shadow-sm sticky-bottom p-3 bg-white border">
         <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <div class="small text-muted" v-if="discountHint">{{ discountHint }}</div>
+            <div class="fs-6 text-muted" v-if="discount>0">
+                折扣：−NT$ {{ discount.toLocaleString() }}
             </div>
             <div class="fs-5">
                 合計：<strong>NT$ {{ finalTotal.toLocaleString() }}</strong>
@@ -97,6 +110,19 @@
         }</style>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function demo(){
+          await Swal.fire({
+            icon: 'success',
+            title: '操作成功',
+            text: '這是 SweetAlert 測試訊息',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          });
+        }
+    </script>
     <script>
         (() => {
             const { createApp, ref, onMounted, computed } = Vue;
@@ -110,6 +136,67 @@
                 const discountHint = ref('');
                 const selected = ref([]);
                 const checkAll = ref(false);
+                const selectedCouponCode = ref('');
+                const coupons = ref([]);
+                const discount = computed(() => {
+                  if (!selectedCouponCode.value) return 0;
+
+                  // 找到被選的券（API 回來屬性: { couponId, code, discountType, discountValue, ... }）
+                  const c = coupons.value.find(x => x.code === selectedCouponCode.value);
+                  if (!c) return 0;
+
+                  // discountType: 1=折數(百分比 off), 2=固定金額
+                  if (c.discountType === 1) {
+                    // 10 表示 10% OFF
+                    const percent = Number(c.discountValue || 0) / 100;
+                    return Math.floor((total.value || 0) * percent);
+                  }
+                  if (c.discountType === 2) {
+                    return Math.min(c.discountValue, total.value || 0);
+                  }
+                  return 0;
+                });
+
+                const finalTotal = computed(() => Math.max(0, (total.value || 0) - discount.value));
+
+                function toDate(v){
+                  if(!v) return '';
+                  const d = new Date(v);
+                  return isNaN(d) ? '' : d.toLocaleDateString('zh-TW');
+                }
+                async function applySelectedCoupon(){
+                  if(!selectedCouponCode.value) return;
+                  await Swal.fire({
+                    icon: 'success',
+                    title: '已套用優惠券',
+                    text: '結帳金額已依優惠券即時更新',
+                    timer: 1500,
+                    showConfirmButton: false
+                    });
+
+                    await axios.post('/CustomersArea/Cart/apply-coupon',
+                    new URLSearchParams({ code: selectedCouponCode.value })
+                  );
+                }
+                async function loadCoupons(){
+                  try {
+                    const res = await axios.get('/CustomersArea/Coupons/api');
+                    const raw = Array.isArray(res.data) ? res.data : [];
+
+                    coupons.value = raw.map(c => ({
+                      couponId: c.couponId ?? c.CouponID ?? 0,
+                      couponCode: c.couponCode ?? c.CouponCode ?? '',   // ← 加這個
+                      disCountCode: c.disCountCode ?? c.DisCountCode ?? '',
+                      name: c.name ?? c.couponDesc ?? c.CouponDesc ?? '',
+                      discountType: Number(c.discountType ?? c.DiscountType ?? 0),
+                      discountValue: Number(c.discountValue ?? c.DiscountValue ?? 0),
+                      expireAt: c.expireAt ?? c.endTime ?? c.EndTime ?? null
+                    }));
+                    } catch (err) {
+                    console.error('載入優惠券失敗', err);
+                    coupons.value = [];
+                    }
+                }
 
                 async function addDemo(){
                   try{
@@ -128,27 +215,44 @@
                 }
 
                 async function payByTransfer(){
-                  const customerId = 123; // 之後改登入者ID
-                  // A) 先建訂單（未付款）
-                  await axios.post('/CustomersArea/Cart/checkout', new URLSearchParams({ customerId }));
+                  try {
+                    // 1) 確認一下是否真的要用轉帳
+                    const confirm = await Swal.fire({
+                      icon: 'question',
+                      title: '確認使用轉帳付款？',
+                      text: '系統會寄出匯款帳號到你的信箱，訂單狀態為「未付款」，待後台對帳後改為「已付款」。',
+                      showCancelButton: true,
+                      confirmButtonText: '是的，寄出匯款資訊',
+                      cancelButtonText: '再想一下'
+                    });
+                    if (!confirm.isConfirmed) return;
 
-                  // B) 寄信（匯款帳號）
-                  await axios.post('/CustomersArea/Payment/Transfer', new URLSearchParams({ customerId }));
+                    // 2) 先在後端建立未付款訂單（若你需要；你現有的 Cart/checkout 若已做，可保留）
+                    await axios.post('/CustomersArea/Cart/checkout'); 
 
-                  alert('已寄出匯款資訊，請於期限內完成轉帳。');
-                  window.location.href = '/CustomersArea/Orders';
-                }
+                    // 3) 寄出匯款資訊（後端會依登入者 Email 寄出）
+                    await axios.post('/CustomersArea/Payment/Transfer');
 
-                async function payByCredit(){
-                  // 這裡 demo 用測試 customerId，之後請改成登入者ID
-                  const customerId = 123;
-                  // 後端會 Redirect 到 /CustomersArea/Payment/Create → GoECPay 自動送出
-                  const form = document.createElement('form');
-                  form.method = 'post';
-                  form.action = '/CustomersArea/Payment/CheckoutCredit';
-                  form.innerHTML = `<input name="customerId" value="${customerId}">`;
-                  document.body.appendChild(form);
-                  form.submit();
+                    // 4) 成功提示
+                    await Swal.fire({
+                      icon: 'success',
+                      title: '已寄出匯款資訊',
+                      text: '請至信箱查看匯款帳號，並於期限內完成轉帳。',
+                      timer: 2200,
+                      showConfirmButton: false,
+                      timerProgressBar: true
+                    });
+
+                    // 5) 導回「我的訂單」
+                    window.location.href = '/CustomersArea/Orders';
+                  } catch (e) {
+                    const msg = e?.response?.data?.error || e?.response?.data || '請稍後再試';
+                    await Swal.fire({
+                      icon: 'error',
+                      title: '操作失敗',
+                      text: msg
+                    });
+                  }
                 }
 
                 async function checkout(){
@@ -218,34 +322,50 @@
                   await reload();
                 }
 
-                async function applyCoupon(){
-                  const res = await axios.post('/CustomersArea/Cart/apply-coupon', new URLSearchParams({ code: couponCode.value }));
-                  discountHint.value = res.data?.hint || '';
-                  await reload();
+                async function applyCouponById(){
+                  try{
+                    await axios.post('/CustomersArea/Cart/apply-coupon', new URLSearchParams({
+                      code: selectedCouponId.value  // 如果你改成傳 couponId，就和後端一致
+                    }));
+                    await Swal.fire({ icon:'success', title:'已套用折價券', timer:1600, showConfirmButton:false });
+                    await reload();
+                  }catch(e){
+                    const msg = e?.response?.data?.error || '套用失敗';
+                    await Swal.fire({ icon:'error', title:'失敗', text:msg });
+                  }
                 }
-
                 async function clearCoupon(){
-                  await axios.post('/CustomersArea/Cart/clear-coupon');
-                  couponCode.value = '';
-                  discountHint.value = '';
-                  await reload();
+                  try{
+                    await axios.post('/CustomersArea/Cart/clear-coupon');
+                  }finally{
+                    couponCode.value = '';
+                    selectedCouponCode.value = '';
+                    discountHint.value = '';
+                    await reload();
+                  }
                 }
+                async function clearCart(){
+                  try{
+                    await axios.post('/CustomersArea/Cart/clear');
+                    await reload();
+                  }catch(e){
+                    console.error(e);
+                    alert('清空失敗');
+                  }
+                }                
 
-                const discount = computed(()=> {
-                  // 也可由後端計算後回傳；這裡前端先顯示，後端仍以自己計算為準
-                  // 例：後端會把折扣放在 api 回傳資料 data.coupon，前端只顯示
-                  return 0;
+                onMounted(async () => {
+                  await reload();
+                  await loadCoupons();
                 });
-                const finalTotal = computed(()=> Math.max(0, total.value - discount.value));
-
-                onMounted(reload);
 
                 return {
                   items, total, couponCode, discountHint,
                   selected, checkAll, toggleAll, batchRemove,
-                  inc, dec, update, remove,
-                  applyCoupon, clearCoupon,checkout,
-                        finalTotal,addDemo,customerId,payByCredit,payByTransfer
+                  inc, dec, update, remove,applyCouponById,
+                  clearCoupon,checkout,finalTotal,addDemo,customerId,
+                  payByTransfer,loadCoupons,clearCart,coupons
+                  ,applySelectedCoupon,toDate,selectedCouponCode
                 };
               }
             }).mount('#cartApp');

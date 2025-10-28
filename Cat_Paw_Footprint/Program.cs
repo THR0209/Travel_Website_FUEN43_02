@@ -73,8 +73,8 @@ namespace Cat_Paw_Footprint
 			.AddCookie("CustomerAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Customer.Auth";
-				options.LoginPath = "/CustomersArea/Account/Login";
-				options.AccessDeniedPath = "/CustomersArea/Account/Index";
+				options.LoginPath = "/CustomersArea/CusLogReg/Login";
+				options.AccessDeniedPath = "/CustomersArea/CusLogReg/Login";
 			})
 			.AddCookie("EmployeeAuth", options =>
 			{
@@ -109,7 +109,7 @@ namespace Cat_Paw_Footprint
 				options.AddPolicy("AreaOrder", policy =>
 					policy.AddAuthenticationSchemes("EmployeeAuth")
 						  .RequireAuthenticatedUser()
-						  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
+						  .RequireClaim("RoleName", "Sales", "SuperAdmin", "CustomerService"));
 
 				options.AddPolicy("AreaProductManagement", policy =>
 					policy.AddAuthenticationSchemes("EmployeeAuth")
@@ -256,6 +256,7 @@ namespace Cat_Paw_Footprint
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
+			app.MapControllers();
 
 			app.Run();
 		}

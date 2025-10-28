@@ -17,7 +17,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
 	[Area("CustomersArea")]
 	[Authorize(AuthenticationSchemes = "CustomerAuth")]
-	[Route("CustomersArea/CustomerService")]
+	[Route("CustomersArea/[controller]/[action]")]
 	public class CustomerServiceController : Controller
 	{
 		private readonly ICustomerSupportTicketsService _ticketService;
@@ -45,11 +45,23 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 客服中心頁面 =======================
+
+		/// <summary>
+		/// 客服中心主頁面
+		/// GET: /CustomersArea/CustomerService/Index
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet("")]
 		public IActionResult Index() => View();
 
 		// ======================= 取得工單列表 =======================
-		[HttpGet("GetTickets")]
+
+		/// <summary>
+		/// 取得目前客戶的所有工單
+		/// GET: /CustomersArea/CustomerService/GetTickets
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet("")]
 		public async Task<IActionResult> GetTickets()
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -81,7 +93,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 建立新工單 =======================
-		[HttpPost("CreateTicket")]
+		[HttpPost("")]
 		public async Task<IActionResult> CreateTicket([FromBody] CustomerSupportTicketViewModel vm)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -145,7 +157,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 取得聊天訊息 =======================
-		[HttpGet("GetMessages")]
+
+		/// <summary>
+		/// 取得指定工單的聊天訊息（前台客戶端）
+		/// GET: /CustomersArea/CustomerService/GetMessages?ticketId={id}
+		/// </summary>
+		/// <param name="ticketId"></param>
+		/// <returns></returns>
+		[HttpGet("")]
 		public async Task<IActionResult> GetMessages(int ticketId)
 		{
 			var msgs = await _msgService.GetByTicketIdAsync(ticketId, 0, 50);
@@ -153,7 +172,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 發送訊息 =======================
-		[HttpPost("SendMessage")]
+
+		/// <summary>
+		/// 發送客服訊息（前台客戶端）
+		/// POST: /CustomersArea/CustomerService/SendMessage
+		/// </summary>
+		/// <param name="vm"></param>
+		/// <returns></returns>
+		[HttpPost("")]
 		public async Task<IActionResult> SendMessage([FromBody] CustomerSupportMessageViewModel vm)
 		{
 			if (vm == null || (string.IsNullOrWhiteSpace(vm.MessageContent) && string.IsNullOrWhiteSpace(vm.AttachmentURL)))
@@ -175,7 +201,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 上傳附件 =======================
-		[HttpPost("UploadAttachment")]
+
+		/// <summary>
+		/// 上傳附件 API（共用 Service）
+		/// POST: /CustomersArea/CustomerService/UploadAttachment
+		/// </summary>
+		/// <param name="file"></param>
+		/// <returns></returns>
+		[HttpPost("")]
 		public async Task<IActionResult> UploadAttachment(IFormFile file)
 		{
 			try
@@ -189,8 +222,46 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 		}
 
+		// ======================= 多檔上傳附件 =======================
+
+		/// <summary>
+		/// 多檔上傳附件 API（共用 Service）
+		/// POST: /CustomersArea/CustomerService/UploadMultipleAttachments
+		/// </summary>
+		/// <param name="files"></param>
+		/// <returns></returns>
+		[HttpPost("")]
+		public async Task<IActionResult> UploadMultipleAttachments(List<IFormFile> files)
+		{
+			try
+			{
+				if (files == null || files.Count == 0)
+					return BadRequest(new { success = false, message = "未選擇任何檔案。" });
+
+				// ✅ 一次啟動所有上傳任務
+				var uploadTasks = files.Select(f => _attachmentService.SaveFileAsync(f));
+				var urls = await Task.WhenAll(uploadTasks);
+
+				// ✅ 成功後回傳所有網址
+				return Ok(new { success = true, urls });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { success = false, message = ex.Message });
+			}
+		}
+
+
+
 		// ======================= 評價 =======================
-		[HttpPost("SubmitFeedback")]
+
+		/// <summary>
+		///	評價客服服務
+		///	POST: /CustomersArea/CustomerService/SubmitFeedback
+		/// </summary>
+		/// <param name="vm"></param>
+		/// <returns></returns>
+		[HttpPost("")]
 		public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackViewModel vm)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -228,7 +299,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 取得工單分類 =======================
-		[HttpGet("GetTicketTypes")]
+
+		/// <summary>
+		/// 取得工單分類列表
+		/// GET: /CustomersArea/CustomerService/GetTicketTypes
+		/// </summary>
+		/// <returns></returns>
+		[HttpGet("")]
 		public async Task<IActionResult> GetTicketTypes()
 		{
 			try
@@ -248,8 +325,16 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				return Json(new { success = false, message = $"載入分類失敗: {ex.Message}" });
 			}
 		}
+
 		// ======================= 檢查是否已評價 =======================
-		[HttpGet("GetFeedbackStatus")]
+
+		/// <summary>
+		/// 檢查指定工單是否已評價
+		/// GET: /CustomersArea/CustomerService/GetFeedbackStatus?ticketId={id}
+		/// </summary>
+		/// <param name="ticketId"></param>
+		/// <returns></returns>
+		[HttpGet("")]
 		public async Task<IActionResult> GetFeedbackStatus(int ticketId)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -263,7 +348,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 取得評價詳細 =======================
-		[HttpGet("GetFeedbackDetail")]
+		/// <summary>
+		/// 取得指定工單的評價詳細
+		/// GET: /CustomersArea/CustomerService/GetFeedbackDetail?ticketId={id}
+		/// </summary>
+		/// <param name="ticketId"></param>
+		/// <returns></returns>
+		[HttpGet("")]
 		public async Task<IActionResult> GetFeedbackDetail(int ticketId)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;

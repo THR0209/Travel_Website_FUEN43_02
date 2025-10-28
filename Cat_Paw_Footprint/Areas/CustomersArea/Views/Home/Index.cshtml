@@ -53,26 +53,249 @@
             filter: hue-rotate(180deg);
         }
     </style>
+
+    <style>
+        /* ===== Banner / 搜尋列（新增與修正） ===== */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            overflow: visible; /* 允許下拉超出 Banner */
+        }
+
+        #heroMedia {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.65);
+            border-radius: 16px; /* 圓角交給圖片 */
+            pointer-events: none; /* 讓點擊穿透到上層搜尋列 */
+        }
+
+        .hero-content {
+            display: none;
+        }
+
+        .search-wrapper {
+            position: absolute;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 1100px;
+            background: rgba(255,255,255,.94);
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0,0,0,.30);
+            padding: 18px;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .search-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .search-tab {
+            padding: 6px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: .25s;
+            user-select: none;
+        }
+
+            .search-tab.active {
+                background: #22B3C1;
+                color: #fff;
+            }
+
+        .search-box {
+            display: grid;
+            gap: 10px;
+            align-items: center;
+            grid-template-columns: 2.2fr 2.2fr 1.6fr 140px; /* 目的地 / 日期 / 旅客(內嵌) / 搜尋 */
+        }
+
+        .search-select {
+            background: #F2FAFF;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #dceeff;
+            position: relative;
+        }
+
+            .search-select:focus-within {
+                border-color: #22B3C1;
+            }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-weight: 600;
+            color: #222;
+        }
+
+            .search-input::placeholder {
+                color: #6b7d90;
+                font-weight: 500;
+            }
+
+        .dropdown-panel {
+            position: absolute;
+            top: 115%;
+            left: 0;
+            width: 100%;
+            min-width: 340px;
+            background: #fff;
+            padding: 12px;
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(0,0,0,.25);
+            display: none;
+            z-index: 10000;
+        }
+
+        .suggest-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 8px;
+        }
+
+        .suggest-item {
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid #eef3fb;
+            border-radius: 10px;
+            background: #fafcff;
+            font-size: 0.95rem;
+        }
+
+            .suggest-item:hover {
+                background: #eef8fb;
+                border-color: #d5eef5;
+            }
+
+        /* 旅客數：改為內嵌控制（無下拉） */
+        .people-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .people-inline .ctrl {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .people-inline button {
+                width: 32px;
+                height: 32px;
+                line-height: 30px;
+                align-items: center;
+                /* text-align: center; */
+            }
+
+        .search-btn {
+            background: #22B3C1;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            padding: 14px 0;
+            width: 100%;
+        }
+
+        /* 讓人數欄位自動撐到和其他 search-select 一樣高度 */
+        .search-select .people-inline {
+            height: 100%;
+        }
+
+        /* 讓數字與字不會撐大高度 */
+        .people-inline span,
+        .people-inline .ctrl * {
+            line-height: 1.2; /* 可依視覺調整 */
+        }
+
+
+        /* 裝飾（避免擋點擊） */
+        .floating-paws {
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
 }
 
 <!-- Hero -->
+<!-- ===== Hero / Banner ===== -->
 <section class="hero mt-3">
-    <!-- 以貓為主題的 Banner 圖片（可改成本機 /uploads/banner-cat.jpg） -->
     <img src="https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=1800&auto=format&fit=crop" alt="帶貓旅行的海邊日落" id="heroMedia" />
-    <div class="hero-content">
+    
+    <!-- Trip.com 風格搜尋列 -->
+    <div class="search-wrapper">
         <h1 class="display-6 fw-bolder mb-3">帶著毛孩去旅行，探索下一站</h1>
-        <div class="search-bar">
-            <input class="search-input" type="search" placeholder="找寵物友善目的地或行程（例：寵物餐廳、寵物旅館）" />
-            <div class="search-chip search-hide-md">出發日期</div>
-            <div class="search-chip">2 位旅客</div>
-            <button class="btn-brand">搜尋</button>
+        <!-- 分類 Tab -->
+        <div class="search-tabs">
+            <div class="search-tab active" data-type="trip">套裝行程</div>
+            <div class="search-tab" data-type="hotel">住宿</div>
+            <div class="search-tab" data-type="ticket">景點門票</div>
+            <div class="search-tab" data-type="car">租車</div>
         </div>
+
+        <!-- 搜尋表單（跳轉到後端搜尋） -->
+        <form asp-area="CustomersArea" asp-controller="Products" asp-action="Search" method="get" id="topSearchForm">
+            <input type="hidden" name="type" id="searchType" value="trip" />
+            <input type="hidden" name="start" id="startDate" />
+            <input type="hidden" name="end" id="endDate" />
+            <input type="hidden" name="people" id="peopleInput" value="2" />
+
+            <div class="search-box">
+                <!-- 目的地（可輸入 + 建議；點選後會關閉下拉） -->
+                <div class="search-select" id="destSelect">
+                    <label class="float-label">目的地</label>
+                    <input type="text" class="search-input" id="destinationInput" name="destination"
+                           placeholder="請輸入或選擇目的地" autocomplete="off" />
+                    <div class="dropdown-panel" id="destPanel">
+                        <div class="mb-2 fw-bold">熱門目的地</div>
+                        <div class="suggest-grid" id="destSuggest"></div>
+                    </div>
+                </div>
+
+                <!-- 日期（daterangepicker：起訖 + 時間） -->
+                <div class="search-select">
+                    <label class="float-label">出發時間-返程時間</label>
+                    <input type="text" class="search-input" id="dateLabel" placeholder="選擇日期與時間" autocomplete="off" />
+                </div>
+
+                <!-- 旅客數（內嵌控制，無下拉） -->
+                <div class="search-select">
+                    <label class="float-label">人數</label>
+                    <div class="people-inline">
+                        <span class="fw-semibold" id="peopleLabel"><span class="fw-semibold" id="peopleCount">2</span> 位旅客</span>
+                        <div class="ctrl">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded" id="minus"><i class="fa-solid fa-minus"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded" id="plus"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜尋 -->
+                <button type="submit" class="search-btn">搜尋</button>
+            </div>
+        </form>
     </div>
+
     <!-- 飄浮貓掌裝飾 -->
     <div class="floating-paws" aria-hidden="true">
         <span>🐾</span><span>🐾</span><span>🐾</span>
     </div>
 </section>
+
+
 
 <!-- Trending Slider (Swiper) -->
 <!-- 本週熱門商品 -->
@@ -352,10 +575,183 @@
                 }
             }
         });
+    </script>
+
+    <!-- daterangepicker -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <script>
+        // Tab 對應不同搜尋欄內容
+        const SEARCH_CONFIG = {
+          trip: {
+            destinationPlaceholder: "想去哪裡玩？（例：台北、新北、花蓮）",
+            dateLabel: "旅行日期",
+            peopleLabel: "人數"
+          },
+          hotel: {
+            destinationPlaceholder: "搜尋城市、區域或飯店名稱",
+            dateLabel: "入住 - 退房",
+            peopleLabel: "房客"
+          },
+          ticket: {
+            destinationPlaceholder: "搜尋景點或城市名稱",
+            dateLabel: "使用日期",
+            peopleLabel: "入場人數"
+          },
+          car: {
+            destinationPlaceholder: "取車地點（例：台北車站、高雄左營）",
+            dateLabel: "取車 - 還車日期",
+            peopleLabel: "乘客人數"
+          }
+        };
+
+        /* ===== 搜尋列互動（修正冒泡與面板關閉） ===== */
+        // Tab
+        $('.search-tab').on('click', function () {
+          $('.search-tab').removeClass('active');
+          $(this).addClass('active');
+          const type = $(this).data('type');
+          $('#searchType').val(type);
+
+          // ✅ 套用對照表更新 UI
+          $('#destinationInput').attr('placeholder', SEARCH_CONFIG[type].destinationPlaceholder);
+          $('#peopleLabel').text(SEARCH_CONFIG[type].peopleLabel + "： " + $('#peopleCount').text());
+          
+          // ✅ 切換分類時重置旅客數
+          cnt = 2;
+          syncPeople();
+
+          // ✅ 切換時清除前面所選的內容
+          $('#destinationInput').val('');
+          $('#dateLabel').val('');
+          $('#startDate').val('');
+          $('#endDate').val('');
+          $('#peopleInput').val('2');
+        });
+
+        // 建議清單
+        const TW_DESTS = [
+          "台北","新北","基隆","桃園","新竹","苗栗","台中","彰化","雲林","南投","嘉義","台南","高雄","屏東",
+          "宜蘭","花蓮","台東","澎湖","金門","連江（馬祖）","綠島","小琉球","蘭嶼"
+        ];
+
+        function renderSuggest(list){
+          const box = $('#destSuggest').empty();
+          list.forEach(name=>{
+            $('<div>', {class:'suggest-item badge text-dark', text:name})
+              .appendTo(box)
+              .on('mousedown', function(e){ // 用 mousedown 先於 document 觸發
+                e.stopPropagation();
+                $('#destinationInput').val(name).trigger('change').blur();
+                closeAllDropdowns();
+              });
+          });
+        }
+        renderSuggest(TW_DESTS);
+
+        function openDest(){ $('#destPanel').show(); }
+        function closeAllDropdowns(){ $('.dropdown-panel').hide(); }
+
+        // 目的地外層：只有點「非 input 區域」才切換面板
+        $('#destSelect').on('mousedown', function(e){
+          if ($(e.target).is('#destinationInput')) return;
+          e.stopPropagation();
+          renderSuggest(TW_DESTS); // ✅ 永遠重新載入完整清單
+          $('#destPanel').toggle();
+        });
+
+        // 目的地輸入框：focus / input / click / mousedown 全部阻止冒泡，並顯示面板
+        $('#destinationInput')
+          .on('focus input click mousedown', function(e){
+            e.stopPropagation();
+
+            // ✅ 關閉日期選擇器
+            if ($('#dateLabel').data('daterangepicker'))
+                $('#dateLabel').data('daterangepicker').hide();
+
+            const q = $(this).val().trim();
+            const filtered = q ? TW_DESTS.filter(x => x.toLowerCase().includes(q.toLowerCase())) : TW_DESTS;
+            // renderSuggest(filtered.length ? filtered : TW_DESTS);
+            openDest();
+          });
+
+
+        // 面板本體：阻止事件冒泡，不讓 document 關掉
+        $('#destPanel').on('mousedown click', function(e){ e.stopPropagation(); });
+
+        // 全域點擊 / 按下關閉所有下拉（mousedown 能更早吃到事件，避免閃現）
+        $(document).on('mousedown click', function(){ closeAllDropdowns(); });
+
+        /* 旅客數（內嵌控制） */
+        let cnt = Number($('#peopleInput').val() || 2);
+        function syncPeople(){
+          $('#peopleCount').text(cnt);
+          $('#peopleLabel').text(cnt + ' 位旅客');
+          $('#peopleInput').val(cnt);
+        }
+        $('#plus').on('click', function(e){ e.preventDefault(); e.stopPropagation(); cnt++; syncPeople(); });
+        $('#minus').on('click', function(e){ e.preventDefault(); e.stopPropagation(); if(cnt>1){ cnt--; syncPeople(); }});
+        syncPeople();
+
+        /* 日期：daterangepicker（僅日期，不含時間） */
+        $('#dateLabel').daterangepicker({
+          autoUpdateInput: false,
+          minDate: moment().startOf('day'), // ✅ 禁止選過去
+          locale: { format: 'YYYY/MM/DD', cancelLabel: '清除', applyLabel:'確定' }
+        }, function(start, end){
+          $('#startDate').val(start.format('YYYY/MM/DD'));
+          $('#endDate').val(end.format('YYYY/MM/DD'));
+          $('#dateLabel').val(start.format('YYYY/MM/DD') + ' - ' + end.format('YYYY/MM/DD'));
+        }).on('cancel.daterangepicker', function(){
+          $(this).val('');
+          $('#startDate,#endDate').val('');
+        });
+
+        // 表單送出（若要驗證可在這裡做）
+        $('#topSearchForm').on('submit', function (e) {
+
+            let destination = $('#destinationInput').val().trim();
+            let start = $('#startDate').val().trim();
+            let end = $('#endDate').val().trim();
+
+            let isValid = true;
+
+            // 清除之前的錯誤樣式
+            $('#destinationInput').removeClass('is-invalid');
+            $('#dateLabel').removeClass('is-invalid');
+
+            // ✅ 驗證目的地
+            if (destination === "") {
+                $('#destinationInput').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // ✅ 驗證日期
+            if (start === "" || end === "") {
+                $('#dateLabel').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // ❌ 若不通過 → 用 SweetAlert 提示
+            if (!isValid) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: '資訊尚未填寫完整',
+                    text: '請選擇「目的地」及「旅行日期」。',
+                    confirmButtonColor: '#22B3C1',
+                    confirmButtonText: '我知道了'
+                });
+                return false;
+            }
+
+            // ✅ 通過 → 放行表單
+            return true;
+        });
 
 
     </script>
 }
-
-
-

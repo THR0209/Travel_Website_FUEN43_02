@@ -43,4 +43,6 @@ public partial class SemiSelfProducts
     public virtual ICollection<Semi_Locations> SemiLocations { get; set; } = new List<Semi_Locations>();
 
     public virtual ICollection<Semi_Transportations> SemiTransportations { get; set; } = new List<Semi_Transportations>();
+
+    public virtual ICollection<Semi_Keywords> SemiKeywords { get; set; } = new List<Semi_Keywords>();
 }

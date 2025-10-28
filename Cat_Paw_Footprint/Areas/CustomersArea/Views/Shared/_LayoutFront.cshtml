@@ -82,7 +82,6 @@
                 <ul class="navbar-nav ms-auto mb-2 me-5 mb-lg-0 justify-content-between">
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">跟團行程</a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">景點門票</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">美食</a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">住宿</a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">交通</a></li>
                     <li class="nav-item border-end me-1 p-1">
@@ -130,6 +129,16 @@
                                         <li>
                                             <a class="dropdown-item" asp-area="CustomersArea" asp-controller="CustomerService" asp-action="Index">
                                                 <i class="fa-solid fa-headset me-2"></i> 客服中心
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="EditProfile">
+                                                <i class="fa-solid fa-user-pen me-2"></i> 會員資料
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="ResetPasswordIslogin">
+                                                <i class="fa-solid fa-key me-2"></i> 變更密碼
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>

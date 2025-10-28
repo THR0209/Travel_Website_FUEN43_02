@@ -3,6 +3,7 @@
 	public class TGLoginDto//導遊登入可能用到的
 	{
 		public int? EmployeeID { get; set; }//員工編號
+		public int GuideId { get; set; }
 		public int? EmployeeProfileID { get; set; }//員工資料編號
 		public string? Account { get; set; }//帳號
 		public string? Password { get; set; }//密碼
@@ -33,6 +34,7 @@
 		public bool Success { get; set; }
 		public string Message { get; set; } = null!;
 		public string? GuideName { get; set; }//導遊姓名
+		public int GuideId { get; set; }//導遊ID
 		public string? Token { get; set; } // 預留擴充用
 	}
 

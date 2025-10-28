@@ -102,7 +102,9 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<Products_Transportations> Products_Transportations { get; set; }
 
-    public virtual DbSet<Promotions> Promotions { get; set; }
+    public virtual DbSet<Products_Keywords> Products_Keywords { get; set; }
+
+	public virtual DbSet<Promotions> Promotions { get; set; }
 
     public virtual DbSet<Regions> Regions { get; set; }
 
@@ -120,7 +122,9 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<Semi_Transportations> Semi_Transportations { get; set; }
 
-    public virtual DbSet<SupportAnalysis> SupportAnalysis { get; set; }
+    public virtual DbSet<Semi_Keywords> Semi_Keywords { get; set; }
+
+	public virtual DbSet<SupportAnalysis> SupportAnalysis { get; set; }
 
     public virtual DbSet<TicketPriority> TicketPriority { get; set; }
 
@@ -707,7 +711,20 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__Products___Trans__45BE5BA9");
         });
 
-        modelBuilder.Entity<Promotions>(entity =>
+        modelBuilder.Entity<Products_Keywords>(entity =>
+        {
+            entity.HasKey(e => e.ProductKeywordID);
+
+            entity.HasOne(d => d.Keyword).WithMany()
+                .HasForeignKey(d => d.KeywordID)
+                .HasConstraintName("ProKey_Keyword_FK");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductsKeywords)
+                .HasForeignKey(d => d.ProductID)
+                .HasConstraintName("ProKey_Product_FK");
+		});
+
+			modelBuilder.Entity<Promotions>(entity =>
         {
             entity.HasKey(e => e.PromoID).HasName("PK__Promotio__33D334D0D8C5EB2C");
 
@@ -823,7 +840,20 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__Semi_Tran__Trans__503BEA1C");
         });
 
-        modelBuilder.Entity<SupportAnalysis>(entity =>
+		modelBuilder.Entity<Semi_Keywords>(entity =>
+		{
+			entity.HasKey(e => e.ProductKeywordID);
+
+			entity.HasOne(d => d.Keyword).WithMany()
+				.HasForeignKey(d => d.KeywordID)
+				.HasConstraintName("SemiKey_Keyword_FK");
+
+			entity.HasOne(d => d.SemiProduct).WithMany(p => p.SemiKeywords)
+				.HasForeignKey(d => d.ProductID)
+				.HasConstraintName("SemiKey_Product_FK");
+		});
+
+		modelBuilder.Entity<SupportAnalysis>(entity =>
         {
             entity.HasNoKey();
 

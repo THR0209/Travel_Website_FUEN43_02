@@ -1,4 +1,5 @@
 ﻿using Cat_Paw_Footprint.Hubs;
+using Cat_Paw_Footprint.Models;
 using Cat_Paw_Footprint.Repositories;
 using Cat_Paw_Footprint.ViewModel;
 using Microsoft.AspNetCore.SignalR;
@@ -16,11 +17,11 @@ namespace Cat_Paw_Footprint.Services
 			_hub = hub;
 		}
 
-		public async Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto)
+		public async Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto)// 發送群組訊息
 		{
 			// 1) 先寫資料庫
 			var entity = await _repo.InsertMessageAsync(dto);
-
+			Console.WriteLine($"📡 廣播中 → GroupCode={dto.GroupCode}, SenderType={dto.SenderType}, Content={dto.Content}");
 			// 2) 成功後推播到 SignalR 群組
 			await _hub.Clients.Group(dto.GroupCode).SendAsync("ReceiveMessage", new
 			{
@@ -28,7 +29,13 @@ namespace Cat_Paw_Footprint.Services
 				Content = entity.Content,
 				SendTime = entity.SendTime
 			});
-
+			// 再額外發給自己（Caller），讓發送者也能看到訊息
+			await _hub.Clients.All.SendAsync("ReceiveMessage", new
+			{
+				SenderType = dto.SenderType,
+				Content = entity.Content,
+				SendTime = entity.SendTime
+			});
 			// 3) 回傳結果 DTO（給 Controller 用）
 			return new GroupMessageResponseDto
 			{
@@ -38,7 +45,7 @@ namespace Cat_Paw_Footprint.Services
 				Message = "訊息發送成功"
 			};
 		}
-		public async Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto)
+		public async Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto)// 上傳群組照片
 		{
 			var photo = await _repo.InsertPhotoAsync(dto);
 
@@ -59,7 +66,7 @@ namespace Cat_Paw_Footprint.Services
 				Message = "照片上傳成功"
 			};
 		}
-		public async Task<GroupLocationResponseDto> SetLocationAsync(GroupLocationRequestDto dto)
+		public async Task<GroupLocationResponseDto> SetLocationAsync(GroupLocationRequestDto dto)// 設定群組集合地點
 		{
 			var location = await _repo.InsertLocationAsync(dto);
 
@@ -77,6 +84,18 @@ namespace Cat_Paw_Footprint.Services
 				Success = true,
 				Message = "集合地點設定成功"
 			};
+		}
+		public async Task<IEnumerable<GroupMessages>> GetHistoryAsync(string groupCode)// 取得群組歷史訊息
+		{
+			return await _repo.GetHistoryByGroupCodeAsync(groupCode);
+		}
+		public async Task<string> JoinGroupbyCustomerAsync(string GroupCode, int JoinerId, string? JoinerName)// 會員加入團體
+		{
+			return await _repo.AddCusToGroupAsync(GroupCode, JoinerId, JoinerName);
+		}
+		public async Task<string> JoinGuestbyDeviceAsync(string groupCode, string? temporaryName, string deviceId)// 遊客加入團體
+		{
+			return await _repo.AddGuestToGroupAsync(groupCode, temporaryName, deviceId);
 		}
 
 	}

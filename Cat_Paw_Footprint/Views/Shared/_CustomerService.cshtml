@@ -9,6 +9,22 @@
             <div>首頁</div>
         </a>
     </li>
+
+    <!-- 訂單管理 -->
+    <li class="menu-item">
+        <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons fa-solid fa-clipboard-list"></i>
+            <div>訂單管理</div>
+        </a>
+        <ul class="menu-sub">
+            <li class="menu-item">
+                <a class="menu-link" asp-area="Order" asp-controller="CustomerOrders" asp-action="Index">
+                    <div>訂單檢視</div>
+                </a>
+            </li>
+        </ul>
+    </li>
+
     <!-- 客服管理 -->
     <li class="menu-item">
         <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -22,3 +38,4 @@
         </ul>
     </li>
 </ul>
+
