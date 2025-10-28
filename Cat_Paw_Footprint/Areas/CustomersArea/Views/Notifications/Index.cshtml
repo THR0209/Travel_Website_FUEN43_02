@@ -1,0 +1,104 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
+
+@{
+    ViewData["Title"] = "通知中心";
+
+}
+
+@section Styles {
+    <style>
+        body {
+            background: #f9fcfe;
+        }
+
+        .notification-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.2rem 1.6rem;
+            box-shadow: 0 4px 14px #0001;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+            .notification-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 16px #0002;
+            }
+
+        .is-read {
+            opacity: 0.6;
+        }
+
+        .time {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .type-tag {
+            font-size: 0.8rem;
+            background: #22b3c1;
+            color: #fff;
+            border-radius: 0.5rem;
+            padding: 0.2rem 0.6rem;
+        }
+    </style>
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 text-center"><i class="fa-solid fa-bell me-2"></i>通知中心</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center text-secondary my-5">目前沒有通知 💤</div>
+    }
+    else
+    {
+        <div class="d-grid gap-3">
+            @foreach (var item in Model)
+            {
+                <div class="notification-card @(item.IsRead ? "is-read" : "")" data-id="@item.NotificationID">
+                    <div class="d-flex justify-content-between">
+                        <h5>@item.Title</h5>
+                        <span class="type-tag">@item.Type</span>
+                    </div>
+                    <p class="mb-2">@item.Message</p>
+                    <div class="time">
+                        建立於 @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                        @if (item.IsRead && item.ReadAt != null)
+                        {
+                            <span>（已讀於 @item.ReadAt.Value.ToString("HH:mm")）</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll(".notification-card").forEach(card => {
+            card.addEventListener("click", async () => {
+                const id = card.dataset.id;
+                try {
+                    await axios.post("/CustomersArea/Notifications/MarkAsRead", { id });
+                    card.classList.add("is-read");
+
+                    // 確保全域函式存在才執行
+                    if (typeof updateUnread === "function") {
+                        updateUnread();
+                    }
+                } catch (err) {
+                    console.error("❌ 標記通知為已讀失敗", err);
+                    Swal.fire({
+                        icon: "error",
+                        title: "操作失敗",
+                        text: "無法標記為已讀，請稍後再試"
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+

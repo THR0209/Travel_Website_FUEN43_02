@@ -80,7 +80,9 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<NewsTable> NewsTable { get; set; }
 
-    public virtual DbSet<OrderPaymentInfo> OrderPaymentInfo { get; set; }
+    public virtual DbSet<Notifications> Notifications { get; set; }
+
+	public virtual DbSet<OrderPaymentInfo> OrderPaymentInfo { get; set; }
 
     public virtual DbSet<OrderStatus> OrderStatus { get; set; }
 
@@ -562,7 +564,17 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__NewsTable__Emplo__3587F3E0");
         });
 
-        modelBuilder.Entity<OrderPaymentInfo>(entity =>
+        modelBuilder.Entity<Notifications>(entity =>
+        {
+			entity.HasKey(e => e.NotificationID).HasName("PK__Notifica__20CF2E32871B0789");
+			entity.Property(e => e.Title).HasMaxLength(200);
+			entity.Property(e => e.Type).HasMaxLength(50);
+			entity.HasOne(d => d.Customer).WithMany(p => p.Notifications)
+				.HasForeignKey(d => d.CustomerID)
+				.HasConstraintName("FK__Notificat__ReadA__5C6CB6D7");
+		});
+
+		modelBuilder.Entity<OrderPaymentInfo>(entity =>
         {
             entity.HasKey(e => e.PaymentID).HasName("PK__OrderPay__9B556A58EDC4925A");
 

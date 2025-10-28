@@ -16,11 +16,15 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+<<<<<<< HEAD
          "Name": "[dbo].[CouponPics]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[Coupons]",
+=======
+         "Name": "[dbo].[Notifications]",
+>>>>>>> origin/dev
          "ObjectType": 0
       }
    ],

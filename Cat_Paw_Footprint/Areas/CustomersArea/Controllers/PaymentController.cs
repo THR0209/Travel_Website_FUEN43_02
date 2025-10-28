@@ -1,12 +1,15 @@
 ﻿using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Services;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
+
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
@@ -23,7 +26,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
         int.TryParse(User.FindFirst("CustomerId")?.Value, out var id) ? id : 0;
         private string PayItemsKey(int cid) => $"PAY_ITEMS_{cid}";
         private string CartKey => $"CART_ITEMS_{CurrentCustomerId}";
-        public class ECPayOptions
+
+		private readonly INotificationTriggerService _notifTrigger;
+		public class ECPayOptions
 		{
 			public bool IsStage { get; set; } = true;
 			public string MerchantID { get; set; } = "";
@@ -33,13 +38,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string OrderResultURL { get; set; } = "";  // 前端導回（付款完成）
 			public string ClientBackURL { get; set; } = "";   // 取消時返回
 		}
-		public PaymentController(webtravel2Context db, IEmailSender sender, IOptions<ECPayOptions> opt , ICustomerLevelService levelSvc)
+		public PaymentController(webtravel2Context db, IEmailSender sender, IOptions<ECPayOptions> opt , ICustomerLevelService levelSvc, INotificationTriggerService notifTrigger)
 		{
 			_db = db;
 			_sender = sender;
 			_opt = opt.Value;
             _levelSvc = levelSvc;
-        }
+			_notifTrigger = notifTrigger;
+
+		}
 		// /CustomersArea/Payment
 		[HttpGet("")]              // GET /CustomersArea/Payment
 		public IActionResult Index()
@@ -84,10 +91,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                 // ★★ 標記本次使用的優惠券（若有）
                 await MarkUsedCouponAsync(cid);
 
+
                 // ★ 重算會員等級
                 await _levelSvc.RecalculateAndUpdateAsync(cid);
 
-                TempData["PayOk"] = "付款成功！";
+				//發送每筆訂單通知
+				await _notifTrigger.NotifyOrderCreatedAsync(cid, o.OrderID);
+
+				TempData["PayOk"] = "付款成功！已建立訂單。";
                 return Redirect("/CustomersArea/Orders");
             }
 
@@ -108,7 +119,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             if (payItems.Count == 0) return BadRequest("購物車中已無選取商品");
 
             var now = DateTime.Now;
-            foreach (var it in payItems)
+			
+			var createdOrders = new List<CustomerOrders>();
+
+			foreach (var it in payItems)
             {
                 _db.CustomerOrders.Add(new CustomerOrders
                 {
@@ -122,8 +136,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             }
             await _db.SaveChangesAsync();
 
-            // 從購物車移除已付款項目
-            items.RemoveAll(x => idList.Contains(x.ProductId));
+			//發送每筆訂單通知
+			foreach (var ord in createdOrders)
+				await _notifTrigger.NotifyOrderCreatedAsync(cid, ord.OrderID);
+
+			// 從購物車移除已付款項目
+			items.RemoveAll(x => idList.Contains(x.ProductId));
             HttpContext.Session.SetString(CartKey, System.Text.Json.JsonSerializer.Serialize(items)); // ★ 寫回每用戶購物車
             HttpContext.Session.Remove(PayItemsKey(cid));
 
@@ -133,7 +151,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             // ★ 重算會員等級
             await _levelSvc.RecalculateAndUpdateAsync(cid);
 
-            TempData["PayOk"] = "付款成功！已建立訂單。";
+			TempData["PayOk"] = "付款成功！已建立訂單。";
             return Redirect("/CustomersArea/Orders");
         }
 
