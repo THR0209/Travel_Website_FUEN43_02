@@ -1,0 +1,272 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.SearchResultsVM
+
+@{
+    ViewData["Title"] = "搜尋結果";
+    string q = Model?.Input?.Destination ?? "";
+    string start = Model?.Input?.Start?.ToString("yyyy-MM-dd") ?? "";
+    string end = Model?.Input?.End?.ToString("yyyy-MM-dd") ?? "";
+    int people = Model?.Input?.People ?? 2;
+    string type = Model?.Input?.Type ?? "trip";
+    decimal? minPrice = Model?.Input?.MinPrice;
+    decimal? maxPrice = Model?.Input?.MaxPrice;
+    double? minRating = Model?.Input?.MinRating;
+}
+
+@section Styles{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" />
+    <style>
+        .layout{ display:grid; grid-template-columns: 280px 1fr; gap:18px; }
+    @@media (max-width: 992px){ .layout{ grid-template-columns: 1fr; } }
+
+        .results-header{
+            background: linear-gradient(180deg, #e6f7fb, #ffffff);
+            border-radius: 16px; padding: 18px 16px; margin-bottom: 18px; border: 1px solid #d7eef6;
+        }
+        .chip{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; background:#f2fbfe; border:1px solid #d7eef6; margin-right:8px; font-weight:600;}
+        .chip i{opacity: .7;}
+
+        aside.filter{ border:1px solid #e7eef7; border-radius:14px; padding:14px; background:#fff; position: sticky; top: 88px; }
+        .filter .title{ font-weight:800; margin-bottom:10px; }
+        .filter .group{ border-top:1px dashed #e7eef7; padding-top:12px; margin-top:12px; }
+        .filter .form-label{ font-weight:700; font-size: .95rem; }
+        .filter .btn-apply{ width:100%; }
+
+        .noUi-target { border: 1px solid #e7eef7; box-shadow: none; }
+        .noUi-connect { background: #22B3C1; }
+        .noUi-handle { border: 1px solid #22B3C1; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .price-inputs .form-control { text-align: right; }
+
+        /* 卡片/工具列樣式在 Partial 內定義 */
+    </style>
+}
+
+<div class="container my-3">
+
+    <!-- 條件摘要（也會在 Partial 內顯示一次；這裡用於初始載入） -->
+    <div class="results-header">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap:2">
+            <div>
+                <div class="mb-1">
+                    <span class="chip"><i class="fa-solid fa-location-dot"></i>@q</span>
+                    <span class="chip"><i class="fa-solid fa-calendar-day"></i>@start – @end</span>
+                    <span class="chip"><i class="fa-solid fa-user-group"></i>@people 位</span>
+                </div>
+                <div class="text-muted small">共 <b>@Model.TotalCount</b> 項結果</div>
+            </div>
+            <div>
+                <a asp-area="CustomersArea" asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> 重新搜尋
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <!-- 側邊篩選 -->
+        <aside class="filter">
+            <div class="title"><i class="fa-solid fa-filter me-2"></i>條件篩選</div>
+            <form method="get" id="filterForm">
+                <!-- 基本條件 -->
+                <input type="hidden" name="destination" value="@q" />
+                <input type="hidden" name="start" value="@start" />
+                <input type="hidden" name="end" value="@end" />
+                <input type="hidden" name="people" value="@people" />
+                <input type="hidden" name="type" value="@type" />
+                <input type="hidden" name="sort" value="@Model.Sort" />
+                <input type="hidden" name="page" value="1" />
+
+                @{
+                    var sliderMin = 0;
+                    var sliderMax = 20000;
+                    var startMin = minPrice ?? sliderMin;
+                    var startMax = maxPrice ?? sliderMax;
+                }
+                <!-- 價格（滑桿 + 輸入） -->
+                <div class="group">
+                    <label class="form-label"><i class="fa-solid fa-dollar-sign me-1"></i>價格區間</label>
+                    <div id="priceSlider"
+                         data-min="@sliderMin" data-max="@sliderMax"
+                         data-start-min="@startMin" data-start-max="@startMax"></div>
+                    <div class="row g-2 mt-2 price-inputs">
+                        <div class="col-6">
+                            <input type="number" min="@sliderMin" max="@sliderMax" step="1"
+                                   class="form-control" name="MinPrice" id="MinPriceInput" placeholder="最低"
+                                   value="@(minPrice?.ToString("0") ?? "")" />
+                        </div>
+                        <div class="col-6">
+                            <input type="number" min="@sliderMin" max="@sliderMax" step="1"
+                                   class="form-control" name="MaxPrice" id="MaxPriceInput" placeholder="最高"
+                                   value="@(maxPrice?.ToString("0") ?? "")" />
+                        </div>
+                    </div>
+                </div>
+
+                @* <!-- 最低評分 -->
+                <div class="group">
+                    <label class="form-label"><i class="fa-solid fa-star me-1"></i>最低評分</label>
+                    <select class="form-select" name="MinRating" id="MinRatingSelect">
+                        @{
+                            double[] opts = new double[] { 0, 3, 3.5, 4, 4.5 };
+                            foreach (var o in opts)
+                            {
+                                var selected = (minRating.HasValue && Math.Abs(minRating.Value - o) < 0.001) ? "selected" : "";
+                                <option value="@o" @selected>@o.ToString("0.0") 以上</option>
+                            }
+                        }
+                    </select>
+                </div> *@
+
+                <div class="group">
+                    <button type="submit" class="btn btn-primary btn-apply">
+                        <i class="fa-solid fa-filter-circle-dollar me-1"></i> 套用篩選
+                    </button>
+                    <a class="btn btn-link w-100 mt-1 p-0"
+                       href="@Url.Action("Search", new { area="CustomersArea", destination=q, start, end, people, type, sort=Model.Sort })">
+                        清除篩選
+                    </a>
+                </div>
+            </form>
+        </aside>
+
+        <!-- 右側結果（AJAX 會替換這一塊） -->
+        <div id="resultsArea">
+            @await Html.PartialAsync("_SearchResultsList", Model)
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+    <script>
+    (function(){
+      // debounce
+      function debounce(fn, delay){ let t; return function(){ clearTimeout(t); t=setTimeout(()=>fn.apply(this, arguments), delay); }; }
+
+      const resultsArea = document.getElementById('resultsArea');
+      const filterForm  = document.getElementById('filterForm');
+
+      function bindDynamicEvents(){
+        // 排序下拉
+        const sortSelect = resultsArea.querySelector('#sortSelect');
+        if (sortSelect){
+          sortSelect.addEventListener('change', function(){
+            applyFilters({ page: 1, sort: this.value });
+          });
+        }
+        // 分頁連結
+        resultsArea.querySelectorAll('a.ajax-link').forEach(a=>{
+          a.addEventListener('click', function(e){
+            e.preventDefault();
+            const url = new URL(this.href, location.origin);
+            loadResults(url.search.slice(1), true);
+          });
+        });
+      }
+
+      function currentQueryString(extra = {}) {
+        const fd = new FormData(filterForm);
+        // 右側排序值
+        const sortSel = resultsArea.querySelector('#sortSelect');
+        if (sortSel) fd.set('sort', sortSel.value);
+        Object.entries(extra).forEach(([k,v]) => fd.set(k, v));
+        return new URLSearchParams(fd).toString();
+      }
+
+      function showLoading(){ resultsArea.style.opacity = .6; }
+      function hideLoading(){ resultsArea.style.opacity = 1; }
+
+      async function loadResults(qs, pushState=true){
+        showLoading();
+        const url = `${location.pathname}?${qs}`;
+        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
+        const html = await res.text();
+        resultsArea.innerHTML = html;
+        hideLoading();
+        if (pushState) history.pushState({ qs }, '', url);
+        bindDynamicEvents();
+      }
+
+      const applyFilters = debounce(function(extra={}){
+        const qs = currentQueryString(extra);
+        loadResults(qs, true);
+      }, 200);
+
+      // 左側表單提交 → AJAX
+      filterForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        applyFilters({ page: 1 });
+      });
+
+      // 初始化價格滑桿
+      const sliderEl = document.getElementById('priceSlider');
+      if (sliderEl) {
+        const min = Number(sliderEl.dataset.min);
+        const max = Number(sliderEl.dataset.max);
+        let startMin = Number(sliderEl.dataset.startMin);
+        let startMax = Number(sliderEl.dataset.startMax);
+        if (isNaN(startMin)) startMin = min;
+        if (isNaN(startMax)) startMax = max;
+        startMin = Math.max(min, Math.min(startMin, max));
+        startMax = Math.max(min, Math.min(startMax, max));
+        if (startMin > startMax) { const t = startMin; startMin = startMax; startMax = t; }
+
+        noUiSlider.create(sliderEl, {
+          start: [startMin, startMax],
+          connect: true,
+          step: 1,
+          range: { min, max },
+          tooltips: [true, true],
+          format: { to: v => Math.round(v), from: v => Number(v) }
+        });
+
+        const $minInput = document.getElementById('MinPriceInput');
+        const $maxInput = document.getElementById('MaxPriceInput');
+
+        // 滑動即同步輸入框（留空代表不限）
+        sliderEl.noUiSlider.on('update', (values) => {
+          const [v1, v2] = values.map(v => Math.round(v));
+          $minInput.value = (v1 <= min ? '' : v1);
+          $maxInput.value = (v2 >= max ? '' : v2);
+        });
+
+        // 放開（change）即時送出
+        sliderEl.noUiSlider.on('change', function(){ applyFilters({ page: 1 }); });
+
+        // 手動輸入 → 送出
+        function syncFromInputs(){ applyFilters({ page: 1 }); }
+        $minInput?.addEventListener('change', syncFromInputs);
+        $maxInput?.addEventListener('change', syncFromInputs);
+      }
+
+      // 最低評分變更 → 即時送出
+      const ratingSelect = document.getElementById('MinRatingSelect');
+      ratingSelect?.addEventListener('change', function(){ applyFilters({ page: 1 }); });
+
+      // 返回/前進
+      window.addEventListener('popstate', function(ev){
+        const qs = (ev.state && ev.state.qs) ? ev.state.qs : location.search.slice(1);
+        loadResults(qs, false);
+      });
+
+      // 首次進入時，綁定事件（初始 HTML 已包含 Partial）
+      bindDynamicEvents();
+    })();
+    </script>
+
+    @* 後端錯誤（缺條件）以 SweetAlert 提示 *@
+    <script>
+        @if (TempData["SwalWarning"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'warning',
+                title: '資訊尚未填寫完整',
+                text: '@(TempData["SwalWarning"]?.ToString())',
+                confirmButtonColor: '#22B3C1',
+                confirmButtonText: '我知道了'
+            });
+            </text>
+        }
+    </script>
+}

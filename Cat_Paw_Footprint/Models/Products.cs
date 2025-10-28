@@ -73,5 +73,5 @@ public partial class Products
 
 	public virtual ICollection<Products_Transportations> ProductsTransportations { get; set; } = new List<Products_Transportations>();
 
-
+	public virtual ICollection<Products_Keywords> ProductsKeywords { get; set; } = new List<Products_Keywords>();
 }

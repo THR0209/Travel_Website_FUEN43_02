@@ -1,10 +1,11 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "首頁";
 }
 
 @section Styles {
     <style>
-        /* ====================== 通用標題風格 ====================== */
+        /* 統一標題風格 */
         .section-title h2 {
             font-weight: bold;
             letter-spacing: 2px;
@@ -19,122 +20,285 @@
             border-radius: 2px;
         }
 
-        /* ====================== FAQ ====================== */
-        #faqSection {
-            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
-            padding: 3rem 2rem;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        /* 手風琴樣式 */
+        .accordion-button {
+            background-color: #f7fbff;
+            color: #2255aa;
+            border-radius: 12px !important;
+            transition: all .3s;
         }
 
-        .faq-item {
+            .accordion-button:not(.collapsed) {
+                background-color: #e6f4ff;
+                color: #226dd3;
+                box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
+            }
+
+            .accordion-button:focus {
+                box-shadow: 0 0 0 0.25rem rgba(34,109,211,0.2);
+                border-color: #7ec8e3;
+            }
+
+        .accordion-body {
             background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            overflow: hidden;
+            border-radius: 0 0 12px 12px;
+            color: #444;
+        }
+
+        .accordion-item {
             border: 1px solid #d8ebff;
         }
 
-            .faq-item:hover {
-                transform: scale(1.01);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            }
+        .accordion-button::after {
+            filter: hue-rotate(180deg);
+        }
+    </style>
 
-        .faq-question {
-            background: linear-gradient(90deg, #eaf6ff, #f9f9fd);
-            color: #2255aa;
-            font-weight: 600;
-            padding: 1.1rem 1.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 1.1rem;
-            transition: background .3s, color .3s;
+    <style>
+        /* ===== Banner / 搜尋列（新增與修正） ===== */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            overflow: visible; /* 允許下拉超出 Banner */
         }
 
-            .faq-question i {
-                transition: transform .3s ease;
-                color: #7ec8e3;
-            }
-
-        .faq-item.active .faq-question {
-            background: linear-gradient(90deg, #dff1ff, #f4faff);
-            color: #226dd3;
+        #heroMedia {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.65);
+            border-radius: 16px; /* 圓角交給圖片 */
+            pointer-events: none; /* 讓點擊穿透到上層搜尋列 */
         }
 
-            .faq-item.active .faq-question i {
-                transform: rotate(180deg);
-            }
-
-        .faq-answer {
-            padding: 1.2rem 1.5rem;
-            color: #444;
+        .hero-content {
             display: none;
-            line-height: 1.8;
+        }
+
+        .search-wrapper {
+            position: absolute;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 1100px;
+            background: rgba(255,255,255,.94);
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0,0,0,.30);
+            padding: 18px;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .search-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .search-tab {
+            padding: 6px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: .25s;
+            user-select: none;
+        }
+
+            .search-tab.active {
+                background: #22B3C1;
+                color: #fff;
+            }
+
+        .search-box {
+            display: grid;
+            gap: 10px;
+            align-items: center;
+            grid-template-columns: 2.2fr 2.2fr 1.6fr 140px; /* 目的地 / 日期 / 旅客(內嵌) / 搜尋 */
+        }
+
+        .search-select {
+            background: #F2FAFF;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #dceeff;
+            position: relative;
+        }
+
+            .search-select:focus-within {
+                border-color: #22B3C1;
+            }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-weight: 600;
+            color: #222;
+        }
+
+            .search-input::placeholder {
+                color: #6b7d90;
+                font-weight: 500;
+            }
+
+        .dropdown-panel {
+            position: absolute;
+            top: 115%;
+            left: 0;
+            width: 100%;
+            min-width: 340px;
             background: #fff;
-            border-top: 1px solid #d8ebff;
-            font-size: 1rem;
+            padding: 12px;
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(0,0,0,.25);
+            display: none;
+            z-index: 10000;
         }
 
-        .faq-item.active .faq-answer {
-            display: block;
-            animation: fadeIn .4s ease;
+        .suggest-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 8px;
         }
 
-        @@keyframes fadeIn {
-            from
-
-        {
-            opacity: 0;
-            transform: translateY(-6px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        }
-
-        @@media (max-width: 768px) {
-            .faq-question
-
-        {
-            font-size: 1rem;
-            padding: 1rem 1.2rem;
-        }
-
-        .faq-answer {
+        .suggest-item {
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid #eef3fb;
+            border-radius: 10px;
+            background: #fafcff;
             font-size: 0.95rem;
-            padding: 1rem 1.2rem;
         }
 
+            .suggest-item:hover {
+                background: #eef8fb;
+                border-color: #d5eef5;
+            }
+
+        /* 旅客數：改為內嵌控制（無下拉） */
+        .people-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .people-inline .ctrl {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .people-inline button {
+                width: 32px;
+                height: 32px;
+                line-height: 30px;
+                align-items: center;
+                /* text-align: center; */
+            }
+
+        .search-btn {
+            background: #22B3C1;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            padding: 14px 0;
+            width: 100%;
+        }
+
+        /* 讓人數欄位自動撐到和其他 search-select 一樣高度 */
+        .search-select .people-inline {
+            height: 100%;
+        }
+
+        /* 讓數字與字不會撐大高度 */
+        .people-inline span,
+        .people-inline .ctrl * {
+            line-height: 1.2; /* 可依視覺調整 */
+        }
+
+
+        /* 裝飾（避免擋點擊） */
+        .floating-paws {
+            pointer-events: none;
+            z-index: 10;
         }
     </style>
 }
 
-<!-- ====================== Hero 區塊 ====================== -->
+<!-- Hero -->
+<!-- ===== Hero / Banner ===== -->
 <section class="hero mt-3">
-    <img src="https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=1800&auto=format&fit=crop"
-         alt="帶貓旅行的海邊日落" id="heroMedia" />
-    <div class="hero-content">
+    <img src="https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=1800&auto=format&fit=crop" alt="帶貓旅行的海邊日落" id="heroMedia" />
+    
+    <!-- Trip.com 風格搜尋列 -->
+    <div class="search-wrapper">
         <h1 class="display-6 fw-bolder mb-3">帶著毛孩去旅行，探索下一站</h1>
-        <div class="search-bar">
-            <input class="search-input" type="search" placeholder="找寵物友善目的地或行程（例：寵物餐廳、寵物旅館）" />
-            <div class="search-chip search-hide-md">出發日期</div>
-            <div class="search-chip">2 位旅客</div>
-            <button class="btn-brand">搜尋</button>
+        <!-- 分類 Tab -->
+        <div class="search-tabs">
+            <div class="search-tab active" data-type="trip">套裝行程</div>
+            <div class="search-tab" data-type="hotel">住宿</div>
+            <div class="search-tab" data-type="ticket">景點門票</div>
+            <div class="search-tab" data-type="car">租車</div>
         </div>
+
+        <!-- 搜尋表單（跳轉到後端搜尋） -->
+        <form asp-area="CustomersArea" asp-controller="Products" asp-action="Search" method="get" id="topSearchForm">
+            <input type="hidden" name="type" id="searchType" value="trip" />
+            <input type="hidden" name="start" id="startDate" />
+            <input type="hidden" name="end" id="endDate" />
+            <input type="hidden" name="people" id="peopleInput" value="2" />
+
+            <div class="search-box">
+                <!-- 目的地（可輸入 + 建議；點選後會關閉下拉） -->
+                <div class="search-select" id="destSelect">
+                    <label class="float-label">目的地</label>
+                    <input type="text" class="search-input" id="destinationInput" name="destination"
+                           placeholder="請輸入或選擇目的地" autocomplete="off" />
+                    <div class="dropdown-panel" id="destPanel">
+                        <div class="mb-2 fw-bold">熱門目的地</div>
+                        <div class="suggest-grid" id="destSuggest"></div>
+                    </div>
+                </div>
+
+                <!-- 日期（daterangepicker：起訖 + 時間） -->
+                <div class="search-select">
+                    <label class="float-label">出發時間-返程時間</label>
+                    <input type="text" class="search-input" id="dateLabel" placeholder="選擇日期與時間" autocomplete="off" />
+                </div>
+
+                <!-- 旅客數（內嵌控制，無下拉） -->
+                <div class="search-select">
+                    <label class="float-label">人數</label>
+                    <div class="people-inline">
+                        <span class="fw-semibold" id="peopleLabel"><span class="fw-semibold" id="peopleCount">2</span> 位旅客</span>
+                        <div class="ctrl">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded" id="minus"><i class="fa-solid fa-minus"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded" id="plus"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜尋 -->
+                <button type="submit" class="search-btn">搜尋</button>
+            </div>
+        </form>
     </div>
+
+    <!-- 飄浮貓掌裝飾 -->
     <div class="floating-paws" aria-hidden="true">
         <span>🐾</span><span>🐾</span><span>🐾</span>
     </div>
 </section>
 
-<!-- ====================== 本週熱門商品 ====================== -->
+
+
+<!-- Trending Slider (Swiper) -->
+<!-- 本週熱門商品 -->
 <section class="section" id="popular">
     <div class="container">
         <div class="section-title text-center mb-5">
@@ -149,7 +313,6 @@
         </div>
         <div class="swiper" aria-label="熱門行程輪播">
             <div class="swiper-wrapper">
-                <!-- 多個 swiper-slide (保留原本 4 個) -->
                 <div class="swiper-slide">
                     <article class="product-card">
                         <div class="product-thumb">
@@ -204,7 +367,8 @@
     </div>
 </section>
 
-<!-- ====================== 最新優惠活動 (Vue) ====================== -->
+
+<!-- 最新優惠活動 -->
 <section class="section" id="deals" v-cloak>
     <div class="container" id="promotion-app">
         <div class="section-title d-flex justify-content-between align-items-center">
@@ -212,42 +376,128 @@
             <a class="link-primary" asp-controller="Promotions" asp-action="Index">全部優惠</a>
         </div>
 
-        <!-- ✅ 狀態一：載入中 -->
-        <template v-if="isLoading">
-            <div class="text-center py-5">
-                <div class="spinner-border text-info mb-3" role="status"></div>
-                <strong>載入中...</strong>
-            </div>
-        </template>
+      @*   <!-- 載入中 -->
+        <div v-if="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 mb-0 text-muted">載入中...</p>
+        </div> *@
 
-        <!-- ✅ 狀態二：有資料 -->
-        <template v-else-if="promotions.length > 0">
-            <div class="row g-3 g-md-4">
-                <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
-                    <article class="product-card h-100 shadow-sm rounded">
-                        <div class="product-thumb position-relative">
-                            <img :src="p.imageUrl" :alt="p.title" class="w-100 rounded-top">
-                        </div>
-                        <div class="product-body p-3">
-                            <h5 class="product-title mb-1">{{ p.promoName }}</h5>
-                            <p class="product-meta text-muted small mb-1">{{ formatDate(p.startTime) }}</p>
-                        </div>
-                    </article>
-                </div>
+        <!-- 有資料 -->
+        <div v-else-if="promotions.length > 0" class="row g-3 g-md-4">
+            <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100 shadow-sm rounded">
+                    <div class="product-thumb position-relative">
+                        <img :src="p.imageUrl" :alt="p.title" class="w-100 rounded-top">
+                    </div>
+                    <div class="product-body p-3">
+                        <h5 class="product-title mb-1">{{ p.promoName }}</h5>
+                        <p class="product-meta text-muted small mb-1">{{ formatDate(p.startTime) }}</p>
+                        @* <div class="price fw-bold text-primary">NT$ {{ p.price }} 起</div> *@
+                    </div>
+                </article>
             </div>
-        </template>
+        </div>
 
-        <!-- ✅ 狀態三：無資料 -->
-        <template v-else>
-            <div class="text-center text-muted py-5">
-                <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
-                <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
-            </div>
-        </template>
+        <!-- 無資料 -->
+        <div v-else class="text-center text-muted py-5">
+            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
+        </div>
     </div>
 </section>
 
-<!-- ====================== 常見問題（ API 熱門資料） ====================== -->
+
+
+<!-- Deals Grid -->
+<section class="section" id="deals">
+    <div class="container">
+        <div class="section-title text-center mb-5">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#7ec8e3;">
+                <i class="fa-solid fa-gift me-2"></i> 精選特惠
+            </h2>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
+        </div>
+        <div class="row g-3 g-md-4">
+            <!-- 6 張商品卡 -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="日月潭 單車">
+                        <span class="badge-live">🔥 今日限定</span>
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">南投｜日月潭環潭自行車・SUP 立槳</h3>
+                        <div class="product-meta">4.7★ (1,122) ・ 台灣・3 小時</div>
+                        <div class="price">NT$ 980 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop" alt="浮潛">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">墾丁｜浮潛＆潮間帶生態導覽</h3>
+                        <div class="product-meta">4.3★ (523) ・ 台灣・半日</div>
+                        <div class="price">NT$ 1,200 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1518544801976-3e188ee7a9a2?q=80&w=1600&auto=format&fit=crop" alt="九份">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">新北｜九份黃金老街・阿妹茶樓</h3>
+                        <div class="product-meta">4.8★ (3,102) ・ 台灣・1 日</div>
+                        <div class="price">NT$ 1,050 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop" alt="韓國 咖啡">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">首爾｜文青咖啡巷弄漫遊</h3>
+                        <div class="product-meta">4.5★ (812) ・ 韓國・2 小時</div>
+                        <div class="price">NT$ 1,180 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1494475673543-6a6a27143b22?q=80&w=1600&auto=format&fit=crop" alt="藍山">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">澳洲｜藍山新秘境・空中步道</h3>
+                        <div class="product-meta">4.6★ (655) ・ 澳洲・1 日</div>
+                        <div class="price">NT$ 3,100 起</div>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card h-100">
+                    <div class="product-thumb">
+                        <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?q=80&w=1600&auto=format&fit=crop" alt="巴黎">
+                    </div>
+                    <div class="product-body">
+                        <h3 class="product-title">法國｜塞納河左岸夜色</h3>
+                        <div class="product-meta">4.9★ (1,210) ・ 法國・2 小時</div>
+                        <div class="price">NT$ 2,900 起</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* 常見問題 *@
+
 <section class="section" id="faqSection">
     <div class="container py-3">
         <div class="section-title mb-4">
@@ -256,9 +506,7 @@
             </h2>
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
-
-        <div id="faqList"></div>
-
+        <div id="homeHotFaqAccordion"></div>
         <div class="mt-4 text-center">
             <a href="/CustomersArea/FrontFAQs/Index"
                class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold"
@@ -269,7 +517,8 @@
     </div>
 </section>
 
-<!-- ====================== Newsletter ====================== -->
+
+<!-- Newsletter / CTA -->
 <section class="section">
     <div class="container">
         <div class="newsletter d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3">
@@ -286,85 +535,223 @@
 </section>
 
 
+
 @section Scripts {
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        /* ====================== Vue 優惠活動載入 ====================== */
         const app = Vue.createApp({
-            data() {
-                return { promotions: [], isLoading: true }
-            },
-            mounted() {
-                axios.get('/CustomersArea/Promotions/GetLatestPromotions')
-                    .then(res => { this.promotions = res.data })
-                    .catch(err => console.error('載入失敗：', err))
-                    .finally(() => { this.isLoading = false })
-            },
-            methods: {
-                formatDate(date) {
-                    const d = new Date(date);
-                    return d.toLocaleDateString('zh-TW');
-                }
+          data() {
+            return {
+              promotions: [],
+              isLoading: true
             }
-        });
-        app.mount('#promotion-app');
+          },
+          mounted() {
+            axios.get('/CustomersArea/Promotions/GetLatestPromotions')
+              .then(res => {
+                this.promotions = res.data
+              })
+              .catch(err => console.error('載入失敗：', err))
+              .finally(() => {
+                this.isLoading = false
+              })
+          }
+        })
+        app.mount('#promotion-app')
 
-        /* ====================== FAQ 熱門資料載入 ====================== */
-        document.addEventListener('DOMContentLoaded', async () => {
-            const faqListContainer = document.getElementById('faqList');
-            try {
-                const response = await axios.get('/CustomersArea/FrontFAQs/api/hot');
-                const faqs = response.data;
 
-                if (!faqs || faqs.length === 0) {
-                    faqListContainer.innerHTML = `
-                        <div class="text-center text-muted py-5">
-                            <i class="fa-solid fa-cat" style="font-size:2rem;"></i>
-                            <p class="mt-3">目前沒有熱門常見問題喔 🐾</p>
-                        </div>`;
-                    return;
-                }
-
-                let html = '';
-                faqs.forEach(faq => {
-                    html += `
-                        <div class="faq-item">
-                            <div class="faq-question">
-                                <span><i class="fa-solid fa-paw me-2"></i>${faq.question}</span>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </div>
-                            <div class="faq-answer">${faq.answer}</div>
-                        </div>`;
-                });
-                faqListContainer.innerHTML = html;
-
-                const faqItems = document.querySelectorAll('.faq-item');
-                faqItems.forEach(item => {
-                    const q = item.querySelector('.faq-question');
-                    q.addEventListener('click', () => {
-                        faqItems.forEach(i => {
-                            if (i !== item) i.classList.remove('active');
+        document.addEventListener('DOMContentLoaded', function () {
+            const hash = window.location.hash;
+            if (hash === '#faqSection') {
+                const faqTarget = document.querySelector(hash);
+                if (faqTarget) {
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: faqTarget.offsetTop - 60,
+                            behavior: 'smooth'
                         });
-                        item.classList.toggle('active');
-                    });
-                });
-            } catch (err) {
-                console.error('載入 FAQ 失敗：', err);
-                faqListContainer.innerHTML = `<div class="alert alert-danger">
-                    無法載入熱門常見問題，請稍後再試。
-                </div>`;
-            }
-
-            if (window.location.hash === '#faqSection') {
-                const faqTarget = document.querySelector('#faqSection');
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: faqTarget.offsetTop - 60,
-                        behavior: 'smooth'
-                    });
-                }, 400);
+                    }, 300);
+                }
             }
         });
+    </script>
+
+    <!-- daterangepicker -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <script>
+        // Tab 對應不同搜尋欄內容
+        const SEARCH_CONFIG = {
+          trip: {
+            destinationPlaceholder: "想去哪裡玩？（例：台北、新北、花蓮）",
+            dateLabel: "旅行日期",
+            peopleLabel: "人數"
+          },
+          hotel: {
+            destinationPlaceholder: "搜尋城市、區域或飯店名稱",
+            dateLabel: "入住 - 退房",
+            peopleLabel: "房客"
+          },
+          ticket: {
+            destinationPlaceholder: "搜尋景點或城市名稱",
+            dateLabel: "使用日期",
+            peopleLabel: "入場人數"
+          },
+          car: {
+            destinationPlaceholder: "取車地點（例：台北車站、高雄左營）",
+            dateLabel: "取車 - 還車日期",
+            peopleLabel: "乘客人數"
+          }
+        };
+
+        /* ===== 搜尋列互動（修正冒泡與面板關閉） ===== */
+        // Tab
+        $('.search-tab').on('click', function () {
+          $('.search-tab').removeClass('active');
+          $(this).addClass('active');
+          const type = $(this).data('type');
+          $('#searchType').val(type);
+
+          // ✅ 套用對照表更新 UI
+          $('#destinationInput').attr('placeholder', SEARCH_CONFIG[type].destinationPlaceholder);
+          $('#peopleLabel').text(SEARCH_CONFIG[type].peopleLabel + "： " + $('#peopleCount').text());
+          
+          // ✅ 切換分類時重置旅客數
+          cnt = 2;
+          syncPeople();
+
+          // ✅ 切換時清除前面所選的內容
+          $('#destinationInput').val('');
+          $('#dateLabel').val('');
+          $('#startDate').val('');
+          $('#endDate').val('');
+          $('#peopleInput').val('2');
+        });
+
+        // 建議清單
+        const TW_DESTS = [
+          "台北","新北","基隆","桃園","新竹","苗栗","台中","彰化","雲林","南投","嘉義","台南","高雄","屏東",
+          "宜蘭","花蓮","台東","澎湖","金門","連江（馬祖）","綠島","小琉球","蘭嶼"
+        ];
+
+        function renderSuggest(list){
+          const box = $('#destSuggest').empty();
+          list.forEach(name=>{
+            $('<div>', {class:'suggest-item badge text-dark', text:name})
+              .appendTo(box)
+              .on('mousedown', function(e){ // 用 mousedown 先於 document 觸發
+                e.stopPropagation();
+                $('#destinationInput').val(name).trigger('change').blur();
+                closeAllDropdowns();
+              });
+          });
+        }
+        renderSuggest(TW_DESTS);
+
+        function openDest(){ $('#destPanel').show(); }
+        function closeAllDropdowns(){ $('.dropdown-panel').hide(); }
+
+        // 目的地外層：只有點「非 input 區域」才切換面板
+        $('#destSelect').on('mousedown', function(e){
+          if ($(e.target).is('#destinationInput')) return;
+          e.stopPropagation();
+          renderSuggest(TW_DESTS); // ✅ 永遠重新載入完整清單
+          $('#destPanel').toggle();
+        });
+
+        // 目的地輸入框：focus / input / click / mousedown 全部阻止冒泡，並顯示面板
+        $('#destinationInput')
+          .on('focus input click mousedown', function(e){
+            e.stopPropagation();
+
+            // ✅ 關閉日期選擇器
+            if ($('#dateLabel').data('daterangepicker'))
+                $('#dateLabel').data('daterangepicker').hide();
+
+            const q = $(this).val().trim();
+            const filtered = q ? TW_DESTS.filter(x => x.toLowerCase().includes(q.toLowerCase())) : TW_DESTS;
+            // renderSuggest(filtered.length ? filtered : TW_DESTS);
+            openDest();
+          });
+
+
+        // 面板本體：阻止事件冒泡，不讓 document 關掉
+        $('#destPanel').on('mousedown click', function(e){ e.stopPropagation(); });
+
+        // 全域點擊 / 按下關閉所有下拉（mousedown 能更早吃到事件，避免閃現）
+        $(document).on('mousedown click', function(){ closeAllDropdowns(); });
+
+        /* 旅客數（內嵌控制） */
+        let cnt = Number($('#peopleInput').val() || 2);
+        function syncPeople(){
+          $('#peopleCount').text(cnt);
+          $('#peopleLabel').text(cnt + ' 位旅客');
+          $('#peopleInput').val(cnt);
+        }
+        $('#plus').on('click', function(e){ e.preventDefault(); e.stopPropagation(); cnt++; syncPeople(); });
+        $('#minus').on('click', function(e){ e.preventDefault(); e.stopPropagation(); if(cnt>1){ cnt--; syncPeople(); }});
+        syncPeople();
+
+        /* 日期：daterangepicker（僅日期，不含時間） */
+        $('#dateLabel').daterangepicker({
+          autoUpdateInput: false,
+          minDate: moment().startOf('day'), // ✅ 禁止選過去
+          locale: { format: 'YYYY/MM/DD', cancelLabel: '清除', applyLabel:'確定' }
+        }, function(start, end){
+          $('#startDate').val(start.format('YYYY/MM/DD'));
+          $('#endDate').val(end.format('YYYY/MM/DD'));
+          $('#dateLabel').val(start.format('YYYY/MM/DD') + ' - ' + end.format('YYYY/MM/DD'));
+        }).on('cancel.daterangepicker', function(){
+          $(this).val('');
+          $('#startDate,#endDate').val('');
+        });
+
+        // 表單送出（若要驗證可在這裡做）
+        $('#topSearchForm').on('submit', function (e) {
+
+            let destination = $('#destinationInput').val().trim();
+            let start = $('#startDate').val().trim();
+            let end = $('#endDate').val().trim();
+
+            let isValid = true;
+
+            // 清除之前的錯誤樣式
+            $('#destinationInput').removeClass('is-invalid');
+            $('#dateLabel').removeClass('is-invalid');
+
+            // ✅ 驗證目的地
+            if (destination === "") {
+                $('#destinationInput').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // ✅ 驗證日期
+            if (start === "" || end === "") {
+                $('#dateLabel').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // ❌ 若不通過 → 用 SweetAlert 提示
+            if (!isValid) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: '資訊尚未填寫完整',
+                    text: '請選擇「目的地」及「旅行日期」。',
+                    confirmButtonColor: '#22B3C1',
+                    confirmButtonText: '我知道了'
+                });
+                return false;
+            }
+
+            // ✅ 通過 → 放行表單
+            return true;
+        });
+
+
     </script>
 }

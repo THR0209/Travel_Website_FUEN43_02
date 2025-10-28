@@ -1,0 +1,125 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.SearchResultsVM
+@{
+    string q = Model?.Input?.Destination ?? "";
+    string start = Model?.Input?.Start?.ToString("yyyy-MM-dd") ?? "";
+    string end = Model?.Input?.End?.ToString("yyyy-MM-dd") ?? "";
+    int people = Model?.Input?.People ?? 2;
+    string type = Model?.Input?.Type ?? "trip";
+    decimal? minPrice = Model?.Input?.MinPrice;
+    decimal? maxPrice = Model?.Input?.MaxPrice;
+    double? minRating = Model?.Input?.MinRating;
+}
+
+<style>
+    .toolbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 12px; }
+    .toolbar .sort{ width:220px; }
+    .product-card{ border:1px solid #eef3f8; border-radius:14px; overflow:hidden; background:#fff; height:100%; transition: box-shadow .2s ease; }
+    .product-card:hover{ box-shadow: 0 8px 20px rgba(0,0,0,.08);}
+    .product-thumb{ aspect-ratio: 16 / 10; overflow:hidden; }
+    .product-thumb img{ width:100%; height:100%; object-fit:cover; }
+    .product-body{ padding:12px 12px 14px; }
+    .title{ font-weight:700; font-size:1.05rem; margin-bottom:4px;}
+    .meta{ color:#6b7d90; font-size:.92rem;}
+    .price{ color:#0c6; font-weight:800; font-size:1.05rem; margin-top:6px;}
+    .empty{ text-align:center; padding:60px 20px; border:1px dashed #d7eef6; border-radius:14px; background:#fbfeff; }
+</style>
+
+<!-- 工具列：排序（以 GET 參數為主，AJAX 會攔截） -->
+<div class="toolbar">
+    <div class="text-muted small">
+        共 <b>@Model.TotalCount</b> 項結果
+    </div>
+    <form method="get" class="d-flex gap-2 align-items-center" id="sortForm">
+        <input type="hidden" name="destination" value="@q" />
+        <input type="hidden" name="start" value="@start" />
+        <input type="hidden" name="end" value="@end" />
+        <input type="hidden" name="people" value="@people" />
+        <input type="hidden" name="type" value="@type" />
+        <input type="hidden" name="MinPrice" value="@minPrice" />
+        <input type="hidden" name="MaxPrice" value="@maxPrice" />
+        <input type="hidden" name="MinRating" value="@minRating" />
+        <input type="hidden" name="page" value="@Model.Page" />
+
+        <select name="sort" class="form-select sort" id="sortSelect">
+            <option value="pop" @@(Model.Sort=="pop" ? "selected" : "")>熱門排序</option>
+            <option value="price_asc" @@(Model.Sort=="price_asc" ? "selected" : "")>價格（低 → 高）</option>
+            <option value="price_desc" @@(Model.Sort=="price_desc" ? "selected" : "")>價格（高 → 低）</option>
+            <option value="rating" @@(Model.Sort=="rating" ? "selected" : "")>評分</option>
+        </select>
+    </form>
+</div>
+
+@if (Model.Items?.Any() == true)
+{
+    <div class="row g-3 g-md-4">
+        @foreach (var p in Model.Items)
+        {
+            <div class="col-12 col-sm-6 col-lg-4">
+                <article class="product-card">
+                    <div class="product-thumb">
+                        <img src="@p.CoverImageUrl" alt="@p.Name" />
+                    </div>
+                    <div class="product-body">
+                        <div class="title">@p.Name</div>
+                        <div class="meta mb-1">
+                            <i class="fa-solid fa-location-dot me-1"></i>@p.RegionName
+                            <span class="ms-2"><i class="fa-solid fa-star me-1"></i>@p.Rating.ToString("0.0")</span>
+                            @if (!string.IsNullOrWhiteSpace(p.DurationText))
+                            {
+                                <span class="ms-2"><i class="fa-solid fa-clock me-1"></i>@p.DurationText</span>
+                            }
+                        </div>
+                        <div class="price">NT$ @p.MinPrice.ToString("N0") 起</div>
+
+                        <div class="mt-2 d-flex gap-2">
+                            <a asp-area="CustomersArea" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductID"
+                               class="btn btn-sm btn-outline-secondary">查看詳情</a>
+                            <a asp-area="CustomersArea" asp-controller="Cart" asp-action="Add" asp-route-id="@p.ProductID"
+                               class="btn btn-sm btn-primary">加入購物車</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @{
+                    int current = Model.Page;
+                    int total = Model.TotalPages;
+                    int prev = current - 1;
+                    int next = current + 1;
+                }
+                <li class="page-item @(current==1?"disabled":"")">
+                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=1, destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">第一頁</a>
+                </li>
+                <li class="page-item @(current==1?"disabled":"")">
+                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=(prev<1?1:prev), destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">上一頁</a>
+                </li>
+                @for (int i = Math.Max(1, current-2); i <= Math.Min(total, current+2); i++)
+                {
+                    <li class="page-item @(i==current?"active":"")">
+                        <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=i, destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">@i</a>
+                    </li>
+                }
+                <li class="page-item @(current==total?"disabled":"")">
+                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=(next>total?total:next), destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">下一頁</a>
+                </li>
+                <li class="page-item @(current==total?"disabled":"")">
+                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=total, destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">最後一頁</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+else
+{
+    <div class="empty">
+        <div class="mb-2" style="font-size:1.15rem; font-weight:700;">找不到符合的行程</div>
+        <div class="text-muted mb-3">試試看調整價格、評分或更改日期範圍。</div>
+        <a asp-area="CustomersArea" asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill">回首頁重新搜尋</a>
+    </div>
+}
