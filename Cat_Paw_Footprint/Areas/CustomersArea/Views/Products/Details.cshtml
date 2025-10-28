@@ -571,12 +571,51 @@
 
             // 送出驗證
             $('#bookForm').on('submit', function(e){
+                e.preventDefault(); // 防止表單傳統提交
+
                 if(!$('#startDate').val() || !$('#endDate').val()){
-                    e.preventDefault();
                     $('#dateLabel').addClass('is-invalid');
                     Swal.fire({ icon:'warning', title:'請先選擇日期', confirmButtonColor:'#22B3C1' });
                     return false;
                 }
+
+                const form = e.target;
+                const formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '已加入購物車',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        if (typeof updateCartCount === 'function') {
+                            updateCartCount(data.count);
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '加入失敗',
+                            text: data.error || '發生未知的錯誤',
+                            confirmButtonColor: '#22B3C1'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '發生錯誤',
+                        text: '無法連線到伺服器',
+                        confirmButtonColor: '#22B3C1'
+                    });
+                });
             });
         })();
     </script>

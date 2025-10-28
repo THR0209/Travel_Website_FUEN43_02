@@ -74,8 +74,7 @@
                         <div class="mt-2 d-flex gap-2">
                             <a asp-area="CustomersArea" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductID"
                                class="btn btn-sm btn-outline-secondary">查看詳情</a>
-                            <a asp-area="CustomersArea" asp-controller="Cart" asp-action="Add" asp-route-id="@p.ProductID"
-                               class="btn btn-sm btn-primary">加入購物車</a>
+                            <button type="button" class="btn btn-sm btn-primary add-to-cart-btn" data-product-id="@p.ProductID">加入購物車</button>
                         </div>
                     </div>
                 </article>

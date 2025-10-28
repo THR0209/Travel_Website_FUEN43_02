@@ -86,7 +86,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				exist.Qty += Math.Max(1, qty);
 			}
 			SaveCart(items);
-			return Ok(new { ok = true });
+			return Ok(new { ok = true, count = items.Count });
 		}
 
 		[HttpPost("update")]
@@ -114,6 +114,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		{
 			SaveCart(new List<CartItem>());
 			return Ok(new { ok = true });
+		}
+
+		[HttpGet("count")]
+		public IActionResult GetCartCount()
+		{
+			var items = GetCart();
+			return Ok(new { count = items.Count });
 		}
 
         // 結帳 → 建立未付款訂單，轉導到訂單頁
