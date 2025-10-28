@@ -956,8 +956,9 @@
                         tickets.value = list.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
                     }
 
-                    await nextTick();
-                        if (scrollEl) scrollEl.scrollTop = prevScrollTop;
+                        await nextTick();
+                        const scrollTarget = document.querySelector('.ticket-grid');
+                        if (scrollTarget) scrollTarget.scrollTop = prevScrollTop; // 或 scrollEl.scrollTop = prevScrollTop;
                     } catch (err) {
                         console.error(err);
                         showAlert('error', '載入失敗', '無法取得工單資料');
@@ -1030,42 +1031,50 @@
                         const res = await axios.get('/CustomersArea/CustomerService/GetMessages', {
                             params: { ticketId: ticket.ticketID }
                         });
-                        if (res.data.success) {
-                            // 如果後端回傳不是陣列，確保 fallback 為空陣列
-                            messages.value = Array.isArray(res.data.messages) ? res.data.messages : [];
-                            await nextTick();
-                            const modalBody = document.querySelector('#chatModal .modal-body');
-                            if (modalBody) modalBody.style.overflowY = 'auto';
-                            scrollToBottom();
+
+                    if (res.data.success) {
+                        const raw = Array.isArray(res.data.messages) ? res.data.messages : [];
+                        messages.value = raw.map(msg => ({
+                            messageID: msg.messageID,
+                            messageContent: msg.messageContent,
+                            sentTime: msg.sentTime,
+                            senderDisplayName: msg.senderDisplayName,
+                            senderRole: msg.senderRole,
+                            attachmentURL: msg.attachmentURL
+                        }));
+                        await nextTick();
+                        scrollToBottom();
+                    }
+
+
+                        if (ticket.statusName === '已完成') {
+                            try {
+                                const fbStatus = await axios.get('/CustomersArea/CustomerService/GetFeedbackStatus', {
+                                    params: { ticketId: ticket.ticketID }
+                                });
+                                if (fbStatus.data.success && fbStatus.data.hasFeedback) {
+                                    hasFeedback.value = true;
+                                    const fbDetail = await axios.get('/CustomersArea/CustomerService/GetFeedbackDetail', {
+                                        params: { ticketId: ticket.ticketID }
+                                    });
+                                    if (fbDetail.data.success) feedback.value = fbDetail.data.feedback;
+                                } else {
+                                    hasFeedback.value = false;
+                                    feedback.value = { rating: 0, comment: '', createTime: '' };
+                                }
+                            } catch {
+                                showAlert('error', '錯誤', '載入評價失敗');
+                            }
+                        } else {
+                            hasFeedback.value = false;
+                            feedback.value = { rating: 0, comment: '', createTime: '' };
                         }
-                    } catch {
+                        // ✅ 到這裡都在 openChat 的 try 裡
+                    } catch (err) {
+                        console.error(err);
                         showAlert('error', '載入失敗', '無法載入聊天內容');
                     } finally {
                         setTimeout(() => (isLoadingMessages.value = false), 300);
-                    }
-
-                    // 若為已完成工單 → 載入評價
-                    if (ticket.statusName === '已完成') {
-                        try {
-                            const fbStatus = await axios.get('/CustomersArea/CustomerService/GetFeedbackStatus', {
-                                params: { ticketId: ticket.ticketID }
-                            });
-                            if (fbStatus.data.success && fbStatus.data.hasFeedback) {
-                                hasFeedback.value = true;
-                                const fbDetail = await axios.get('/CustomersArea/CustomerService/GetFeedbackDetail', {
-                                    params: { ticketId: ticket.ticketID }
-                                });
-                                if (fbDetail.data.success) feedback.value = fbDetail.data.feedback;
-                            } else {
-                                hasFeedback.value = false;
-                                feedback.value = { rating: 0, comment: '', createTime: '' };
-                            }
-                        } catch {
-                            showAlert('error', '錯誤', '載入評價失敗');
-                        }
-                    } else {
-                        hasFeedback.value = false;
-                        feedback.value = { rating: 0, comment: '', createTime: '' };
                     }
                 }
 
@@ -1086,8 +1095,8 @@
 
                         const payload = {
                             ticketID: selectedTicket.value.ticketID,
-                            messageContent: content,
-                            attachmentURL: attachmentUrl || ''
+                            MessageContent: content,
+                            AttachmentURL: attachmentUrl || ''
                         };
 
                         const res = await axios.post('/CustomersArea/CustomerService/SendMessage', payload, {
@@ -1100,7 +1109,8 @@
                                 senderDisplayName: '我',
                                 messageContent: content,
                                 attachmentURL: attachmentUrl,
-                                sentTime: new Date().toISOString()
+                                sentTime: new Date().toISOString(),
+                                senderRole: selectedTicket.value.isEmployee ? '員工' : '客戶'
                             });
 
                             newMessage.value = '';
@@ -1303,16 +1313,13 @@
                 // ====================== 工具 ======================
                 function scrollToBottom() {
                     const el = document.querySelector('#chatModal .modal-body');
-                    if (el) el.scrollTop = el.scrollHeight;
+                    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
                 }
 
                 function formatTime(iso) {
                     return iso ? new Date(iso).toLocaleString() : '';
                 }
 
-                function showAlert(type, title, text, timer = 2000) {
-                    Swal.fire({ icon: type, title, text, timer, showConfirmButton: false, timerProgressBar: true });
-                }
 
                 return {
                     tickets, selectedTicket, messages, newMessage, showAll,

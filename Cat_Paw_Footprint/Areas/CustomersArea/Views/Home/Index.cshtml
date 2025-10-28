@@ -1,7 +1,15 @@
 ﻿
 @{
     ViewData["Title"] = "首頁";
+    var isHomePage =
+        string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "CustomersArea", StringComparison.OrdinalIgnoreCase);
 }
+
+<script>
+    window.isHomePage = @(isHomePage.ToString().ToLower());
+</script>
 
 @section Styles {
     <style>
@@ -226,6 +234,97 @@
         .floating-paws {
             pointer-events: none;
             z-index: 10;
+        }
+    </style>
+
+    <style>
+        /* ====================== FAQ ====================== */
+        #faqSection {
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-item {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid #d8ebff;
+        }
+
+            .faq-item:hover {
+                transform: scale(1.01);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            }
+
+        .faq-question {
+            background: linear-gradient(90deg, #eaf6ff, #f9f9fd);
+            color: #2255aa;
+            font-weight: 600;
+            padding: 1.1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            transition: background .3s, color .3s;
+        }
+
+            .faq-question i {
+                transition: transform .3s ease;
+                color: #7ec8e3;
+            }
+
+        .faq-item.active .faq-question {
+            background: linear-gradient(90deg, #dff1ff, #f4faff);
+            color: #226dd3;
+        }
+
+            .faq-item.active .faq-question i {
+                transform: rotate(180deg);
+            }
+
+        .faq-answer {
+            padding: 1.2rem 1.5rem;
+            color: #444;
+            display: none;
+            line-height: 1.8;
+            background: #fff;
+            border-top: 1px solid #d8ebff;
+            font-size: 1rem;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            animation: fadeIn .4s ease;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .faq-question {
+                font-size: 1rem;
+                padding: 1rem 1.2rem;
+            }
+
+            .faq-answer {
+                font-size: 0.95rem;
+                padding: 1rem 1.2rem;
+            }
         }
     </style>
 }
@@ -496,8 +595,7 @@
     </div>
 </section>
 
-@* 常見問題 *@
-
+<!-- ====================== 常見問題（ API 熱門資料） ====================== -->
 <section class="section" id="faqSection">
     <div class="container py-3">
         <div class="section-title mb-4">
@@ -506,7 +604,9 @@
             </h2>
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
-        <div id="homeHotFaqAccordion"></div>
+
+        <div id="faqList"></div>
+
         <div class="mt-4 text-center">
             <a href="/CustomersArea/FrontFAQs/Index"
                class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold"
@@ -540,41 +640,87 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+         /* ====================== Vue 優惠活動載入 ====================== */
         const app = Vue.createApp({
-          data() {
-            return {
-              promotions: [],
-              isLoading: true
+            data() {
+                return { promotions: [], isLoading: true }
+            },
+            mounted() {
+                axios.get('/CustomersArea/Promotions/GetLatestPromotions')
+                    .then(res => { this.promotions = res.data })
+                    .catch(err => console.error('載入失敗：', err))
+                    .finally(() => { this.isLoading = false })
+            },
+            methods: {
+                formatDate(date) {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('zh-TW');
+                }
             }
-          },
-          mounted() {
-            axios.get('/CustomersArea/Promotions/GetLatestPromotions')
-              .then(res => {
-                this.promotions = res.data
-              })
-              .catch(err => console.error('載入失敗：', err))
-              .finally(() => {
-                this.isLoading = false
-              })
-          }
-        })
-        app.mount('#promotion-app')
+        });
+        app.mount('#promotion-app');
 
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const hash = window.location.hash;
-            if (hash === '#faqSection') {
-                const faqTarget = document.querySelector(hash);
+        // ====================== FAQ 熱門資料載入 ======================
+        document.addEventListener('DOMContentLoaded', async () => {
+            const faqListContainer = document.getElementById('faqList');
+            try {
+                const response = await axios.get('/CustomersArea/FrontFAQs/api/hot');
+                const faqs = response.data;
+
+                if (!faqs || faqs.length === 0) {
+                    faqListContainer.innerHTML = `
+                        <div class="text-center text-muted py-5">
+                            <i class="fa-solid fa-cat" style="font-size:2rem;"></i>
+                            <p class="mt-3">目前沒有熱門常見問題喔 🐾</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '';
+                faqs.forEach(faq => {
+                    html += `
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span><i class="fa-solid fa-paw me-2"></i>${faq.question}</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">${faq.answer}</div>
+                        </div>`;
+                });
+                faqListContainer.innerHTML = html;
+
+                const faqItems = document.querySelectorAll('.faq-item');
+                faqItems.forEach(item => {
+                    const q = item.querySelector('.faq-question');
+                    q.addEventListener('click', () => {
+                        faqItems.forEach(i => {
+                            if (i !== item) i.classList.remove('active');
+                        });
+                        item.classList.toggle('active');
+                    });
+                });
+            } catch (err) {
+                console.error('載入 FAQ 失敗：', err);
+                faqListContainer.innerHTML = `<div class="alert alert-danger">
+                    無法載入熱門常見問題，請稍後再試。
+                </div>`;
+            }
+
+            // 只有首頁才啟用滾動（避免其他頁誤觸）
+            if (window.isHomePage && window.location.hash === '#faqSection') {
+                const faqTarget = document.querySelector('#faqSection');
                 if (faqTarget) {
                     setTimeout(() => {
                         window.scrollTo({
                             top: faqTarget.offsetTop - 60,
                             behavior: 'smooth'
                         });
-                    }, 300);
+                    }, 400);
                 }
             }
         });
+
     </script>
 
     <!-- daterangepicker -->

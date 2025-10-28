@@ -17,9 +17,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 		private readonly ICustomerProfileRepository _customerRepo;
 		private readonly IEmployeeMiniRepository _employeeMiniRepo;
 
-		/// <summary>
-		/// 透過 DI 注入各資料存取層
-		/// </summary>
 		public CustomerSupportMessagesService(
 			ICustomerSupportMessagesRepository repo,
 			ICustomerProfileRepository customerRepo,
@@ -30,58 +27,32 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 			_employeeMiniRepo = employeeMiniRepo;
 		}
 
-		/// <summary>
-		/// 取得指定工單的所有訊息（不分頁），回傳 ViewModel 並自動補齊發送者姓名/角色
-		/// </summary>
 		public async Task<IEnumerable<CustomerSupportMessageViewModel>> GetByTicketIdAsync(int ticketId)
 		{
-			// 從資料庫取得所有訊息
 			var messages = await _repo.GetByTicketIdAsync(ticketId);
-
-			// 取得所有員工的ID與姓名字典
 			var employeeDict = await _employeeMiniRepo.GetEmployeeNamesAsync();
-
-			// 取得所有客戶
 			var allCustomers = await _customerRepo.GetAllAsync();
-
-			// 建立所有客戶的ID與姓名對應字典 (必須包含所有客戶)
 			var customerDict = allCustomers
 				.Where(c => c.CustomerID.HasValue)
 				.ToDictionary(c => c.CustomerID.Value, c => c.CustomerName ?? "(未知客戶)");
 
-			// 將每則訊息轉換成ViewModel
 			return messages.Select(m => MapFromEntity(m, employeeDict, customerDict));
 		}
 
-		/// <summary>
-		/// 取得指定工單的訊息（分頁），回傳 ViewModel 並自動補齊發送者姓名/角色
-		/// </summary>
 		public async Task<IEnumerable<CustomerSupportMessageViewModel>> GetByTicketIdAsync(int ticketId, int skip, int take)
 		{
-			// 從資料庫取得分頁後的訊息
 			var messages = await _repo.GetByTicketIdAsync(ticketId, skip, take);
-
-			// 取得所有員工的ID與姓名字典
 			var employeeDict = await _employeeMiniRepo.GetEmployeeNamesAsync();
-
-			// 取得所有客戶
 			var allCustomers = await _customerRepo.GetAllAsync();
-
-			// 建立所有客戶的ID與姓名對應字典 (必須包含所有客戶)
 			var customerDict = allCustomers
 				.Where(c => c.CustomerID.HasValue)
 				.ToDictionary(c => c.CustomerID.Value, c => c.CustomerName ?? "(未知客戶)");
 
-			// 將每則訊息轉換成ViewModel
 			return messages.Select(m => MapFromEntity(m, employeeDict, customerDict));
 		}
 
-		/// <summary>
-		/// 新增訊息，補齊 ViewModel 的發送者姓名/角色
-		/// </summary>
 		public async Task<CustomerSupportMessageViewModel> AddAsync(CustomerSupportMessageViewModel vm)
 		{
-			// 建立資料表實體
 			var entity = new CustomerSupportMessages
 			{
 				TicketID = vm.TicketID,
@@ -91,47 +62,78 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 				UnreadCount = vm.UnreadCount,
 				AttachmentURL = vm.AttachmentURL,
 				SentTime = DateTime.Now
-
 			};
 
-			// 新增到資料庫
 			var result = await _repo.AddAsync(entity);
 			vm.MessageID = result.MessageID;
 			vm.SentTime = result.SentTime;
 
-			// 取得所有員工字典
 			var employeeDict = await _employeeMiniRepo.GetEmployeeNamesAsync();
-			// 取得所有客戶字典
 			var allCustomers = await _customerRepo.GetAllAsync();
 			var customerDict = allCustomers
 				.Where(c => c.CustomerID.HasValue)
 				.ToDictionary(c => c.CustomerID.Value, c => c.CustomerName ?? "(未知客戶)");
 
-			// 補齊發送者姓名與角色
 			return MapToViewModel(vm, employeeDict, customerDict);
 		}
 
 		/// <summary>
-		/// 根據 ViewModel 補齊 SenderRole/SenderDisplayName
+		/// 根據 ViewModel 補齊 SenderRole / SenderDisplayName
 		/// </summary>
 		private CustomerSupportMessageViewModel MapToViewModel(
 			CustomerSupportMessageViewModel vm,
 			IDictionary<int, string> employeeDict,
 			IDictionary<int, string> customerDict)
 		{
-			// 若 SenderID 有值，優先判斷為員工或客戶
+			// ✅ 若前端有傳 SenderType，優先使用
+			if (!string.IsNullOrWhiteSpace(vm.SenderType))
+			{
+				if (vm.SenderType.Equals("Customer", StringComparison.OrdinalIgnoreCase))
+				{
+					vm.SenderRole = "客戶";
+					if (vm.SenderID.HasValue)
+					{
+						if (!customerDict.TryGetValue(vm.SenderID.Value, out var name) || string.IsNullOrWhiteSpace(name))
+							name = "未知客戶";
+						vm.SenderDisplayName = name;
+					}
+					else
+					{
+						vm.SenderDisplayName = vm.SenderDisplayName ?? "客戶";
+					}
+					return vm;
+				}
+				else if (vm.SenderType.Equals("Employee", StringComparison.OrdinalIgnoreCase))
+				{
+					vm.SenderRole = "員工";
+					if (vm.SenderID.HasValue)
+					{
+						if (!employeeDict.TryGetValue(vm.SenderID.Value, out var name) || string.IsNullOrWhiteSpace(name))
+							name = "未知員工";
+						vm.SenderDisplayName = name;
+					}
+					else
+					{
+						vm.SenderDisplayName = vm.SenderDisplayName ?? "客服人員";
+					}
+					return vm;
+				}
+			}
+
+			// ✅ 若無 SenderType，則根據 ID fallback 判斷
 			if (vm.SenderID.HasValue)
 			{
 				var senderId = vm.SenderID.Value;
-				if (employeeDict.ContainsKey(senderId))
+
+				if (employeeDict.TryGetValue(senderId, out var empName) && !string.IsNullOrWhiteSpace(empName))
 				{
 					vm.SenderRole = "員工";
-					vm.SenderDisplayName = employeeDict[senderId];
+					vm.SenderDisplayName = empName;
 				}
-				else if (customerDict.ContainsKey(senderId))
+				else if (customerDict.TryGetValue(senderId, out var cusName) && !string.IsNullOrWhiteSpace(cusName))
 				{
 					vm.SenderRole = "客戶";
-					vm.SenderDisplayName = customerDict[senderId];
+					vm.SenderDisplayName = cusName;
 				}
 				else
 				{
@@ -139,32 +141,22 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 					vm.SenderDisplayName = "未知";
 				}
 			}
-			// 若 SenderID 為 null、ReceiverID 有值，判斷為客戶發送
-			else if (vm.ReceiverID.HasValue)
+			else if (vm.ReceiverID.HasValue &&
+					 customerDict.TryGetValue(vm.ReceiverID.Value, out var recvName) &&
+					 !string.IsNullOrWhiteSpace(recvName))
 			{
-				var receiverId = vm.ReceiverID.Value;
-				if (customerDict.ContainsKey(receiverId))
-				{
-					vm.SenderRole = "客戶";
-					vm.SenderDisplayName = customerDict[receiverId];
-				}
-				else
-				{
-					vm.SenderRole = "未知";
-					vm.SenderDisplayName = "未知";
-				}
+				vm.SenderRole = "客戶";
+				vm.SenderDisplayName = recvName;
 			}
 			else
 			{
 				vm.SenderRole = "未知";
 				vm.SenderDisplayName = "未知";
 			}
+
 			return vm;
 		}
 
-		/// <summary>
-		/// 將 Entity 轉成 ViewModel 並補齊 SenderRole/SenderDisplayName
-		/// </summary>
 		private CustomerSupportMessageViewModel MapFromEntity(
 			CustomerSupportMessages entity,
 			IDictionary<int, string> employeeDict,
@@ -182,7 +174,6 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 				SentTime = entity.SentTime
 			};
 
-			// 補齊發送者姓名與角色
 			return MapToViewModel(vm, employeeDict, customerDict);
 		}
 	}

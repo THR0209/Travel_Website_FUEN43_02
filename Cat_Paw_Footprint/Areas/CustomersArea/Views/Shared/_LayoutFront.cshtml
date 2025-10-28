@@ -106,10 +106,24 @@
                                         <i class="fa-solid fa-calendar-check me-1"></i> 每日簽到
                                     </a>
                                 </li>
-                                <li class="nav-item me-1">
-                                    <a href="#" class="nav-link">
-                                        <i class="fa-solid fa-bell me-1"></i> 通知
+                                <li class="nav-item me-1 dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-bell"></i> 通知
+                                        <span id="notifBadge"
+                                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                              style="display:none; font-size:0.7rem;">
+                                        </span>
                                     </a>
+                                    <div class="dropdown-menu dropdown-menu-end shadow p-0 notif-dropdown"
+                                         data-bs-popper="none">
+                                        <div class="p-3 border-bottom fw-bold">最新通知</div>
+                                        <div id="notifList" class="overflow-auto" style="max-height:400px; max-width:320px;">
+                                            <div class="text-center text-muted py-3">載入中...</div>
+                                        </div>
+                                        <div class="p-2 text-center border-top">
+                                            <a href="/CustomersArea/Notifications/Index" class="text-decoration-none small">查看所有通知</a>
+                                        </div>
+                                    </div>
                                 </li>
                                 <li class="nav-item me-1">
                                     <a href="/CustomersArea/Cart" class="nav-link">
@@ -122,7 +136,7 @@
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end mt-2 shadow">
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" href="/CustomersArea/Orders/Index">
                                                 <i class="fa-solid fa-file-invoice me-2"></i> 訂單紀錄
                                             </a>
                                         </li>
@@ -224,9 +238,9 @@
 
     <!-- Back to top -->
     <button class="to-top" aria-label="回到頂部" id="toTop">▲</button>
-   
-    
-    
+
+
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>

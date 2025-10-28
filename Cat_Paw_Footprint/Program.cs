@@ -4,6 +4,7 @@ using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
 using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
+using Cat_Paw_Footprint.Areas.Notification.Services;
 using Cat_Paw_Footprint.Areas.Order.Models;
 using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Areas.TourGuideArea.Repositories;
@@ -158,6 +159,10 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddSignalR();
 			builder.Services.AddScoped<ITalkMessageRepository, TalkMessageRepository>();
 			builder.Services.AddScoped<ITalkMessageService, TalkMessageService>();
+			builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+			builder.Services.AddScoped<INotificationService, NotificationService>();
+			builder.Services.AddScoped<INotificationTriggerService, NotificationTriggerService>();
+			builder.Services.AddScoped<ICouponExpiryChecker, CouponExpiryChecker>();
 
 			#endregion
 
@@ -175,9 +180,9 @@ namespace Cat_Paw_Footprint
 
 			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CustomerEmailSender>();
-			// 其它註冊...
+			
 			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
-
+			builder.Services.AddHostedService<CouponExpiryChecker>();
 
 
 			var app = builder.Build();
@@ -256,6 +261,7 @@ namespace Cat_Paw_Footprint
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
+			app.MapHub<NotificationHub>("/notificationHub");
 			app.MapControllers();
 
 			app.Run();

@@ -38,7 +38,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                                && (r.IsUsed == false || r.IsUsed == null)
                                && cpn.IsActive == true
                                && (cpn.StartDate == null || cpn.StartDate <= now)
-                               && (cpn.EndTime == null || cpn.EndTime >= now)
+                               && (cpn.EndDate == null || cpn.EndDate >= now)
                             select new CouponDto
                             {
                                 CouponId = cpn.CouponID,
@@ -46,7 +46,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                                 Name = cpn.CouponDesc ?? "",
                                 DiscountType = cpn.DiscountType ?? 0,
                                 DiscountValue = cpn.DiscountValue ?? 0m,
-                                ExpireAt = cpn.EndTime
+                                ExpireAt = cpn.EndDate
                             };
 
             // 3) 等級券（符合我的 Level）
@@ -55,7 +55,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                            where map.CustomerLevel == level
                               && cpn.IsActive == true
                               && (cpn.StartDate == null || cpn.StartDate <= now)
-                              && (cpn.EndTime == null || cpn.EndTime >= now)
+                              && (cpn.EndDate == null || cpn.EndDate >= now)
                            select new CouponDto
                            {
                                CouponId = cpn.CouponID,
@@ -63,7 +63,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                                Name = cpn.CouponDesc ?? "",
                                DiscountType = cpn.DiscountType ?? 0,
                                DiscountValue = cpn.DiscountValue ?? 0m,
-                               ExpireAt = cpn.EndTime
+                               ExpireAt = cpn.EndDate
                            };
 
             // 4) 合併 + 去重（以 CouponId 為主）

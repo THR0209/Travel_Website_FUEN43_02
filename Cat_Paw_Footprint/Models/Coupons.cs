@@ -29,7 +29,7 @@ public partial class Coupons
 	public DateTime? StartDate { get; set; }
 
 	[DisplayName("結束時間")]
-	public DateTime? EndTime { get; set; }
+	public DateTime? EndDate { get; set; }
 
 	[DisplayName("狀態")]
 	public bool IsActive { get; set; }

@@ -30,8 +30,9 @@ public partial class Customers
 	public string? UserId { get; set; }// ★ 新增：指向 AspNetUsers(Id)
 
 	public virtual ICollection<CustomerLoginHistory> CustomerLoginHistory { get; set; } = new List<CustomerLoginHistory>();
+    public virtual ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
 
-    public virtual CustomerProfile? CustomerProfile { get; set; }
+	public virtual CustomerProfile? CustomerProfile { get; set; }
 
     public virtual CustomerLevels? LevelNavigation { get; set; }
 	public IdentityUser User { get; set; }

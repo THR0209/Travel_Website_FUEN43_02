@@ -234,7 +234,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		{
 			string email = dto.Email;
 			string newPassword = dto.Password;
-			if (email==null)
+			if (email == null)
 			{
 				email = User.Claims.FirstOrDefault(c => c.Type == "Email")?.Value;
 			}

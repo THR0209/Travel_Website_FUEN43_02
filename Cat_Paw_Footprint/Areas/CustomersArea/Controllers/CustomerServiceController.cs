@@ -2,16 +2,12 @@
 using Cat_Paw_Footprint.Areas.CustomerService.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
@@ -26,6 +22,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		private readonly webtravel2Context _context;
 		private readonly IChatAttachmentService _attachmentService;
 		private readonly IWebHostEnvironment _env;
+		private readonly INotificationTriggerService _notifTrigger;
 
 		public CustomerServiceController(
 			ICustomerSupportTicketsService ticketService,
@@ -33,7 +30,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			IHubContext<TicketChatHub> hubContext,
 			webtravel2Context context,
 			IChatAttachmentService attachmentService,
-			IWebHostEnvironment env
+			IWebHostEnvironment env,
+			INotificationTriggerService notifTrigger
 		)
 		{
 			_ticketService = ticketService;
@@ -42,6 +40,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_context = context;
 			_attachmentService = attachmentService;
 			_env = env;
+			_notifTrigger = notifTrigger;
 		}
 
 		// ======================= 客服中心頁面 =======================
@@ -182,6 +181,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		[HttpPost("")]
 		public async Task<IActionResult> SendMessage([FromBody] CustomerSupportMessageViewModel vm)
 		{
+			var customerIdStr = User.FindFirst("CustomerId")?.Value;
+			if (string.IsNullOrEmpty(customerIdStr) || !int.TryParse(customerIdStr, out int customerId))
+				return StatusCode(401, new { success = false, message = "請先登入" });
+
 			if (vm == null || (string.IsNullOrWhiteSpace(vm.MessageContent) && string.IsNullOrWhiteSpace(vm.AttachmentURL)))
 				return BadRequest(new { success = false, message = "訊息不可為空" });
 
@@ -189,13 +192,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			vm.SentBy = User.FindFirst("FullName")?.Value
 				?? User.FindFirst("Account")?.Value
 				?? "客戶";
-			vm.SenderID = int.Parse(User.FindFirst("CustomerId")?.Value ?? "0");
+			vm.SenderID = customerId;
 			vm.SentTime = DateTime.Now;
 
 			var msg = await _msgService.AddAsync(vm);
+			await _hubContext.Clients.Group($"ticket-{vm.TicketID}").SendAsync("ReceiveMessage", msg);
 
-			await _hubContext.Clients.Group($"ticket-{vm.TicketID}")
-				.SendAsync("ReceiveMessage", msg);
+			await _notifTrigger.NotifyCustomerServiceReplyAsync(customerId, vm.TicketID ?? 0);
 
 			return Ok(new { success = true, message = msg });
 		}

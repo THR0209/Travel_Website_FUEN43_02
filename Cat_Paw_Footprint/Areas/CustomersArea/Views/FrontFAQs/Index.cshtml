@@ -84,7 +84,7 @@
             transition: all 0.3s;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             position: relative;
-            z-index: 1100; /* 確保輸入本身在搜尋結果上層（視情況可調） */
+            z-index: 10; /* 確保輸入本身在搜尋結果上層（視情況可調） */
         }
 
             .faq-search-box:focus {
@@ -102,7 +102,7 @@
             border: none;
             cursor: pointer;
             display: none;
-            z-index: 1200; /* 高於輸入框，確保可點擊 */
+            z-index: 20; /* 高於輸入框，確保可點擊 */
         }
 
             #faqClearBtn i {
@@ -125,7 +125,7 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
             display: none;
-            z-index: 1300; /* 提高 z-index，確保不會被下方區塊蓋住 */
+            z-index: 30; /* 提高 z-index，確保不會被下方區塊蓋住 */
             width: auto; /* 使用 left/right */
             max-width: none;
             max-height: 340px;
@@ -369,7 +369,7 @@
         let allFaqs = [];
         let categories = [];
         $(function () {
-            $.getJSON('/CustomersArea/FrontFAQs/api/hot', function (faqs) {
+            $.getJSON('@Url.Content("~/CustomersArea/FrontFAQs/api/hot")', function (faqs) {
                 let html = "";
                 faqs.forEach((faq, idx) => {
                     html += `
