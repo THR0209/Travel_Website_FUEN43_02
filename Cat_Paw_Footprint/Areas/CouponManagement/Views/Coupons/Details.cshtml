@@ -1,4 +1,4 @@
-﻿@model Cat_Paw_Footprint.Models.Coupons
+﻿@model Cat_Paw_Footprint.Areas.CouponManagement.ViewModel.CouponViewModel
 
 @{
     ViewData["Title"] = "優惠券詳情";
@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <dl class="row">
                         <dt class="col-sm-3 fw-semibold mt-3 mb-2">優惠券折扣代碼</dt>
-                        <dd class="col-sm-9 mt-3 mb-2">@Html.DisplayFor(model => model.DisCountCode)</dd>
+                        <dd class="col-sm-9 mt-3 mb-2">@Html.DisplayFor(model => model.DiscountCode)</dd>
 
                         <dt class="col-sm-3 fw-semibold">描述</dt>
                         <dd class="col-sm-9">@Html.DisplayFor(model => model.CouponDesc)</dd>
@@ -38,7 +38,7 @@
                         <dd class="col-sm-9">@Html.DisplayFor(model => model.StartDate)</dd>
 
                         <dt class="col-sm-3 fw-semibold">結束日期</dt>
-                        <dd class="col-sm-9">@Html.DisplayFor(model => model.EndTime)</dd>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.EndDate)</dd>
 
                         <dt class="col-sm-3 fw-semibold">是否啟用</dt>
                         <dd class="col-sm-9">

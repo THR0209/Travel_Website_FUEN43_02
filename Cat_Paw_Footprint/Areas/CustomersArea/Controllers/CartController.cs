@@ -179,8 +179,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                       && (r.IsUsed == null || r.IsUsed == false)
                       && r.Coupon.IsActive == true
                       && (r.Coupon.StartDate == null || r.Coupon.StartDate <= now)
-                      && (r.Coupon.EndTime == null || r.Coupon.EndTime >= now)
-                      && (r.Coupon.CouponCode == code || r.Coupon.DisCountCode == code) // ★ 兼容兩種
+                      && (r.Coupon.EndDate == null || r.Coupon.EndDate >= now)
+                      && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code) // ★ 兼容兩種
                 select r;
 
             var rec = await q.FirstOrDefaultAsync();

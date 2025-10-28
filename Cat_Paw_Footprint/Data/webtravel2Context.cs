@@ -16,7 +16,7 @@ public partial class webtravel2Context : DbContext
     {
     }
 
-	public virtual DbSet<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; }
+	//public virtual DbSet<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; }
 
 	public virtual DbSet<CouponPics> CouponPics { get; set; }
 
@@ -142,14 +142,7 @@ public partial class webtravel2Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-		modelBuilder.Entity<Coupon_CustomerLevels>(entity =>
-		{
-			entity.HasKey(e => e.CouponLevelID); // 預計更改的
 
-			entity.HasOne(d => d.Coupon).WithMany(p => p.Coupon_CustomerLevels)
-				.HasForeignKey(d => d.CouponID)
-				.HasConstraintName("FK__Coupon_Cu__Custo__7869D707");
-		});
 
 		modelBuilder.Entity<CouponPics>(entity =>
         {
@@ -169,7 +162,7 @@ public partial class webtravel2Context : DbContext
             entity.HasIndex(e => e.CouponCode, "UQ__Coupons__D3490800F4D03A6F").IsUnique();
 
             entity.Property(e => e.CouponCode).HasMaxLength(50);
-			entity.Property(e => e.DisCountCode).HasMaxLength(50);
+			entity.Property(e => e.DiscountCode).HasMaxLength(50);
 			entity.Property(e => e.DiscountValue).HasColumnType("numeric(7, 2)");
         });
 

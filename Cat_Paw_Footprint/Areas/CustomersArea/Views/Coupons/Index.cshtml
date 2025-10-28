@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "我的優惠券";
+}
+
+<div id="coupon-app" class="container py-4">
+    <h2 class="text-center mb-3">🎟 我的優惠券</h2>
+
+    <div class="alert alert-info text-center" v-if="message">
+        {{ message }}
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    message: ""
+                };
+            },
+            mounted() {
+                this.loadCoupons();
+            },
+            methods: {
+                async loadCoupons() {
+                    try {
+                        const response = await fetch('/Member/Coupons/GetMyCoupons');
+                        const data = await response.json();
+                        this.message = data.message;
+                    } catch (error) {
+                        console.error("無法載入優惠券資料：", error);
+                    }
+                }
+            }
+        }).mount('#coupon-app');
+    </script>
+}
+
