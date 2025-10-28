@@ -10,32 +10,43 @@
     </div>
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-    <script>
-        const { createApp } = Vue;
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<script>
+    const { createApp } = Vue;
 
-        createApp({
-            data() {
-                return {
-                    message: ""
-                };
-            },
-            mounted() {
-                this.loadCoupons();
-            },
-            methods: {
-                async loadCoupons() {
-                    try {
-                        const response = await fetch('/Member/Coupons/GetMyCoupons');
-                        const data = await response.json();
-                        this.message = data.message;
-                    } catch (error) {
-                        console.error("無法載入優惠券資料：", error);
+    createApp({
+        data() {
+            return {
+                message: ""
+            };
+        },
+        mounted() {
+            this.loadCoupons();
+        },
+        methods: {
+            async loadCoupons() {
+                try {
+                    const response = await fetch('/CustomersArea/Coupons/GetMyCoupons', {
+                        method: 'GET',
+                        credentials: 'include' // 🔥 必加：讓登入 cookie (CustomerAuth) 一起帶上
+                    });
+
+                    if (!response.ok) {
+                        console.error("伺服器回傳錯誤:", response.status);
+                        this.message = "載入優惠券時發生錯誤";
+                        return;
                     }
+
+                    const data = await response.json();
+                    console.log("API 回傳資料:", data); // 🧩 除錯用，方便看後端實際回傳
+                    this.message = data.message ?? "目前沒有優惠券資料";
+                } catch (error) {
+                    console.error("無法載入優惠券資料：", error);
+                    this.message = "連線失敗，請稍後再試";
                 }
             }
-        }).mount('#coupon-app');
-    </script>
-}
+        }
+    }).mount('#coupon-app');
+</script>
+
 

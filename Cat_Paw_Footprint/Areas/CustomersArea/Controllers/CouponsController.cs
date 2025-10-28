@@ -1,7 +1,8 @@
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Data;
 using System.Security.Claims;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
@@ -26,71 +27,16 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
         public IActionResult GetMyCoupons()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return Ok(new { message = $"這是會員 {userId} 的優惠券資料" });
+			var customerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "CustomerId");
+			var CustomerId = int.Parse(customerIdClaim.Value);
+
+			return Ok(new { message = $"這是會員 {CustomerId} 的優惠券資料" });
 		}
 
 
-            // 2) 客製券（未使用）
-            var qByRecord = from r in _db.CustomerCouponsRecords
-                            join cpn in _db.Coupons on r.CouponID equals cpn.CouponID
-                            where r.CustomerID == cid
-                               && (r.IsUsed == false || r.IsUsed == null)
-                               && cpn.IsActive == true
-                               && (cpn.StartDate == null || cpn.StartDate <= now)
-                               && (cpn.EndDate == null || cpn.EndDate >= now)
-                            select new CouponDto
-                            {
-                                CouponId = cpn.CouponID,
-                                Code = cpn.DisCountCode!,    // 注意：資料表是 DisCountCode
-                                Name = cpn.CouponDesc ?? "",
-                                DiscountType = cpn.DiscountType ?? 0,
-                                DiscountValue = cpn.DiscountValue ?? 0m,
-                                ExpireAt = cpn.EndDate
-                            };
-
-            // 3) 等級券（符合我的 Level）
-            var qByLevel = from map in _db.Coupon_CustomerLevels
-                           join cpn in _db.Coupons on map.CouponID equals cpn.CouponID
-                           where map.CustomerLevel == level
-                              && cpn.IsActive == true
-                              && (cpn.StartDate == null || cpn.StartDate <= now)
-                              && (cpn.EndDate == null || cpn.EndDate >= now)
-                           select new CouponDto
-                           {
-                               CouponId = cpn.CouponID,
-                               Code = cpn.DisCountCode!,
-                               Name = cpn.CouponDesc ?? "",
-                               DiscountType = cpn.DiscountType ?? 0,
-                               DiscountValue = cpn.DiscountValue ?? 0m,
-                               ExpireAt = cpn.EndDate
-                           };
-
-		//	var coupons = await (
-		//		from r in _context.CustomerCouponsRecords
-		//		join cpn in _context.Coupons on r.CouponID equals cpn.CouponID
-		//		where r.CustomerID == cid
-		//			  && (r.IsUsed == false || r.IsUsed == null)
-		//			  && cpn.IsActive == true
-		//			  && (cpn.StartDate == null || cpn.StartDate <= now)
-		//			  && (cpn.EndDate == null || cpn.EndDate >= now)
-		//		select new CouponDto
-		//		{
-		//			CouponId = cpn.CouponID,
-		//			Code = cpn.DiscountCode ?? "",
-		//			Name = cpn.CouponName ?? cpn.CouponDesc ?? "",
-		//			DiscountType = cpn.DiscountType,
-		//			DiscountValue = cpn.DiscountValue,
-		//			ExpireAt = cpn.EndDate
-		//		}
-		//	)
-		//	.OrderBy(x => x.ExpireAt ?? DateTime.MaxValue)
-		//	.ToListAsync();
-
-		//	return Ok(coupons);
-		//}
-
+    
 
 		public class CouponDto
         {
