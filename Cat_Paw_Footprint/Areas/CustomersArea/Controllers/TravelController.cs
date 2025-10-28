@@ -116,6 +116,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// 儲存行程 (接收前端 JSON)
+		/*
 		[HttpPost]
 		public IActionResult SaveTrip([FromBody] TripProjectViewModel data)
 		{
@@ -154,7 +155,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			return Ok();
 		}
-
+		*/
 
 	}
 }

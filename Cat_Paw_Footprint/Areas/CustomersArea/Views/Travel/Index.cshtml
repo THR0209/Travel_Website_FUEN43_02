@@ -1,5 +1,7 @@
 ﻿@section Styles {    
     <link href="~/css/travel.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
     <style ></style>
 }
 
@@ -111,19 +113,20 @@
                     <button class="btn btn-sm btn-danger" @@click="clearTrip">清空</button>
                 </div>
                 <div class="card-body">
+
                     <!-- 🟢 使用 vuedraggable 可拖曳排序 -->
                     <draggable v-model="tripList" item-key="id" handle=".drag-handle">
                         <template #item="{ element, index }">
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2 bg-white rounded shadow-sm my-1 px-2 ">
                                 <span>
-                                    <i class="bi bi-list drag-handle me-2"></i>
+                                    <i class="bi bi-list drag-handle me-2" style="cursor: grab; font-size: 18px;"></i>
                                     {{ index + 1 }}. {{ element.name }}（{{ element.typeLabel }}）
                                 </span>
                                 <button class="btn btn-sm btn-outline-danger" @@click="removeFromTrip(index)">✖</button>
                             </div>
                         </template>
                     </draggable>
-                    <div v-if="tripList.length === 0" class="text-muted text-center">
+                    <div v-if="tripList.length === 0" class="text-muted text-center ">
                         尚未加入任何行程
                     </div>
 
@@ -166,15 +169,20 @@
 @section Scripts{
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
+
     <!-- 支援拖曳排序 -->
     <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script src="https://unpkg.com/vuedraggable@next"></script>
+    <script src="https://unpkg.com/vuedraggable@4.0.1/dist/vuedraggable.umd.min.js"></script>
+
 
     <script>
         const { createApp } = Vue;
 
         const app = createApp({
-            components: { draggable: vuedraggable },
+
+            // CDN 模式需使用 window.vuedraggable
+            components: { draggable: window.vuedraggable },
+
             data() {
                 return {
                     buttons: [
@@ -230,7 +238,6 @@
                         return matchKeyword && matchRegion && matchDistrict;
                     });
                 }
-
             },
 
             methods: {
@@ -262,6 +269,7 @@
                         pictureUrl: x.pictureUrl || []
                     }));
                 },
+
                 // 單鍵切換排序方向 - 評分排序（高→低) <-> (低→高）
                 toggleSort() {
                     this.sortDesc = !this.sortDesc; // 切換狀態
@@ -279,7 +287,7 @@
                     modal.show();
                 },
 
-                /* 🟢 新增：加入行程 */
+                /* 加入行程 */
                 addToTrip(item) {
                     const exists = this.tripList.some(x => x.id === item.id && x.type === this.currentType);
                     if (!exists) {
@@ -292,17 +300,17 @@
                     }
                 },
 
-                /* 🟢 新增：刪除行程 */
+                /* 刪除行程 */
                 removeFromTrip(index) {
                     this.tripList.splice(index, 1);
                 },
 
-                /* 🟢 新增：清空行程 */
+                /* 清空行程 */
                 clearTrip() {
                     this.tripList = [];
                 },
 
-                /* 🟢 新增：儲存行程 */
+                /* 儲存行程 */
                 async saveTrip() {
                     const payload = {
                         customerID: 1, // 之後改登入者ID
@@ -320,7 +328,6 @@
                     });
                     if (res.ok) alert('✅ 行程已儲存！');
                 }
-
             },            
 
             mounted() {
@@ -330,7 +337,10 @@
                     this.selectedRegion = "離島";
                 });
             }
-        }).mount("#app");
+        });
+        // 全域註冊 draggable
+        app.component('draggable', vuedraggable); 
+        app.mount("#app");
     </script>
 }
 

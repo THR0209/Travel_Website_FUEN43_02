@@ -11,14 +11,12 @@
     border-bottom: 1px solid #ddd;
     box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* 略帶陰影區分上方與下方內容 */
 }
-
 /* 按鈕外觀 */
 .top-buttons button {
     border-radius: 50px;
     padding: 8px 20px;
     transition: 0.2s;
 }
-
 /* 滑鼠滑過的輕微陰影 */
 .top-buttons button:hover {
     transform: scale(1.05);
@@ -31,7 +29,6 @@
     overflow: hidden;
     transition: transform 0.3s;
 }
-
 .card:hover {
     transform: scale(1.03);
 }
@@ -51,11 +48,9 @@ input.form-control {
 .modal-content {
     border-radius: 15px;
 }
-
 .modal-header {
     border-bottom: none;
 }
-
 .modal-body {
     font-size: 1rem;
     line-height: 1.6;
@@ -66,7 +61,6 @@ input.form-control {
     position: relative;
     display: inline-block;
 }
-
 .pic img {
     display: block;
     width: 100%;
@@ -76,33 +70,31 @@ input.form-control {
 }
 
 /* 🐾 左上角貓爪 */
-    .pic::before {
-        content: "";
-        position: absolute;
-        top: -10px;
-        left: -10px;
-        width: 40px;
-        height: 40px;
-        background-image: url('../images/logo.png'); 
-        background-size: contain;
-        background-repeat: no-repeat;
-        transform: rotate(-20deg);
-    }
-
+.pic::before {
+    content: "";
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 30px;
+    height: 30px;
+    background-image: url('../images/logo.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    transform: rotate(135deg);
+}
 /* 🐾 右下角貓爪 */
 .pic::after {
     content: "";
     position: absolute;
-    bottom: -10px;
-    right: -10px;
-    width: 40px;
-    height: 40px;
+    bottom: 0px;
+    right: 0px;
+    width: 30px;
+    height: 30px;
     background-image: url('../images/logo.png');
     background-size: contain;
     background-repeat: no-repeat;
-    transform: rotate(20deg);
+    transform: rotate(315deg);
 }
-
 /* 🐾 可選 hover 效果 */
 .pic:hover::before,
 .pic:hover::after {
@@ -111,7 +103,13 @@ input.form-control {
     filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.5));
 }
 
-/* 新增：行程拖曳游標樣式 */
+/* 行程拖曳游標樣式 */
 .drag-handle {
-    cursor: grab;
+    color: #555; /* 改深一點顏色 */
+    cursor: grab; /* 顯示可抓取游標 */
+    font-size: 20px; /* 放大一些 */
 }
+.drag-handle:hover {
+    color: #000; /* 滑鼠滑過變更深 */
+}
+
