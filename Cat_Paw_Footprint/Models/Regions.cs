@@ -18,5 +18,7 @@ public partial class Regions
 
     public virtual ICollection<Products> Products { get; set; } = new List<Products>();
 
-    public virtual ICollection<Restaurants> Restaurants { get; set; } = new List<Restaurants>();
+	public virtual ICollection<SemiSelfProducts> SemiSelfProducts { get; set; } = new List<SemiSelfProducts>();
+
+	public virtual ICollection<Restaurants> Restaurants { get; set; } = new List<Restaurants>();
 }
