@@ -1,9 +1,10 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomersArea.ViewModel;
 using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Cat_Paw_Footprint.Models;
 using Microsoft.EntityFrameworkCore;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
@@ -11,17 +12,21 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 	[AllowAnonymous]
 	public class TravelController : Controller
 	{
-		private readonly webtravel2Context _context;
+		private readonly webtravel2Context _context;    // 資料庫 Context
+		private readonly IConfiguration _config;    // appsettings.json 設定檔
 
 		//	建構子：注入資料庫 Context
-		public TravelController(webtravel2Context context)
+		public TravelController(webtravel2Context context, IConfiguration config)
 		{
-			_context = context;
+			// 把設定注入
+			_context = context; // 取得資料庫 Context
+			_config = config;   // 取得 appsettings.json 設定  
 		}
 
 		//	主頁面 View (顯示 Vue 畫面)
 		public IActionResult Index()
 		{
+			ViewBag.GoogleMapKey = _config["GoogleMaps:ApiKey"]; // 取得 Google Maps API Key
 			return View();
 		}
 
