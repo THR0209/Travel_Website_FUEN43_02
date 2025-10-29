@@ -3,6 +3,7 @@ using Cat_Paw_Footprint.Models;
 using Cat_Paw_Footprint.Repositories;
 using Cat_Paw_Footprint.ViewModel;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 
 namespace Cat_Paw_Footprint.Services
 {
@@ -35,7 +36,6 @@ namespace Cat_Paw_Footprint.Services
 			// 3) 回傳結果 DTO（給 Controller 用）
 			return new GroupMessageResponseDto
 			{
-				
 				MessageId = entity.MessageId,
 				SentAt = entity.SendTime,
 				Success = true,
@@ -51,7 +51,8 @@ namespace Cat_Paw_Footprint.Services
 			{
 				PhotoId = photo.PhotoId,
 				Url = photo.FilePath,
-				UploadTime = photo.UploadTime
+				UploadTime = photo.UploadTime,
+				Username = dto.name
 			});
 
 			return new GroupPhotoResponseDto
@@ -70,11 +71,14 @@ namespace Cat_Paw_Footprint.Services
 			// ✅ 即時推播
 			await _hub.Clients.Group(dto.GroupCode).SendAsync("ReceiveLocation", new
 			{
-				Latitude = location.Latitude,
-				Longitude = location.Longitude,
-				SetTime = location.RecordTime
+				username = dto.name ?? "匿名",
+				
+				SenderType = dto.SenderType,
+				Latitude = dto.Latitude,
+				Longitude = dto.Longitude,
+				SendTime = location.RecordTime
 			});
-
+			Console.WriteLine($"👉 dto.name = {dto.name}");
 			return new GroupLocationResponseDto
 			{
 				LocationId = location.LocationId,

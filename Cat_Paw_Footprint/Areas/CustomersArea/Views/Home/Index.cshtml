@@ -223,6 +223,46 @@
             height: 100%;
         }
 
+        /* ===== Swiper Arrow Buttons ===== */
+        .swiper-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all .25s;
+            color: #22B3C1;
+        }
+
+            .swiper-btn:hover {
+                background: #22B3C1;
+                color: #fff;
+                box-shadow: 0 4px 10px rgba(34,179,193,0.4);
+            }
+
+        .swiper-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-title {
+            display: -webkit-box; /* 建立多行彈性盒 */
+            -webkit-box-orient: vertical; /* 垂直方向排列 */
+            -webkit-line-clamp: 2; /* 限制為 2 行 */
+            overflow: hidden; /* 超出隱藏 */
+            text-overflow: ellipsis; /* 加上省略號 */
+            white-space: normal; /* 允許換行 */
+            word-break: break-word; /* 中文或長字自動斷行 */
+            min-height: 3em; /* 避免只有一行時高度不齊 */
+        }
+
+
+
         /* 讓數字與字不會撐大高度 */
         .people-inline span,
         .people-inline .ctrl * {
@@ -396,68 +436,183 @@
 
 
 
-<!-- Trending Slider (Swiper) -->
-<!-- 本週熱門商品 -->
-<section class="section" id="popular">
-    <div class="container">
-        <div class="section-title text-center mb-5">
-            <h2 class="fw-bold" style="letter-spacing:2px;">
-                <i class="fa-solid fa-fire me-2"></i>本週熱門商品
+<!-- 為你精選熱門行程 -->
+<section class="section" id="hotProducts" v-cloak>
+    <div class="container" id="hot-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+                <i class="fa-solid fa-paw me-2"></i>精選熱門行程
             </h2>
-            <div style="width:60px; height:3px; margin:10px auto 0; border-radius:2px;"></div>
+            <div style="width:60px; height:3px; background:#22B3C1; margin:10px auto 0; border-radius:2px;"></div>
         </div>
-        <div class="d-flex justify-content-end gap-2 mb-3">
-            <div class="swiper-prev btn btn-outline-secondary btn-sm rounded-pill">◀</div>
-            <div class="swiper-next btn btn-outline-secondary btn-sm rounded-pill">▶</div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="/CustomersArea/Products/Search" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有行程 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn hot-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn hot-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
         </div>
-        <div class="swiper" aria-label="熱門行程輪播">
+
+        <!-- Swiper -->
+        <div class="swiper hot-swiper" aria-label="熱門商品輪播">
             <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=1600&auto=format&fit=crop" alt="寵物友善咖啡廳" />
-                            <span class="badge-live">毛孩歡迎</span>
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🔥 熱門</span>
                         </div>
-                        <div class="product-body">
-                            <h3 class="product-title">台北｜寵物友善咖啡館巡禮</h3>
-                            <div class="product-meta">4.7★ ・ 台灣・3 小時</div>
-                            <div class="price">NT$ 690 起</div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                        </div>
+                        <!-- 新增 查看詳情按鈕 -->
+                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            查看詳情
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 精選住宿 -->
+<section class="section" id="featured-hotels" v-cloak>
+    <div class="container" id="hotels-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+                <i class="fa-solid fa-bed me-2"></i>精選住宿
+            </h2>
+            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="/CustomersArea/Products/Search?type=hotel" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有住宿 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn hotel-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn hotel-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="swiper hotels-swiper" aria-label="精選住宿">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🏨 精選</span>
+                        </div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                        </div>
+                        <!-- 新增 查看詳情按鈕 -->
+                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            查看詳情
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 精選景點門票 -->
+<section class="section" id="featured-tickets" v-cloak>
+    <div class="container" id="tickets-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+                <i class="fa-solid fa-ticket me-2"></i>精選景點門票
+            </h2>
+            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="/CustomersArea/Products/Search?type=ticket" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有門票 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn ticket-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn ticket-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="swiper tickets-swiper" aria-label="精選景點門票">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🎟️ 熱賣</span>
+                        </div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                            <!-- 新增 查看詳情按鈕 -->
+                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                查看詳情
+                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </article>
                 </div>
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="寵物友善步道" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 精選交通 -->
+<section class="section" id="featured-transports" v-cloak>
+    <div class="container" id="transports-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+                <i class="fa-solid fa-car-side me-2"></i>精選交通
+            </h2>
+            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="/CustomersArea/Products/Search?type=car" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有交通 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn transport-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn transport-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="swiper transports-swiper" aria-label="精選交通">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🚗 熱門</span>
                         </div>
-                        <div class="product-body">
-                            <h3 class="product-title">新北｜毛孩森林步道＋河濱散步</h3>
-                            <div class="product-meta">4.8★ ・ 台灣・1 日</div>
-                            <div class="price">NT$ 1,080 起</div>
-                        </div>
-                    </article>
-                </div>
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1600&auto=format&fit=crop" alt="寵物泳池" />
-                        </div>
-                        <div class="product-body">
-                            <h3 class="product-title">桃園｜寵物泳池戲水日</h3>
-                            <div class="product-meta">4.6★ ・ 台灣・半日</div>
-                            <div class="price">NT$ 850 起</div>
-                        </div>
-                    </article>
-                </div>
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1583511655826-05700d52f4d9?q=80&w=1600&auto=format&fit=crop" alt="寵物友善露營" />
-                        </div>
-                        <div class="product-body">
-                            <h3 class="product-title">苗栗｜寵物友善露營＆星空晚餐</h3>
-                            <div class="product-meta">4.5★ ・ 台灣・2 日</div>
-                            <div class="price">NT$ 2,980 起</div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                            <!-- 新增 查看詳情按鈕 -->
+                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                查看詳情
+                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </article>
                 </div>
@@ -507,7 +662,7 @@
 
 
 
-<!-- Deals Grid -->
+@* <!-- Deals Grid -->
 <section class="section" id="deals">
     <div class="container">
         <div class="section-title text-center mb-5">
@@ -593,7 +748,7 @@
             </div>
         </div>
     </div>
-</section>
+</section> *@
 
 <!-- ====================== 常見問題（ API 熱門資料） ====================== -->
 <section class="section" id="faqSection">
@@ -640,7 +795,85 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-         /* ====================== Vue 優惠活動載入 ====================== */
+
+        // 共用：建立一個 Vue + Swiper 幫手
+        function mountFeatured(appId, apiUrl, swiperSelector, prevEl, nextEl){
+          const app = Vue.createApp({
+            data(){ return { items: [] }; },
+            mounted(){
+              axios.get(apiUrl)
+                .then(res => { this.items = res.data || []; })
+                .then(() => this.$nextTick(() => {
+                  new Swiper(swiperSelector, {
+                    slidesPerView: 1.2,
+                    spaceBetween: 20,
+                    navigation: { prevEl, nextEl },
+                    breakpoints: {
+                      576:{ slidesPerView:2 },
+                      768:{ slidesPerView:3 },
+                      992:{ slidesPerView:4 }
+                    }
+                  });
+                }))
+                .catch(err => console.error('載入失敗：', apiUrl, err));
+            }
+          });
+          app.mount(appId);
+        }
+
+        // 住宿 / 門票 / 交通
+        mountFeatured('#hot-app',    '/CustomersArea/Products/GetHotProducts',    '.hot-swiper',    '.hot-prev',    '.hot-next');
+        mountFeatured('#hotels-app',    '/CustomersArea/Products/GetFeaturedHotels',    '.hotels-swiper',    '.hotel-prev',    '.hotel-next');
+        mountFeatured('#tickets-app',   '/CustomersArea/Products/GetFeaturedTickets',   '.tickets-swiper',   '.ticket-prev',   '.ticket-next');
+        mountFeatured('#transports-app','/CustomersArea/Products/GetFeaturedTransports','.transports-swiper','.transport-prev','.transport-next');
+
+        /* ====================== Vue 熱門行程載入 ====================== */
+        // const hotApp = Vue.createApp({
+        //     data() {
+        //         return { products: [] };
+        //     },
+        //     mounted() {
+        //         axios.get('/CustomersArea/Products/GetHotProducts')
+        //             .then(res => { this.products = res.data; })
+        //             .then(() => {
+        //                 this.$nextTick(() => {
+        //                     new Swiper('.swiper', {
+        //                         slidesPerView: 1.3,
+        //                         spaceBetween: 16,
+        //                         navigation: {
+        //                             nextEl: '.swiper-next',
+        //                             prevEl: '.swiper-prev',
+        //                         },
+        //                         breakpoints: {
+        //                             576: { slidesPerView: 2 },
+        //                             768: { slidesPerView: 3 },
+        //                             992: { slidesPerView: 4 }
+        //                         }
+        //                     });
+        //                 });
+        //             })
+        //             .catch(err => console.error('熱門商品載入失敗', err));
+        //     }
+        // });
+        // hotApp.mount('#hot-app');
+
+
+        /* ====================== Vue 精選住宿載入 ====================== */
+
+
+
+        
+        /* ====================== Vue 精選景點載入 ====================== */
+
+
+
+
+        /* ====================== Vue 熱門租車載入 ====================== */
+
+
+
+
+        /* ====================== Vue 優惠活動載入 ====================== */
         const app = Vue.createApp({
             data() {
                 return { promotions: [], isLoading: true }

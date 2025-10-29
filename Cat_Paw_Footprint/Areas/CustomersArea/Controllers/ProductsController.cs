@@ -48,7 +48,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			// 目的地（用 RegionName / Name 模糊比對；依你的 schema 調整）
 			var key = input.Destination.Trim();
 			query = query.Where(p =>
-				//EF.Functions.Like(p.RegionName, $"%{key}%") ||
+				//EF.Functions.Like(p.ProductsKeywords, $"%{key}%") ||
 				EF.Functions.Like(p.ProductName, $"%{key}%")
 			);
 
@@ -261,5 +261,89 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			return View(vm);
 		}
+
+		// GET: /CustomersArea/Products/GetHotProducts
+		[HttpGet]
+		public async Task<IActionResult> GetHotProducts()
+		{
+			var hotProducts = await _context.Products
+				.AsNoTracking()
+				.Where(p => p.IsActive == true)
+				.OrderByDescending(p => p.Views) // 熱門排序依照瀏覽數，可改成銷量或評價
+				.Take(8)
+				.Select(p => new
+				{
+					p.ProductID,
+					p.ProductName,
+					Region = p.Region.RegionName,
+					Price = p.ProductPrice ?? 0,
+					Cover = string.IsNullOrEmpty(p.ProductImageUrl) ? "/images/NoImage.png" : p.ProductImageUrl
+				})
+				.ToListAsync();
+
+			return Json(hotProducts);
+		}
+
+
+		// GET: /CustomersArea/Products/GetFeaturedHotels
+		[HttpGet]
+		public async Task<IActionResult> GetFeaturedHotels()
+		{
+			var list = await _context.SemiSelfProducts
+				.AsNoTracking()
+				.Where(x => x.IsActive == true && x.ProductType == 1)
+				.OrderByDescending(x => x.Views)
+				.Take(8)
+				.Select(x => new {
+					productID = x.ProductID,
+					productName = x.ProductName,
+					region = x.Region.RegionName,
+					price = x.ProductPrice ?? 0,
+					cover = string.IsNullOrEmpty(x.ProductImageUrl) ? "/images/NoImage.png" : x.ProductImageUrl
+				}).ToListAsync();
+
+			return Json(list);
+		}
+
+		// GET: /CustomersArea/Products/GetFeaturedTickets
+		[HttpGet]
+		public async Task<IActionResult> GetFeaturedTickets()
+		{
+			var list = await _context.SemiSelfProducts
+				.AsNoTracking()
+				.Where(x => x.IsActive == true && x.ProductType == 2)
+				.OrderByDescending(x => x.Views)
+				.Take(8)
+				.Select(x => new {
+					productID = x.ProductID,
+					productName = x.ProductName,
+					region = x.Region.RegionName,
+					price = x.ProductPrice ?? 0,
+					cover = string.IsNullOrEmpty(x.ProductImageUrl) ? "/images/NoImage.png" : x.ProductImageUrl
+				}).ToListAsync();
+
+			return Json(list);
+		}
+
+		// GET: /CustomersArea/Products/GetFeaturedTransports
+		[HttpGet]
+		public async Task<IActionResult> GetFeaturedTransports()
+		{
+			var list = await _context.SemiSelfProducts
+				.AsNoTracking()
+				.Where(x => x.IsActive == true && x.ProductType == 3)
+				.OrderByDescending(x => x.Views)
+				.Take(8)
+				.Select(x => new {
+					productID = x.ProductID,
+					productName = x.ProductName,
+					region = x.Region.RegionName,
+					price = x.ProductPrice ?? 0,
+					cover = string.IsNullOrEmpty(x.ProductImageUrl) ? "/images/NoImage.png" : x.ProductImageUrl
+				}).ToListAsync();
+
+			return Json(list);
+		}
+
 	}
 }

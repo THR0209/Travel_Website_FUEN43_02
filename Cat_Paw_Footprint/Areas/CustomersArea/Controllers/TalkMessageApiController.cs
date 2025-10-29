@@ -108,6 +108,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			var result = await _service.UploadPhotoAsync(dto);
 			return Ok(result);
 		}
+		[HttpPost]
+		public async Task<IActionResult> SetLocation([FromBody] GroupLocationRequestDto dto)// 設定群組位置
+		{
+			var result = await _service.SetLocationAsync(dto);
+			return Ok(result);
+		}
 		[HttpGet("{groupCode}")]
 		public async Task<IActionResult> GetHistory(string groupCode)
 		{

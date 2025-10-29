@@ -56,7 +56,7 @@ namespace Cat_Paw_Footprint.Hubs
 				SendTime = DateTime.UtcNow
 			};
 
-			await Clients.Group(groupCode).SendAsync("ReceiveMessage", message);
+			await Clients.Group(groupCode).SendAsync("ReceiveMessage", message);// ✅ 傳給群組其他人
 			await Clients.Caller.SendAsync("ReceiveMessage", message); // ✅ 自己也收到
 		}
 	}

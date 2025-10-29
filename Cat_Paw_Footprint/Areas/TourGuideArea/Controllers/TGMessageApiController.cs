@@ -2,6 +2,7 @@
 using Cat_Paw_Footprint.Areas.TourGuideArea.ViewModel;
 using Cat_Paw_Footprint.Services;
 using Cat_Paw_Footprint.ViewModel;
+using Google.Api;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cat_Paw_Footprint.Areas.TourGuideArea.Controllers
@@ -77,23 +78,23 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Controllers
 		{
 			try
 			{
-				var history = await _msgSvc.GetHistoryAsync(groupCode);
-				if (history == null || !history.Any())
-					return Ok(new List<object>());
+				var history = await _msgSvc.GetNewHistoryAsync(groupCode);
+				if (history == null || history.Count == 0) return Ok(Array.Empty<object>());
 
-				var safeList = history.Select(m => new {
-					m.MessageId,
-					m.SenderType,
-					m.Content,
-					SendTime = m.SendTime.ToString("yyyy-MM-dd HH:mm:ss")
+				// ✅ 和客戶/訪客完全一致：MessageId, UserName, SenderType, Content, SendTime(UTC)
+				var list = history.Select(m => new {
+					MessageId = m.MessageId,
+					UserName = m.UserName ?? "匿名",
+					SenderType = m.SenderType,   // "Customer" / "Guest" / "Guide"
+					Content = m.Content,
+					SendTime = m.SendTime        // 保持 DateTime/ISO，前端再轉 tz
 				});
-
-				return Ok(safeList);
+				return Ok(list);
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"❌ 取得歷史訊息失敗: {ex}");
-				return StatusCode(500, new { message = "伺服器錯誤", error = ex.Message, stack = ex.StackTrace });
+				Console.WriteLine($"❌ GetHistory 失敗: {ex.Message}");
+				return StatusCode(500, new { message = "伺服器錯誤" });
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,20 +26,66 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return View(ActiveCoupons);
 		}
 
+        [HttpGet]
         public IActionResult GetMyCoupons()
         {
-            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 1️⃣ 嘗試抓取登入會員的 CustomerId
+            var customerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "CustomerId");
+            if (customerIdClaim == null)
+            {
+                return Json(new { message = "尚未登入，請先登入會員後再查看優惠券。" });
+            }
 
-			var customerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "CustomerId");
-			var CustomerId = int.Parse(customerIdClaim.Value);
+            if (!int.TryParse(customerIdClaim.Value, out var customerId))
+            {
+                return Json(new { message = "無法解析會員識別碼。" });
+            }
 
-			return Ok(new { message = $"這是會員 {CustomerId} 的優惠券資料" });
-		}
+
+          
+            // 先抓出會員的所有優惠券 ID
+            var couponIds = _context.CustomerCouponsRecords
+                .Where(r => r.CustomerID == customerId)
+                .Select(r => new { r.CouponID, r.IsUsed })
+                .ToList();
+
+            // 用 ID 去撈優惠券資料
+            var coupons = (from r in couponIds
+                           join c in _context.Coupons
+                           on r.CouponID equals c.CouponID
+                           select new
+                           {
+                               CouponID = c.CouponID,
+                               Desc = c.CouponDesc,
+                               DiscountValue = c.DiscountValue,
+                               DiscountType = c.DiscountType,
+                               StartDate = c.StartDate,
+                               EndDate = c.EndDate,
+                               IsUsed = r.IsUsed,
+                               IsExpired = c.EndDate < DateTime.Now
+                           }).ToList();
 
 
-    
 
-		public class CouponDto
+
+
+            // 3️⃣ 分類回傳（避免 null 問題）
+            var usable = coupons.Where(c => !c.IsUsed && !c.IsExpired).ToList();
+            var used = coupons.Where(c => c.IsUsed).ToList();
+            var expired = coupons.Where(c => !c.IsUsed && c.IsExpired).ToList();
+
+            return Json(new
+            {
+                usable,
+                used,
+                expired
+            });
+        }
+
+
+
+
+        public class CouponDto
         {
             public int CouponId { get; set; }
             public string Code { get; set; } = "";

@@ -53,20 +53,21 @@ namespace Cat_Paw_Footprint.Services
 							(r.IsUsed == false || r.IsUsed == null))
 				.ToListAsync();
 
-			foreach (var r in expiring)
-			{
-				if (r.CustomerID.HasValue)
-				{
-					await notifSvc.AddNotificationAsync(
-						r.CustomerID.Value,
-						"優惠券即將到期",
-						$"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期，請盡快使用！",
-						"優惠券"
-					);
-				}
-			}
+            foreach (var r in expiring)
+            {
+                if (r.CustomerID > 0)
+                {
+                    await notifSvc.AddNotificationAsync(
+                        r.CustomerID,
+                        "優惠券即將到期",
+                        $"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期，請盡快使用！",
+                        "優惠券"
+                    );
+                }
+            }
 
-			_logger.LogInformation($"✅ 優惠券檢查完成，共發送 {expiring.Count} 筆通知。");
+
+            _logger.LogInformation($"✅ 優惠券檢查完成，共發送 {expiring.Count} 筆通知。");
 		}
 	}
 }
