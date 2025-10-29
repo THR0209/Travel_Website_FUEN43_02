@@ -15,7 +15,6 @@
 
         <!-- 上方 - 保留凍結效果 -->
         <div class="top-buttons sticky-top bg-white shadow-sm py-3 z-3">
-        @* <div> *@
             <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <!-- 搜尋框 -->
@@ -58,8 +57,8 @@
         <div class="col-md-8">
             <div class="row">
                 <div v-for="(item, index) in filteredItems" :key="index" class="col-md-3 mb-4">
-
                     <div class="card position-relative">
+
                         <!-- 右上角＋鍵 -->
                         <button class="btn btn-sm btn-success position-absolute top-0 end-0 m-2"
                                 @@click.stop="addToTrip(item)">
@@ -331,13 +330,20 @@
 
                 /* 清空行程 */
                 clearTrip() {
-                    // this.tripList = [];
+                    // 若沒有行程 → 提示並離開
                     if (this.tripList.length === 0) {
                         alert("目前沒有任何行程可以清空！");
                         return;
                     }
-                    this.tripList.splice(0, this.tripList.length);
-                    alert("🗑️ 行程已全部清空！");
+
+                    // confirm() 對話框，讓使用者選擇
+                    const result = confirm("❓確定要清空所有行程嗎？\n（按「取消」可保留目前行程）");
+
+                    // 按下「確定」→ 清空行程
+                    if (result) {
+                        
+                        this.tripList.splice(0, this.tripList.length);                        
+                    } 
                 },
 
                 /* 拖曳完成事件（可選，顯示目前排序） */
@@ -383,7 +389,9 @@
                     // 資料載入後，保持離島預設狀態
                     this.selectedRegion = "離島";
                 });
-                this.getCurrentUser(); // 初始化抓取登入者
+
+                // 初始化抓取登入者
+                this.getCurrentUser(); 
 
                 // 🧩 重新啟用所有 dropdown 功能
                 const dropdownList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
