@@ -6,7 +6,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 	public class TripProjectViewModel
 	{
 		[Display(Name = "會員ID")]
-		public virtual Customers? CustomerID { get; set; }
+		//public virtual Customers? CustomerID { get; set; }
+		public int CustomerID { get; set; }
 
 		[Display(Name = "行程ID")]
 		public int ProjectID { get; set; }
@@ -56,14 +57,30 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 		[Display(Name = "備註")]
 		public string? Notes { get; set; }
 		
-		public virtual Hotels? Hotel { get; set; }
-		
-		public virtual Locations? Location { get; set; }
-		
-		public virtual CustomerTripProjects? Project { get; set; }
-		
-		public virtual Restaurants? Restaurant { get; set; }
-				
+		public virtual Hotels? Hotel { get; set; }		
+		public virtual Locations? Location { get; set; }		
+		public virtual CustomerTripProjects? Project { get; set; }		
+		public virtual Restaurants? Restaurant { get; set; }				
 		public virtual Transportations? Transport { get; set; }
+		public virtual Customers? Customer { get; set; }
+
+		[Display(Name = "行程明細列表")]	// 讓 data.TripDetails 有型別可對應
+		public List<TripDetailItem> TripDetails { get; set; } = new List<TripDetailItem>();
+	}
+
+	// 對應前端 tripDetails 陣列中的每一筆資料
+	
+	public class TripDetailItem{
+		[Display(Name = "排序序號")]
+		public int TripSequence { get; set; }
+
+		[Display(Name = "行程類型")]
+		public string TripType { get; set; } = "";
+
+		[Display(Name = "對應目標ID")]
+		public int TripTargetID { get; set; }
+
+		[Display(Name = "名稱（前端顯示用）")]
+		public string? TripName { get; set; }
 	}
 }

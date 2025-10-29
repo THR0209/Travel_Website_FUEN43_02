@@ -1,8 +1,9 @@
 ﻿@section Styles {    
-    <link href="~/css/travel.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    @* 引用CSS樣式庫 *@
+    <link href="~/css/travel.css" rel="stylesheet" />   
 
-    <style ></style>
+    @* 引用bootstrap的icon *@
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 }
 
 @{
@@ -14,6 +15,7 @@
 
         <!-- 上方 - 保留凍結效果 -->
         <div class="top-buttons sticky-top bg-white shadow-sm py-3 z-3">
+        @* <div> *@
             <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <!-- 搜尋框 -->
@@ -52,7 +54,7 @@
             </div>
         </div>
 
-        <!-- 左下側顯示卡片 (動態載入區) -->
+        <!-- 左側顯示卡片 (動態載入區) -->
         <div class="col-md-8">
             <div class="row">
                 <div v-for="(item, index) in filteredItems" :key="index" class="col-md-3 mb-4">
@@ -115,7 +117,7 @@
                 <div class="card-body">
 
                     <!-- 🟢 使用 vuedraggable 可拖曳排序 -->
-                    <draggable v-model="tripList" item-key="id" handle=".drag-handle">
+                    <draggable v-model="tripList" item-key="uid" handle=".drag-handle" @@end ="onDragEnd">
                         <template #item="{ element, index }">
                             <div class="d-flex justify-content-between align-items-center border-bottom py-2 bg-white rounded shadow-sm my-1 px-2 ">
                                 <span>
@@ -166,8 +168,7 @@
 
 </div>
 
-@section Scripts{
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@section Scripts{    
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
 
     <!-- 支援拖曳排序 -->
@@ -196,7 +197,7 @@
                     modalData: {},     // Modal 詳情資料
                     sortDesc: true ,    // 排序狀態（true = 高→低）
 
-                    /* ✅ 新增地區 / 縣市綁定欄位 */
+                    /* 地區 / 縣市綁定欄位 */
                     selectedRegion: "離島",   // 預設地區
                     selectedDistrict: "",     // 預設不選縣市
                     regions: ["北部", "中部", "南部", "東部", "離島"],
@@ -207,7 +208,8 @@
                         "東部": ["台東縣", "花蓮縣"],
                         "離島": ["澎湖", "金門", "馬祖", "綠島", "蘭嶼", "小琉球"]
                     },
-                    tripList: []    //行程清單
+                    tripList: [],    // 行程清單
+                    currentUser: null,  // 目前登入使用者資訊
                 }
             },
 
@@ -241,6 +243,22 @@
             },
 
             methods: {
+                /* 取得目前登入者資訊 */
+                async getCurrentUser() {
+                    try {
+                        const res = await fetch('/api/currentUser', {
+                        credentials: 'include'   // ✅ 加上這行
+                        });
+                        if (!res.ok) throw new Error('尚未登入');
+                        const data = await res.json();
+                        console.log("👤 目前登入者：", data);
+                        this.currentUser = data;
+                    } catch (err) {
+                        console.warn("⚠️ 無法取得登入者資訊", err);
+                        this.currentUser = null;
+                    }
+                },
+
                 // 改變分類 (景點/美食/住宿)
                 async changeType(type) {
                     this.currentType = type;
@@ -289,44 +307,73 @@
 
                 /* 加入行程 */
                 addToTrip(item) {
-                    const exists = this.tripList.some(x => x.id === item.id && x.type === this.currentType);
+                    // 檢查是否已存在相同項目 (同分類同 id 不可重複)
+                    const exists = this.tripList.some(
+                        x => x.id === item.id && x.type === this.currentType
+                    );
                     if (!exists) {
                         this.tripList.push({
+                            uid: `${this.currentType}-${item.id}`, // 唯一 key
                             id: item.id,
                             name: item.name,
                             type: this.currentType,
                             typeLabel: this.buttons.find(b => b.type === this.currentType).label
                         });
+                    }else {
+                        alert(`❗「${item.name}」已在行程中！`);
                     }
                 },
 
-                /* 刪除行程 */
+                /* 刪除單一行程 */
                 removeFromTrip(index) {
                     this.tripList.splice(index, 1);
                 },
 
                 /* 清空行程 */
                 clearTrip() {
-                    this.tripList = [];
+                    // this.tripList = [];
+                    if (this.tripList.length === 0) {
+                        alert("目前沒有任何行程可以清空！");
+                        return;
+                    }
+                    this.tripList.splice(0, this.tripList.length);
+                    alert("🗑️ 行程已全部清空！");
+                },
+
+                /* 拖曳完成事件（可選，顯示目前排序） */
+                onDragEnd() {
+                    console.log("🔁 已重新排序：", this.tripList.map(x => x.name).join(" → "));
+                    // 重新觸發 Vue 更新畫面（防止 index 顯示未更新）
+                    this.tripList = [...this.tripList];
                 },
 
                 /* 儲存行程 */
                 async saveTrip() {
+                    if (!this.currentUser) {
+                        alert("⚠️ 尚未登入，無法儲存行程！");
+                        return;
+                    }
+
                     const payload = {
-                        customerID: 1, // 之後改登入者ID
+                        customerId: this.currentUser.customerId, // 改登入者ID
                         projectName: "我的自由行",
                         tripDetails: this.tripList.map((item, idx) => ({
-                            tripSequence: idx + 1,
-                            tripType: item.typeLabel,
-                            tripTargetID: item.id
+                            tripSequence: idx + 1,  // 排序順序
+                            tripType: item.typeLabel,   // 類別名稱（景點、美食、住宿）
+                            tripTargetID: item.id,  // 對應原始資料 ID
+                            tripName: item.name     // 方便前端檢查（純顯示用）
                         }))
                     };
-                    const res = await fetch('/Travel/SaveTrip', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (res.ok) alert('✅ 行程已儲存！');
+
+                    // 這一行 — 讓你能在 Console 看送出的內容
+                    console.log("🚀 送出行程資料：", payload);
+
+                    // const res = await fetch('/Travel/SaveTrip', {
+                    //     method: 'POST',
+                    //     headers: { 'Content-Type': 'application/json' },
+                    //     body: JSON.stringify(payload)
+                    // });
+                    // if (res.ok) alert('✅ 行程已儲存！');
                 }
             },            
 
@@ -335,6 +382,13 @@
                 this.fetchData().then(() => {
                     // 資料載入後，保持離島預設狀態
                     this.selectedRegion = "離島";
+                });
+                this.getCurrentUser(); // 初始化抓取登入者
+
+                // 🧩 重新啟用所有 dropdown 功能
+                const dropdownList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+                dropdownList.forEach((dropdownToggleEl) => {
+                    new bootstrap.Dropdown(dropdownToggleEl);
                 });
             }
         });

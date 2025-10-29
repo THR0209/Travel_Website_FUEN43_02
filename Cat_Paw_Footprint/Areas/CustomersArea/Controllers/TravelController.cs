@@ -13,19 +13,37 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 	{
 		private readonly webtravel2Context _context;
 
-		// 建構子：注入資料庫 Context
+		//	建構子：注入資料庫 Context
 		public TravelController(webtravel2Context context)
 		{
 			_context = context;
 		}
 
-		//主頁面 View (顯示 Vue 畫面)
+		//	主頁面 View (顯示 Vue 畫面)
 		public IActionResult Index()
 		{
 			return View();
 		}
 
-		//取得【住宿資料】（給 Vue3 呼叫用）
+		//	取得目前登入使用者資訊
+		[HttpGet("/api/currentUser")]
+		[Authorize(AuthenticationSchemes = "CustomerAuth")]
+		public IActionResult GetCurrentUser()
+		{
+			if (!User.Identity.IsAuthenticated)
+				return Unauthorized();
+
+			var userInfo = new
+			{
+				CustomerId = User.FindFirst("CustomerId")?.Value,
+				Account = User.FindFirst("Account")?.Value,
+				FullName = User.FindFirst("FullName")?.Value,
+			};
+
+			return Json(userInfo);
+		}
+
+		//	取得【住宿資料】（給 Vue3 呼叫用）
 		[HttpGet("/api/hotels")]
 		public async Task<IActionResult> GetHotels()
 		{
@@ -55,7 +73,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
-		//取得【景點資料】（給 Vue3 呼叫用）
+		//	取得【景點資料】（給 Vue3 呼叫用）
 		[HttpGet("/api/locations")]
 		public async Task<IActionResult> GetLocations()
 		{
@@ -85,7 +103,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
-		//取得【美食資料】（給 Vue3 呼叫用）
+		//	取得【美食資料】（給 Vue3 呼叫用）
 		[HttpGet("/api/restaurants")]
 		public async Task<IActionResult> GetRestaurants()
 		{
@@ -115,17 +133,20 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
-		// 儲存行程 (接收前端 JSON)
-		/*
-		[HttpPost]
+		//	儲存行程 (接收前端 JSON)		
+		[HttpPost("/Travel/SaveTrip")]
 		public IActionResult SaveTrip([FromBody] TripProjectViewModel data)
 		{
+			Console.WriteLine("🚀 收到行程資料：");
+			Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+
+			// 可改成實際儲存流程
 			var project = new CustomerTripProjects
 			{
 				CustomerID = data.CustomerID,
 				ProjectName = data.ProjectName,
 				StartDate = DateTime.Now,
-				EndDate = DateTime.Now.AddDays(3),
+				EndTime = DateTime.Now.AddDays(3),
 				CreateTime = DateTime.Now,
 				UpdateTime = DateTime.Now
 			};
@@ -153,9 +174,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 			_context.SaveChanges();
 
-			return Ok();
+			return Ok(new { message = "✅ 行程已儲存成功！" });
 		}
-		*/
 
 	}
 }

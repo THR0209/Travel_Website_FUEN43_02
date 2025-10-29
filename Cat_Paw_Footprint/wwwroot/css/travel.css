@@ -4,8 +4,8 @@
 
 .top-buttons {
     position: sticky; /* 黏在畫面頂部 */
-    top: 86px; /* ← 根據你的導覽列高度調整 */
-    z-index: 1020; /* 確保在卡片上層 */
+    /*top: 86px;*/ /* ← 根據你的導覽列高度調整 */
+    /*z-index: 1020;*/ /* 確保在卡片上層 */
     background-color: white;
     padding: 12px 0;
     border-bottom: 1px solid #ddd;
