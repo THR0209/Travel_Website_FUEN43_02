@@ -3,50 +3,131 @@
 }
 
 <div id="coupon-app" class="container py-4">
-    <h2 class="text-center mb-3">🎟 我的優惠券</h2>
+    <h2 class="text-center mb-4 fw-bold">🎟 我的優惠券</h2>
 
-    <div class="alert alert-info text-center" v-if="message">
-        {{ message }}
+    <!-- Tabs -->
+    <ul class="nav nav-tabs justify-content-center mb-4">
+        <li class="nav-item">
+            <button class="nav-link"
+                    :class="{ active: tab === 'usable' }"
+                    v-on:click="tab = 'usable'">
+                可使用
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link"
+                    :class="{ active: tab === 'used' }"
+                    v-on:click="tab = 'used'">
+                已使用
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link"
+                    :class="{ active: tab === 'expired' }"
+                    v-on:click="tab = 'expired'">
+                無法使用
+            </button>
+        </li>
+    </ul>
+
+
+    <!-- Coupon Cards -->
+    <div class="row g-3">
+        <!-- 可使用 -->
+        <template v-if="tab === 'usable' && coupons.usable.length">
+            <div v-for="c in coupons.usable" :key="c.couponId" class="col-md-6">
+                <div class="card border-success shadow-sm h-100">
+                    <div class="card-body">
+                        <h4 class="fw-bold text-success mb-2">
+                            {{ displayDiscount(c) }}
+                        </h4>
+                        <p class="mb-1 text-secondary">訂購金額須滿 TWD {{ c.minSpend || 0 }}</p>
+                        <p class="mb-1">{{ c.desc }}</p>
+                        <small class="text-muted">有效期限：{{ formatDate(c.endDate) }}</small>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- 已使用 -->
+        <template v-if="tab === 'used' && coupons.used.length">
+            <div v-for="c in coupons.used" :key="c.couponId" class="col-md-6">
+                <div class="card border-secondary h-100 shadow-sm opacity-75">
+                    <div class="card-body">
+                        <h4 class="fw-bold text-secondary mb-2">
+                            {{ displayDiscount(c) }}
+                        </h4>
+                        <p class="mb-1 text-secondary">{{ c.desc }}</p>
+                        <small class="text-muted">已使用</small>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- 無法使用 -->
+        <template v-if="tab === 'expired' && coupons.expired.length">
+            <div v-for="c in coupons.expired" :key="c.couponId" class="col-md-6">
+                <div class="card border-danger h-100 shadow-sm opacity-75">
+                    <div class="card-body">
+                        <h4 class="fw-bold text-danger mb-2">
+                            {{ displayDiscount(c) }}
+                        </h4>
+                        <p class="mb-1 text-danger">{{ c.desc }}</p>
+                        <small class="text-muted">已過期</small>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- 無資料時 -->
+        <div v-if="currentTabList.length === 0" class="text-center text-muted py-5">
+            <p>目前沒有這類優惠券</p>
+        </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-<script>
-    const { createApp } = Vue;
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const { createApp } = Vue;
 
-    createApp({
-        data() {
-            return {
-                message: ""
-            };
-        },
-        mounted() {
-            this.loadCoupons();
-        },
-        methods: {
-            async loadCoupons() {
-                try {
-                    const response = await fetch('/CustomersArea/Coupons/GetMyCoupons', {
-                        method: 'GET',
-                        credentials: 'include' // 🔥 必加：讓登入 cookie (CustomerAuth) 一起帶上
-                    });
-
-                    if (!response.ok) {
-                        console.error("伺服器回傳錯誤:", response.status);
-                        this.message = "載入優惠券時發生錯誤";
-                        return;
+        createApp({
+            data() {
+                return {
+                    tab: 'usable',
+                    coupons: { usable: [], used: [], expired: [] }
+                };
+            },
+            computed: {
+                currentTabList() {
+                    return this.coupons[this.tab] || [];
+                }
+            },
+            mounted() {
+                this.loadCoupons();
+            },
+            methods: {
+                async loadCoupons() {
+                    try {
+                        const response = await fetch('/CustomersArea/Coupons/GetMyCoupons');
+                        this.coupons = await response.json();
+                    } catch (err) {
+                        console.error("載入優惠券失敗：", err);
                     }
-
-                    const data = await response.json();
-                    console.log("API 回傳資料:", data); // 🧩 除錯用，方便看後端實際回傳
-                    this.message = data.message ?? "目前沒有優惠券資料";
-                } catch (error) {
-                    console.error("無法載入優惠券資料：", error);
-                    this.message = "連線失敗，請稍後再試";
+                },
+                formatDate(dateStr) {
+                    if (!dateStr) return "-";
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                },
+                displayDiscount(coupon) {
+                    if (coupon.discountType === 1)
+                        return `TWD ${coupon.discountValue}`;
+                    if (coupon.discountType === 2)
+                        return `${(coupon.discountValue * 100)} 折`;
+                    return '優惠券';
                 }
             }
-        }
-    }).mount('#coupon-app');
-</script>
-
-
+        }).mount('#coupon-app');
+    </script>
+}

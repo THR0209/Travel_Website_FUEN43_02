@@ -797,8 +797,12 @@ public partial class webtravel2Context : DbContext
             entity.Property(e => e.ProductCode)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.ProjectName).HasMaxLength(100);
-        });
+            entity.Property(e => e.ProductName).HasMaxLength(100);
+
+			entity.HasOne(d => d.Region).WithMany(p => p.SemiSelfProducts)
+	            .HasForeignKey(d => d.RegionID)
+	            .HasConstraintName("SemiSelfProduct_Region_FK");
+		});
 
         modelBuilder.Entity<Semi_Hotels>(entity =>
         {

@@ -54,11 +54,13 @@ namespace Cat_Paw_Footprint.ViewModel
 		public string GroupCode { get; set; } = null!;
 		public int GroupId { get; set; }// 群組Id
 		public Guid? GuestId { get; set; }// 遊客ID
-		public int UploaderId { get; set; }
+		public int? UploaderId { get; set; }// 上傳者ID
 		public string UploaderType { get; set; } = null!; // "Guide" / "Guest"/ "Customer"
 		public string PhotoUrl { get; set; } = null!;     // 檔案存好後的 URL
 		public double? Latitude { get; set; }             // 可選GPS
 		public double? Longitude { get; set; }
+		public string? DeviceId { get; set; }
+		public string? name { get; set; }// 上傳者稱呼
 	}
 
 	public class GroupPhotoResponseDto// 上傳照片回應
@@ -83,6 +85,9 @@ namespace Cat_Paw_Footprint.ViewModel
 		public string SenderType { get; set; } = null!;// 發送者類型 (Guide / Customer / Guest)
 
 		public string? Note { get; set; }                // 備註(可選)
+		public string? DeviceId { get; set; }
+
+		public string? name { get; set; }// 上傳者稱呼
 	}
 
 	public class GroupLocationResponseDto// 設定集合地點回應
