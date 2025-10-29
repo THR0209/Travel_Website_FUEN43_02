@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cat_Paw_Footprint.Models
 {
@@ -17,5 +18,9 @@ namespace Cat_Paw_Footprint.Models
 		public string? Note { get; set; }// 備註
 
 		public TourGroups Group { get; set; } = null!;
+		[NotMapped]
+		public string? UserName { get; set; }
+		[NotMapped]
+		public string? Content { get; set; }// 訊息內容
 	}
 }

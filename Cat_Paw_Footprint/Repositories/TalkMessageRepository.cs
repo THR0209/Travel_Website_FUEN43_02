@@ -190,19 +190,19 @@ namespace Cat_Paw_Footprint.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<GroupPhotos> InsertPhotoAsync(GroupPhotoRequestDto dto)// 上傳照片
+		public async Task<GroupPhotos> InsertPhotoAsync(GroupPhotoRequestDto dto)
 		{
 			// 1️⃣ 找出群組
 			var group = await _db.TourGroups.FirstOrDefaultAsync(g => g.GroupCode == dto.GroupCode);
 			if (group == null)
 				throw new Exception("群組不存在");
 
-			// 2️⃣ 建立新照片資料
+			// 2️⃣ 建立照片紀錄
 			var photo = new GroupPhotos
 			{
 				GroupId = group.GroupId,
-				UploaderType = dto.UploaderType,
-				FilePath = dto.PhotoUrl, // 這裡如果是相對路徑也OK
+				UploaderType = dto.UploaderType,   // Guide / Customer / Guest
+				FilePath = dto.PhotoUrl,           // 可相對或絕對路徑
 				Latitude = (decimal?)dto.Latitude,
 				Longitude = (decimal?)dto.Longitude,
 				UploadTime = DateTime.UtcNow
@@ -216,11 +216,10 @@ namespace Cat_Paw_Footprint.Repositories
 					break;
 
 				case "Customer":
-					photo.CustomerId = dto.UploaderId.ToString();
+					photo.CustomerId = dto.UploaderId?.ToString();
 					break;
 
 				case "Guest":
-					// 如果你要支援訪客，需要讓 DTO 多一個 GuestId 屬性
 					if (Guid.TryParse(dto.GuestId?.ToString(), out Guid guestGuid))
 						photo.GuestId = guestGuid;
 					break;
@@ -229,9 +228,43 @@ namespace Cat_Paw_Footprint.Repositories
 					throw new Exception("未知的上傳者類型");
 			}
 
-			// 4️⃣ 寫入資料庫
+			// 4️⃣ 寫入 GroupPhotos
 			_db.GroupPhotos.Add(photo);
 			await _db.SaveChangesAsync();
+
+			// 5️⃣ 順便寫入歷史訊息
+			var message = new GroupMessages
+			{
+				GroupId = group.GroupId,
+				SenderType = dto.UploaderType,
+				Content = $"上傳了一張照片 📸：{dto.PhotoUrl}",
+				SendTime = DateTime.UtcNow
+			};
+
+			switch (dto.UploaderType)
+			{
+				case "Guide":
+					message.GuideId = dto.UploaderId;
+					break;
+
+				case "Customer":
+					message.CustomerId = dto.UploaderId?.ToString();
+					break;
+
+				case "Guest":
+					// 若訪客存在，查找 GuestId
+					var guest = await _db.TourGroupGuests
+						.FirstOrDefaultAsync(g => g.DeviceId == dto.DeviceId && g.GroupId == group.GroupId);
+					if (guest != null)
+						message.GuestId = guest.GuestId;
+					break;
+			}
+
+
+			_db.GroupMessages.Add(message);
+			await _db.SaveChangesAsync();
+
+
 
 			return photo;
 		}
@@ -243,14 +276,24 @@ namespace Cat_Paw_Footprint.Repositories
 				.ToListAsync();
 		}
 
-		public async Task<GroupLocations> InsertLocationAsync(GroupLocationRequestDto dto)// 導遊設集合地或遊客發送自己位置
+		public async Task<GroupLocations> InsertLocationAsync(GroupLocationRequestDto dto)// 導遊與遊客設集合地或遊客發送自己位置
 		{
+			Console.WriteLine($"📡 InsertLocationAsync 呼叫: GroupCode={dto.GroupCode}, GroupId={dto.GroupId}, SenderType={dto.SenderType}, Lat={dto.Latitude}, Lng={dto.Longitude}");
+
+			var group = await _db.TourGroups
+				.FirstOrDefaultAsync(g => g.GroupCode == dto.GroupCode);
+
+			if (group == null)
+			{
+				Console.WriteLine($"❌ 找不到群組: {dto.GroupCode}");
+				throw new Exception("群組不存在");
+			}
 			var location = new GroupLocations
 			{
-				GroupId = dto.GroupId,
-				SenderType = dto.SenderType,        // ✅ 導遊設定集合地
-				Latitude = (decimal)dto.Latitude,
-				Longitude = (decimal)dto.Longitude,
+				GroupId = group.GroupId,// ✅ 群組ID
+				SenderType = dto.SenderType,        // ✅ 發送者類型 (Guide / Customer / Guest)
+				Latitude = (decimal)dto.Latitude,// ✅ 緯度
+				Longitude = (decimal)dto.Longitude,// ✅ 經度
 				RecordTime = DateTime.UtcNow,// ✅ 對應資料表的 RecordTime
 				Note = dto.Note
 			};
@@ -264,13 +307,59 @@ namespace Cat_Paw_Footprint.Repositories
 			}
 			else if (dto.SenderType == "Guest")
 			{
-				if (Guid.TryParse(dto.GuestId?.ToString(), out Guid guestGuid))
-					location.GuestId = guestGuid;// ✅ 遊客ID
+				if (!string.IsNullOrEmpty(dto.DeviceId))
+				{
+					var guest = await _db.TourGroupGuests
+						.FirstOrDefaultAsync(g => g.DeviceId == dto.DeviceId && g.GroupId == group.GroupId);
+
+					if (guest != null)
+					{
+						location.GuestId = guest.GuestId; // ✅ 透過 DeviceId 查出 GuestId
+					}
+					else
+					{
+						Console.WriteLine($"⚠️ 找不到對應的訪客 DeviceId={dto.DeviceId} GroupId={group.GroupId}");
+					}
+				}
 			}
 
 			_db.GroupLocations.Add(location);
 			await _db.SaveChangesAsync();
+			#region 順便寫入歷史訊息
+			var message = new GroupMessages
+			{
+				GroupId = group.GroupId,
+				SenderType = dto.SenderType,     // "Customer" / "Guest" / "Guide"
+				Content = $"已更新地點 👉 <a href=\"https://www.google.com/maps?q={dto.Latitude},{dto.Longitude}\" target=\"_blank\">查看地圖</a>",
+				SendTime = DateTime.UtcNow       // 使用 UTC 可保持一致性
+			};
 
+			// 3️⃣ 根據發送者類型填入對應欄位
+			switch (dto.SenderType)
+			{
+				case "Guide":
+					message.GuideId = dto.GuideId;
+					break;
+				case "Customer":
+					message.CustomerId = dto.CustomerId?.ToString();
+					break;
+				case "Guest":
+					if (location.GuestId.HasValue)
+					{
+						message.GuestId = location.GuestId;
+						Console.WriteLine($"✅ 已綁定訪客 GuestId={location.GuestId}");
+					}
+					else
+					{
+						Console.WriteLine($"⚠️ 未取得 GuestId，可能是 DeviceId 無效或未註冊");
+					}
+					break;
+			}
+
+			_db.GroupMessages.Add(message);
+			await _db.SaveChangesAsync();
+
+			#endregion
 			return location;
 		}
 		public async Task<GroupLocations?> GetLatestLocationAsync(int groupId)// 查集合地
