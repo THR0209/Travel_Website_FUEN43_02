@@ -53,13 +53,30 @@ window.updateList = async function () {
             return;
         }
 
+        // === 通知清單動態生成 ===
         list.innerHTML = data.map(n => `
-            <div class="border-bottom py-2 px-2 ${n.isRead ? 'opacity-50' : ''}">
+            <div class="border-bottom py-2 px-2 notif-item ${n.isRead ? 'opacity-50' : ''}"
+                 data-id="${n.notificationID}" style="cursor:pointer;">
                 <div class="fw-bold">${n.title}</div>
                 <div class="small text-muted">${n.message}</div>
                 <div class="text-end small text-secondary">${dayjs(n.createdAt).format('MM/DD HH:mm')}</div>
             </div>
         `).join('');
+
+        // === 🔹加在這裡！綁定點擊事件 ===
+        document.querySelectorAll('.notif-item').forEach(item => {
+            item.addEventListener('click', async function () {
+                const id = this.dataset.id;
+                try {
+                    await axios.post('/CustomersArea/Notifications/MarkAsRead', { id });
+                    this.classList.add('opacity-50'); // 立即透明化
+                    await window.updateUnread(); // 更新紅點數
+                } catch (err) {
+                    console.error("❌ 標記為已讀失敗", err);
+                    window.showAlert('error', '錯誤', '無法標記通知為已讀');
+                }
+            });
+        });
     } catch (e) {
         console.error("載入通知清單失敗", e);
         window.showAlert('warning', '載入失敗', '通知清單載入失敗');

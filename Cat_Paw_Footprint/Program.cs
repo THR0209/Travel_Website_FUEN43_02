@@ -252,6 +252,7 @@ namespace Cat_Paw_Footprint
 
 			app.UseAuthentication();
 			app.UseAuthorization();
+			app.MapControllers();
 
 			app.MapControllerRoute(
 				name: "areas",
@@ -262,7 +263,6 @@ namespace Cat_Paw_Footprint
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
 			app.MapHub<NotificationHub>("/notificationHub");
-			app.MapControllers();
 
 			app.Run();
 		}

@@ -1,104 +1,237 @@
 ﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
-
 @{
     ViewData["Title"] = "通知中心";
-
 }
 
 @section Styles {
     <style>
+        /* ========== 全站底色與字體 ========== */
         body {
-            background: #f9fcfe;
+            background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+            font-family: "Poppins", "Noto Sans TC", sans-serif;
+            color: #333;
+            overflow-x: hidden;
         }
 
-        .notification-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 1.2rem 1.6rem;
-            box-shadow: 0 4px 14px #0001;
-            transition: 0.2s;
-            cursor: pointer;
+        /* ========== 主容器 ========== */
+        .notif-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 28px;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
         }
 
-            .notification-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 6px 16px #0002;
+        /* ========== 左側分類 ========== */
+        .notif-sidebar {
+            background: linear-gradient(135deg, #d9f1ff, #f7fbff);
+            border-radius: 20px;
+            padding: 1.6rem 1rem;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+            .notif-sidebar h5 {
+                color: #3388cc;
+                font-weight: 700;
+                margin-bottom: 1rem;
+                text-align: center;
             }
 
-        .is-read {
-            opacity: 0.6;
+        .notif-category {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .time {
+            .notif-category li {
+                padding: 0.8rem 1rem;
+                margin-bottom: 0.5rem;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 0.6rem;
+                color: #2255aa;
+                font-weight: 500;
+            }
+
+                .notif-category li:hover {
+                    background: #e6f3ff;
+                    transform: translateX(4px);
+                }
+
+                .notif-category li.active {
+                    background: #22b3c1;
+                    color: #fff;
+                    box-shadow: 0 8px 20px rgba(34, 179, 193, 0.25);
+                }
+
+                .notif-category li i {
+                    font-size: 1rem;
+                }
+
+        /* ========== 右側內容 ========== */
+        .notif-content {
+            background: #fefefe;
+            border-radius: 18px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+            min-height: 520px;
+        }
+
+        .notif-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 5px solid transparent;
+        }
+
+            .notif-card:hover {
+                transform: translateY(-4px);
+                border-left-color: #22b3c1;
+            }
+
+            .notif-card.is-read {
+                opacity: 0.6;
+            }
+
+        .notif-title {
+            font-weight: 600;
+            color: #2255aa;
+        }
+
+        .notif-message {
+            color: #444;
+            margin: 0.4rem 0;
+        }
+
+        .notif-time {
             font-size: 0.85rem;
             color: #888;
         }
 
-        .type-tag {
-            font-size: 0.8rem;
-            background: #22b3c1;
-            color: #fff;
-            border-radius: 0.5rem;
-            padding: 0.2rem 0.6rem;
+        /* 響應式 */
+        @@media (max-width: 992px) {
+            .notif-wrapper
+
+        {
+            grid-template-columns: 1fr;
+        }
+
+        .notif-sidebar {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.8rem;
+        }
+
+        .notif-category li {
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+
         }
     </style>
 }
 
-<div class="container py-4">
-    <h2 class="mb-4 text-center"><i class="fa-solid fa-bell me-2"></i>通知中心</h2>
+<div class="notif-wrapper">
+    <!-- 左側分類 -->
+    <div class="notif-sidebar">
+        <h5><i class="fa-solid fa-filter me-1"></i>通知分類</h5>
+        <ul class="notif-category" id="notifCategory">
+            <li class="active" data-type="全部"><i class="fa-solid fa-bell"></i> 全部通知</li>
+            <li data-type="客服訊息"><i class="fa-solid fa-headset"></i> 客服訊息</li>
+            <li data-type="優惠活動"><i class="fa-solid fa-tags"></i> 優惠活動</li>
+            <li data-type="系統公告"><i class="fa-solid fa-bullhorn"></i> 系統公告</li>
+        </ul>
+    </div>
 
-    @if (!Model.Any())
-    {
-        <div class="text-center text-secondary my-5">目前沒有通知 💤</div>
-    }
-    else
-    {
-        <div class="d-grid gap-3">
-            @foreach (var item in Model)
+    <!-- 右側通知內容 -->
+    <div class="notif-content">
+        <h4 class="fw-bold text-primary mb-3">
+            <i class="fa-solid fa-bell me-2"></i><span id="notifTitle">全部通知</span>
+        </h4>
+
+        <div id="notifListArea">
+            @if (!Model.Any())
             {
-                <div class="notification-card @(item.IsRead ? "is-read" : "")" data-id="@item.NotificationID">
-                    <div class="d-flex justify-content-between">
-                        <h5>@item.Title</h5>
-                        <span class="type-tag">@item.Type</span>
+                <div class="text-center text-secondary my-5">目前沒有通知 💤</div>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <div class="notif-card @(item.IsRead ? "is-read" : "")" data-id="@item.NotificationID" data-type="@item.Type">
+                        <div class="notif-title">@item.Title</div>
+                        <div class="notif-message">@item.Message</div>
+                        <div class="notif-time">
+                            建立於 @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                            @if (item.IsRead && item.ReadAt != null)
+                            {
+                                <span>（已讀於 @item.ReadAt.Value.ToString("HH:mm")）</span>
+                            }
+                        </div>
                     </div>
-                    <p class="mb-2">@item.Message</p>
-                    <div class="time">
-                        建立於 @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
-                        @if (item.IsRead && item.ReadAt != null)
-                        {
-                            <span>（已讀於 @item.ReadAt.Value.ToString("HH:mm")）</span>
-                        }
-                    </div>
-                </div>
+                }
             }
         </div>
-    }
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        document.querySelectorAll(".notification-card").forEach(card => {
-            card.addEventListener("click", async () => {
-                const id = card.dataset.id;
-                try {
-                    await axios.post("/CustomersArea/Notifications/MarkAsRead", { id });
-                    card.classList.add("is-read");
+        document.addEventListener("DOMContentLoaded", () => {
 
-                    // 確保全域函式存在才執行
-                    if (typeof updateUnread === "function") {
-                        updateUnread();
+            // 🔹 點擊通知 -> 標記為已讀
+            document.querySelectorAll(".notif-card").forEach(card => {
+                card.addEventListener("click", async () => {
+                    const id = card.dataset.id;
+                    try {
+                        await axios.post("/CustomersArea/Notifications/MarkAsRead", { id });
+                        card.classList.add("is-read");
+
+                        if (typeof updateUnread === "function") {
+                            updateUnread();
+                        }
+                    } catch (err) {
+                        console.error("❌ 標記通知為已讀失敗", err);
+                        Swal.fire({ icon: "error", title: "操作失敗", text: "無法標記為已讀，請稍後再試" });
                     }
-                } catch (err) {
-                    console.error("❌ 標記通知為已讀失敗", err);
-                    Swal.fire({
-                        icon: "error",
-                        title: "操作失敗",
-                        text: "無法標記為已讀，請稍後再試"
+                });
+            });
+
+            // 🔹 分類篩選
+            const categoryItems = document.querySelectorAll(".notif-category li");
+            const notifList = document.querySelectorAll(".notif-card");
+            const titleSpan = document.getElementById("notifTitle");
+
+            categoryItems.forEach(cat => {
+                cat.addEventListener("click", () => {
+                    categoryItems.forEach(c => c.classList.remove("active"));
+                    cat.classList.add("active");
+                    const type = cat.dataset.type;
+                    titleSpan.textContent = type;
+
+                    notifList.forEach(card => {
+                        if (type === "全部" || card.dataset.type === type) {
+                            card.style.display = "block";
+                        } else {
+                            card.style.display = "none";
+                        }
                     });
-                }
+                });
             });
         });
     </script>
 }
-
-

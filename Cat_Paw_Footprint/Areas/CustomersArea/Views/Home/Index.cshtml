@@ -115,7 +115,7 @@
         }
 
             .search-tab.active {
-                background: #22B3C1;
+                background: #7ec8e3;
                 color: #fff;
             }
 
@@ -135,7 +135,7 @@
         }
 
             .search-select:focus-within {
-                border-color: #22B3C1;
+                border-color: #7ec8e3;
             }
 
         .search-input {
@@ -209,7 +209,7 @@
             }
 
         .search-btn {
-            background: #22B3C1;
+            background: #7ec8e3;
             color: #fff;
             border: none;
             border-radius: 12px;
@@ -423,7 +423,7 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <button type="submit" class="search-btn">搜尋</button>
+                <button type="submit" class="btn btn-outline-primary">搜尋</button>
             </div>
         </form>
     </div>
@@ -637,7 +637,7 @@
         </div> *@
 
         <!-- 有資料 -->
-        <div v-else-if="promotions.length > 0" class="row g-3 g-md-4">
+        <div v-if="promotions.length > 0" class="row g-3 g-md-4">
             <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
                 <article class="product-card h-100 shadow-sm rounded">
                     <div class="product-thumb position-relative">

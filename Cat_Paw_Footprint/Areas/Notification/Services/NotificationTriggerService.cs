@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using Cat_Paw_Footprint.Hubs;
 
+
 namespace Cat_Paw_Footprint.Services
 {
 	public class NotificationTriggerService : INotificationTriggerService
@@ -30,7 +31,7 @@ namespace Cat_Paw_Footprint.Services
 
 		public async Task NotifyCustomerServiceReplyAsync(int customerId, int ticketId)
 		{
-			await SendAsync(customerId, "客服回覆通知", $"客服人員回覆了您的工單 #{ticketId}", "客服訊息");
+			await SendAsync(customerId,"客服回覆通知",$"客服人員回覆了您的工單 #{ticketId}","客服訊息");
 		}
 
 		public async Task NotifyDailySignInAsync(int customerId)
@@ -74,5 +75,6 @@ namespace Cat_Paw_Footprint.Services
 			await _hub.Clients.User(customerId.Value.ToString())
 				.SendAsync("ReceiveNotification", title, message, type);
 		}
+
 	}
 }

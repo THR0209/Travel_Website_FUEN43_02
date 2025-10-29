@@ -69,13 +69,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(new { count });
 		}
 
-		/// <summary>最新通知 5 筆（給 Layout 用）</summary>
+		/// <summary>最新通知 3 筆（給 Layout 用）</summary>
 		[HttpGet]
 		public async Task<IActionResult> GetLatestNotifications()
 		{
 			var list = (await _notificationService.GetUserNotificationsAsync(CurrentCustomerId))
 				.OrderByDescending(n => n.CreatedAt)
-				.Take(5)
+				.Take(3)
 				.Select(n => new
 				{
 					n.NotificationID,

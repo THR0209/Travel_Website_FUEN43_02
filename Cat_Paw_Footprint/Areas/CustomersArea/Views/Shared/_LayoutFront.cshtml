@@ -157,7 +157,7 @@
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-area="CustomersArea" asp-controller="Coupons" asp-action="Index">
-                                                <i class="fa-solid fa-ticket"></i> 我的優惠券
+                                                <i class="fa-solid fa-ticket me-2"></i> 我的優惠券
                                             </a>
                                         </li>
                                         <li>
@@ -247,7 +247,7 @@
     </footer>
 
     <!-- Back to top -->
-    <button class="to-top" aria-label="回到頂部" id="toTop">▲</button>
+    <button class="back-to-top" aria-label="回到頂部" id="toTop">▲</button>
 
 
 
@@ -275,22 +275,24 @@
                 .catch(err => console.log('Service Worker 註冊失敗:', err));
         }
 
-        // 全域購物車計數更新
+         // 全域購物車計數更新
         function updateCartCount(count) {
             const cartCount = document.getElementById('cart-count');
-            if (cartCount) {
-                cartCount.innerText = count;
-            }
+            if (cartCount) cartCount.innerText = count;
         }
 
-        // 頁面載入時取得購物車數量
+        // ✅ 頁面載入時，只有登入會員才呼叫購物車 API
         document.addEventListener('DOMContentLoaded', function () {
+            const isLoggedIn = @isCustomerLoggedIn.ToString().ToLower();
+            if (!isLoggedIn) return; // 🚫 未登入就直接跳出，不呼叫 API
+
             fetch('/CustomersArea/Cart/count')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.count > 0) {
-                        updateCartCount(data.count);
-                    }
+                    if (data.count > 0) updateCartCount(data.count);
                 })
                 .catch(error => console.error('Error fetching cart count:', error));
         });

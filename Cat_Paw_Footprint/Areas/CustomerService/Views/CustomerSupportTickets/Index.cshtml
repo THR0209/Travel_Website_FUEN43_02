@@ -15,7 +15,7 @@
 
 @section Styles {
     <style>
-        /* ================= 聊天輸入區 ================= */
+        /* ====================== 聊天輸入區 ====================== */
         .chat-input-area {
             background: linear-gradient(135deg, #f8fcfe 0%, #eef6f9 100%);
             border: 1px solid #dce8ef;
@@ -27,17 +27,7 @@
                 box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.25);
             }
 
-        .chat-icon-btn,
-        .chat-send-btn {
-            display: flex; /* ✅ 讓內容可用 flex 對齊 */
-            align-items: center; /* ✅ 垂直置中 */
-            justify-content: center; /* ✅ 水平置中 */
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        /* 附件按鈕 */
+        /* 附件按鈕樣式 */
         .chat-icon-btn {
             background: transparent;
             color: #7ec8e3;
@@ -45,6 +35,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
+            transition: all 0.2s ease;
         }
 
             .chat-icon-btn:hover {
@@ -53,7 +44,7 @@
                 box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             }
 
-        /* 發送按鈕 */
+        /* 發送按鈕樣式 */
         .chat-send-btn {
             background: #7ec8e3;
             color: #fff;
@@ -61,6 +52,7 @@
             height: 46px;
             border-radius: 50%;
             font-size: 1.1rem;
+            transition: all 0.2s ease;
         }
 
             .chat-send-btn:hover {
@@ -72,100 +64,69 @@
                 transform: scale(0.95);
             }
 
-        /* 讓輸入框乾淨一點 */
+        /* 乾淨輸入框 */
         .chat-input-area input:focus {
             outline: none;
             box-shadow: none;
         }
 
-
-        /* 美化聊天室訊息泡泡 */
-        .chat-message-row {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 12px;
+        /* ====================== DataTable 樣式 ====================== */
+        table.dataTable thead th {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            background-color: #7ec8e3 !important;
+            color: #31708f !important;
+            font-weight: 600;
+            font-size: 1rem;
         }
 
-            .chat-message-row.me {
-                align-items: flex-end;
-            }
-
-            .chat-message-row.other {
-                align-items: flex-start;
-            }
-
-        .chat-bubble {
-            max-width: 72%;
-            padding: 12px 18px;
-            border-radius: 1.4em;
-            box-shadow: 0 2px 8px #0002;
-            position: relative;
-            font-size: 1.08em;
-            word-break: break-word;
+        /* 內容置中，主旨欄例外 */
+        #ticketTable tbody td {
+            text-align: center;
+            vertical-align: middle;
         }
 
-            .chat-bubble.me {
-                background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
-                color: #fff;
-                border-bottom-right-radius: .3em;
+        #ticketTable tbody td:nth-child(2) {
+            text-align: left;
+        }
+
+        /* 防止欄位換行 */
+        #ticketTable th, #ticketTable td {
+            white-space: nowrap;
+        }
+        /* ✅ 主旨欄（第 2 欄）允許自動換行 */
+        #ticketTable tbody td:nth-child(2),
+        #ticketTable thead th:nth-child(2) {
+            white-space: normal !important;
+            word-break: break-word; /* 長字自動斷行 */
+        }
+
+        /* table 外層容器：加橫向捲軸 */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+            /* 美化捲軸 */
+            .table-responsive::-webkit-scrollbar {
+                height: 8px;
             }
 
-            .chat-bubble.other {
+            .table-responsive::-webkit-scrollbar-thumb {
+                background: #7ec8e3;
+                border-radius: 4px;
+            }
+
+            .table-responsive::-webkit-scrollbar-track {
                 background: #f4f7fa;
-                color: #234;
-                border-bottom-left-radius: .3em;
             }
-
-        .chat-meta {
-            font-size: 0.92em;
-            opacity: .70;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
-        }
-
-            .chat-meta .badge {
-                font-size: 0.95em;
-                margin-right: 8px;
-            }
-
-        #imagePreviewModal .btn-light {
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-
-            #imagePreviewModal .btn-light:hover {
-                opacity: 1;
-                transform: scale(1.1);
-            }
-
-        #imagePreviewModal img {
-            transition: transform 0.25s ease;
-        }
-
-            #imagePreviewModal img:hover {
-                transform: scale(1.02);
-            }
-
-        #imagePreviewModal .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,.2);
-            background-color: rgba(255,255,255,0.9);
-        }
     </style>
 }
 
-<!-- =============================== -->
-<!-- 📊 工單統計 + DataTable 表格 -->
-<!-- =============================== -->
+<!-- ====================== 📊 工單統計 + 表格 ====================== -->
 <div class="card shadow-sm">
     <div class="card-body">
+        <!-- 標題 -->
         <div class="mb-4 text-center">
             <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3;">
                 <i class="fa-solid fa-clipboard-list me-2"></i>工單管理
@@ -173,27 +134,31 @@
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto; border-radius:2px;"></div>
         </div>
 
-        <div class="mb-4 d-flex flex-wrap gap-3">
+        <!-- 狀態統計 -->
+        <div class="mb-4 d-flex flex-wrap gap-3 justify-content-center">
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#d9edf7;color:#31708f;">待處理 <span class="fw-bold">@pendingCount</span></div>
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#fcf8e3;color:#8a6d3b;">處理中 <span class="fw-bold">@processingCount</span></div>
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#dff0d8;color:#3c763d;">已完成 <span class="fw-bold">@finishedCount</span></div>
         </div>
 
-        <table id="ticketTable" class="table table-striped align-middle">
-            <thead class="table-primary text-center">
-                <tr>
-                    <th>工單編號</th>
-                    <th>主旨</th>
-                    <th>分類</th>
-                    <th>客戶</th>
-                    <th>狀態</th>
-                    <th>優先度</th>
-                    <th>建立時間</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <!-- 🔹 DataTable 放進 .table-responsive，避免欄位折行 -->
+        <div class="table-responsive">
+            <table id="ticketTable" class="table table-striped align-middle w-100">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>工單編號</th>
+                        <th>主旨</th>
+                        <th>分類</th>
+                        <th>客戶</th>
+                        <th>狀態</th>
+                        <th>優先度</th>
+                        <th>建立時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 </div>
 <!-- ===============================
@@ -340,6 +305,8 @@
         ====================================================== */
         $(document).ready(function () {
             $('#ticketTable').DataTable({
+                scrollX: true,        // ✅ 開啟橫向捲軸（避免欄位太多換行）
+                autoWidth: false,     // ✅ 禁止自動調整寬度
                 ajax: {
                     url: '/CustomerService/CustomerSupportTickets/GetTickets',
                     type: 'GET',
@@ -373,13 +340,13 @@
 
                             // 🔹 寄信按鈕
                             const mailBtn = `
-                                <a href="${mailUrl}" class="btn btn-outline-success send-mail-btn">
+                                <a href="${mailUrl}" class="btn btn-sm btn-outline-success send-mail-btn">
                                     <i class="fa-solid fa-paper-plane"></i> 寄信
                                 </a>`;
 
                             // 🔹 聊天室：開啟即時對話Modal
                             const chatBtn = `
-                                <button class="btn btn-outline-secondary open-chat-btn ms-1"
+                                <button class="btn btn-sm btn-outline-secondary open-chat-btn ms-1"
                                     data-ticketid="${row.ticketID}"
                                     data-ticketcode="${row.ticketCode}"
                                     data-customer="${row.customerName}"
@@ -391,7 +358,7 @@
 
                             // 🔹 編輯工單
                             const editBtn = `
-                                <button class="btn btn-outline-primary ms-1 edit-ticket-btn"
+                                <button class="btn btn-sm btn-outline-primary ms-1 edit-ticket-btn"
                                     data-ticketid="${row.ticketID}"
                                     data-ticketcode="${row.ticketCode}"
                                     data-subject="${row.subject}"
@@ -412,9 +379,20 @@
                 ],
                 order: [[0, 'desc']],
                 language: {
-                    search: "搜尋：",
-                    zeroRecords: "找不到資料",
-                    paginate: { next: "下一頁", previous: "上一頁" }
+                    "processing": "處理中...",
+                    "loadingRecords": "載入中...",
+                    "lengthMenu": "顯示 _MENU_ 筆資料",
+                    "zeroRecords": "目前沒有資料",
+                    "info": "顯示第 _START_ 至 _END_ 筆，共 _TOTAL_ 筆",
+                    "infoEmpty": "無可顯示的資料",
+                    "infoFiltered": "(從 _MAX_ 筆資料中篩選)",
+                    "search": "搜尋：",
+                    "paginate": {
+                        "first": "第一頁",
+                        "last": "最後一頁",
+                        "next": "下一頁",
+                        "previous": "上一頁"
+                    }
                 }
             });
         });
@@ -504,7 +482,7 @@
         function loadHistory(ticketId) {
             const skip = 0, take = 30;
             $('#chatBox').html('<div class="text-center text-primary py-4"><i class="fa fa-spinner fa-spin"></i> 載入中...</div>');
-            $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, msgs => {
+           $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, msgs => {
                 $('#chatBox').empty();
                 msgs.forEach(appendMsg);
             });

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 
+
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
 	[Area("CustomersArea")]
@@ -196,9 +197,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			vm.SentTime = DateTime.Now;
 
 			var msg = await _msgService.AddAsync(vm);
+			//聊天室即時傳送
 			await _hubContext.Clients.Group($"ticket-{vm.TicketID}").SendAsync("ReceiveMessage", msg);
-
-			await _notifTrigger.NotifyCustomerServiceReplyAsync(customerId, vm.TicketID ?? 0);
 
 			return Ok(new { success = true, message = msg });
 		}
