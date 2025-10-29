@@ -51,19 +51,22 @@ namespace Cat_Paw_Footprint.Services
 							(r.IsUsed == false || r.IsUsed == null))
 				.ToListAsync();
 
-			foreach (var r in expiring)
-			{
-				if (r.CustomerID.HasValue)
-				{
-					await SendAsync(r.CustomerID.Value,
-						"優惠券即將到期",
-						$"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期。",
-						"優惠券");
-				}
-			}
-		}
+            foreach (var r in expiring)
+            {
+                if (r.CustomerID > 0)
+                {
+                    await SendAsync(
+                        r.CustomerID,
+                        "優惠券即將到期",
+                        $"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期。",
+                        "優惠券"
+                    );
+                }
+            }
 
-		private async Task SendAsync(int? customerId, string title, string message, string type)
+        }
+
+        private async Task SendAsync(int? customerId, string title, string message, string type)
 		{
 			if (customerId == null || customerId <= 0) return;
 
