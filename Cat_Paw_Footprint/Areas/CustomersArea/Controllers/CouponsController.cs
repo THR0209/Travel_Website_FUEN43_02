@@ -62,7 +62,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                                StartDate = c.StartDate,
                                EndDate = c.EndDate,
                                IsUsed = r.IsUsed,
-                               IsExpired = c.EndDate < DateTime.Now
+                               IsExpired = c.EndDate < DateTime.Now,
+                               CouponName = c.CouponName,
+                               MinimumAmount = c.MinimumAmount,
+                               
                            }).ToList();
 
 

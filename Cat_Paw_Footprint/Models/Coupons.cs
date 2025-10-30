@@ -36,5 +36,10 @@ public partial class Coupons
 
     public string? UpdatedBy { get; set; }
 
+    public decimal? MinimumAmount { get; set; }      // 滿額門檻
+    public decimal? MaximumDiscount { get; set; }    // 折扣上限
+    public int? UsageLimit { get; set; }             // 可使用次數
+    public bool? PerOrderLimit { get; set; }         // 每筆訂單限用一次
+
     public virtual ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 }

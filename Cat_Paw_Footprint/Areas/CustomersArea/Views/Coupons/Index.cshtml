@@ -39,9 +39,9 @@
                 <div class="card border-success shadow-sm h-100">
                     <div class="card-body">
                         <h4 class="fw-bold text-success mb-2">
-                            {{ displayDiscount(c) }}
+                            {{c.couponName}}
                         </h4>
-                        <p class="mb-1 text-secondary">訂購金額須滿 TWD {{ c.minSpend || 0 }}</p>
+                        <p class="mb-1 text-secondary">訂購金額須滿 TWD {{ c.minimumAmount || 0 }}</p>
                         <p class="mb-1">{{ c.desc }}</p>
                         <small class="text-muted">有效期限：{{ formatDate(c.endDate) }}</small>
                     </div>
@@ -55,7 +55,7 @@
                 <div class="card border-secondary h-100 shadow-sm opacity-75">
                     <div class="card-body">
                         <h4 class="fw-bold text-secondary mb-2">
-                            {{ displayDiscount(c) }}
+                            {{c.couponName}}
                         </h4>
                         <p class="mb-1 text-secondary">{{ c.desc }}</p>
                         <small class="text-muted">已使用</small>
@@ -70,7 +70,7 @@
                 <div class="card border-danger h-100 shadow-sm opacity-75">
                     <div class="card-body">
                         <h4 class="fw-bold text-danger mb-2">
-                            {{ displayDiscount(c) }}
+                            {{c.couponName}}
                         </h4>
                         <p class="mb-1 text-danger">{{ c.desc }}</p>
                         <small class="text-muted">已過期</small>
@@ -111,6 +111,7 @@
                     try {
                         const response = await fetch('/CustomersArea/Coupons/GetMyCoupons');
                         this.coupons = await response.json();
+                         // console.log("API 回傳資料:", this.coupons);
                     } catch (err) {
                         console.error("載入優惠券失敗：", err);
                     }

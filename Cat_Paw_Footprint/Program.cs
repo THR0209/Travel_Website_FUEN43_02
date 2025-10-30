@@ -171,10 +171,11 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<INotificationService, NotificationService>();
 			builder.Services.AddScoped<INotificationTriggerService, NotificationTriggerService>();
 			builder.Services.AddScoped<ICouponExpiryChecker, CouponExpiryChecker>();
+            builder.Services.AddScoped<MemberLevelService>();
 
-			#endregion
+            #endregion
 
-			builder.Services.AddHttpContextAccessor();
+            builder.Services.AddHttpContextAccessor();
 
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
