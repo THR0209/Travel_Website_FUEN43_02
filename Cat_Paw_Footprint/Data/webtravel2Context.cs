@@ -16,6 +16,7 @@ public partial class webtravel2Context : DbContext
     {
     }
 
+	public DbSet<PendingPayment> PendingPayments { get; set; }
 	//public virtual DbSet<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; }
 
 	public virtual DbSet<CouponPics> CouponPics { get; set; }

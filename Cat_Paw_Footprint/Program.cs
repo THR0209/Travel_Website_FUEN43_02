@@ -78,18 +78,24 @@ namespace Cat_Paw_Footprint
 				options.Cookie.Name = ".CatPaw.Vendor.Auth";
 				options.LoginPath = "/Vendor/VendorHome/Login";
 				options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			})
 			.AddCookie("CustomerAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Customer.Auth";
 				options.LoginPath = "/CustomersArea/CusLogReg/Login";
 				options.AccessDeniedPath = "/CustomersArea/CusLogReg/Login";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			})
 			.AddCookie("EmployeeAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Employee.Auth";
 				options.LoginPath = "/Employee/EmployeeAuth/Login";
 				options.AccessDeniedPath = "/Home/Index";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			});
 
 			// 授權權限設定
@@ -139,6 +145,8 @@ namespace Cat_Paw_Footprint
 				options.IdleTimeout = TimeSpan.FromHours(9);
 				options.Cookie.HttpOnly = true;
 				options.Cookie.IsEssential = true;
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			});
 
 			#region DI 註冊資料存取層與服務層
@@ -191,8 +199,9 @@ namespace Cat_Paw_Footprint
 			
 			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
 			builder.Services.AddHostedService<CouponExpiryChecker>();
-
-
+			//清理購物車DB
+			builder.Services.Configure<CleanupOptions>(builder.Configuration.GetSection("CleanupOptions"));
+			builder.Services.AddHostedService<PendingPaymentsCleanupService>();
 			var app = builder.Build();
 			app.MapHub<ChatHub>("/chatHub");
 			// Configure the HTTP request pipeline.
