@@ -26,7 +26,19 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 		// GET: CouponManagement/Coupons
 		public async Task<IActionResult> Index()
 		{
-			return View(await _context.Coupons.ToListAsync());
+			var coupons = await _context.Coupons.Select(c => new CouponViewModel
+			{
+				CouponID = c.CouponID,
+				CouponName = c.CouponName,
+				DiscountType = c.DiscountType,
+				DiscountValue = c.DiscountValue,
+				StartDate = c.StartDate,
+				EndDate = c.EndDate,
+				IsActive = c.IsActive
+			}).ToListAsync();
+
+			return View(coupons);
+
 		}
 
 		// GET: CouponManagement/Coupons/Details/5
@@ -99,59 +111,71 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 			
 		}
 
-		// GET: CouponManagement/Coupons/Edit/5
-		public async Task<IActionResult> Edit(int? id)
-		{
-			if (id == null)
-			{
-				return NotFound();
-			}
+        // GET: CouponManagement/Coupons/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
 
-			var coupons = await _context.Coupons.FindAsync(id);
-			if (coupons == null)
-			{
-				return NotFound();
-			}
-			return View(coupons);
-		}
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null) return NotFound();
 
-		// POST: CouponManagement/Coupons/Edit/5
-		// To protect from overposting attacks, enable the specific properties you want to bind to.
-		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(int id, [Bind("CouponID, CouponCode,CouponDesc,DiscountType,DiscountValue,StartDate,EndDate,IsActive,DiscountCode")] Coupons coupons)
-		{
-			if (id != coupons.CouponID)
-			{
-				return NotFound();
-			}
+            var vm = new CouponViewModel
+            {
+                CouponID = coupon.CouponID,
+                CouponName = coupon.CouponName,
+                CouponDesc = coupon.CouponDesc,
+                DiscountType = coupon.DiscountType,
+                DiscountValue = coupon.DiscountValue,
+                StartDate = coupon.StartDate,
+                EndDate = coupon.EndDate,
+                IsActive = coupon.IsActive,
+                TargetType = coupon.TargetType,
+                DiscountCode = coupon.DiscountCode,
+                MinimumAmount = coupon.MinimumAmount
+            };
 
-			if (ModelState.IsValid)
-			{
-				try
-				{
-					_context.Update(coupons);
-					await _context.SaveChangesAsync();
-				}
-				catch (DbUpdateConcurrencyException)
-				{
-					if (!CouponsExists(coupons.CouponID))
-					{
-						return NotFound();
-					}
-					else
-					{
-						throw;
-					}
-				}
-				return RedirectToAction(nameof(Index));
-			}
-			return View(coupons);
-		}
+            return View(vm);
+        }
 
-		// GET: CouponManagement/Coupons/Delete/5
-		public async Task<IActionResult> Delete(int? id)
+
+        // POST: CouponManagement/Coupons/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, CouponViewModel vm)
+        {
+            if (id != vm.CouponID)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+                return NotFound();
+
+            // 手動映射回實體
+            coupon.CouponName = vm.CouponName;
+            coupon.CouponDesc = vm.CouponDesc;
+            coupon.DiscountType = vm.DiscountType;
+            coupon.DiscountValue = vm.DiscountValue;
+            coupon.StartDate = vm.StartDate;
+            coupon.EndDate = vm.EndDate;
+            coupon.IsActive = vm.IsActive;
+            coupon.TargetType = vm.TargetType;
+            coupon.DiscountCode = vm.DiscountCode;
+            coupon.MinimumAmount = vm.MinimumAmount;
+            coupon.UpdatedAt = DateTime.Now;
+            coupon.UpdatedBy = User.Identity?.Name ?? "System";
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        // GET: CouponManagement/Coupons/Delete/5
+        public async Task<IActionResult> Delete(int? id)
 		{
 			if (id == null)
 			{

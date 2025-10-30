@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Models.Coupons>
+﻿@model IEnumerable< Cat_Paw_Footprint.Areas.CouponManagement.ViewModel.CouponViewModel>
 
 @{
     ViewData["Title"] = "優惠券管理";
@@ -23,7 +23,7 @@
             <thead>
                 <tr>
                     <th>
-                        @Html.DisplayNameFor(model => model.CouponCode)
+                        @Html.DisplayNameFor(model => model.CouponName)
                     </th>
                     <th>
                         @Html.DisplayNameFor(model => model.DiscountType)
@@ -48,10 +48,10 @@
                 {
                     <tr>
                         <td>
-                            @Html.DisplayFor(modelItem => item.CouponCode)
+                            @Html.DisplayFor(modelItem => item.CouponName)
                         </td>
                         <td>
-                            @if (item.DiscountType == 0)
+                            @if (item.DiscountType == 1)
                             {
                                 <span>百分比折扣 (%)</span>
                             }
