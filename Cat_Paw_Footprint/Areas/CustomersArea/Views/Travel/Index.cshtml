@@ -69,10 +69,11 @@
                         <div @@click="openModal(item)">                        
 
                             <!-- Bootstrap 輪播 -->
-                            <div :id="'carousel-'+item.id" class="carousel slide" data-bs-ride="carousel">
+                            <div :id="'carousel-'+item.id" class="carousel slide"
+                                 data-bs-ride="carousel" data-bs-interval="3000">
                                 <div class="carousel-inner">
 
-                                    <!-- 判斷是否有圖片，沒有則顯示預設圖片 -->
+                                    <!-- 沒有圖片 -> 顯示預設圖片 -->
                                     <div v-if="!item.pictureUrl || item.pictureUrl.length===0">
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
@@ -81,7 +82,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- 有圖片則顯示輪播 -->
+                                    <!-- 有圖片 -> 顯示輪播 -->
                                     <div v-else v-for="(pic, i) in item.pictureUrl" :key="i"
                                          class="carousel-item" :class="{'active': i===0}">
 
@@ -110,12 +111,12 @@
             <div class="card mb-3">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <span>排行程</span>
-                    <!-- 🟢 新增清空按鈕 -->
+                    <!-- 清空按鈕 -->
                     <button class="btn btn-sm btn-danger" @@click="clearTrip">清空</button>
                 </div>
                 <div class="card-body">
 
-                    <!-- 🟢 使用 vuedraggable 可拖曳排序 -->
+                    <!-- 使用 vuedraggable 可拖曳排序 -->
                     <draggable v-model="tripList" item-key="uid" handle=".drag-handle" @@end ="onDragEnd">
                         <template #item="{ element, index }">
                             <div class="d-flex justify-content-between align-items-center border-bottom py-2 bg-white rounded shadow-sm my-1 px-2 ">
@@ -131,7 +132,7 @@
                         尚未加入任何行程
                     </div>
 
-                    <!-- 🟢 儲存行程 -->
+                    <!-- 儲存行程 -->
                     <button v-if="tripList.length > 0" class="btn btn-success w-100 mt-3" @@click="saveTrip">
                         💾 儲存行程
                     </button>
@@ -142,10 +143,10 @@
             <div class="card">
                 <div class="card-header bg-success text-white">行程地圖</div>
                 <div class="card-body">
-                    <!-- ✅ 新增地圖顯示區 -->
+                    <!-- 地圖顯示區 -->
                     <div id="map" style="height: 400px; width: 100%;"></div>
 
-                    <!-- ✅ 顯示距離與時間 -->
+                    <!-- 顯示距離與時間 -->
                     <p class="mt-2 text-muted" v-if="travelInfo">
                         🚗 距離：{{ travelInfo.distance }}　🕒 預估時間：{{ travelInfo.duration }}
                     </p>
@@ -198,9 +199,8 @@
         };
 
         app = createApp({
-
-            // CDN 模式需使用 window.vuedraggable
-            components: { draggable: window.vuedraggable },
+            
+            components: { draggable: window.vuedraggable }, // CDN 模式需使用 window.vuedraggable
 
             data() {
                 return {
@@ -215,7 +215,7 @@
                     modalData: {},     // Modal 詳情資料
                     sortDesc: true ,    // 排序狀態（true = 高→低）
 
-                    /* 地區 / 縣市綁定欄位 */
+                    /* 補強說明「地區與縣市動態綁定」 */
                     selectedRegion: "離島",   // 預設地區
                     selectedDistrict: "",     // 預設不選縣市
                     regions: ["北部", "中部", "南部", "東部", "離島"],
@@ -229,7 +229,7 @@
                     tripList: [],    // 行程清單
                     currentUser: null,  // 目前登入使用者資訊
 
-                    // ✅ 新增地圖相關變數
+                    // 新增地圖相關變數
                     map: null,
                     directionsService: null,
                     directionsRenderer: null,
@@ -238,14 +238,14 @@
             },
 
             computed: {
-                /* 根據選擇的地區動態顯示縣市 */
+                /* 根據地區動態顯示對應縣市 */
                 availableDistricts() {
                     return this.selectedRegion
                         ? this.districtsByRegion[this.selectedRegion]
                         : Object.values(this.districtsByRegion).flat();
                 },
 
-                /* 綜合搜尋 + 篩選功能 */
+                /* 綜合搜尋過濾 */
                 filteredItems() {
                     const key = this.keyword.toLowerCase();
                     return this.items.filter(x => {
@@ -271,7 +271,7 @@
                 async getCurrentUser() {
                     try {
                         const res = await fetch('/api/currentUser', {
-                        credentials: 'include'   // ✅ 加上這行
+                        credentials: 'include'   
                         });
                         if (!res.ok) throw new Error('尚未登入');
                         const data = await res.json();
@@ -289,7 +289,7 @@
                     await this.fetchData();
                 },
 
-                // 取得資料 (Ajax 呼叫 Controller)
+                // 取得資料 (Ajax 呼叫 Controller API)
                 async fetchData() {
                     const res = await fetch(`/api/${this.currentType}`, {
                         headers: {
@@ -304,8 +304,8 @@
                         name: x.hotelName || x.locationName || x.restaurantName,
                         addr: x.hotelAddr || x.locationAddr || x.restaurantAddr,     
                         desc: x.hotelDesc || x.locationDesc || x.restaurantDesc,
-                        lat: x.latitude,     
-                        lng: x.longitude,
+                        lat: Number(x.hotelLat || x.locationLat || x.restaurantLat),
+                        lng: Number(x.hotelLng || x.locationLng || x.restaurantLng),
                         regionName: x.regionName,
                         districtName: x.districtName,
                         rating: x.rating,
@@ -314,7 +314,7 @@
                     }));
                 },
 
-                // 單鍵切換排序方向 - 評分排序（高→低) <-> (低→高）
+                // 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）
                 toggleSort() {
                     this.sortDesc = !this.sortDesc; // 切換狀態
                     if (this.sortDesc) {
@@ -324,7 +324,7 @@
                     }
                 },
 
-                // Modal 顯示
+                // Modal 顯示詳細資料
                 openModal(item) {
                     this.modalData = item;
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
@@ -343,7 +343,9 @@
                             id: item.id,
                             name: item.name,
                             type: this.currentType,
-                            typeLabel: this.buttons.find(b => b.type === this.currentType).label
+                            typeLabel: this.buttons.find(b => b.type === this.currentType).label,
+                            lat: item.lat,   
+                            lng: item.lng
                         });
                     }else {
                         alert(`❗「${item.name}」已在行程中！`);
@@ -367,8 +369,7 @@
                     const result = confirm("❓確定要清空所有行程嗎？\n（按「取消」可保留目前行程）");
 
                     // 按下「確定」→ 清空行程
-                    if (result) {
-                        
+                    if (result) {                        
                         this.tripList.splice(0, this.tripList.length);                        
                     } 
                 },
@@ -421,27 +422,86 @@
                 this.directionsRenderer = new google.maps.DirectionsRenderer({ map: this.map });
                 },
 
-                // 根據 tripList 計算路線
+                /* 根據 tripList 動態繪製地圖：
+                    0 個點 → 清空地圖
+                    1 個點 → 顯示單一 marker，地圖置中放大
+                    2 個以上 → 自動規劃行車路線並顯示距離/時間
+                */
                 async drawRoute() {
+
+                    console.log("📍 tripList:", this.tripList); // 除錯輸出
+
+                    // 檢查是否有缺少經緯度的項目
+                    const invalid = this.tripList.filter(x => isNaN(x.lat) || isNaN(x.lng));
+                    if (invalid.length > 0) {
+                        console.warn("⚠️ 缺少座標：", invalid);
+                        alert("有地點缺少經緯度，無法顯示地圖！");
+                        return;
+                    }
+
+                    // 無地點 → 清空地圖並移除 marker
+                    if (this.tripList.length === 0) {
+                        this.directionsRenderer.set('directions', null);
+                        this.travelInfo = null;
+                        if (this.singleMarker) {
+                            this.singleMarker.setMap(null);
+                            this.singleMarker = null;
+                        }
+                        return;
+                    }
+
+                    // 單一地點：只顯示 marker，不使用 Directions API
+                    if (this.tripList.length === 1) {
+                        this.directionsRenderer.set('directions', null);
+                        this.travelInfo = null;
+
+                        const point = this.tripList[0];
+                        const position = { lat: point.lat, lng: point.lng };
+
+                        // 清除舊 marker（若存在）
+                        if (this.singleMarker) {
+                            this.singleMarker.setMap(null);
+                        }
+
+                        // 建立新的 marker
+                        this.singleMarker = new google.maps.Marker({
+                            position,
+                            map: this.map,
+                            title: point.name
+                        });
+
+                        // 聚焦單一地點
+                        this.map.setCenter(position);
+                        this.map.setZoom(14); // 放大至區域
+                        return;
+                    }
+
+                    // 至少需要兩個點才能規劃路線
                     if (this.tripList.length < 2) {
                         this.directionsRenderer.set('directions', null);
                         this.travelInfo = null;
                         return;
                     }
-                    // 假設每個 item 都有經緯度 (lat, lng)
+
+                    // 設定中途停靠點（去掉第一與最後）
                     const waypoints = this.tripList.slice(1, -1).map(item => ({
                         location: { lat: item.lat, lng: item.lng },
                         stopover: true
                     }));
 
+                    // 起點
                     const origin = {
                         lat: this.tripList[0].lat,
                         lng: this.tripList[0].lng
                     };
+
+                    // 終點
                     const destination = {
                         lat: this.tripList[this.tripList.length - 1].lat,
                         lng: this.tripList[this.tripList.length - 1].lng
                     };
+
+                    // 建立 Directions API 請求
                     const request = {
                         origin,
                         destination,
@@ -449,6 +509,8 @@
                         optimizeWaypoints: false, // 是否自動最佳化順序
                         travelMode: google.maps.TravelMode.DRIVING
                     };
+
+                    // 發送路線請求
                     this.directionsService.route(request, (result, status) => {
                         if (status === 'OK') {
                             this.directionsRenderer.setDirections(result);
@@ -460,7 +522,7 @@
                                 totalDist += leg.distance.value; // 公尺
                                 totalTime += leg.duration.value; // 秒
                             }
-
+                            // 更新 travelInfo (顯示於畫面)
                             this.travelInfo = {
                                 distance: (totalDist / 1000).toFixed(1) + " 公里",
                                 duration: Math.round(totalTime / 60) + " 分鐘"
@@ -472,8 +534,9 @@
                 },
             },
 
-            // 監聽器：tripList 有變化時重繪路線
+            // 監聽器
             watch: {
+                // 每當行程 tripList 改變（新增、刪除、拖曳排序）時，自動重繪地圖
                 tripList: {
                     handler() {
                         this.$nextTick(() => this.drawRoute());

@@ -31,6 +31,14 @@ namespace Cat_Paw_Footprint
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
+			/* 加入 secrets.json（使用者祕密設定）
+			   這樣 _config["GoogleMaps:ApiKey"] 就能正確讀到
+			*/
+			builder.Configuration
+				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+				.AddUserSecrets<Program>(optional: true)
+				.AddEnvironmentVariables();
+
 			// 1️⃣ 取得 Google Cloud SQL 連線字串
 			var credential = GoogleCredential.FromFile(@"C:\GoogleCloudSql\Keys\web-travel-ap.json");
 			var client = new SecretManagerServiceClientBuilder { Credential = credential }.Build();

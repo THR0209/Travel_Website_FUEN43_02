@@ -26,7 +26,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		//	主頁面 View (顯示 Vue 畫面)
 		public IActionResult Index()
 		{
-			ViewBag.GoogleMapKey = _config["GoogleMaps:ApiKey"]; // 取得 Google Maps API Key
+			// 從 secrets.json 取得金鑰
+			ViewBag.GoogleMapKey = _config["GoogleMaps:ApiKey"]; 
 			return View();
 		}
 
