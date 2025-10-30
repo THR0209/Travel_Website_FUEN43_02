@@ -14,10 +14,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "景點地址")]
 		public string? LocationAddr { get; set; }
 
-		[Display(Name = "經度")]
+		[Display(Name = "緯度")]
 		public decimal? LocationLat { get; set; }
 
-		[Display(Name = "緯度")]
+		[Display(Name = "經度")]
 		public decimal? LocationLng { get; set; }
 
 		[Display(Name = "景點介紹")]
