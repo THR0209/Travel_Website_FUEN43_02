@@ -4,6 +4,18 @@
     ViewData["Title"] = "優惠券管理";
 }
 
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success text-center">
+        @TempData["Message"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger text-center">
+        @TempData["Error"]
+    </div>
+}
 
 
 <div class="mt-2" id="cr-coup" style="display:none;">
@@ -72,17 +84,23 @@
                         <td class="text-center">
                             @if (item.IsActive == true)
                             {
-                                <span class="badge bg-success text-center justify-content-between">上架</span>
+                                <span class="badge bg-success text-center justify-content-between">上架中</span>
                             }
                             else
                             {
-                                <span class="badge bg-warning text-center justify-content-between">下架</span>
+                                <span class="badge bg-warning text-center justify-content-between">已下架</span>
                             }
                         </td>
                         <td class="text-center">
                             <a asp-action="Details" asp-route-id="@item.CouponID" class="btn btn-outline-secondary btn-sm mb-1 ms-auto"><i class="fa-solid fa-eye"></i>檢視</a>
                             <a asp-action="Edit" asp-route-id="@item.CouponID" class="btn btn-outline-primary btn-sm mb-1 ms-auto"><i class="fa-solid fa-pen-to-square"></i>編輯</a>
                             <a asp-action="Delete" asp-route-id="@item.CouponID" class="btn btn-outline-danger btn-sm mb-1 ms-auto"><i class="fa-solid fa-ban"></i>下架</a>
+                            <form asp-action="Distribute" asp-route-id="@item.CouponID" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success"
+                                        onclick="return confirm('確定要發放這張優惠券嗎？');">
+                                    發放
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 }

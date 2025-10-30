@@ -149,7 +149,10 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
                 return NotFound();
 
             if (!ModelState.IsValid)
+			{
                 return View(vm);
+            }
+                
 
             var coupon = await _context.Coupons.FindAsync(id);
             if (coupon == null)
@@ -165,8 +168,8 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
             coupon.IsActive = vm.IsActive;
             coupon.TargetType = vm.TargetType;
             coupon.DiscountCode = vm.DiscountCode;
-            coupon.MinimumAmount = vm.MinimumAmount;
-            coupon.UpdatedAt = DateTime.Now;
+            //coupon.MinimumAmount = vm.MinimumAmount;
+            //coupon.UpdatedAt = DateTime.Now;
             coupon.UpdatedBy = User.Identity?.Name ?? "System";
 
             await _context.SaveChangesAsync();
@@ -176,40 +179,118 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 
         // GET: CouponManagement/Coupons/Delete/5
         public async Task<IActionResult> Delete(int? id)
-		{
-			if (id == null)
-			{
-				return NotFound();
-			}
+        {
+            if (id == null)
+                return NotFound();
 
-			var coupons = await _context.Coupons
-				.FirstOrDefaultAsync(m => m.CouponID == id);
-			if (coupons == null)
-			{
-				return NotFound();
-			}
+            var coupon = await _context.Coupons
+                .Where(c => c.CouponID == id)
+                .Select(c => new CouponViewModel
+                {
+                    CouponID = c.CouponID,
+                    CouponName = c.CouponName,
+                    CouponDesc = c.CouponDesc,
+                    DiscountType = c.DiscountType,
+                    DiscountValue = c.DiscountValue,
+                    StartDate = c.StartDate,
+                    EndDate = c.EndDate,
+                    IsActive = c.IsActive,
+                    DiscountCode = c.DiscountCode
+                })
+                .FirstOrDefaultAsync();
 
-			return View(coupons);
-		}
+            if (coupon == null)
+                return NotFound();
 
-		// POST: CouponManagement/Coupons/Delete/5
-		[HttpPost, ActionName("Delete")]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(int id)
-		{
-			var coupons = await _context.Coupons.FindAsync(id);
-			if (coupons != null)
-			{
-				_context.Coupons.Remove(coupons);
-			}
+            return View(coupon);
+        }
 
-			await _context.SaveChangesAsync();
-			return RedirectToAction(nameof(Index));
-		}
+        // POST: CouponManagement/Coupons/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+                return NotFound();
 
-		private bool CouponsExists(int id)
-		{
-			return _context.Coupons.Any(e => e.CouponID == id);
-		}
-	}
+            // 改為下架（IsActive = false）
+            coupon.IsActive = false;
+            coupon.UpdatedAt = DateTime.Now;
+            coupon.UpdatedBy = User.Identity?.Name ?? "System";
+
+            _context.Update(coupon);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Distribute(int id)
+        {
+            var coupon = await _context.Coupons.FindAsync(id);
+            if (coupon == null)
+            {
+                TempData["Error"] = "找不到該優惠券。";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var now = DateTime.Now;
+            var targets = _context.Customers.AsQueryable();
+
+            // 🎯 根據 TargetType 判斷發放對象
+            switch (coupon.TargetType)
+            {
+                case "All":
+                    targets = targets.Where(c => c.Status == true);
+                    break;
+                case "Register":
+                    // 可改成註冊 30 天內會員
+                    targets = targets.Where(c => c.CreateDate >= now.AddDays(-30));
+                    break;
+                case "Level_Bronze":
+                    targets = targets.Where(c => c.Level == 1);
+                    break;
+                case "Level_Silver":
+                    targets = targets.Where(c => c.Level == 2);
+                    break;
+                case "Level_Gold":
+                    targets = targets.Where(c => c.Level == 3);
+                    break;
+                default:
+                    TempData["Error"] = "未定義的發放對象類型。";
+                    return RedirectToAction(nameof(Index));
+            }
+
+            var targetList = await targets.ToListAsync();
+            int count = 0;
+
+            foreach (var member in targetList)
+            {
+                bool alreadyHas = await _context.CustomerCouponsRecords
+                    .AnyAsync(r => r.CustomerID == member.CustomerID && r.CouponID == coupon.CouponID);
+
+                if (!alreadyHas)
+                {
+                    _context.CustomerCouponsRecords.Add(new CustomerCouponsRecords
+                    {
+                        CustomerID = member.CustomerID,
+                        CouponID = coupon.CouponID,
+                        IsUsed = false,
+                        UsedTime = DateTime.Now
+                    });
+                    count++;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = $"已成功發放 {count} 張優惠券給對應會員。";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+    }
 }

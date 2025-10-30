@@ -54,9 +54,16 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.ViewModel
         public int? UsageLimit { get; set; }             // 可使用次數
         public bool? PerOrderLimit { get; set; }         // 每筆訂單限用一次
 
+
+        [Display(Name = "發放對象")]
         public string? TargetType { get; set; }
 
-		public ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
+        [Display(Name = "使用期限（天）")]
+        public int? ValidDays { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 
 		public ICollection<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; } = new List<Coupon_CustomerLevels>();
 	}

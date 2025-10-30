@@ -41,5 +41,7 @@ public partial class Coupons
     public int? UsageLimit { get; set; }             // 可使用次數
     public bool? PerOrderLimit { get; set; }         // 每筆訂單限用一次
 
+    public bool IsDeleted { get; set; }
+
     public virtual ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 }
