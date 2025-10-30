@@ -199,9 +199,10 @@
         };
 
         app = createApp({
-            
+            // 註冊子元件
             components: { draggable: window.vuedraggable }, // CDN 模式需使用 window.vuedraggable
 
+            // 變動的資料
             data() {
                 return {
                     buttons: [
@@ -237,6 +238,7 @@
                 }
             },
 
+            // 計算屬性
             computed: {
                 /* 根據地區動態顯示對應縣市 */
                 availableDistricts() {
@@ -266,6 +268,7 @@
                 }
             },
 
+            // 方法(事件處理)
             methods: {
                 /* 取得目前登入者資訊 */
                 async getCurrentUser() {
@@ -545,6 +548,7 @@
                 }
             },
 
+            // 元件載入時
             mounted() {
                 // 預設載入
                 this.fetchData().then(() => {

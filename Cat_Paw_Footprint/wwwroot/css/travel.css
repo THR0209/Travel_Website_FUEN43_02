@@ -2,115 +2,122 @@
     background-color: #f8f8f8;
 }
 
+/* 頂部固定按鈕區 (搜尋、篩選列) */
 .top-buttons {
-    position: sticky; /* 黏在畫面頂部 */
-    /*top: 86px;*/ /* ← 根據你的導覽列高度調整 */
-    /*z-index: 1020;*/ /* 確保在卡片上層 */
+    position: sticky; /* 黏在畫面頂部，滑動頁面時仍會固定在上方 */
+    /*top: 86px;*/ /* ← 根據你的導覽列高度調整（若有navbar） */
+    /*z-index: 1020;*/ /* 設定層級，確保不被卡片覆蓋 */
     background-color: white;
     padding: 12px 0;
     border-bottom: 1px solid #ddd;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* 略帶陰影區分上方與下方內容 */
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* 加上淡陰影，讓區塊有浮起的感覺 */
 }
 /* 按鈕外觀 */
 .top-buttons button {
-    border-radius: 50px;
-    padding: 8px 20px;
-    transition: 0.2s;
+    border-radius: 50px; /* 按鈕變圓角膠囊形 */
+    padding: 8px 20px; /* 內距，讓按鈕更大 */
+    transition: 0.2s; /* 設定滑鼠滑過的動畫時間 */
 }
-/* 滑鼠滑過的輕微陰影 */
+/* 滑鼠滑過按鈕時的效果 */
 .top-buttons button:hover {
-    transform: scale(1.05);
+    transform: scale(1.05); /* 微微放大 5% */
 }
 
-/* 卡片樣式 */
+/* 卡片外觀設定 (景點、美食、住宿卡片) */
 .card {
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* 卡片陰影，讓它有立體感 */
+    border-radius: 12px; /* 四角圓弧化 */
+    overflow: hidden; /* 超出邊界的內容隱藏 (如圖片圓角一致) */
+    transition: transform 0.3s; /* 滑過卡片放大動畫 */
 }
+/* 滑鼠滑過卡片時的動畫效果 */
 .card:hover {
-    transform: scale(1.03);
+    transform: scale(1.03); /* 微微放大 3% */
 }
 
+/*輪播圖片設定 (carousel)*/
 .carousel-item img {
-    object-fit: cover;
-    width: 100%;
-    height: 180px;
+    object-fit: cover; /* 讓圖片保持比例裁切，填滿容器 */
+    width: 100%; /* 寬度填滿父容器 */
+    height: 180px; /* 固定高度 */
 }
 
-/* 搜尋框 */
+/* 搜尋框外觀 */
 input.form-control {
-    border-radius: 50px;
-    padding-left: 15px;
+    border-radius: 50px; /* 椭圓形邊角 */
+    padding-left: 15px; /* 左側留白，讓輸入文字不貼邊 */
 }
 
-/* modal */
+/* modal (彈出視窗) 樣式 */
 .modal-content {
-    border-radius: 15px;
+    border-radius: 15px; /* 整體圓角 */
 }
 .modal-header {
-    border-bottom: none;
+    border-bottom: none; /* 去掉標題下方的分隔線，讓視覺更乾淨 */
 }
 .modal-body {
-    font-size: 1rem;
-    line-height: 1.6;
+    font-size: 1rem; /* 一般字體大小 */
+    line-height: 1.6; /* 行距稍大，提升可讀性 */
 }
 
 /* 圖片外框：可放在最上方 */
 .pic {
+    /* 讓此元素成為定位基準，方便 ::before 和 ::after（貓爪）依據這個框來定位,而不會亂飄到頁面其他地方 */
     position: relative;
+    /* 讓 .pic 容器可以像文字一樣橫向排列，但仍保有區塊元素可設定寬高的特性，適合讓多張圖片排成一行顯示 */
     display: inline-block;
 }
+/* 圖片基本樣式 */
 .pic img {
-    display: block;
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    border-radius: 10px;
+    display: block; /* 移除圖片底下的空白縫隙 */
+    width: 100%; /* 寬度自適應 */
+    height: 180px; /* 固定高度 */
+    object-fit: cover; /* 圖片比例裁切填滿 */
+    border-radius: 10px; /* 圖片邊角圓滑 */
 }
 
-/* 🐾 左上角貓爪 */
+/* 🐾 左上角貓爪標記 */
 .pic::before {
-    content: "";
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 30px;
+    content: ""; /* 建立一個虛擬元素 */
+    position: absolute; /* 絕對定位在圖片上方 */
+    top: 0px; /* 距離圖片頂端 0 */
+    left: 0px; /* 距離圖片左側 0 */
+    width: 30px; /* 貓爪圖片大小 */
     height: 30px;
-    background-image: url('../images/logo.png'); 
-    background-size: contain;
-    background-repeat: no-repeat;
-    transform: rotate(135deg);
+    background-image: url('../images/logo.png'); /* 使用 logo.png 作為貓爪圖 */
+    background-size: contain; /* 圖片等比例縮放完整顯示 */
+    background-repeat: no-repeat; /* 不重複顯示圖片 */
+    transform: rotate(135deg); /* 旋轉 135 度，營造「左上角貼」的感覺 */
 }
-/* 🐾 右下角貓爪 */
+/* 🐾 右下角貓爪標記 */
 .pic::after {
-    content: "";
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    width: 30px;
+    content: ""; /* 建立一個虛擬元素 */
+    position: absolute; /* 絕對定位在圖片上方 */
+    bottom: 0px; /* 距離圖片底端 0 */
+    right: 0px; /* 距離圖片右側 0 */
+    width: 30px; /* 貓爪圖片大小 */
     height: 30px;
-    background-image: url('../images/logo.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    transform: rotate(315deg);
+    background-image: url('../images/logo.png'); /* 使用 logo.png 作為貓爪圖 */
+    background-size: contain; /* 圖片等比例縮放完整顯示 */
+    background-repeat: no-repeat; /* 不重複顯示圖片 */
+    transform: rotate(315deg); /* 旋轉 315 度，營造「右下角貼」的感覺 */
 }
-/* 🐾 可選 hover 效果 */
+/* 🐾 滑鼠滑過圖片時，貓爪特效 */
 .pic:hover::before,
 .pic:hover::after {
-    transform: scale(1.2) rotate(25deg);
-    transition: 0.3s;
-    filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.5));
+    transform: scale(1.2) rotate(25deg); /* 放大並旋轉一點，顯示互動效果 */
+    transition: 0.3s; /* 動畫時間 0.3 秒 */
+    filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.5)); /* 加上橘色陰影光暈 */
 }
 
-/* 行程拖曳游標樣式 */
+/* 行程拖曳圖示 (拖曳排序功能) */
 .drag-handle {
     color: #555; /* 改深一點顏色 */
     cursor: grab; /* 顯示可抓取游標 */
     font-size: 20px; /* 放大一些 */
 }
+/* 滑鼠滑過拖曳圖示時顏色加深 */
 .drag-handle:hover {
-    color: #000; /* 滑鼠滑過變更深 */
+    color: #000; /* 變成純黑色，提示可操作 */
 }
 
