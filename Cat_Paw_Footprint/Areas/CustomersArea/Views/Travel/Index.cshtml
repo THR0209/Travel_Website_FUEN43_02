@@ -13,7 +13,7 @@
 <div id="app">
     <div class="row">
 
-        <!-- 上方 - 保留凍結效果 -->
+        <!-- 上方：篩選與按鈕 -->
         <div class="top-buttons sticky-top bg-white shadow-sm py-3 z-3">
             <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
 
@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <!-- 左側顯示卡片 (動態載入區) -->
+        <!-- 左側：動態卡片區 -->
         <div class="col-md-8">
             <div class="row">
                 <div v-for="(item, index) in filteredItems" :key="index" class="col-md-3 mb-4">
@@ -103,7 +103,7 @@
             </div>
         </div>
 
-        <!-- 右側排行程與地圖 -->
+        <!-- 右側：排行程 + 地圖 -->
         <div class="col-md-4">
 
             <!-- 排行程 -->
@@ -138,11 +138,17 @@
                 </div>
             </div>
 
-            <!-- 行程地圖 -->
+            <!-- Google Map 路線地圖 -->
             <div class="card">
                 <div class="card-header bg-success text-white">行程地圖</div>
                 <div class="card-body">
-                    <p>這裡未來可以整合 Google Maps。</p>
+                    <!-- ✅ 新增地圖顯示區 -->
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+
+                    <!-- ✅ 顯示距離與時間 -->
+                    <p class="mt-2 text-muted" v-if="travelInfo">
+                        🚗 距離：{{ travelInfo.distance }}　🕒 預估時間：{{ travelInfo.duration }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -174,15 +180,24 @@
     <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://unpkg.com/vuedraggable@4.0.1/dist/vuedraggable.umd.min.js"></script>
 
-    <!-- Google Key -->
+    <!-- Google Maps API -->
     <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapKey&libraries=places">
+            src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapKey&libraries=places&callback=initMap">
     </script>
 
     <script>
         const { createApp } = Vue;
+        let app; // 全域變數：讓 initMap() 能呼叫 Vue 方法
 
-        const app = createApp({
+        // 全域 callback（Google 會自動呼叫這個）
+        window.initMap = function () {
+            console.log("✅ Google Map script loaded, calling Vue method...");
+            if (app && app._instance && app._instance.proxy) {
+                app._instance.proxy.initMap(); // 呼叫 Vue 內的 initMap()
+            }
+        };
+
+        app = createApp({
 
             // CDN 模式需使用 window.vuedraggable
             components: { draggable: window.vuedraggable },
@@ -213,6 +228,12 @@
                     },
                     tripList: [],    // 行程清單
                     currentUser: null,  // 目前登入使用者資訊
+
+                    // ✅ 新增地圖相關變數
+                    map: null,
+                    directionsService: null,
+                    directionsRenderer: null,
+                    travelInfo: null
                 }
             },
 
@@ -282,7 +303,9 @@
                         id: x.hotelID || x.locationID || x.restaurantID,
                         name: x.hotelName || x.locationName || x.restaurantName,
                         addr: x.hotelAddr || x.locationAddr || x.restaurantAddr,     
-                        desc: x.hotelDesc || x.locationDesc || x.restaurantDesc,     
+                        desc: x.hotelDesc || x.locationDesc || x.restaurantDesc,
+                        lat: x.latitude,     
+                        lng: x.longitude,
                         regionName: x.regionName,
                         districtName: x.districtName,
                         rating: x.rating,
@@ -384,8 +407,80 @@
                     //     body: JSON.stringify(payload)
                     // });
                     // if (res.ok) alert('✅ 行程已儲存！');
+                },
+
+                /* 初始化地圖 */
+                initMap() {
+                    console.log("🗺️ Google Map 初始化成功");
+                this.map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 23.5, lng: 121 },    // 台灣中心點
+                    zoom: 7,    
+                });
+
+                this.directionsService = new google.maps.DirectionsService();
+                this.directionsRenderer = new google.maps.DirectionsRenderer({ map: this.map });
+                },
+
+                // 根據 tripList 計算路線
+                async drawRoute() {
+                    if (this.tripList.length < 2) {
+                        this.directionsRenderer.set('directions', null);
+                        this.travelInfo = null;
+                        return;
+                    }
+                    // 假設每個 item 都有經緯度 (lat, lng)
+                    const waypoints = this.tripList.slice(1, -1).map(item => ({
+                        location: { lat: item.lat, lng: item.lng },
+                        stopover: true
+                    }));
+
+                    const origin = {
+                        lat: this.tripList[0].lat,
+                        lng: this.tripList[0].lng
+                    };
+                    const destination = {
+                        lat: this.tripList[this.tripList.length - 1].lat,
+                        lng: this.tripList[this.tripList.length - 1].lng
+                    };
+                    const request = {
+                        origin,
+                        destination,
+                        waypoints,
+                        optimizeWaypoints: false, // 是否自動最佳化順序
+                        travelMode: google.maps.TravelMode.DRIVING
+                    };
+                    this.directionsService.route(request, (result, status) => {
+                        if (status === 'OK') {
+                            this.directionsRenderer.setDirections(result);
+
+                            // 取得距離與時間（總計）
+                            const route = result.routes[0].legs;
+                            let totalDist = 0, totalTime = 0;
+                            for (let leg of route) {
+                                totalDist += leg.distance.value; // 公尺
+                                totalTime += leg.duration.value; // 秒
+                            }
+
+                            this.travelInfo = {
+                                distance: (totalDist / 1000).toFixed(1) + " 公里",
+                                duration: Math.round(totalTime / 60) + " 分鐘"
+                            };
+                        } else {
+                            alert("無法規劃路線，請檢查座標");
+                        }
+                    });
+                },
+            },
+
+            // 監聽器：tripList 有變化時重繪路線
+            watch: {
+                tripList: {
+                    handler() {
+                        this.$nextTick(() => this.drawRoute());
+                    },
+                    deep: true
                 }
-            },            
+            },
 
             mounted() {
                 // 預設載入
@@ -402,8 +497,16 @@
                 dropdownList.forEach((dropdownToggleEl) => {
                     new bootstrap.Dropdown(dropdownToggleEl);
                 });
-            }
+
+                // 初始化地圖
+                window.initMap = this.initMap;
+                if (typeof google !== "undefined") {
+                    this.initMap();
+                }
+            },
+
         });
+
         // 全域註冊 draggable
         app.component('draggable', vuedraggable); 
         app.mount("#app");
