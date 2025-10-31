@@ -10,21 +10,21 @@ using System.Text;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
-    [Area("CustomersArea")]
-    [Route("CustomersArea/[controller]")]
-    [Authorize(AuthenticationSchemes = "CustomerAuth")]
-    public class PaymentController : Controller
+	[Area("CustomersArea")]
+	[Route("CustomersArea/[controller]")]
+	[Authorize(AuthenticationSchemes = "CustomerAuth")]
+	public class PaymentController : Controller
 	{
 		private readonly webtravel2Context _db;
 		private readonly ECPayOptions _opt;
-        private readonly ICustomerLevelService _levelSvc;
-        private readonly IEmailSender _sender;		
+		private readonly ICustomerLevelService _levelSvc;
+		private readonly IEmailSender _sender;
 		private readonly IWebHostEnvironment _env;
 		private int CurrentCustomerId =>
-        int.TryParse(User.FindFirst("CustomerId")?.Value, out var id) ? id : 0;
-        private string PayItemsKey(int cid) => $"PAY_ITEMS_{cid}";
-        private string CartKey => $"CART_ITEMS_{CurrentCustomerId}";
-        public class ECPayOptions
+		int.TryParse(User.FindFirst("CustomerId")?.Value, out var id) ? id : 0;
+		private string PayItemsKey(int cid) => $"PAY_ITEMS_{cid}";
+		private string CartKey => $"CART_ITEMS_{CurrentCustomerId}";
+		public class ECPayOptions
 		{
 			public bool IsStage { get; set; } = true;
 			public string MerchantID { get; set; } = "";
@@ -34,14 +34,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string OrderResultURL { get; set; } = "";  // 前端導回（付款完成）
 			public string ClientBackURL { get; set; } = "";   // 取消時返回
 		}
-		public PaymentController(webtravel2Context db, IEmailSender sender, IOptions<ECPayOptions> opt , 
+		public PaymentController(webtravel2Context db, IEmailSender sender, IOptions<ECPayOptions> opt,
 			ICustomerLevelService levelSvc, IConfiguration cfg, IWebHostEnvironment env)
 		{
 			_db = db;
 			_sender = sender;
 			_opt = opt.Value;
-            _levelSvc = levelSvc;
-			_env = env;			
+			_levelSvc = levelSvc;
+			_env = env;
 		}
 		// /CustomersArea/Payment
 		[HttpGet("")]              // GET /CustomersArea/Payment
@@ -52,141 +52,141 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		public IActionResult MockPay()
 			=> View();             //        [HttpPost("PayMock")]
 
-        [HttpPost("MockPay")]        
-        public async Task<IActionResult> MockPay(
-        [FromForm] string name, [FromForm] string c1, [FromForm] string c2,
-        [FromForm] string c3, [FromForm] string c4,
-        [FromForm] string expRaw, [FromForm] string cvv)
-        {
-            var cid = CurrentCustomerId;
-            if (cid <= 0) return Unauthorized();
+		[HttpPost("MockPay")]
+		public async Task<IActionResult> MockPay(
+		[FromForm] string name, [FromForm] string c1, [FromForm] string c2,
+		[FromForm] string c3, [FromForm] string c4,
+		[FromForm] string expRaw, [FromForm] string cvv)
+		{
+			var cid = CurrentCustomerId;
+			if (cid <= 0) return Unauthorized();
 
-            // 最基本的後端檢核（保留）
-            if (string.IsNullOrWhiteSpace(name) ||
-                c1?.Length != 4 || c2?.Length != 4 || c3?.Length != 4 || c4?.Length != 4 ||
-                expRaw?.Length != 4 || (cvv?.Length != 3 && cvv?.Length != 4))
-            {
+			// 最基本的後端檢核（保留）
+			if (string.IsNullOrWhiteSpace(name) ||
+				c1?.Length != 4 || c2?.Length != 4 || c3?.Length != 4 || c4?.Length != 4 ||
+				expRaw?.Length != 4 || (cvv?.Length != 3 && cvv?.Length != 4))
+			{
 				TempData["PayError"] = "資料不完整，請重新輸入。";
 				return RedirectToAction(nameof(MockPay));
 			}
 
-            // ---------------- A) 從「訂單頁」來（單筆訂單付款） ----------------
-            var orderIdStr = HttpContext.Session.GetString("PAY_ORDER_ID");
-            if (!string.IsNullOrWhiteSpace(orderIdStr) && int.TryParse(orderIdStr, out var orderId))
-            {
-                var o = await _db.CustomerOrders.FirstOrDefaultAsync(x => x.OrderID == orderId && x.CustomerID == cid);
-                if (o == null) return NotFound("訂單不存在");
-                if (o.OrderStatusID != 2 /*未付款*/) return BadRequest("此訂單不可付款");
+			// ---------------- A) 從「訂單頁」來（單筆訂單付款） ----------------
+			var orderIdStr = HttpContext.Session.GetString("PAY_ORDER_ID");
+			if (!string.IsNullOrWhiteSpace(orderIdStr) && int.TryParse(orderIdStr, out var orderId))
+			{
+				var o = await _db.CustomerOrders.FirstOrDefaultAsync(x => x.OrderID == orderId && x.CustomerID == cid);
+				if (o == null) return NotFound("訂單不存在");
+				if (o.OrderStatusID != 2 /*未付款*/) return BadRequest("此訂單不可付款");
 
-                o.OrderStatusID = 1; // 已付款
-                o.UpdateTime = DateTime.Now;
-                await _db.SaveChangesAsync();
+				o.OrderStatusID = 1; // 已付款
+				o.UpdateTime = DateTime.Now;
+				await _db.SaveChangesAsync();
 
-                HttpContext.Session.Remove("PAY_ORDER_ID");
+				HttpContext.Session.Remove("PAY_ORDER_ID");
 
-                // ★★ 標記本次使用的優惠券（若有）
-                await MarkUsedCouponAsync(cid);
+				// ★★ 標記本次使用的優惠券（若有）
+				await MarkUsedCouponAsync(cid);
 
-                // ★ 重算會員等級
-                await _levelSvc.RecalculateAndUpdateAsync(cid);
+				// ★ 重算會員等級
+				await _levelSvc.RecalculateAndUpdateAsync(cid);
 
-                TempData["PayOk"] = "付款成功！";
-                return Redirect("/CustomersArea/Orders");
-            }
+				TempData["PayOk"] = "付款成功！";
+				return Redirect("/CustomersArea/Orders");
+			}
 
-            // ---------------- B) 從「購物車頁」來（勾選多筆建立訂單） ----------------
-            var idsStr = HttpContext.Session.GetString(PayItemsKey(cid)) ?? "";
-            var idList = idsStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                               .Select(s => int.TryParse(s, out var i) ? i : 0)
-                               .Where(i => i > 0)
-                               .ToHashSet();
-            if (idList.Count == 0) return BadRequest("找不到要付款的商品");
+			// ---------------- B) 從「購物車頁」來（勾選多筆建立訂單） ----------------
+			var idsStr = HttpContext.Session.GetString(PayItemsKey(cid)) ?? "";
+			var idList = idsStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+							   .Select(s => int.TryParse(s, out var i) ? i : 0)
+							   .Where(i => i > 0)
+							   .ToHashSet();
+			if (idList.Count == 0) return BadRequest("找不到要付款的商品");
 
 			var cartJson = HttpContext.Session.GetString(CartKey);
 			var items = string.IsNullOrWhiteSpace(cartJson)
-                ? new List<CartItem>()
-                : System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new();
+				? new List<CartItem>()
+				: System.Text.Json.JsonSerializer.Deserialize<List<CartItem>>(cartJson) ?? new();
 
-            var payItems = items.Where(x => idList.Contains(x.ProductId)).ToList();
-            if (payItems.Count == 0) return BadRequest("購物車中已無選取商品");
+			var payItems = items.Where(x => idList.Contains(x.ProductId)).ToList();
+			if (payItems.Count == 0) return BadRequest("購物車中已無選取商品");
 
-            var now = DateTime.Now;
-            foreach (var it in payItems)
-            {
-                _db.CustomerOrders.Add(new CustomerOrders
-                {
-                    CustomerID = cid,
-                    ProductID = it.ProductId,
-                    OrderStatusID = 1, // 已付款
-                    TotalAmount = it.Price * it.Qty,
-                    CreateTime = now,
-                    UpdateTime = now
-                });
-            }
-            await _db.SaveChangesAsync();
+			var now = DateTime.Now;
+			foreach (var it in payItems)
+			{
+				_db.CustomerOrders.Add(new CustomerOrders
+				{
+					CustomerID = cid,
+					ProductID = it.ProductId,
+					OrderStatusID = 1, // 已付款
+					TotalAmount = it.Price * it.Qty,
+					CreateTime = now,
+					UpdateTime = now
+				});
+			}
+			await _db.SaveChangesAsync();
 
-            // 從購物車移除已付款項目
-            items.RemoveAll(x => idList.Contains(x.ProductId));
-            HttpContext.Session.SetString(CartKey, System.Text.Json.JsonSerializer.Serialize(items)); // ★ 寫回每用戶購物車
-            HttpContext.Session.Remove(PayItemsKey(cid));
+			// 從購物車移除已付款項目
+			items.RemoveAll(x => idList.Contains(x.ProductId));
+			HttpContext.Session.SetString(CartKey, System.Text.Json.JsonSerializer.Serialize(items)); // ★ 寫回每用戶購物車
+			HttpContext.Session.Remove(PayItemsKey(cid));
 
-            // ★★ 標記本次使用的優惠券（若有）
-            await MarkUsedCouponAsync(cid);
+			// ★★ 標記本次使用的優惠券（若有）
+			await MarkUsedCouponAsync(cid);
 
-            // ★ 重算會員等級
-            await _levelSvc.RecalculateAndUpdateAsync(cid);
+			// ★ 重算會員等級
+			await _levelSvc.RecalculateAndUpdateAsync(cid);
 
-            TempData["PayOk"] = "付款成功！已建立訂單。";
-            return Redirect("/CustomersArea/Orders");
-        }
+			TempData["PayOk"] = "付款成功！已建立訂單。";
+			return Redirect("/CustomersArea/Orders");
+		}
 
-        // ====== 新增：共用方法—把 Session 中的券標記為已使用 ======
-        private async Task MarkUsedCouponAsync(int customerId)
-        {
-            var couponJson = HttpContext.Session.GetString("CART_COUPON");
-            if (string.IsNullOrWhiteSpace(couponJson)) return;
+		// ====== 新增：共用方法—把 Session 中的券標記為已使用 ======
+		private async Task MarkUsedCouponAsync(int customerId)
+		{
+			var couponJson = HttpContext.Session.GetString("CART_COUPON");
+			if (string.IsNullOrWhiteSpace(couponJson)) return;
 
-            try
-            {
-                var used = System.Text.Json.JsonSerializer.Deserialize<UsedCouponDto>(couponJson);
-                if (used?.id > 0)
-                {
-                    var rec = await _db.CustomerCouponsRecords
-                        .FirstOrDefaultAsync(x => x.CustomerID == customerId && x.CouponID == used.id);
+			try
+			{
+				var used = System.Text.Json.JsonSerializer.Deserialize<UsedCouponDto>(couponJson);
+				if (used?.id > 0)
+				{
+					var rec = await _db.CustomerCouponsRecords
+						.FirstOrDefaultAsync(x => x.CustomerID == customerId && x.CouponID == used.id);
 
-                    if (rec != null)
-                    {
-                        rec.IsUsed = true;            // bool?
-                        rec.UsedTime = DateTime.Now;  // 記錄使用時間
-                        await _db.SaveChangesAsync();
-                    }
-                }
-            }
-            catch { /* ignore bad session */ }
-            finally
-            {
-                // 無論成功與否都清掉，避免重覆使用
-                HttpContext.Session.Remove("CART_COUPON");
-            }
-        }
+					if (rec != null)
+					{
+						rec.IsUsed = true;            // bool?
+						rec.UsedTime = DateTime.Now;  // 記錄使用時間
+						await _db.SaveChangesAsync();
+					}
+				}
+			}
+			catch { /* ignore bad session */ }
+			finally
+			{
+				// 無論成功與否都清掉，避免重覆使用
+				HttpContext.Session.Remove("CART_COUPON");
+			}
+		}
 
-        private class UsedCouponDto
-        {
-            public int id { get; set; }
-            public string? code { get; set; }
-            public string? type { get; set; }   // percent / fixed（可有可無）
-            public decimal? value { get; set; } // 可有可無
-        }
+		private class UsedCouponDto
+		{
+			public int id { get; set; }
+			public string? code { get; set; }
+			public string? type { get; set; }   // percent / fixed（可有可無）
+			public decimal? value { get; set; } // 可有可無
+		}
 
-        private class AppliedCoupon
-        {
-            public int couponId { get; set; }
-            public string? code { get; set; }
-            public string? type { get; set; }
-            public decimal? value { get; set; }
-        }
+		private class AppliedCoupon
+		{
+			public int couponId { get; set; }
+			public string? code { get; set; }
+			public string? type { get; set; }
+			public decimal? value { get; set; }
+		}
 
-        public class CardPayDto
+		public class CardPayDto
 		{
 			public string Card { get; set; } = "";
 			public string Exp { get; set; } = "";
@@ -194,21 +194,21 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string Invoice { get; set; } = "";
 		}
 
-        [HttpPost("Transfer")]
-        public async Task<IActionResult> Transfer([FromForm] int customerId)
-        {
-            var cid = CurrentCustomerId;
-            if (cid <= 0) return Unauthorized();
+		[HttpPost("Transfer")]
+		public async Task<IActionResult> Transfer([FromForm] int customerId)
+		{
+			var cid = CurrentCustomerId;
+			if (cid <= 0) return Unauthorized();
 
-            var email = await _db.CustomerProfile
-                .Where(c => c.CustomerID == cid)
-                .Select(c => c.Email)
-                .FirstOrDefaultAsync();
+			var email = await _db.CustomerProfile
+				.Where(c => c.CustomerID == cid)
+				.Select(c => c.Email)
+				.FirstOrDefaultAsync();
 
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest(new { ok = false, error = "找不到客戶 Email" });
+			if (string.IsNullOrWhiteSpace(email))
+				return BadRequest(new { ok = false, error = "找不到客戶 Email" });
 
-            var html = $@"
+			var html = $@"
 <table width='100%' cellpadding='0' cellspacing='0' style='font-family:Arial,sans-serif;color:#333'>
 <tr><td align='center'>
   <table width='600' style='max-width:600px;border:1px solid #eee;border-radius:8px;overflow:hidden'>
@@ -230,12 +230,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
   </table>
 </td></tr></table>";
 
-            await _sender.SendAsync(email, "【匯款資訊】貓爪足跡", html);
-            return Ok(new { ok = true });
-        }
-        private string CashierUrl => _opt.IsStage
-            ? "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"
-            : "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5";        // 1) 前端按「信用卡付款」→ 從購物車讀資料 → 呼叫 Create (回自動送出的 GoECPay View)
+			await _sender.SendAsync(email, "【匯款資訊】貓爪足跡", html);
+			return Ok(new { ok = true });
+		}
+		private string CashierUrl => _opt.IsStage
+			? "https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5"
+			: "https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5";        // 1) 前端按「信用卡付款」→ 從購物車讀資料 → 呼叫 Create (回自動送出的 GoECPay View)
 
 		[HttpPost("CheckoutCredit")]
 		public async Task<IActionResult> CheckoutCredit([FromForm] int[] productIds)
@@ -324,8 +324,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		// 2) 建立綠界交易，送出自動表單
 		[HttpGet("Create")]
 
-        public IActionResult Create([FromQuery] int customerId, [FromQuery] string snapKey, [FromQuery] int? orderId)
-        {
+		public IActionResult Create([FromQuery] int customerId, [FromQuery] string snapKey, [FromQuery] int? orderId)
+		{
 			if (customerId != CurrentCustomerId) return Forbid();
 
 			List<CartItem> items;
@@ -624,27 +624,27 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		// ===== 工具/型別 =====
 
 		private static string MakeCheckMac(SortedDictionary<string, string> fields, string hashKey, string hashIV)
-        {
-            var sb = new StringBuilder();
-            sb.Append($"HashKey={hashKey}");
-            foreach (var kv in fields.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)))
-                sb.Append($"&{kv.Key}={kv.Value}");
-            sb.Append($"&HashIV={hashIV}");
+		{
+			var sb = new StringBuilder();
+			sb.Append($"HashKey={hashKey}");
+			foreach (var kv in fields.Where(kv => !string.IsNullOrWhiteSpace(kv.Value)))
+				sb.Append($"&{kv.Key}={kv.Value}");
+			sb.Append($"&HashIV={hashIV}");
 
-            var encoded = System.Web.HttpUtility.UrlEncode(sb.ToString()).ToLower();
-            var fixedStr = encoded.Replace("%2d", "-").Replace("%5f", "_").Replace("%2e", ".")
-                                  .Replace("%21", "!").Replace("%2a", "*").Replace("%28", "(").Replace("%29", ")");
+			var encoded = System.Web.HttpUtility.UrlEncode(sb.ToString()).ToLower();
+			var fixedStr = encoded.Replace("%2d", "-").Replace("%5f", "_").Replace("%2e", ".")
+								  .Replace("%21", "!").Replace("%2a", "*").Replace("%28", "(").Replace("%29", ")");
 
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(fixedStr));
-            var outSB = new StringBuilder();
-            foreach (var b in bytes) outSB.Append(b.ToString("X2"));
-            return outSB.ToString();
-        }
+			using var sha = SHA256.Create();
+			var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(fixedStr));
+			var outSB = new StringBuilder();
+			foreach (var b in bytes) outSB.Append(b.ToString("X2"));
+			return outSB.ToString();
+		}
 
-        [HttpPost("CheckoutCreditByOrder")]
-        public async Task<IActionResult> CheckoutCreditByOrder([FromForm] int orderId)
-        {
+		[HttpPost("CheckoutCreditByOrder")]
+		public async Task<IActionResult> CheckoutCreditByOrder([FromForm] int orderId)
+		{
 			var cid = CurrentCustomerId;
 			if (cid <= 0) return Unauthorized();
 
@@ -683,27 +683,27 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			// 走原本 Create（會帶 customerId, snapKey, orderId）
 			return RedirectToAction(nameof(Create), new { customerId = cid, snapKey, orderId });
 		}
-        private class CartItem
-        {
-            public int ProductId { get; set; }
-            public string ProductName { get; set; } = "";
-            public int Price { get; set; }
-            public int Qty { get; set; }
-        }
-        public class MockPayVm
-        {
-            public List<PayItem> Items { get; set; } = new();
-            public int Total { get; set; }
-            public class PayItem
-            {
-                public int ProductId { get; set; }
-                public string ProductName { get; set; } = "";
-                public int Qty { get; set; }
-                public int Price { get; set; }
-            }
-        }
+		private class CartItem
+		{
+			public int ProductId { get; set; }
+			public string ProductName { get; set; } = "";
+			public int Price { get; set; }
+			public int Qty { get; set; }
+		}
+		public class MockPayVm
+		{
+			public List<PayItem> Items { get; set; } = new();
+			public int Total { get; set; }
+			public class PayItem
+			{
+				public int ProductId { get; set; }
+				public string ProductName { get; set; } = "";
+				public int Qty { get; set; }
+				public int Price { get; set; }
+			}
+		}
 
-        public class GoECPayVm
+		public class GoECPayVm
 		{
 			public string Action { get; set; } = "";
 			public SortedDictionary<string, string> Fields { get; set; } = new();
