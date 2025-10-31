@@ -46,5 +46,16 @@ namespace Cat_Paw_Footprint.Services
 		{
 			await _repo.MarkAsReadAsync(id);
 		}
+
+		/// <summary>
+		/// 全部標記為已讀
+		/// </summary>
+		/// <param name="customerId"></param>
+		/// <returns></returns>
+		public async Task MarkAllAsReadAsync(int customerId)
+		{
+			await _repo.MarkAllAsReadAsync(customerId);
+		}
+
 	}
 }

@@ -58,6 +58,27 @@ namespace Cat_Paw_Footprint.Repositories
 		{
 			return await _context.Notifications.FirstOrDefaultAsync(n => n.NotificationID == id);
 		}
+
+		/// <summary>
+		/// 將該會員的所有通知標記為已讀
+		/// </summary>
+		public async Task MarkAllAsReadAsync(int customerId)
+		{
+			var list = await _context.Notifications
+				.Where(n => n.CustomerID == customerId && !n.IsRead)
+				.ToListAsync();
+
+			if (list.Any())
+			{
+				foreach (var n in list)
+				{
+					n.IsRead = true;
+					n.ReadAt = DateTime.Now;
+				}
+				await _context.SaveChangesAsync();
+			}
+		}
+
 	}
 
 }

@@ -19,7 +19,9 @@ using Cat_Paw_Footprint.Services;
 using ClosedXML.Parser;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.SecretManager.V1;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using static Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController;
 
@@ -179,7 +181,8 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<INotificationService, NotificationService>();
 			builder.Services.AddScoped<INotificationTriggerService, NotificationTriggerService>();
 			builder.Services.AddScoped<ICouponExpiryChecker, CouponExpiryChecker>();
-
+			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
+			builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 			#endregion
 
 			builder.Services.AddHttpContextAccessor();
@@ -194,7 +197,6 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
-			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CustomerEmailSender>();
 			
 			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
@@ -279,7 +281,9 @@ namespace Cat_Paw_Footprint
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
-			app.MapHub<NotificationHub>("/notificationHub");
+			app.MapHub<NotificationHub>("/notificationHub")
+				.RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = "CustomerAuth" });
+
 
 			app.Run();
 		}

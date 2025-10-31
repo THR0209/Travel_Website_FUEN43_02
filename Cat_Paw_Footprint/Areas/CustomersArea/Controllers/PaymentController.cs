@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		private readonly ICustomerLevelService _levelSvc;
 		private readonly IEmailSender _sender;
 		private readonly IWebHostEnvironment _env;
+		private readonly INotificationTriggerService _notifTrigger;
 		private int CurrentCustomerId =>
 		int.TryParse(User.FindFirst("CustomerId")?.Value, out var id) ? id : 0;
 		private string PayItemsKey(int cid) => $"PAY_ITEMS_{cid}";
@@ -35,13 +37,14 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string ClientBackURL { get; set; } = "";   // 取消時返回
 		}
 		public PaymentController(webtravel2Context db, IEmailSender sender, IOptions<ECPayOptions> opt,
-			ICustomerLevelService levelSvc, IConfiguration cfg, IWebHostEnvironment env)
+			ICustomerLevelService levelSvc, IConfiguration cfg, IWebHostEnvironment env,INotificationTriggerService notifTrigger)
 		{
 			_db = db;
 			_sender = sender;
 			_opt = opt.Value;
 			_levelSvc = levelSvc;
 			_env = env;
+			_notifTrigger = notifTrigger;
 		}
 		// /CustomersArea/Payment
 		[HttpGet("")]              // GET /CustomersArea/Payment
@@ -90,6 +93,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				// ★ 重算會員等級
 				await _levelSvc.RecalculateAndUpdateAsync(cid);
 
+				// ✅ 單筆訂單：付款成功通知
+				await _notifTrigger.NotifyPaymentSuccessAsync(cid, o.OrderID);
+
+
 				TempData["PayOk"] = "付款成功！";
 				return Redirect("/CustomersArea/Orders");
 			}
@@ -124,6 +131,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				});
 			}
 			await _db.SaveChangesAsync();
+
+			// ✅ 通知訂單成立 + 付款成功
+			foreach (var it in _db.CustomerOrders
+				.Where(o => o.CustomerID == cid && o.CreateTime == now))
+			{
+				await _notifTrigger.NotifyOrderCreatedAsync(cid, it.OrderID);
+				await _notifTrigger.NotifyPaymentSuccessAsync(cid, it.OrderID);
+			}
+
 
 			// 從購物車移除已付款項目
 			items.RemoveAll(x => idList.Contains(x.ProductId));

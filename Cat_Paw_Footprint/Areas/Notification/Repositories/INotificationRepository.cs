@@ -11,5 +11,6 @@ namespace Cat_Paw_Footprint.Repositories
 		Task AddAsync(Notifications entity);
 		Task MarkAsReadAsync(int id);
 		Task<Notifications?> GetByIdAsync(int id);
+		Task MarkAllAsReadAsync(int customerId);
 	}
 }
