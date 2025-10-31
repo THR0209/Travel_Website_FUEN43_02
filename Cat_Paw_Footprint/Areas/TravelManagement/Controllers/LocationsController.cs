@@ -265,6 +265,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", locations.RegionID);
 			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "KeywordID", "Keyword", viewModel.KeywordID);
 
+			ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
+
 			return View(viewModel);
 		}
 
@@ -355,8 +357,6 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 			return View(model);
 		}
-
-		
 
 		// GET: TravelManagement/Locations/Delete/5
 		public async Task<IActionResult> Delete(int? id)

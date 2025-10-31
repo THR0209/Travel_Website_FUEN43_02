@@ -261,7 +261,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", hotels.DistrictID);
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", hotels.RegionID);
 			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "KeywordID", "Keyword", viewModel.KeywordID);
-						
+
+			ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
+
 			return View(viewModel);
 		}
 
