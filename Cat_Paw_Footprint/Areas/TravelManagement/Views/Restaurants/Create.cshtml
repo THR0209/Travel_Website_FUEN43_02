@@ -28,12 +28,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="RestaurantLat" class="control-label"></label>
-                            <input asp-for="RestaurantLat" class="form-control" />
+                            <input asp-for="RestaurantLat" class="form-control" id="RestaurantLat" readonly style="background-color:#f3f3f3;" />
                             <span asp-validation-for="RestaurantLat" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="RestaurantLng" class="control-label"></label>
-                            <input asp-for="RestaurantLng" class="form-control" />
+                            <input asp-for="RestaurantLng" class="form-control" id="RestaurantLng" readonly style="background-color:#f3f3f3;" />
                             <span asp-validation-for="RestaurantLng" class="text-danger"></span>
                         </div>
                     </div>
@@ -236,43 +236,26 @@
             input.files = dataTransfer.files;
         }
 
-        /* 地址 ↔ 經緯度 轉換 */
+        /* 地址自動轉換經緯度（單向） */
         const geocoder = new google.maps.Geocoder();
-        // 地址 → 經緯度
+        // 當地址輸入完（離開輸入框）時觸發
         document.getElementById("RestaurantAddr").addEventListener("blur", function () {
             const address = this.value.trim();
             if (!address) return;
-
+            // 呼叫 Google Geocoding API 解析地址
             geocoder.geocode({ address: address }, function (results, status) {
                 if (status === "OK" && results[0]) {
+                    // 取得座標
                     const loc = results[0].geometry.location;
-                    document.getElementById("RestaurantLat").value = loc.lat();
-                    document.getElementById("RestaurantLng").value = loc.lng();
+                    // 更新到欄位（唯讀欄位中仍可顯示文字）
+                    document.getElementById("RestaurantLat").value = loc.lat().toFixed(6);
+                    document.getElementById("RestaurantLng").value = loc.lng().toFixed(6);
                 } else {
                     alert("無法找到該地址，請確認輸入是否正確");
                 }
             });
         });
-        // 經緯度 → 地址
-        const latInput = document.getElementById("RestaurantLat");
-        const lngInput = document.getElementById("RestaurantLng");
-
-        latInput.addEventListener("blur", reverseGeocode);
-        lngInput.addEventListener("blur", reverseGeocode);
-
-        function reverseGeocode() {
-            const lat = parseFloat(latInput.value);
-            const lng = parseFloat(lngInput.value);
-            if (isNaN(lat) || isNaN(lng)) return;
-
-            geocoder.geocode({ location: { lat: lat, lng: lng } }, function (results, status) {
-                if (status === "OK" && results[0]) {
-                    document.getElementById("RestaurantAddr").value = results[0].formatted_address;
-                } else {
-                    alert("無法根據經緯度找到地址");
-                }
-            });
-        }
+        
 
     </script>
 
