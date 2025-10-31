@@ -112,6 +112,9 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
+    @* 載入 Google Maps API 並帶入後端傳來的金鑰 *@
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&libraries=places"></script>
+
     <script>
         let selected = [];
 
@@ -233,6 +236,43 @@
             input.files = dataTransfer.files;
         }
 
+        /* 地址 ↔ 經緯度 轉換 */
+        const geocoder = new google.maps.Geocoder();
+        // 地址 → 經緯度
+        document.getElementById("RestaurantAddr").addEventListener("blur", function () {
+            const address = this.value.trim();
+            if (!address) return;
+
+            geocoder.geocode({ address: address }, function (results, status) {
+                if (status === "OK" && results[0]) {
+                    const loc = results[0].geometry.location;
+                    document.getElementById("RestaurantLat").value = loc.lat();
+                    document.getElementById("RestaurantLng").value = loc.lng();
+                } else {
+                    alert("無法找到該地址，請確認輸入是否正確");
+                }
+            });
+        });
+        // 經緯度 → 地址
+        const latInput = document.getElementById("RestaurantLat");
+        const lngInput = document.getElementById("RestaurantLng");
+
+        latInput.addEventListener("blur", reverseGeocode);
+        lngInput.addEventListener("blur", reverseGeocode);
+
+        function reverseGeocode() {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+            if (isNaN(lat) || isNaN(lng)) return;
+
+            geocoder.geocode({ location: { lat: lat, lng: lng } }, function (results, status) {
+                if (status === "OK" && results[0]) {
+                    document.getElementById("RestaurantAddr").value = results[0].formatted_address;
+                } else {
+                    alert("無法根據經緯度找到地址");
+                }
+            });
+        }
 
     </script>
 
