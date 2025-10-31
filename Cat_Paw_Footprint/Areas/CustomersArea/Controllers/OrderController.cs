@@ -92,25 +92,41 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             if (cid <= 0) return Unauthorized();
             try
             {
-                var o = await _db.CustomerOrders.FirstOrDefaultAsync(x => x.OrderID == orderId && x.CustomerID == cid);
-                if (o == null) return NotFound(new { ok = false, error = "找不到訂單" });
-                
-                // 建工單（用你團隊的 service）
-                await _ticketSvc.AddAsync(new CustomerSupportTicketViewModel
+				var o = await _db.CustomerOrders
+										 .AsNoTracking()
+										 .FirstOrDefaultAsync(x => x.OrderID == orderId && x.CustomerID == cid); if (o == null) return NotFound(new { ok = false, error = "找不到訂單" });
+				if (o == null) return NotFound(new { ok = false, error = "找不到訂單" });
+
+				// 產生顯示用的訂單編號（若資料表沒有 OrderCode 欄位）
+				string orderCode = "ORD-" + o.CreateTime.Value.ToString("yyyyMMdd" + "-" + $"{o.OrderID}");
+
+				// ★ 指派客服：挑工單未結案數最少的客服
+				var assignedEmp = await _db.Employees
+					.Include(e => e.Role)
+					.Where(e => e.Role.RoleName == "CustomerService")
+					.OrderBy(e => _db.CustomerSupportTickets
+					.Count(t => t.EmployeeID == e.EmployeeID && t.StatusID != 3)) // 3=已結案
+					.FirstOrDefaultAsync();
+				if (assignedEmp == null)
+					return StatusCode(500, new { ok = false, error = "找不到客服人員" });
+
+				// 建工單（用你團隊的 service）
+				await _ticketSvc.AddAsync(new CustomerSupportTicketViewModel
                 {
                     CustomerID = cid,
-                    EmployeeID = null,             // 沒指定就 null 或排程分派
-                    Subject = $"取消訂單申請 #{orderId}",
+                    EmployeeID = assignedEmp.EmployeeID,    // 沒指定就 null 或排程分派
+					Subject = $"取消訂單申請 #{orderCode}",
                     TicketTypeID = 1,              // ← 請依你們的對照表給一個有效值
                     Description = reason,
                     StatusID = 1,                  // ← 例如 1=新建立
                     PriorityID = 2,                // ← 給個預設優先權
                     CreateTime = DateTime.Now,
-                    TicketCode = $"T{DateTime.Now:yyyyMMddHHmmssfff}"
+                    TicketCode = $"T{DateTime.Now:yyyyMMddHH}"
                 });
 
                 return Ok(new { ok = true });
             }
+
             catch (Exception ex)
             {
                 return BadRequest(new { ok = false, error = ex.Message });
