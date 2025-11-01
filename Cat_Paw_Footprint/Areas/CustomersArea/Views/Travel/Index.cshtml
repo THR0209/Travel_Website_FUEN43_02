@@ -107,7 +107,7 @@
         <!-- 右側：排行程 + 地圖 -->
         <div class="col-md-4">
 
-            <!-- 排行程 -->
+            <!-- 排行程區塊，支援多天與時間推算 -->
             <div class="card mb-3">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <span>排行程</span>
@@ -116,40 +116,66 @@
                 </div>
                 <div class="card-body">
 
-                    <!-- 使用 vuedraggable 可拖曳排序 -->
-                    <draggable v-model="tripList" item-key="uid" handle=".drag-handle" @@end ="onDragEnd">
+                    <!-- 行程名稱 & 天數設定 -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <input v-model="projectName" placeholder="行程名稱" class="form-control w-50" />
+                        <input type="number" min="1" v-model.number="totalDays" class="form-control w-25" placeholder="天數" />
+                        <select class="form-select w-25" v-model="currentDay">
+                            <option v-for="n in totalDays" :key="n" :value="n">第 {{ n }} 天</option>
+                        </select>
+                    </div>
+
+                    <!-- 多天行程陣列 tripDays -->
+                    <draggable v-model="tripDays[currentDay-1].items" item-key="uid" handle=".drag-handle" @@end="updateSequence">
                         <template #item="{ element, index }">
-                            <div class="d-flex justify-content-between align-items-center border-bottom py-2 bg-white rounded shadow-sm my-1 px-2 ">
-                                <span>
-                                    <i class="bi bi-list drag-handle me-2" style="cursor: grab; font-size: 18px;"></i>
-                                    {{ index + 1 }}. {{ element.name }}（{{ element.typeLabel }}）
-                                </span>
-                                <button class="btn btn-sm btn-outline-danger" @@click="removeFromTrip(index)">✖</button>
+                            <div class="border rounded p-2 mb-2 bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-list drag-handle me-2"></i>{{ index+1 }}. {{ element.name }}</span>
+                                    <button class="btn btn-sm btn-outline-danger" @@click="removeItem(index)">✖</button>
+                                </div>
+
+                                <!-- 時間欄位 -->
+                                <div class="mt-2 d-flex gap-2">
+                                    <!-- 開始時間 -->
+                                    <div>
+                                        <label class="form-label mb-0 small">開始</label>
+                                        <input type="time" v-model="element.startTime"
+                                               class="form-control form-control-sm"
+                                               @@change="onTimeChange(currentDay-1, index)" />
+                                    </div>
+                                    <!-- 停留時間 -->
+                                    <div>
+                                        <label class="form-label mb-0 small">停留(分)</label>
+                                        <input type="number" min="0" v-model.number="element.stayMinute"
+                                               class="form-control form-control-sm"
+                                               @@change="onTimeChange(currentDay-1, index)" />
+                                    </div>
+                                    <!-- 路程時間 -->
+                                    <div>
+                                        <label class="form-label mb-0 small">行車(分)</label>
+                                        <input type="number" v-model.number="element.driveMinute" class="form-control form-control-sm" readonly />
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </draggable>
-                    <div v-if="tripList.length === 0" class="text-muted text-center ">
-                        尚未加入任何行程
+                    <div v-if="tripDays[currentDay-1].items.length===0" class="text-center text-muted py-3">
+                        第 {{ currentDay }} 天尚無行程
                     </div>
 
-                    <!-- 儲存行程 -->
-                    <button v-if="tripList.length > 0" class="btn btn-success w-100 mt-3" @@click="saveTrip">
+                    <!-- 儲存方法為 saveTrip() -->
+                    <button class="btn btn-success w-100 mt-3" @@click="saveTrip">
                         💾 儲存行程
-                    </button>
+                    </button>                    
                 </div>
             </div>
 
-            <!-- Google Map 路線地圖 -->
+            <!-- Google 地圖 -->
             <div class="card">
                 <div class="card-header bg-success text-white">行程地圖</div>
                 <div class="card-body">
                     <!-- 地圖顯示區 -->
                     <div id="map" style="height: 400px; width: 100%;"></div>
-
-                    <!-- 顯示距離與時間 -->
-                    <p class="mt-2 text-muted" v-if="travelInfo">
-                        🚗 距離：{{ travelInfo.distance }}　🕒 預估時間：{{ travelInfo.duration }}
-                    </p>
                 </div>
             </div>
         </div>
@@ -210,8 +236,8 @@
                         { label: "美食", type: "restaurants" },
                         { label: "住宿", type: "hotels" }
                     ],
-                    currentType: "locations",
-                    items: [],
+                    currentType: "locations",   // 預設分類
+                    items: [],  // 目前分類的資料清單
                     keyword: "",       // 搜尋關鍵字
                     modalData: {},     // Modal 詳情資料
                     sortDesc: true ,    // 排序狀態（true = 高→低）
@@ -219,22 +245,30 @@
                     /* 補強說明「地區與縣市動態綁定」 */
                     selectedRegion: "離島",   // 預設地區
                     selectedDistrict: "",     // 預設不選縣市
-                    regions: ["北部", "中部", "南部", "東部", "離島"],
-                    districtsByRegion: {
+                    regions: ["北部", "中部", "南部", "東部", "離島"],    // 地區清單
+                    districtsByRegion: {    // 縣市對應地區
                         "北部": ["台北市", "新北市", "基隆市", "桃園市", "新竹縣", "新竹市", "宜蘭縣"],
                         "中部": ["苗栗縣", "台中市", "彰化縣", "南投縣", "雲林縣"],
                         "南部": ["嘉義縣", "嘉義市", "台南市", "高雄市", "屏東縣"],
                         "東部": ["台東縣", "花蓮縣"],
                         "離島": ["澎湖", "金門", "馬祖", "綠島", "蘭嶼", "小琉球"]
                     },
-                    tripList: [],    // 行程清單
-                    currentUser: null,  // 目前登入使用者資訊
 
-                    // 新增地圖相關變數
-                    map: null,
-                    directionsService: null,
-                    directionsRenderer: null,
-                    travelInfo: null
+                    /* 行程清單 */
+                    projectName: '',    // 行程名稱
+                    totalDays: 1,   // 行程天數
+                    currentDay: 1,  // 目前選擇的天數
+                    tripDays: [{ day: 1, items: [] }],  // 多天行程陣列
+
+                    /* 目前登入使用者資訊 */
+                    currentUser: null,  
+
+                    /* 新增地圖相關變數 */ 
+                    map: null,  // 地圖物件
+                    directionsService: null,    // 路線服務
+                    directionsRenderer: null,   // 路線繪製器
+                    travelInfo: null, // 距離與時間資訊
+                    markers: [] // 多點標記陣列
                 }
             },
 
@@ -286,13 +320,13 @@
                     }
                 },
 
-                // 改變分類 (景點/美食/住宿)
+                /* 改變分類 (景點/美食/住宿) */
                 async changeType(type) {
                     this.currentType = type;
                     await this.fetchData();
                 },
 
-                // 取得資料 (Ajax 呼叫 Controller API)
+                /* 取得資料 (Ajax 呼叫 Controller API) */
                 async fetchData() {
                     const res = await fetch(`/api/${this.currentType}`, {
                         headers: {
@@ -317,7 +351,7 @@
                     }));
                 },
 
-                // 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）
+                /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）*/
                 toggleSort() {
                     this.sortDesc = !this.sortDesc; // 切換狀態
                     if (this.sortDesc) {
@@ -327,61 +361,53 @@
                     }
                 },
 
-                // Modal 顯示詳細資料
+                /* Modal 顯示詳細資料 */
                 openModal(item) {
                     this.modalData = item;
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
                     modal.show();
                 },
 
-                /* 加入行程 */
+                /* 加入行程（支援多天） */
                 addToTrip(item) {
-                    // 檢查是否已存在相同項目 (同分類同 id 不可重複)
-                    const exists = this.tripList.some(
-                        x => x.id === item.id && x.type === this.currentType
-                    );
+                    const day = this.tripDays[this.currentDay - 1];
+                    const exists = day.items.some(x => x.id === item.id && x.type === this.currentType);
                     if (!exists) {
-                        this.tripList.push({
-                            uid: `${this.currentType}-${item.id}`, // 唯一 key
+                        day.items.push({
+                            uid: `${this.currentType}-${item.id}-${Date.now()}`,
                             id: item.id,
                             name: item.name,
                             type: this.currentType,
                             typeLabel: this.buttons.find(b => b.type === this.currentType).label,
-                            lat: item.lat,   
-                            lng: item.lng
+                            lat: item.lat,
+                            lng: item.lng,
+                            startTime: '',
+                            stayMinute: 0,
+                            driveMinute: 0
                         });
-                    }else {
-                        alert(`❗「${item.name}」已在行程中！`);
+                        this.drawRoute();
+                    } else {
+                        alert(`❗「${item.name}」已在第 ${this.currentDay} 天行程中！`);
                     }
                 },
 
                 /* 刪除單一行程 */
-                removeFromTrip(index) {
-                    this.tripList.splice(index, 1);
+                removeItem(index) {
+                    this.tripDays[this.currentDay - 1].items.splice(index, 1);
+                    this.drawRoute();
                 },
 
-                /* 清空行程 */
+                /* 清空當天行程 */
                 clearTrip() {
-                    // 若沒有行程 → 提示並離開
-                    if (this.tripList.length === 0) {
-                        alert("目前沒有任何行程可以清空！");
+                     const current = this.tripDays[this.currentDay - 1];
+                    if (current.items.length === 0) {
+                        alert(`第 ${this.currentDay} 天目前沒有任何行程可清空`);
                         return;
                     }
-
-                    // confirm() 對話框，讓使用者選擇
-                    const result = confirm("❓確定要清空所有行程嗎？\n（按「取消」可保留目前行程）");
-
-                    // 按下「確定」→ 清空行程
-                    if (result) {                        
-                        this.tripList.splice(0, this.tripList.length);                        
-                    } 
-                },
-
-                /* 拖曳完成事件（可選，顯示目前排序） */
-                onDragEnd() {
-                    console.log("🔁 已重新排序：", this.tripList.map(x => x.name).join(" → "));
-                    // 重新觸發 Vue 更新畫面（防止 index 顯示未更新）
-                    this.tripList = [...this.tripList];
+                    if (confirm(`確定要清空「第 ${this.currentDay} 天」的所有行程嗎？`)) {
+                        current.items = [];
+                        this.updateMapMarkers();
+                    }
                 },
 
                 /* 儲存行程 */
@@ -393,24 +419,29 @@
 
                     const payload = {
                         customerId: this.currentUser.customerId, // 改登入者ID
-                        projectName: "我的自由行",
-                        tripDetails: this.tripList.map((item, idx) => ({
-                            tripSequence: idx + 1,  // 排序順序
-                            tripType: item.typeLabel,   // 類別名稱（景點、美食、住宿）
-                            tripTargetID: item.id,  // 對應原始資料 ID
-                            tripName: item.name     // 方便前端檢查（純顯示用）
-                        }))
+                        projectName: this.projectName || "未命名行程",
+                        TotalDays: this.totalDays,
+                        Details: this.tripDays.flatMap((d, dayIndex) =>
+                            d.items.map((x, i) => ({
+                                TripDate: new Date(Date.now() + dayIndex * 86400000).toISOString(),
+                                TripSequence: i + 1,
+                                StartTime: x.startTime,
+                                StayMinute: x.stayMinute,
+                                LocationID: x.id,
+                                TripType: x.typeLabel
+                            }))
+                        )
                     };
 
                     // 這一行 — 讓你能在 Console 看送出的內容
                     console.log("🚀 送出行程資料：", payload);
 
-                    // const res = await fetch('/Travel/SaveTrip', {
-                    //     method: 'POST',
-                    //     headers: { 'Content-Type': 'application/json' },
-                    //     body: JSON.stringify(payload)
-                    // });
-                    // if (res.ok) alert('✅ 行程已儲存！');
+                   // const res = await fetch('/Travel/SaveTrip', {
+                   //      method: 'POST',
+                   //      headers: { 'Content-Type': 'application/json' },
+                   //      body: JSON.stringify(payload)
+                   // });
+                   if (res.ok) alert('✅ 行程已儲存成功！');
                 },
 
                 /* 初始化地圖 */
@@ -425,25 +456,26 @@
                 this.directionsRenderer = new google.maps.DirectionsRenderer({ map: this.map });
                 },
 
-                /* 根據 tripList 動態繪製地圖：
-                    0 個點 → 清空地圖
-                    1 個點 → 顯示單一 marker，地圖置中放大
-                    2 個以上 → 自動規劃行車路線並顯示距離/時間
+                /* 根據當前天的行程 tripDays[currentDay-1].items 動態繪製地圖：
+                     0 個點 → 清空地圖
+                     1 個點 → 顯示單一 marker，地圖置中放大
+                     2 個以上 → 自動規劃行車路線並顯示距離/時間
                 */
                 async drawRoute() {
-
-                    console.log("📍 tripList:", this.tripList); // 除錯輸出
+                    // 改為使用「目前天數」的行程
+                    const tripList = this.tripDays[this.currentDay - 1].items;
+                    console.log(`📍 第 ${this.currentDay} 天行程：`, tripList);
 
                     // 檢查是否有缺少經緯度的項目
-                    const invalid = this.tripList.filter(x => isNaN(x.lat) || isNaN(x.lng));
+                    const invalid = tripList.filter(x => isNaN(x.lat) || isNaN(x.lng));
                     if (invalid.length > 0) {
                         console.warn("⚠️ 缺少座標：", invalid);
                         alert("有地點缺少經緯度，無法顯示地圖！");
                         return;
                     }
 
-                    // 無地點 → 清空地圖並移除 marker
-                    if (this.tripList.length === 0) {
+                    // 無地點 → 清空地圖
+                    if (tripList.length === 0) {
                         this.directionsRenderer.set('directions', null);
                         this.travelInfo = null;
                         if (this.singleMarker) {
@@ -453,12 +485,12 @@
                         return;
                     }
 
-                    // 單一地點：只顯示 marker，不使用 Directions API
-                    if (this.tripList.length === 1) {
+                    // 單一地點 → 只顯示 marker
+                    if (tripList.length === 1) {
                         this.directionsRenderer.set('directions', null);
                         this.travelInfo = null;
 
-                        const point = this.tripList[0];
+                        const point = tripList[0];
                         const position = { lat: point.lat, lng: point.lng };
 
                         // 清除舊 marker（若存在）
@@ -476,32 +508,33 @@
                         // 聚焦單一地點
                         this.map.setCenter(position);
                         this.map.setZoom(14); // 放大至區域
+                        tripList[0].driveMinute = 0; // 第一個地點永遠 0
                         return;
                     }
 
-                    // 至少需要兩個點才能規劃路線
-                    if (this.tripList.length < 2) {
+                    // 兩個點 → 規劃路線
+                    if (tripList.length < 2) {
                         this.directionsRenderer.set('directions', null);
                         this.travelInfo = null;
                         return;
                     }
 
                     // 設定中途停靠點（去掉第一與最後）
-                    const waypoints = this.tripList.slice(1, -1).map(item => ({
+                    const waypoints = tripList.slice(1, -1).map(item => ({
                         location: { lat: item.lat, lng: item.lng },
                         stopover: true
                     }));
 
-                    // 起點
+                    /* 起點 */ 
                     const origin = {
-                        lat: this.tripList[0].lat,
-                        lng: this.tripList[0].lng
+                        lat: tripList[0].lat,
+                        lng: tripList[0].lng
                     };
 
-                    // 終點
+                    /* 終點 */
                     const destination = {
-                        lat: this.tripList[this.tripList.length - 1].lat,
-                        lng: this.tripList[this.tripList.length - 1].lng
+                        lat: tripList[tripList.length - 1].lat,
+                        lng: tripList[tripList.length - 1].lng
                     };
 
                     // 建立 Directions API 請求
@@ -513,59 +546,162 @@
                         travelMode: google.maps.TravelMode.DRIVING
                     };
 
-                    // 發送路線請求
+                    // 發送路線請求 (呼叫 Google Directions API)
                     this.directionsService.route(request, (result, status) => {
                         if (status === 'OK') {
                             this.directionsRenderer.setDirections(result);
 
-                            // 取得距離與時間（總計）
+                            // 取得距離與時間
                             const route = result.routes[0].legs;
                             let totalDist = 0, totalTime = 0;
-                            for (let leg of route) {
-                                totalDist += leg.distance.value; // 公尺
-                                totalTime += leg.duration.value; // 秒
-                            }
-                            // 更新 travelInfo (顯示於畫面)
+
+                            // 第一個地點行車時間固定為 0
+                            tripList[0].driveMinute = 0;
+
+                            // 將每段行車時間寫入對應地點
+                            route.forEach((leg, i) => {
+                                totalDist += leg.distance.value;
+                                totalTime += leg.duration.value;
+
+                                // 第一段沒有 driveMinute（從起點出發）
+                                if (tripList[i + 1]) {
+                                    tripList[i + 1].driveMinute = Math.round(leg.duration.value / 60); // 秒 → 分
+                                }
+                            });
+
+                            // 更新顯示資訊
                             this.travelInfo = {
                                 distance: (totalDist / 1000).toFixed(1) + " 公里",
                                 duration: Math.round(totalTime / 60) + " 分鐘"
                             };
+
+                            // 自動推算時間：找到第一個有 startTime 的地點，往後推算
+                            const dayIndex = this.currentDay - 1;
+                            const firstTimedItem = tripList.find(x => x.startTime);
+                            if (firstTimedItem) {
+                                const idx = tripList.indexOf(firstTimedItem);
+                                this.onTimeChange(dayIndex, idx);
+                            }
+
                         } else {
-                            alert("無法規劃路線，請檢查座標");
+                            console.warn("❌ Google Maps 路線規劃失敗:", status);
+                            alert("無法規劃路線，請檢查座標或嘗試重新整理");
                         }
                     });
+                },
+
+                /* 自動推算所有開始時間（包含往前與往後） */
+                onTimeChange(dayIndex, itemIndex) {
+                    const day = this.tripDays[dayIndex];
+                    const items = day.items;
+                    const current = items[itemIndex];  // 以目前設定的景點為基準
+
+                    if (!current.startTime) return;    // 確保該景點有設定時間
+
+                    const [baseH, baseM] = current.startTime.split(":").map(Number);
+                    let total = baseH * 60 + baseM;
+
+                    // 往後推算：從目前項目往後更新所有時間
+                    for (let i = itemIndex + 1; i < items.length; i++) {
+                        total += (Number(items[i - 1].stayMinute) || 0); // 停留時間
+                        total += (Number(items[i].driveMinute) || 0); // 行車時間
+                        const nextH = Math.floor(total / 60) % 24; // 小時
+                        const nextM = total % 60; // 分鐘
+                        items[i].startTime = `${String(nextH).padStart(2, "0")}:${String(nextM).padStart(2, "0")}`;
+                    }
+
+                    // 往前回推：反向推算前面的行程
+                    let prevTotal = baseH * 60 + baseM;
+                    for (let i = itemIndex - 1; i >= 0; i--) {
+                        prevTotal -= (Number(items[i + 1].driveMinute) || 0); // 行車時間
+                        prevTotal -= (Number(items[i].stayMinute) || 0);      // 停留時間
+                        if (prevTotal < 0) prevTotal += 24 * 60;
+                        const prevH = Math.floor(prevTotal / 60);
+                        const prevM = prevTotal % 60;
+                        items[i].startTime = `${String(prevH).padStart(2, "0")}:${String(prevM).padStart(2, "0")}`;
+                    }
+                },
+
+                 /* 更新地圖標記 */
+                updateMapMarkers() {
+                    this.markers.forEach(m => m.setMap(null));
+                    this.markers = [];
+                    const day = this.tripDays[this.currentDay - 1];
+                    day.items.forEach(p => {
+                        const marker = new google.maps.Marker({
+                            position: { lat: p.lat, lng: p.lng },
+                            map: this.map,
+                            title: p.name
+                        });
+                        this.markers.push(marker);
+                    });
+                },
+
+                /* 拖曳完後自動重算時間並更新地圖 */
+                updateSequence() {
+                    const day = this.tripDays[this.currentDay - 1]; // 目前天
+                    const items = day.items; // 取得目前天的行程
+
+                    // 先清空舊行車時間
+                    items.forEach(x => x.driveMinute = 0);
+
+                    // 重新規劃地圖路線（會自動填入 driveMinute）
+                    this.drawRoute();
+
+                    // 若有設定開始時間，重新推算所有時間
+                    const firstTimedItem = items.find(x => x.startTime); // 找到第一個有設定時間的項目
+                    if (firstTimedItem) {
+                        const index = items.indexOf(firstTimedItem);
+                        this.onTimeChange(this.currentDay - 1, index);
+                    }                    
+                },
+                
+                /* 拖曳完成事件（可選，顯示目前排序） */
+                onDragEnd() {
+                    console.log("🔁 已重新排序：", this.tripList.map(x => x.name).join(" → "));
+                    // 重新觸發 Vue 更新畫面（防止 index 顯示未更新）
+                    this.tripList = [...this.tripList];
                 },
             },
 
             // 監聽器
             watch: {
-                // 每當行程 tripList 改變（新增、刪除、拖曳排序）時，自動重繪地圖
-                tripList: {
-                    handler() {
-                        this.$nextTick(() => this.drawRoute());
-                    },
-                    deep: true
+                // 動態調整 tripDays 陣列長度
+                totalDays(newVal) {
+                    const old = this.tripDays.length;
+                    if (newVal > old) {
+                        for (let i = old + 1; i <= newVal; i++) {
+                            this.tripDays.push({ day: i, items: [] });
+                        }
+                    } else if (newVal < old) {
+                        this.tripDays.splice(newVal);
+                    }
+                },
+
+                // 切換天數時重繪地圖
+                currentDay() {
+                    this.$nextTick(() => this.drawRoute());
                 }
             },
 
             // 元件載入時
             mounted() {
-                // 預設載入
+                /* 預設載入 */ 
                 this.fetchData().then(() => {
                     // 資料載入後，保持離島預設狀態
                     this.selectedRegion = "離島";
                 });
 
-                // 初始化抓取登入者
+                /* 初始化抓取登入者 */ 
                 this.getCurrentUser(); 
 
-                // 🧩 重新啟用所有 dropdown 功能
+                /* 重新啟用所有 dropdown 功能 */ 
                 const dropdownList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
                 dropdownList.forEach((dropdownToggleEl) => {
                     new bootstrap.Dropdown(dropdownToggleEl);
                 });
 
-                // 初始化地圖
+                /* 初始化地圖 */
                 window.initMap = this.initMap;
                 if (typeof google !== "undefined") {
                     this.initMap();
