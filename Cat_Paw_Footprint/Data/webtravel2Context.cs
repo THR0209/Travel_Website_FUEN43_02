@@ -938,7 +938,7 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<TripProjectDetails>(entity =>
         {
-            entity.HasNoKey();
+			entity.HasKey(e => e.ProjectDetailID);
 
             entity.Property(e => e.TripType).HasMaxLength(50);
 

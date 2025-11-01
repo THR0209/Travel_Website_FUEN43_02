@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Cat_Paw_Footprint.Models;
 
 public partial class TripProjectDetails
 {
-    public int? ProjectID { get; set; }
+    [Key]
+	public int ProjectDetailID { get; set; }
+	
+	public int? ProjectID { get; set; }
 
     public DateTime? TripDate { get; set; }
 
