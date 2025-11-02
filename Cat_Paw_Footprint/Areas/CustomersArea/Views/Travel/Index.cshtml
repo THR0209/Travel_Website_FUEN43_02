@@ -418,30 +418,60 @@
                     }
 
                     const payload = {
-                        customerId: this.currentUser.customerId, // 改登入者ID
-                        projectName: this.projectName || "未命名行程",
+                        CustomerID: Number(this.currentUser.customerId), // 登入者ID
+                        ProjectName: this.projectName || "未命名行程",
                         TotalDays: this.totalDays,
                         Details: this.tripDays.flatMap((d, dayIndex) =>
-                            d.items.map((x, i) => ({
-                                TripDate: new Date(Date.now() + dayIndex * 86400000).toISOString(),
-                                TripSequence: i + 1,
-                                StartTime: x.startTime,
-                                StayMinute: x.stayMinute,
-                                LocationID: x.id,
-                                TripType: x.typeLabel
-                            }))
+                            d.items.map((x, i) => {
+                                // 根據類型決定哪個 ID 欄位要填
+                                let LocationID = null;
+                                let RestaurantID = null;
+                                let HotelID = null;
+
+                                switch (x.typeLabel) {
+                                    case "景點":
+                                        LocationID = x.id;
+                                        break;
+                                    case "美食":
+                                        RestaurantID = x.id;
+                                        break;
+                                    case "住宿":
+                                        HotelID = x.id;
+                                        break;
+                                }
+
+                                return {
+                                    TripDate: dayIndex + 1,  // 第幾天 (整數)
+                                    TripSequence: i + 1,
+                                    StartTime: x.startTime,
+                                    StayMinute: x.stayMinute,
+                                    TripType: x.typeLabel,
+                                    LocationID,
+                                    RestaurantID,
+                                    HotelID
+                                };
+                            })
                         )
+
                     };
 
                     // 這一行 — 讓你能在 Console 看送出的內容
                     console.log("🚀 送出行程資料：", payload);
 
-                   // const res = await fetch('/Travel/SaveTrip', {
-                   //      method: 'POST',
-                   //      headers: { 'Content-Type': 'application/json' },
-                   //      body: JSON.stringify(payload)
-                   // });
-                   if (res.ok) alert('✅ 行程已儲存成功！');
+                    // 啟用 Fetch 呼叫後端 API
+                    const res = await fetch('/api/trips/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        const result = await res.json();
+                        alert(result.message);
+                    } else {
+                        const err = await res.text();
+                        alert(`❌ 儲存失敗：${err}`);
+                    }
                 },
 
                 /* 初始化地圖 */

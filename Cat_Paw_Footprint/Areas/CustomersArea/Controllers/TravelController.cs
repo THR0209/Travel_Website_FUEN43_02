@@ -4,6 +4,7 @@ using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
@@ -23,7 +24,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_config = config;   // 取得 appsettings.json 設定  
 		}
 
-		//	主頁面 View (顯示 Vue 畫面)
+		/* 主頁面 View (顯示 Vue 畫面) */
 		public IActionResult Index()
 		{
 			// 從 secrets.json 取得金鑰
@@ -31,7 +32,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return View();
 		}
 
-		//	取得目前登入使用者資訊
+		/* 取得目前登入使用者資訊 */
 		[HttpGet("/api/currentUser")]
 		[Authorize(AuthenticationSchemes = "CustomerAuth")]
 		public IActionResult GetCurrentUser()
@@ -49,7 +50,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(userInfo);
 		}
 
-		//	取得【住宿資料】（給 Vue3 呼叫用）
+		/* 取得【住宿資料】（給 Vue3 呼叫用） */
 		[HttpGet("/api/hotels")]
 		public async Task<IActionResult> GetHotels()
 		{
@@ -79,7 +80,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
-		//	取得【景點資料】（給 Vue3 呼叫用）
+		/* 取得【景點資料】（給 Vue3 呼叫用） */
 		[HttpGet("/api/locations")]
 		public async Task<IActionResult> GetLocations()
 		{
@@ -109,7 +110,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
-		//	取得【美食資料】（給 Vue3 呼叫用）
+		/* 取得【美食資料】（給 Vue3 呼叫用） */	
 		[HttpGet("/api/restaurants")]
 		public async Task<IActionResult> GetRestaurants()
 		{
@@ -139,48 +140,94 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(data);  // 回傳 JSON 格式資料
 		}
 
-		//	儲存行程 (接收前端 JSON)		
-		[HttpPost("/Travel/SaveTrip")]
-		public IActionResult SaveTrip([FromBody] TripProjectViewModel data)
+		/* 儲存行程 (接收前端 JSON) */
+		[HttpPost("/api/trips/save")]
+		[Authorize(AuthenticationSchemes = "CustomerAuth")]
+		public async Task<IActionResult> SaveTrip([FromBody] JsonElement json)
 		{
-			Console.WriteLine("🚀 收到行程資料：");
-			Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(data, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
 
-			// 可改成實際儲存流程
-			var project = new CustomerTripProjects
-			{
-				CustomerID = data.CustomerID,
-				ProjectName = data.ProjectName,
-				StartDate = DateTime.Now,
-				EndTime = DateTime.Now.AddDays(3),
-				CreateTime = DateTime.Now,
-				UpdateTime = DateTime.Now
-			};
-			_context.CustomerTripProjects.Add(project);
-			_context.SaveChanges();
+			TripProjectViewModel? data;
 
-			foreach (var item in data.TripDetails)
+			try
 			{
-				var detail = new TripProjectDetails
+				// 反序列化 JSON
+				data = JsonSerializer.Deserialize<TripProjectViewModel>(
+					json.GetRawText(),
+					new JsonSerializerOptions
+					{
+						PropertyNameCaseInsensitive = true  // 大小寫不敏感
+					});
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"❌ 無法解析 JSON 資料: {ex.Message}");
+			}
+
+			// 更清楚的錯誤提示（逐層檢查）
+			if (data == null)
+				return BadRequest("❌ 未收到資料");
+			if (data.Details == null)
+				return BadRequest("❌ 明細資料為空");
+			if (!data.Details.Any())
+				return BadRequest("❌ 行程明細無內容");
+
+			try
+			{
+				// 建立主檔 CustomerTripProjects
+				var project = new CustomerTripProjects
 				{
-					ProjectID = project.ProjectID,
-					TripDate = DateTime.Now,
-					TripSequence = item.TripSequence,
-					TripType = item.TripType,
-					StartTime = DateTime.Now,
-					StayMinute = 60,
-					Notes = ""
+					CustomerID = data.CustomerID,
+					ProjectName = data.ProjectName ?? "未命名行程",
+					TotalDays = data.TotalDays ?? 1,
+					CreateTime = DateTime.Now,
+					UpdateTime = DateTime.Now
 				};
 
-				if (item.TripType == "景點") detail.LocationID = item.TripTargetID;
-				if (item.TripType == "美食") detail.RestaurantID = item.TripTargetID;
-				if (item.TripType == "住宿") detail.HotelID = item.TripTargetID;
+				_context.CustomerTripProjects.Add(project);
+				await _context.SaveChangesAsync(); // 儲存後才能取得 ProjectID
 
-				_context.TripProjectDetails.Add(detail);
+				// 建立多筆明細 TripProjectDetails
+				var details = data.Details.Select(d =>
+				{
+					// 🟢 嘗試將 "12:30" 轉成 TimeSpan(12,30,0)
+					TimeSpan parsedTime = TimeSpan.Zero;
+					if (!string.IsNullOrWhiteSpace(d.StartTime))
+						TimeSpan.TryParse(d.StartTime, out parsedTime);
+
+					return new TripProjectDetails
+					{
+						ProjectID = project.ProjectID,
+						TripDate = d.TripDate,
+						TripSequence = d.TripSequence ?? 0,
+						StartTime = parsedTime,                // ✅ 安全轉換後使用
+						StayMinute = d.StayMinute ?? 0,
+						TripType = d.TripType,
+
+						// 三種行程類別 ID 對應
+						HotelID = d.HotelID,
+						LocationID = d.LocationID,
+						RestaurantID = d.RestaurantID,
+
+						Notes = d.Notes
+					};
+				}).ToList();
+
+				_context.TripProjectDetails.AddRange(details);
+				await _context.SaveChangesAsync();
+
+				// 回傳結果給前端
+				return Ok(new
+				{
+					message = "✅ 行程已成功儲存！",
+					projectId = project.ProjectID,
+					count = details.Count
+				});
 			}
-			_context.SaveChanges();
-
-			return Ok(new { message = "✅ 行程已儲存成功！" });
+			catch (Exception ex)
+			{
+				// 若有錯誤，回傳 500 錯誤碼與訊息
+				return StatusCode(500, $"❌ 儲存失敗: {ex.Message}");
+			}
 		}
 
 	}
