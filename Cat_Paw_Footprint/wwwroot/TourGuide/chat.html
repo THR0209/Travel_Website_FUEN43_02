@@ -159,7 +159,7 @@
         }
 
         button {
-            background: #8f94fb;
+            
             border: none;
             color: #fff;
             border-radius: 6px;
@@ -200,6 +200,33 @@
                 padding: 10px;
             }
         }
+        .chat-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .chat-send {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+            .chat-send:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        .plain-btn {
+            all: unset; /* 清掉所有繼承樣式 */
+            cursor: pointer; /* 還原可點擊游標 */
+            font-size: 1.5rem; /* 你想要的大小 */
+            line-height: 1;
+        }
     </style>
 </head>
 
@@ -212,24 +239,7 @@
             </div>
             <div class="muted">導遊：{{ guideName || guideAccount }}</div>
 
-            <!-- ⚙️ 放 header 裡 -->
-            <div class="side-wrapper">
-                <button class="toggle-btn" @click="showSide = !showSide">⚙️</button>
-                <transition name="fade">
-                    <aside class="side" v-show="showSide">
-                        <h4>上傳照片（提供已存 URL）</h4>
-                        <input v-model.trim="photoUrl" placeholder="/uploads/group_photos/xxx.jpg" />
-                        <div class="row"><button @click="sendPhoto" :disabled="!photoUrl">上傳</button></div>
-
-                        <h4 style="margin-top:24px">設定集合地</h4>
-                        <input v-model.number="lat" type="number" step="0.000001" placeholder="緯度" />
-                        <input v-model.number="lng" type="number" step="0.000001" placeholder="經度" />
-                        <div class="row"><button @click="setLocation" :disabled="!lat || !lng">發布集合地</button></div>
-
-                        <p class="muted" style="margin-top:24px"><a href="group-list.html">← 返回群組清單</a></p>
-                    </aside>
-                </transition>
-            </div>
+            <p class="muted" style="margin-top:24px"><a href="group-list.html">← 返回群組清單</a></p>
         </header>
 
         <main>
@@ -240,19 +250,35 @@
                      :class="(item.sender && item.sender.indexOf('自己') !== -1) ? 'me' : 'other'">
                     <div class="bubble">
                         <div class="meta">{{ item.sender }} · {{ item.time }}</div>
-                        <div v-if="item.type==='text'"v-html="item.content"></div>
+                        <div v-if="item.type==='text'" v-html="item.content"></div>
                         <div v-else-if="item.type==='photo'"><img :src="item.url" style="max-width:100%;border-radius:8px;" /></div>
-                        <div v-else-if="m.type === 'location'">
-                            <a :href="'https://www.google.com/maps?q=' + m.lat + ',' + m.lng" target="_blank">現在位置</a>
+                        <div v-else-if="item.type === 'location'">
+                            <a :href="'https://www.google.com/maps?q=' + item.lat + ',' + item.lng" target="_blank">現在位置</a>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <textarea v-model.trim="text" placeholder="輸入訊息..."@keyup.enter="sendText"></textarea>
-                    <button @click="sendText" :disabled="!text">送出</button>
+                    <input v-model.trim="text"
+                           @keyup.enter="sendText"
+                           placeholder="輸入訊息..."
+                           class="chat-input" />
+
+                    <button @click="setLocation" class="plain-btn">📍</button>
+                    <button @click="$refs.photoInput.click()" class="plain-btn">📷</button>
+                    <button @click="sendText"
+                            :disabled="!text"
+                            class="chat-send">
+                        送出
+                    </button>
                     <span class="err" v-if="errText">{{ errText }}</span>
                 </div>
             </section>
+            <input type="file"
+                   ref="photoInput"
+                   accept="image/*"
+                   capture="environment"
+                   style="display:none"
+                   @change="Photomsg" />
         </main>
     </div>
 
@@ -374,31 +400,34 @@
                         const PhotoId = pick(p, 'PhotoId', 'photoId');
                         const Url = pick(p, 'Url', 'url');
                         const UploadTime = pick(p, 'UploadTime', 'uploadTime');
+                        const UserName = pick(p, 'UserName', 'userName') || p.username || '匿名';
+                        const SenderType = pick(p, 'SenderType', 'senderType');
 
                         this.pushUnique({
                             type: 'photo',
-                            sender: 'Photo',
+                            sender: this.label(SenderType, UserName),
                             time: this.tz(UploadTime),
-                            url: Url,
+                            url: Url || p.url || p.PhotoUrl || p.photoUrl,
                             PhotoId
                         });
                     });
 
                     this.connection.on('ReceiveLocation', l => {
-                        
+                        const Latitude = pick(l, 'Latitude', 'latitude');
+                        const Longitude = pick(l, 'Longitude', 'longitude');
+                        const UserName = pick(l, 'UserName', 'userName') || l.username || '匿名';
+                        const SenderType = pick(l, 'SenderType', 'senderType');
+                        const SendTime = pick(l, 'SendTime', 'sendTime');
+
+
 
                         this.pushUnique({
-                            messagename: l.username || l.UserName || '匿名',
                             type: 'location',
-                            sender: l.senderType || l.SenderType || 'Guest',
-                            time: l.sendTime
-                                ? new Date(l.sendTime).toLocaleString()
-                                : l.SendTime
-                                    ? new Date(l.SendTime).toLocaleString()
-                                    : '',
-                            lat: l.latitude ?? l.Latitude,
-                            lng: l.longitude ?? l.Longitude,
-                            content: '分享位置'
+                            sender: this.label(SenderType, UserName),
+                            time: this.tz(SendTime),
+                            lat: Latitude,
+                            lng: Longitude,
+                            content: '客戶目前位置'
                         });
                     });
 
@@ -425,15 +454,82 @@
                     } catch { this.errText = '發送失敗'; }
                 },
 
-                async sendPhoto() {
-                    if (!this.photoUrl.trim()) return;
-                    await axios.post('/api/TourGuideArea/TGMessageApi/UploadPhoto', {
-                        groupCode: this.groupCode,
-                        uploaderType: 'Guide',
-                        uploaderId: this.guideId,
-                        photoUrl: this.photoUrl
-                    });
-                    this.photoUrl = '';
+                
+                async Photomsg(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    try {
+                        if (!file.type.startsWith("image/")) {
+                            alert("只能上傳圖片");
+                            return;
+                        }
+
+                        let uploadFile = file;
+                        if (file.size > 2 * 1024 * 1024) { // 超過2MB就壓縮
+                            uploadFile = await this.compressImage(file, 2);
+                        }
+
+                        // 取得定位
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 0
+                            });
+                        });
+
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // ✅ 組 FormData（與後端 [FromForm] 對應）
+                        const formData = new FormData();
+                        formData.append("GroupCode", this.groupCode);
+                        formData.append("UploaderType", "Guide"); // 固定導遊
+                        formData.append("name", this.guideName || "導遊");
+                        formData.append("photo", uploadFile);
+                        formData.append("GuideId", this.guideId);
+                        formData.append("Latitude", latitude);
+                        formData.append("Longitude", longitude);
+
+                        // ✅ 呼叫導遊區域的 API
+                        const res = await axios.post('/api/TourGuideArea/TGMessageApi/UploadPhoto', formData, {
+                            headers: { "Content-Type": "multipart/form-data" },
+                        });
+
+                        console.log("✅ 照片上傳成功:", res.data);
+                    } catch (err) {
+                        console.error("❌ 上傳照片失敗:", err);
+                        alert("上傳失敗，請再試一次");
+                    } finally {
+                        event.target.value = ""; // 清空選擇檔案
+                    }
+                },
+                async compressImage(file, maxMB = 2) {
+                    const img = await createImageBitmap(file);
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    // 調整尺寸（寬度不超過 1280px）
+                    const maxWidth = 1280;
+                    let { width, height } = img;
+                    if (width > maxWidth) {
+                        height = (maxWidth / width) * height;
+                        width = maxWidth;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    let quality = 0.9; // 初始品質
+                    let blob;
+
+                    do {
+                        blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", quality));
+                        quality -= 0.1;
+                    } while (blob.size > maxMB * 1024 * 1024 && quality > 0.2);
+
+                    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
                 },
 
                 async setLocation() {
@@ -462,16 +558,19 @@
                         // 4️⃣ 準備要送的 payload
                         const payload = {
                             groupCode: this.groupCode,
-                            senderType: this.senderType,   // "Guide" / "Guest" / "Customer"
+                            senderType: 'Guide',   // "Guide" / "Guest" / "Customer"
                             name: this.temporaryName,
                             latitude: latitude,
                             longitude: longitude,
-                            deviceId: this.deviceId
+                            deviceId: this.deviceId,
+                            guideId: this.guideId
                         };
+                        
 
                         // 5️⃣ 發送到後端 API
                         const res = await axios.post('/api/TalkMessageApi/SetLocation', payload);
                         console.log("✅ 發送定位成功:", res.data);
+                        console.log("✅ 發送定位成功:", this.guideId);
 
                     } catch (err) {
                         console.error("❌ 發送位置失敗:", err);

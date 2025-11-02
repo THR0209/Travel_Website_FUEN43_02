@@ -103,7 +103,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(result);
 		}
 		[HttpPost]
-		public async Task<IActionResult> UploadPhoto([FromBody] GroupPhotoRequestDto dto)// 上傳群組照片
+		public async Task<IActionResult> UploadPhoto([FromForm] GroupPhotoRequestDto dto)// 上傳群組照片
 		{
 			var result = await _service.UploadPhotoAsync(dto);
 			return Ok(result);
@@ -111,6 +111,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		[HttpPost]
 		public async Task<IActionResult> SetLocation([FromBody] GroupLocationRequestDto dto)// 設定群組位置
 		{
+			Console.WriteLine($"📍 收到設定位置請求 → GroupCode={dto.GroupCode}, Latitude={dto.Latitude}, Longitude={dto.Longitude}, SenderType={dto.SenderType},id{dto.GuideId}");
+			if (dto.name == null)
+			{
+				dto.name = "導遊";
+			}
 			var result = await _service.SetLocationAsync(dto);
 			return Ok(result);
 		}

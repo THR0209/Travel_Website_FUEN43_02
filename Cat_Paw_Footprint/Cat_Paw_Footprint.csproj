@@ -38,6 +38,7 @@
     <Folder Include="Areas\TravelManagement\Data\" />
     <Folder Include="Areas\TravelManagement\Views\Shared\" />
     <Folder Include="Views\Shared\test\" />
+    <Folder Include="wwwroot\uploads\groupphotos\" />
   </ItemGroup>
 
   <ItemGroup>

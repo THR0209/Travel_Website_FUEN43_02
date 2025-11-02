@@ -20,4 +20,6 @@ public partial class CustomerTripProjects
     public DateTime? CreateTime { get; set; }
 
     public DateTime? UpdateTime { get; set; }
+
+    public int? TotalDays { get; set; }
 }

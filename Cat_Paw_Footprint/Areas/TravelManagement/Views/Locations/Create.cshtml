@@ -27,12 +27,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="LocationLat" class="control-label"></label>
-                            <input asp-for="LocationLat" class="form-control" />
+                            <input asp-for="LocationLat" class="form-control" id="LocationLat" readonly style="background-color:#f3f3f3;" />
                             <span asp-validation-for="LocationLat" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="LocationLng" class="control-label"></label>
-                            <input asp-for="LocationLng" class="form-control" />
+                            <input asp-for="LocationLng" class="form-control" id="LocationLng" readonly style="background-color:#f3f3f3;" />
                             <span asp-validation-for="LocationLng" class="text-danger"></span>
                         </div>
                     </div>
@@ -113,7 +113,9 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-
+    
+    @* 載入 Google Maps API 並帶入後端傳來的金鑰 *@
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&libraries=places"></script>
 
     <script>
         let selected = [];
@@ -235,6 +237,27 @@
             files.forEach(f => dataTransfer.items.add(f));
             input.files = dataTransfer.files;
         }
+
+        /* 地址自動轉換經緯度（單向） */
+        const geocoder = new google.maps.Geocoder();
+        // 當地址輸入完（離開輸入框）時觸發
+        document.getElementById("LocationAddr").addEventListener("blur", function () {
+            const address = this.value.trim();
+            if (!address) return;
+            // 呼叫 Google Geocoding API 解析地址
+            geocoder.geocode({ address: address }, function (results, status) {
+                if (status === "OK" && results[0]) {
+                    // 取得座標
+                    const loc = results[0].geometry.location;
+                    // 更新到欄位（唯讀欄位中仍可顯示文字）
+                    document.getElementById("LocationLat").value = loc.lat().toFixed(6);
+                    document.getElementById("LocationLng").value = loc.lng().toFixed(6);
+                } else {
+                    alert("無法找到該地址，請確認輸入是否正確");
+                }
+            });
+        });
+        
 
     </script>
 }

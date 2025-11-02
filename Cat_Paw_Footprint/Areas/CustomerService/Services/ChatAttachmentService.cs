@@ -8,8 +8,7 @@ using Cat_Paw_Footprint.Areas.Helper;
 namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 {
 	/// <summary>
-	/// 聊天附件上傳服務實作。
-	/// 改為上傳到 ImgBB 並回傳外部連結。
+	/// 聊天附件上傳服務實作（僅支援圖片，上傳到 ImgBB）。
 	/// </summary>
 	public class ChatAttachmentService : IChatAttachmentService
 	{
@@ -18,47 +17,31 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Services
 			if (file == null || file.Length == 0)
 				throw new InvalidOperationException("未選擇任何檔案。");
 
-			const long maxFileSize = 25 * 1024 * 1024; // 25MB
+			// ✅ 檔案大小上限 25MB
+			const long maxFileSize = 25 * 1024 * 1024;
 			if (file.Length > maxFileSize)
 				throw new InvalidOperationException("檔案大小不可超過 25MB。");
 
-			var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".pdf" };
+			// ✅ 僅允許圖片格式
+			var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
 			var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+
 			if (!allowedExtensions.Contains(ext))
-				throw new InvalidOperationException("僅允許上傳圖片或 PDF 檔案。");
+				throw new InvalidOperationException("僅允許上傳圖片格式（JPG、PNG、GIF、WEBP）。");
 
-			//  若是圖片，上傳 ImgBB
-			if (ext != ".pdf")
+			try
 			{
-				try
-				{
-					var url = await ImgBBHelper.UploadSingleImageAsync(file);
-					if (string.IsNullOrWhiteSpace(url))
-						throw new InvalidOperationException("ImgBB 回傳空網址，可能上傳失敗。");
-					return url;
-				}
-				catch (Exception ex)
-				{
-					throw new InvalidOperationException($"圖片上傳到 ImgBB 失敗：{ex.Message}");
-				}
+				// ✅ 上傳至 ImgBB
+				var url = await ImgBBHelper.UploadSingleImageAsync(file);
+				if (string.IsNullOrWhiteSpace(url))
+					throw new InvalidOperationException("ImgBB 回傳空網址，上傳可能失敗。");
+
+				return url;
 			}
-
-			//  PDF 檔案仍保存於本地
-			var uploadRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-			var chatDir = Path.Combine(uploadRoot, "uploads", "chat");
-
-			if (!Directory.Exists(chatDir))
-				Directory.CreateDirectory(chatDir);
-
-			var safeFileName = $"{Guid.NewGuid():N}{ext}";
-			var filePath = Path.Combine(chatDir, safeFileName);
-
-			await using (var stream = new FileStream(filePath, FileMode.Create))
+			catch (Exception ex)
 			{
-				await file.CopyToAsync(stream);
+				throw new InvalidOperationException($"圖片上傳至 ImgBB 失敗：{ex.Message}");
 			}
-
-			return $"/uploads/chat/{safeFileName}";
 		}
 	}
 }

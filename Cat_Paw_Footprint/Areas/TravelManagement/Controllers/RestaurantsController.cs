@@ -18,11 +18,13 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 	public class RestaurantsController : Controller
     {
         private readonly webtravel2Context _context;
+		private readonly IConfiguration _configuration;
 
-        public RestaurantsController(webtravel2Context context)
+		public RestaurantsController(webtravel2Context context, IConfiguration configuration)
         {
             _context = context;
-        }
+			_configuration = configuration; // 這樣就能存取 secrets.json
+		}
 
         // GET: TravelManagement/Restaurants
         public async Task<IActionResult> Index()
@@ -123,6 +125,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
             ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName");
             ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
 			ViewBag.KeywordID = new SelectList(_context.Keywords, "KeywordID", "Keyword");
+
+			// 從 secrets.json 讀取 Google Maps API Key
+			var apiKey = _configuration["GoogleMaps:ApiKey"];
+			ViewBag.GoogleMapsApiKey = apiKey;
+
 			return View();
         }
 
@@ -251,6 +258,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", restaurants.DistrictID);
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", restaurants.RegionID);
 			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "KeywordID", "Keyword", viewModel.KeywordID);
+
+			ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
 
 			return View(viewModel);
 		}

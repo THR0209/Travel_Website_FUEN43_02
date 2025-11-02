@@ -1,4 +1,4 @@
-using Cat_Paw_Footprint.Data;
+﻿using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,8 +56,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             var cj = HttpContext.Session.GetString("CART_COUPON");
             if (!string.IsNullOrWhiteSpace(cj))
                 coupon = JsonSerializer.Deserialize<object>(cj);
-            return Ok(new { items, total });
+            return Ok(new { items, total, coupon });
 		}
+
 
 		// 加入購物車（以資料庫 ProductID 為準）
 		[HttpPost("add")]
@@ -116,13 +117,6 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(new { ok = true });
 		}
 
-		[HttpGet("count")]
-		public IActionResult GetCartCount()
-		{
-			var items = GetCart();
-			return Ok(new { count = items.Count });
-		}
-
         // 結帳 → 建立未付款訂單，轉導到訂單頁
         [HttpPost("checkout")]
         public async Task<IActionResult> Checkout()
@@ -174,16 +168,17 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             var now = DateTime.Now;
 
             var q =
-                from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
-                where r.CustomerID == cid
-                      && (r.IsUsed == null || r.IsUsed == false)
-                      && r.Coupon.IsActive == true
-                      && (r.Coupon.StartDate == null || r.Coupon.StartDate <= now)
-                      && (r.Coupon.EndDate == null || r.Coupon.EndDate >= now)
-                      && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code) // ★ 兼容兩種
-                select r;
+				from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
+				where r.CustomerID == cid
+					  && (r.IsUsed == null || r.IsUsed == false)
+					  && (r.Coupon != null)                              // 👈 防呆
+					  && (r.Coupon.DiscountCode == code)                   // 或改為 DisCountCode，依你實際對應
+					  && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code)
+					  && (r.Coupon.StartDate == null || r.Coupon.StartDate <= now)
+					  && (r.Coupon.EndDate == null || r.Coupon.EndDate >= now) // 名稱一致！
+				select r;
 
-            var rec = await q.FirstOrDefaultAsync();
+			var rec = await q.FirstOrDefaultAsync();
             if (rec == null) return BadRequest(new { ok = false, error = "此折價券不可使用" });
 
             // 寫入 Session（後續付款成功要把它標記已用）
@@ -256,5 +251,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
             return Ok(new { ok = true });
         }
-    }
+		[HttpGet("count")]
+		public IActionResult GetCartCount()
+		{
+			var items = GetCart();
+			return Ok(new { count = items.Count });
+		}
+	}
 }

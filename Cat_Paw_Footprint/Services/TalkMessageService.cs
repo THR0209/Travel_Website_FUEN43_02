@@ -11,11 +11,13 @@ namespace Cat_Paw_Footprint.Services
 	{
 		private readonly ITalkMessageRepository _repo;
 		private readonly IHubContext<ChatHub> _hub;
+		private readonly IWebHostEnvironment _env;
 
-		public TalkMessageService(ITalkMessageRepository repo, IHubContext<ChatHub> hub)
+		public TalkMessageService(ITalkMessageRepository repo, IHubContext<ChatHub> hub, IWebHostEnvironment env	)
 		{
 			_repo = repo;
 			_hub = hub;
+			_env = env;
 		}
 
 		public async Task<GroupMessageResponseDto> SendMessageAsync(GroupMessageRequestDto dto)// 發送群組訊息
@@ -44,6 +46,24 @@ namespace Cat_Paw_Footprint.Services
 		}
 		public async Task<GroupPhotoResponseDto> UploadPhotoAsync(GroupPhotoRequestDto dto)// 上傳群組照片
 		{
+			var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "groupphotos");
+			Directory.CreateDirectory(uploadsFolder);
+
+			// ⬇️ 如果有上傳的檔案，就把它存進去
+			if (dto.Photo != null)
+			{
+				var fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.Photo.FileName)}";
+				var filePath = Path.Combine(uploadsFolder, fileName);
+
+				using (var stream = new FileStream(filePath, FileMode.Create))
+				{
+					await dto.Photo.CopyToAsync(stream);
+				}
+
+				// 把實際檔案路徑回填到 dto
+				dto.FilePath = $"/uploads/groupphotos/{fileName}";
+			}
+
 			var photo = await _repo.InsertPhotoAsync(dto);
 
 			// ✅ 即時推播
@@ -52,7 +72,11 @@ namespace Cat_Paw_Footprint.Services
 				PhotoId = photo.PhotoId,
 				Url = photo.FilePath,
 				UploadTime = photo.UploadTime,
-				Username = dto.name
+				username = dto.name
+			   ?? (dto.UploaderType == "Guide" ? "導遊" : "匿名"), // ✅ 新增 fallback
+				Latitude = dto.Latitude,
+				Longitude = dto.Longitude,
+				SenderType = dto.UploaderType
 			});
 
 			return new GroupPhotoResponseDto
@@ -72,7 +96,6 @@ namespace Cat_Paw_Footprint.Services
 			await _hub.Clients.Group(dto.GroupCode).SendAsync("ReceiveLocation", new
 			{
 				username = dto.name ?? "匿名",
-				
 				SenderType = dto.SenderType,
 				Latitude = dto.Latitude,
 				Longitude = dto.Longitude,

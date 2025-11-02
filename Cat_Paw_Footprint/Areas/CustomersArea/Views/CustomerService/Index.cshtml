@@ -3,567 +3,12 @@
     ViewData["Title"] = "客服中心";
 }
 
-@section Styles {
-    <style>
-        /* ====================== 全域樣式 ====================== */
-        /* 背景主色與容器寬度限制 */
-        body {
-            background: #f7fbfd;
-        }
-
-        .support-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* ====================== 卡片樣式 ====================== */
-        /* 共用卡片樣式 (支援卡片與工單卡片) */
-        .support-card, .ticket-card {
-            border-radius: 1rem;
-            box-shadow: 0 4px 14px #0001;
-            background: #fff;
-            transition: all .25s ease;
-        }
-
-            /* 卡片懸浮時的互動樣式 */
-            .support-card:hover, .ticket-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 20px #0002;
-            }
-
-        /* ====================== 版面留白與呼吸空間 ====================== */
-
-        /* 整體容器上下增加空間 */
-        #chatApp {
-            margin-top: 64px !important;
-            margin-bottom: 80px !important;
-        }
-
-            /* 標題列與內容的距離稍微拉開 */
-            #chatApp .d-flex.mb-4 {
-                margin-bottom: 2.5rem !important;
-            }
-
-        /* 三欄之間與頁面邊界再多一點間距 */
-        .equal-row {
-            gap: 2rem !important;
-            margin-top: 0.5rem;
-        }
-
-        /* 各卡片增加內距，看起來不那麼擠 */
-        .support-card, .ticket-card {
-            padding: 1.5rem !important;
-        }
-
-        /* Modal 的上下 padding 更柔和（避免貼邊） */
-        .modal-body {
-            padding-top: 1.5rem !important;
-            padding-bottom: 1.5rem !important;
-        }
-
-        /* ========== 工單卡片貓掌堆疊效果 + 閃光動畫 ========== */
-        .ticket-grid {
-            position: relative;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 1.5rem 1rem 2rem;
-            scrollbar-gutter: stable both-edges;
-            perspective: 1000px;
-            transition: max-height 0.5s ease;
-        }
-
-        /* 疊層外層容器 */
-        .ticket-card-wrapper {
-            position: relative;
-            z-index: calc(100 - var(--index, 0));
-        }
-
-            .ticket-card-wrapper:hover {
-                transition: transform 0.3s ease, z-index 0.1s;
-            }
-
-
-        /* 每張卡片本體 */
-        .ticket-card {
-            background: #fff;
-            border: 2px solid #7ec8e3;
-            box-shadow: 0 4px 14px rgba(0, 123, 156, 0.1);
-            border-radius: 1rem;
-            padding: 1.2rem;
-            transition: transform 0.35s ease, box-shadow 0.35s ease;
-            position: relative;
-            z-index: 5;
-            cursor: pointer;
-            transform-origin: center bottom;
-            overflow: hidden; /* 讓閃光不超出邊框 */
-        }
-
-        /* 疊層：每張卡往下疊 */
-        .ticket-card-wrapper:nth-child(n+2) {
-            margin-top: -2.3rem;
-        }
-
-        /* 微旋轉創造層次 */
-        .ticket-card-wrapper:nth-child(odd) .ticket-card {
-            transform: rotate(-1.2deg);
-        }
-
-        .ticket-card-wrapper:nth-child(even) .ticket-card {
-            transform: rotate(1.2deg);
-        }
-
-        /* 滑鼠懸浮效果：卡片微微浮起 */
-        .ticket-card:hover {
-            transform: rotate(0deg) scale(1.03) translateY(-6px);
-            z-index: 10;
-            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
-            border-color: #7ec8e3;
-        }
-
-        /* 陰影動畫（像貓掌壓著） */
-        .ticket-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 1rem;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05) inset;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .ticket-card:hover::before {
-            opacity: 1;
-        }
-
-        /* ✨ 閃光特效 (hover 時閃過一條柔光) */
-        .ticket-card::after {
-            content: '🐾';
-            position: absolute;
-            font-size: 2rem;
-            right: 12px;
-            top: 10px;
-            opacity: 0;
-            transform: scale(0.5) rotate(-10deg);
-            transition: all 0.4s ease;
-        }
-
-        .ticket-card:hover::after {
-            opacity: 0.9;
-            transform: scale(1) rotate(10deg);
-        }
-
-        @@keyframes card-shine {
-            0% {
-                left: -80%;
-                opacity: 0;
-            }
-            30% {
-                opacity: 1;
-            }
-            100% {
-                left: 120%;
-                opacity: 0;
-            }
-        }
-
-        /* 標題樣式 */
-        .ticket-card h5 {
-            font-size: 1.05rem;
-            color: #007b9c;
-        }
-
-        /* 狀態徽章微調 */
-        .badge.bg-info {
-            background-color: #5ab8d5 !important;
-        }
-
-        /* 美化滾動條 */
-        .ticket-grid::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .ticket-grid::-webkit-scrollbar-thumb {
-            background-color: rgba(0,0,0,0.15);
-            border-radius: 10px;
-        }
-
-        /* ✅ hover 才顯示的查看對話按鈕 */
-        .ticket-chat-btn {
-            position: absolute;
-            bottom: 12px;
-            right: 14px;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            font-size: 1rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.25s ease;
-            opacity: 0; /* 預設隱藏 */
-            transform: scale(0.9); /* 稍微縮小 */
-            pointer-events: none; /* 防止 hover 時誤觸 */
-        }
-
-        /* hover 卡片時淡入 */
-        .ticket-card:hover .ticket-chat-btn {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-
-        /* 按鈕 hover 效果 */
-        .ticket-chat-btn:hover {
-            transform: scale(1.15);
-            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
-        }
-
-        .ticket-chat-btn i {
-            margin: 0;
-        }
-
-        /* 小螢幕：改為直排 */
-        @@media (max-width: 768px) {
-            .ticket-card-wrapper:nth-child(n+2) {
-                margin-top: 1rem;
-            }
-
-            .ticket-card {
-                transform: none !important;
-            }
-
-            .ticket-grid:hover .ticket-card-wrapper,
-            .ticket-grid:active .ticket-card-wrapper {
-                transform: none;
-            }
-        }
-
-        /* ========== 展開／收起動畫 ========== */
-        .ticket-fade-enter-active,
-        .ticket-fade-leave-active {
-            transition: all 0.35s ease;
-        }
-
-        .ticket-fade-enter-from {
-            opacity: 0;
-            transform: translateY(10px) scale(0.98);
-        }
-
-        .ticket-fade-leave-to {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.98);
-        }
-
-        /* ====================== 聊天訊息 ====================== */
-        #chatModal .modal-content {
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-
-        /* 上方標題列 */
-        #chatModal .modal-header {
-            border-top-left-radius: 1rem !important;
-            border-top-right-radius: 1rem !important;
-        }
-
-        /* 讓聊天內容能滾動，同時成為定位基準 */
-        #chatModal .modal-body {
-            position: relative; /* 成為定位基準 */
-            background: #f0f8fa;
-            height: 60vh;
-            overflow-y: auto; /* ✅ 確保這裡是 auto，而不是 hidden */
-            scrollbar-gutter: stable both-edges;
-            border-bottom-left-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
-        }
-
-            /* 拖曳提示層 */
-            #chatModal .modal-body .drag-overlay {
-                position: fixed;
-                top: 50%; /* 垂直置中 */
-                left: 50%; /* 水平置中 */
-                transform: translate(-50%, -50%); /* 完整置中 */
-                width: 85%;
-                max-width: 500px;
-                height: 40%;
-                background: rgba(255,255,255,0.92);
-                border: 3px dashed #7ec8e3;
-                border-radius: 1rem;
-                box-shadow: 0 0 20px rgba(126,200,227,0.35);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                z-index: 2000; /* 高於 modal 內容但低於 backdrop */
-                pointer-events: auto;
-                transition: opacity .25s ease;
-            }
-
-        /* 拖曳時聊天區加邊框高亮 */
-        .drag-over {
-            outline: 3px dashed #7ec8e3;
-            outline-offset: -8px;
-            background: #e8f9fd !important;
-            transition: background 0.3s ease;
-        }
-
-        /* 聊天訊息列：採用直列排列，區分自己與他人對齊方式 */
-        .chat-message-row {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 12px;
-        }
-
-            /* 自己的訊息靠右 */
-            .chat-message-row.me {
-                align-items: flex-end;
-            }
-
-            /* 其他人的訊息靠左 */
-            .chat-message-row.other {
-                align-items: flex-start;
-            }
-
-        /* 聊天泡泡基本樣式 */
-        .chat-bubble {
-            max-width: 72%;
-            padding: 12px 18px;
-            border-radius: 1.4em;
-            box-shadow: 0 2px 8px #0002;
-            font-size: 1.08em;
-            word-break: break-word;
-            user-select: text !important;
-            -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
-        }
-
-            /*  客戶（自己）訊息反白樣式 */
-            .chat-bubble.me,
-            .chat-bubble.me * {
-                user-select: text !important;
-                -webkit-user-select: text !important;
-            }
-
-                .chat-bubble.me::selection,
-                .chat-bubble.me *::selection {
-                    background: rgba(255, 255, 255, 0.85) !important;
-                    color: #004d61 !important;
-                }
-
-            /*  客服訊息反白樣式 */
-            .chat-bubble.other,
-            .chat-bubble.other * {
-                user-select: text !important;
-                -webkit-user-select: text !important;
-            }
-
-                .chat-bubble.other::selection,
-                .chat-bubble.other *::selection {
-                    background: rgba(126, 200, 227, 0.4) !important;
-                    color: #000 !important;
-                }
-
-            /* 自己訊息的顏色與圓角調整 */
-            .chat-bubble.me {
-                background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
-                color: #fff;
-                border-bottom-right-radius: .3em;
-            }
-
-            /* 他人訊息的顏色與圓角調整 */
-            .chat-bubble.other {
-                background: #f4f7fa;
-                color: #234;
-                border-bottom-left-radius: .3em;
-            }
-
-        /* 訊息 metadata（例如姓名、時間、身分） */
-        .chat-meta {
-            font-size: 0.9em;
-            opacity: .7;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .empty-chat-placeholder {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            min-height: 55vh;
-            color: #666;
-            text-align: center;
-        }
-
-            .empty-chat-placeholder i {
-                font-size: 2.5rem;
-                color: #9ab;
-                margin-bottom: .75rem;
-            }
-        /* 讓客服資訊永遠在最上方顯示 */
-        .ticket-info-bar {
-            font-size: 0.95rem;
-            color: #234;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 1.2rem;
-        }
-
-        .spinner-border {
-            animation-duration: 0.8s !important;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #7ec8e3, #b4e1eb);
-        }
-
-        /* ====================== 星級評價 ====================== */
-        /* 星星互動樣式（若未使用 JS 控制，僅外觀） */
-        .star {
-            cursor: pointer;
-            font-size: 1.8rem;
-            color: #ddd;
-            transition: color 0.2s;
-        }
-
-            .star.active {
-                color: #f4b400;
-            }
-
-        /* ====================== 三欄布局 ====================== */
-        /* 使用彈性盒三欄排版，會根據寬度換行 */
-        .equal-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1.5rem;
-            align-items: stretch;
-        }
-
-        .equal-col {
-            flex: 1;
-            min-width: 280px;
-            display: flex;
-            flex-direction: column;
-        }
-
-            /* 每欄內的卡片讓內容垂直填滿 */
-            .equal-col > .support-card {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-
-        /* 行動裝置斷點：窄螢幕時改為直列 */
-        @@media (max-width: 992px) {
-            .equal-row {
-                flex-direction: column;
-            }
-        }
-
-        /* ====================== 附件預覽 ====================== */
-        .attach-preview {
-            margin-top: 8px;
-        }
-
-            .attach-preview img {
-                max-width: 220px;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px #0002;
-            }
-
-        /* ====================== 下拉選單顏色調整 ====================== */
-        .form-select,
-        .form-select option {
-            color: #222 !important; /* 黑色文字 */
-            background-color: #fff !important; /* 白色背景 */
-        }
-
-            /* hover 或 focus 時，讓使用者更容易看見選取效果 */
-            .form-select option:hover,
-            .form-select option:focus {
-                background-color: #e8f4ff !important; /* 淺藍背景 */
-                color: #000 !important; /* 黑字 */
-            }
-
-            /* 讓整個下拉框聚焦時邊框呈現主題色 */
-            .form-select:focus {
-                border-color: #7ec8e3 !important;
-                box-shadow: 0 0 0 0.15rem rgba(126, 200, 227, .25);
-            }
-
-        /* ====================== 輸入欄位顏色統一 ====================== */
-        .form-control {
-            color: #222 !important; /* 黑色文字 */
-            background-color: #fff !important; /* 白底 */
-            border-color: #ccc !important; /* 預設灰框 */
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-            /* 聚焦時顯示主題藍色外框 */
-            .form-control:focus {
-                border-color: #7ec8e3 !important;
-                box-shadow: 0 0 0 0.15rem rgba(126, 200, 227, .25);
-            }
-
-            /* Placeholder 顏色柔和一點 */
-            .form-control::placeholder {
-                color: #999;
-            }
-
-        /* ====================== 圖片預覽 ======================*/
-        #imagePreviewModal .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-
-        #imagePreviewModal .btn-light {
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.2s;
-        }
-
-            #imagePreviewModal .btn-light:hover {
-                opacity: 1;
-                transform: scale(1.1);
-            }
-
-        #imagePreviewModal img {
-            transition: transform 0.25s ease;
-        }
-
-            #imagePreviewModal img:hover {
-                transform: scale(1.02);
-            }
-        /* ====================== 禁用訊息區樣式 ====================== */
-        /* 完成工單或不可輸入時，顯示禁用提示 */
-        .chat-disabled {
-            background: #eef1f4;
-            border-radius: 10px;
-            padding: 12px;
-            text-align: center;
-            color: #888;
-            font-size: 0.95rem;
-        }
-    </style>
-}
-
 <!-- ====================== 主內容 ====================== -->
 <div id="chatApp" class="container mt-4 support-container">
 
     <!-- 標題列：頁面標題和建立新工單按鈕 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="fw-bold text-primary"><i class="fa-solid fa-headset me-2"></i> 客服中心</h3>
-        <!-- 建立新工單會觸發 Vue 方法 openNewTicketModal -->
-        <button class="btn btn-outline-primary" v-on:click="openNewTicketModal">
-            <i class="fa-solid fa-plus"></i> 建立新工單
-        </button>
     </div>
 
     <!-- ====================== 三欄內容 ====================== -->
@@ -572,6 +17,12 @@
         <div class="equal-col">
             <div class="support-card p-3 mb-3">
                 <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-paw"></i> 我的客服紀錄</h5>
+
+                <!-- ✅ 工單載入中提示 -->
+                <div v-if="isLoadingTickets" class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <p class="text-muted">正在載入您的工單...</p>
+                </div>
 
                 <!-- 若有工單，使用卡片網格列出所有 ticket -->
                 <div v-if="tickets && tickets.length > 0" class="ticket-grid">
@@ -583,7 +34,9 @@
                              @@mouseenter ="hoveredIndex = i"
                              @@mouseleave ="hoveredIndex = null">
 
-                            <div class="ticket-card shadow-sm p-3 position-relative">
+                            <div class="ticket-card shadow-sm p-3 position-relative"
+                                 v-on:click="openChat(t)"
+                                 style="cursor: pointer;">
                                 <h5 class="fw-bold mb-2 text-primary">
                                     <i class="fa-solid fa-clipboard-list"></i> {{ t.subject }}
                                 </h5>
@@ -611,20 +64,26 @@
                         </div>
                     </transition-group>
 
-                    <!-- 查看更多 / 收起按鈕 -->
-                    <div class="text-center mt-3">
-                        <button class="btn btn-outline-primary btn-sm rounded-pill"
-                                v-if="tickets && tickets.length > 2"
+                    <!-- ✅ 查看更多 / 收起工單（含箭頭圖示） -->
+                    <div class="text-center mt-3" v-if="tickets && tickets.length > 2">
+                        <button class="btn btn-outline-primary btn-sm rounded-pill shadow-sm px-4"
                                 v-on:click="showAll = !showAll">
+                            <i class="fa-solid me-1"
+                               :class="showAll ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                             {{ showAll ? '收起工單' : '查看更多工單' }}
                         </button>
                     </div>
+
                 </div>
 
                 <!-- 若無工單，顯示空狀態提示 -->
                 <div v-else class="text-center py-5 opacity-75">
-                    <img src="/front-end/assets/images/cutservice.png" style="width:200px">
-                    <p class="mt-3 text-muted">目前尚無工單，點右上角建立新工單 🐾</p>
+                    <img src="/front-end/assets/images/cutservice.png" style="width:200px" class="d-block mx-auto">
+                    <p class="mt-3 text-muted">目前尚無工單 🐾</p>
+                    <button class="btn btn-outline-primary mt-3 px-4 rounded-pill shadow-sm"
+                            v-on:click="openNewTicketModal">
+                        <i class="fa-solid fa-plus me-1"></i> 建立新工單
+                    </button>
                 </div>
             </div>
         </div>
@@ -661,7 +120,7 @@
                 <div class="modal-header text-white"
                      style="background: linear-gradient(90deg,#7ec8e3 60%,#b4e1eb 100%);">
                     <h5 class="modal-title mb-0">
-                        <i class="fa-solid fa-comments me-2"></i>{{ selectedTicket.subject }}
+                        <i class="fa-solid fa-comments me-2"></i>{{ selectedTicket?.subject || '客服對話' }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
@@ -669,8 +128,8 @@
                 <!-- ✅ 新增：工單資訊列（固定在標題下方） -->
                 <div class="ticket-info-bar text-dark px-4 py-2"
                      style="background:#ecf9fc; border-bottom:1px solid #d4edf3;">
-                    <b>客服人員：</b>{{ selectedTicket.employeeName || '尚未指派' }}
-                    <b class="ms-3">狀態：</b>{{ selectedTicket.statusName }}
+                    <b>客服人員：</b>{{ selectedTicket?.employeeName || '尚未指派' }}
+                    <b class="ms-3">狀態：</b>{{ selectedTicket?.statusName || '—' }}
                     <b class="ms-3">建立時間：</b>{{ formatTime(selectedTicket.createTime) }}
                 </div>
 
@@ -696,7 +155,7 @@
                          ref="dragOverlay"
                          class="drag-overlay">
                         <i class="fa-solid fa-upload fs-1 text-info mb-3"></i>
-                        <strong class="text-info fs-5">放開以上傳圖片或檔案</strong>
+                        <strong class="text-info fs-5">放開以上傳圖片（支援 PNG / JPG / GIF / WEBP）</strong>
                     </div>
 
                     <!-- 聊天內容：以 messages 陣列呈現 -->
@@ -723,26 +182,54 @@
 
                         <!-- 訊息泡泡 -->
                         <div class="chat-bubble" :class="msg.senderRole === '客戶' ? 'me' : 'other'">
+                            <!-- 有文字 -->
                             <div v-if="msg.messageContent">{{ msg.messageContent }}</div>
 
-                            <div v-if="msg.attachmentURL" class="attach-preview">
-                                <!-- 圖片 -->
-                                <img v-if="isImage(msg.attachmentURL)"
-                                     :src="msg.attachmentURL"
-                                     alt="image"
+                            <!-- ✅ 單張圖片：與文字同一排 -->
+                            <div v-else-if="imageListFrom(msg.attachmentURL).length === 1" class="d-inline-block ms-2 align-middle">
+                                <img :src="imageListFrom(msg.attachmentURL)[0]"
                                      loading="lazy"
                                      class="rounded shadow-sm"
-                                     style="max-width: 220px; cursor: zoom-in;"
-                                     v-on:click="openImagePreview(msg.attachmentURL)" />
-
-                                <!-- 其他附件 -->
-                                <a v-else
-                                   :href="msg.attachmentURL"
-                                   target="_blank"
-                                   class="text-primary d-inline-flex align-items-center gap-1">
-                                    <i class="fa-solid fa-paperclip"></i> 下載附件
-                                </a>
+                                     style="max-width: 180px; max-height: 160px; object-fit: cover; cursor: zoom-in; transition: opacity 0.3s ease; opacity: 0;"
+                                     v-on:load="$event.target.style.opacity = 1"
+                                     v-on:click="openImagePreview(imageListFrom(msg.attachmentURL)[0])" />
                             </div>
+
+                            <!-- ✅ 多張圖片才使用 2×2 佈局 -->
+                            <div v-else-if="imageListFrom(msg.attachmentURL).length > 1" class="image-grid mt-2">
+                                <img v-for="(u, idx) in imageListFrom(msg.attachmentURL)"
+                                     :key="idx"
+                                     :src="u"
+                                     alt="image"
+                                     loading="lazy"
+                                     v-on:load="$event.target.style.opacity = 1"
+                                     v-on:click="openImagePreview(u)"
+                                     style="opacity: 0; transition: opacity 0.3s ease;" />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 評價表單：僅未評價時出現 -->
+                    <div v-if="selectedTicket.statusName === '已完成' && !hasFeedback" class="p-3 bg-white rounded shadow-sm mt-3">
+                        <h6 class="fw-bold text-primary mb-2">
+                            <i class="fa-solid fa-star"></i> 請對本次服務留下評價
+                        </h6>
+                        <div class="d-flex justify-content-center mb-3">
+                            <i v-for="n in 5" :key="n"
+                               class="fa-star"
+                               :class="n <= feedback.rating ? 'fa-solid text-warning' : 'fa-regular text-secondary'"
+                               v-on:click="feedback.rating = n"
+                               style="font-size:1.8rem;cursor:pointer;"></i>
+                        </div>
+                        <textarea v-model="feedback.comment"
+                                  class="form-control mb-3"
+                                  rows="2"
+                                  placeholder="留下您的寶貴意見（選填）"></textarea>
+                        <div class="text-center">
+                            <button class="btn btn-outline-primary" v-on:click="submitFeedback">
+                                <i class="fa-solid fa-paper-plane"></i> 送出評價
+                            </button>
                         </div>
                     </div>
 
@@ -812,7 +299,7 @@
                                type="text"
                                class="form-control"
                                placeholder="輸入訊息..."
-                               v-on:keydown.enter.exact.prevent="handleEnter" />
+                               @@keyup.enter ="handleEnter" />
 
                         <button class="btn btn-outline-primary px-4"
                                 v-on:click="sendMessage">
@@ -902,6 +389,7 @@
 </div>
 
 @section Scripts {
+
     <script>
         const { createApp, ref, onMounted, nextTick } = Vue;
 
@@ -909,6 +397,7 @@
             setup() {
                 const tickets = ref([]);
                 const selectedTicket = ref({});
+                const isLoadingTickets = ref(false);
                 const messages = ref([]);
                 const feedback = ref({ rating: 0, comment: '', createTime: '' });
                 const hasFeedback = ref(false);
@@ -930,42 +419,65 @@
                 let imagePreviewModal;
                 let newTicketModal;
                 let chatModal;
+                let connection;
 
                 // ====================== Vue Mounted ======================
                 onMounted(async () => {
-                    await loadTickets();
-                    await loadTicketCategories();
+                await loadTickets();
+                await loadTicketCategories();
 
-                    // ←→ 鍵盤圖片切換（如果 image preview modal 有 .show class）
-                    document.addEventListener('keydown', e => {
-                      const modalEl = document.getElementById('imagePreviewModal');
-                      if (!modalEl || !modalEl.classList.contains('show')) return;
-                      if (e.key === 'ArrowLeft') prevImage();
-                      if (e.key === 'ArrowRight') nextImage();
-                    });
+                // ←→ 鍵盤圖片切換（如果 image preview modal 有 .show class）
+                document.addEventListener('keydown', e => {
+                    const modalEl = document.getElementById('imagePreviewModal');
+                    if (!modalEl || !modalEl.classList.contains('show')) return;
+                    if (e.key === 'ArrowLeft') prevImage();
+                    if (e.key === 'ArrowRight') nextImage();
                 });
+
+                // ✅ 若網址有 ticketId 參數 → 自動開啟對應工單聊天室
+                const urlParams = new URLSearchParams(window.location.search);
+                const ticketId = urlParams.get('ticketId');
+                if (ticketId) {
+                const target = tickets.value.find(t => t.ticketID == ticketId);
+                if (target) {
+                    await nextTick();
+                    openChat(target);
+                } else {
+                        setTimeout(() => {
+                        const t2 = tickets.value.find(t => t.ticketID == ticketId);
+                        if (t2) openChat(t2);
+                        }, 800);
+                    }
+                }
+
+                // ✅ 新增：Modal 關閉後清除快取實例
+                ['chatModal', 'newTicketModal', 'imagePreviewModal'].forEach(id => {
+                const el = document.getElementById(id);
+                el?.addEventListener('hidden.bs.modal', () => {
+                        window[id] = null; // 清除舊實例
+                     });
+                });
+            });
+
 
                 // ====================== 工單載入 ======================
                 async function loadTickets() {
+                    isLoadingTickets.value = true;
                     try {
-                    const scrollEl = document.querySelector('.ticket-grid');
-                    const prevScrollTop = scrollEl?.scrollTop || 0;
-
-                    const res = await axios.get('/CustomersArea/CustomerService/GetTickets');
-                    if (res.data.success) {
-                        const list = Array.isArray(res.data.tickets) ? res.data.tickets : [];
-                        tickets.value = list.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
-                    }
-
-                        await nextTick();
-                        const scrollTarget = document.querySelector('.ticket-grid');
-                        if (scrollTarget) scrollTarget.scrollTop = prevScrollTop; // 或 scrollEl.scrollTop = prevScrollTop;
+                        const res = await axios.get('/CustomersArea/CustomerService/GetTickets');
+                        if (res.data.success) {
+                            const list = Array.isArray(res.data.tickets) ? res.data.tickets : [];
+                            tickets.value = list.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+                        }
                     } catch (err) {
-                        console.error(err);
+                        console.error('API 錯誤：', err.response?.data || err.message);
                         showAlert('error', '載入失敗', '無法取得工單資料');
                         tickets.value = [];
+                    } finally {
+                        isLoadingTickets.value = false;
                     }
                 }
+
 
                 async function loadTicketCategories() {
                     try {
@@ -980,14 +492,29 @@
 
                 // ====================== 開啟新工單 ======================
                 function openNewTicketModal() {
-                    if (!newTicketModal) {
-                        const modalEl = document.getElementById('newTicketModal');
-                        if (modalEl) newTicketModal = new bootstrap.Modal(modalEl);
-                    }
                     newTicket.value = { subject: '', description: '', ticketTypeID: '' };
-                    newTicketModal.show();
+                    getModal('newTicketModal').show();
                 }
 
+                // ====================== 共用 Modal 取得函式 ======================
+                function getModal(id) {
+                    const el = document.getElementById(id);
+                    if (!el) {
+                        console.warn(`[getModal] 找不到元素 #${id}`);
+                        return null;
+                    }
+
+                    // 取得或建立 Bootstrap Modal 實例
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(el);
+
+                    // 將實例快取起來（可選）
+                    window[id] = modalInstance;
+
+                    // ✅ 關鍵：一定要 return modalInstance！
+                    return modalInstance;
+                }
+
+                // ====================== 提交新工單 ======================
                 async function submitNewTicket() {
                     if (!newTicket.value.subject || !newTicket.value.description || !newTicket.value.ticketTypeID) {
                         showAlert('warning', '請完整填寫', '主旨、描述與分類皆為必填');
@@ -1014,82 +541,154 @@
                     }
                 }
 
-                // ====================== 開啟聊天室 ======================
-                async function openChat(ticket) {
-                    selectedTicket.value = ticket;
-                    await nextTick();
-
-                    if (!chatModal) {
-                        const modalEl = document.getElementById('chatModal');
-                        if (modalEl) chatModal = new bootstrap.Modal(modalEl);
+                // ======================= SignalR 初始化 ======================
+                async function initSignalR(ticketId) {
+                    // 若已有連線，先中止舊的（避免重複加入群組）
+                    if (connection) {
+                        try { await connection.stop(); } catch (err) { console.warn('舊連線關閉失敗', err); }
                     }
 
-                    chatModal.show();
-                    messages.value = [];
-                    isLoadingMessages.value = true;
 
-                    try {
+                    connection = new signalR.HubConnectionBuilder()
+                        .withUrl("/ticketChatHub")
+                        .withAutomaticReconnect()
+                        .configureLogging(signalR.LogLevel.Information)
+                        .build();
+
+                    // 監聽從後端推來的訊息
+                    connection.on("ReceiveMessage", (msg) => {
+                        console.log("📩 收到即時訊息：", msg);
+
+                        if (parseInt(msg.ticketID) === parseInt(selectedTicket.value?.ticketID)) {
+                            // 🔹 若有暫存訊息（相同內容）先移除
+                            const idx = messages.value.findIndex(m =>
+                                !m.messageID &&
+                                m.senderRole === '客戶' &&
+                                m.messageContent === msg.messageContent
+                            );
+                            if (idx !== -1) messages.value.splice(idx, 1);
+
+                            // 再加入正式訊息
+                            messages.value.push({
+                                messageID: msg.messageID,
+                                messageContent: msg.messageContent,
+                                sentTime: msg.sentTime,
+                                senderDisplayName: msg.senderDisplayName,
+                                senderRole: msg.senderRole,
+                                attachmentURL: msg.attachmentURL
+                            });
+
+                            setTimeout(scrollToBottom, 150);
+                        }
+                    });
+
+
+                    // 啟動連線
+                    await connection.start();
+                    console.log("✅ SignalR 連線成功");
+
+                    // 加入該工單群組
+                    await connection.invoke("JoinTicketGroup", ticketId);
+                    console.log(`👥 已加入群組 ticket-${ticketId}`);
+                }
+
+
+                // ====================== 開啟聊天室 ======================
+                async function openChat(ticket) {
+                      selectedTicket.value = ticket;
+                      messages.value = [];
+                      isLoadingMessages.value = true;
+
+                      // ✅ 立即顯示空白 Modal + loading 動畫
+                      await nextTick();
+                      const modal = getModal('chatModal');
+                      if (modal) modal.show();
+
+                      try {
+                        // 取得工單訊息
                         const res = await axios.get('/CustomersArea/CustomerService/GetMessages', {
-                            params: { ticketId: ticket.ticketID }
+                          params: { ticketId: ticket.ticketID }
                         });
 
-                    if (res.data.success) {
-                        const raw = Array.isArray(res.data.messages) ? res.data.messages : [];
-                        messages.value = raw.map(msg => ({
+                        if (res.data.success) {
+                          const raw = Array.isArray(res.data.messages) ? res.data.messages : [];
+                          messages.value = raw.map(msg => ({
                             messageID: msg.messageID,
                             messageContent: msg.messageContent,
                             sentTime: msg.sentTime,
                             senderDisplayName: msg.senderDisplayName,
                             senderRole: msg.senderRole,
                             attachmentURL: msg.attachmentURL
-                        }));
-                        await nextTick();
-                        scrollToBottom();
-                    }
-
-
-                        if (ticket.statusName === '已完成') {
-                            try {
-                                const fbStatus = await axios.get('/CustomersArea/CustomerService/GetFeedbackStatus', {
-                                    params: { ticketId: ticket.ticketID }
-                                });
-                                if (fbStatus.data.success && fbStatus.data.hasFeedback) {
-                                    hasFeedback.value = true;
-                                    const fbDetail = await axios.get('/CustomersArea/CustomerService/GetFeedbackDetail', {
-                                        params: { ticketId: ticket.ticketID }
-                                    });
-                                    if (fbDetail.data.success) feedback.value = fbDetail.data.feedback;
-                                } else {
-                                    hasFeedback.value = false;
-                                    feedback.value = { rating: 0, comment: '', createTime: '' };
-                                }
-                            } catch {
-                                showAlert('error', '錯誤', '載入評價失敗');
-                            }
-                        } else {
-                            hasFeedback.value = false;
-                            feedback.value = { rating: 0, comment: '', createTime: '' };
+                          }));
                         }
-                        // ✅ 到這裡都在 openChat 的 try 裡
-                    } catch (err) {
+
+                        // ✅ 若工單已完成，載入評價資料
+                        if (ticket.statusName === '已完成') {
+                          try {
+                            const fbStatus = await axios.get('/CustomersArea/CustomerService/GetFeedbackStatus', {
+                              params: { ticketId: ticket.ticketID }
+                            });
+                            if (fbStatus.data.success && fbStatus.data.hasFeedback) {
+                              hasFeedback.value = true;
+                              const fbDetail = await axios.get('/CustomersArea/CustomerService/GetFeedbackDetail', {
+                                params: { ticketId: ticket.ticketID }
+                              });
+                              if (fbDetail.data.success) feedback.value = fbDetail.data.feedback;
+                            } else {
+                              hasFeedback.value = false;
+                              feedback.value = { rating: 0, comment: '', createTime: '' };
+                            }
+                          } catch {
+                            showAlert('error', '錯誤', '載入評價失敗');
+                          }
+                        } else {
+                          hasFeedback.value = false;
+                          feedback.value = { rating: 0, comment: '', createTime: '' };
+                        }
+
+                        await nextTick();
+
+                        // ✅ 監聽 Bootstrap modal 動畫完成後再滾動
+                        const modalEl = document.getElementById('chatModal');
+                        if (modalEl) {
+                            modalEl.addEventListener('shown.bs.modal', () => {
+                                scrollToBottom();
+                            }, { once: true });
+                        }
+
+                        // ✅ 初始化 SignalR 連線
+                        await initSignalR(ticket.ticketID);
+
+
+                      } catch (err) {
                         console.error(err);
                         showAlert('error', '載入失敗', '無法載入聊天內容');
-                    } finally {
+                      } finally {
                         setTimeout(() => (isLoadingMessages.value = false), 300);
-                    }
+                      }
                 }
 
+
+
                 // ====================== 傳送訊息 ======================
-                async function sendMessage(attachmentUrl = '') {
+                async function sendMessage(attachmentUrl = '', images = []) {
                     try {
-                        if (attachmentUrl && typeof attachmentUrl !== 'string') attachmentUrl = '';
                         if (!selectedTicket.value?.ticketID) {
                             showAlert('warning', '請先選擇工單', '請先開啟一個客服對話');
                             return;
                         }
 
                         const content = (newMessage.value || '').trim();
-                        if (!content && !attachmentUrl) {
+
+                        // 若有多張圖片，合併為同一則
+                        let attachmentPayload = '';
+                        if (Array.isArray(images) && images.length) {
+                            attachmentPayload = images.join(',');
+                        } else if (attachmentUrl) {
+                            attachmentPayload = attachmentUrl;
+                        }
+
+                        if (!content && !attachmentPayload) {
                             showAlert('info', '沒有輸入內容', '請輸入訊息或上傳附件');
                             return;
                         }
@@ -1097,38 +696,61 @@
                         const payload = {
                             ticketID: selectedTicket.value.ticketID,
                             MessageContent: content,
-                            AttachmentURL: attachmentUrl || ''
+                            AttachmentURL: attachmentPayload
                         };
 
+                        // ✅ 這裡不再 push 前端暫存訊息
                         const res = await axios.post('/CustomersArea/CustomerService/SendMessage', payload, {
                             headers: { 'Content-Type': 'application/json' }
                         });
 
-                        if (res.data.success) {
-                            messages.value.push({
-                                senderRole: '客戶',
-                                senderDisplayName: '我',
-                                messageContent: content,
-                                attachmentURL: attachmentUrl,
-                                sentTime: new Date().toISOString(),
-                                senderRole: selectedTicket.value.isEmployee ? '員工' : '客戶'
-                            });
-
-                            newMessage.value = '';
-                            await nextTick();
-                            scrollToBottom();
-                        } else {
+                        if (!res.data.success) {
                             showAlert('error', '傳送失敗', res.data.message || '請稍後再試');
                         }
-                    } catch {
+
+                        // ✅ 清空輸入框並滾到底
+                        newMessage.value = '';
+                        setTimeout(scrollToBottom, 150);
+                    } catch (err) {
+                        console.error(err);
                         showAlert('error', '錯誤', '訊息傳送失敗，請稍後再試');
                     }
                 }
 
+            // ====================== 評價功能 ======================
+            async function submitFeedback() {
+                if (feedback.value.rating === 0) {
+                    showAlert('warning', '尚未評分', '請至少選擇一顆星星');
+                    return;
+                }
+
+                const payload = {
+                    TicketID: selectedTicket.value.ticketID,
+                    Rating: feedback.value.rating,
+                    Comment: feedback.value.comment.trim()
+                };
+
+                try {
+                    const res = await axios.post('/CustomersArea/CustomerService/SubmitFeedback', payload);
+                    if (res.data.success) {
+                        showAlert('success', '感謝您的回饋！', '已成功送出評價');
+                        hasFeedback.value = true;
+                        await loadTickets();
+                    } else {
+                        showAlert('info', '已評價過', res.data.message || '');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showAlert('error', '評價失敗', '請稍後再試');
+                }
+            }
+
+
+
+
                 // ====================== 處理 Enter 輸入（避免中文誤送） ======================
                 function handleEnter(e) {
-                    // 因為在 template 使用了 .prevent，這裡只需要處理 composing 狀態
-                    if (e.isComposing) return;
+                    if (e.isComposing) return; // 保留中文組字保護
                     sendMessage();
                 }
 
@@ -1136,23 +758,38 @@
                 async function handleFiles(e) {
                     const files = Array.from(e.target.files || []);
                     if (files.length === 0) return;
+
+                    // ✅ 數量上限檢查
+                    if (files.length > 5) {
+                        showAlert('warning', '超出上限', '一次最多只能上傳 5 張圖片');
+                        e.target.value = '';
+                        return;
+                    }
+
+                    // ✅ 格式檢查
+                    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+                    const invalidFiles = files.filter(f => !allowed.includes(f.type));
+                    if (invalidFiles.length > 0) {
+                        showAlert('warning', '格式錯誤', '僅支援圖片格式（PNG、JPG、GIF、WEBP）');
+                        e.target.value = '';
+                        return;
+                    }
+
+                    // ✅ 檔案大小限制（每檔不得超過 10MB）
+                    const oversize = files.filter(f => f.size > 10 * 1024 * 1024);
+                    if (oversize.length > 0) {
+                        showAlert('warning', '檔案過大', `有 ${oversize.length} 張圖片超過 10MB，請重新選擇`);
+                        e.target.value = '';
+                        return;
+                    }
+
                     if (!selectedTicket.value.ticketID) {
                         showAlert('warning', '請先選擇工單', '開啟對話後再上傳附件');
                         e.target.value = '';
                         return;
                     }
 
-                    const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
-
-                    const invalidFiles = files.filter(f => !allowed.includes(f.type));
-                    if (invalidFiles.length > 0) {
-                        showAlert('warning', '格式錯誤', '僅支援上傳圖片格式（PNG、JPG、GIF、WEBP）');
-
-                        e.target.value = '';
-                        return;
-                    }
-
-
+                    // ✅ 通過檢查才開始上傳
                     const form = new FormData();
                     files.forEach(f => form.append('files', f));
 
@@ -1167,12 +804,17 @@
                             }
                         });
 
-                        if (resp.data.success && Array.isArray(resp.data.urls)) {
-                            for (const url of resp.data.urls) await sendMessage(url);
-                            showAlert('success', '上傳完成', `${resp.data.urls.length} 個附件已上傳`);
-                        } else {
-                            showAlert('error', '上傳失敗', resp.data.message || '請稍後再試');
-                        }
+                    // handleFiles 成功上傳後：
+                    if (resp.data.success && Array.isArray(resp.data.urls)) {
+                      // ✅ 每 4 張合併成一則訊息
+                      const groups = chunk(resp.data.urls, 4);
+                      for (const group of groups) {
+                        await sendMessage('', group);
+                      }
+                      showAlert('success', '上傳完成', `${resp.data.urls.length} 張圖片已上傳`);
+                    } else {
+                      showAlert('error', '上傳失敗', resp.data.message || '請稍後再試');
+                    }
                     } catch {
                         showAlert('error', '錯誤', '上傳附件時發生錯誤');
                     } finally {
@@ -1211,31 +853,43 @@
                 async function onDrop(e) {
                     e.preventDefault();
                     isDragOver.value = false;
-                    dragCounter = 0; // 重置計數
-
-                    // 移除 wheel listener（避免殘留）
-                    const overlay = document.querySelector('#chatModal .modal-body .drag-overlay');
-                    if (overlay) overlay.removeEventListener('wheel', overlayWheelHandler);
+                    dragCounter = 0;
 
                     const files = Array.from(e.dataTransfer.files || []);
                     if (files.length === 0) return;
-                    if (!selectedTicket.value || !selectedTicket.value.ticketID) {
-                        showAlert('warning', '請先選擇工單', '開啟對話後再上傳附件');
-                        return;
-                    }
-                    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
-                    const allowedExt = ['.png', '.jpg', '.jpeg', '.gif', '.webp'];
-                    const invalidFiles = files.filter(f => {
-                        const ext = f.name.toLowerCase().slice(f.name.lastIndexOf('.'));
-                        return !allowedTypes.includes(f.type) && !allowedExt.includes(ext);
-                    });
-                    if (invalidFiles.length > 0) {
-                        showAlert('warning', '格式錯誤', '僅支援上傳圖片格式（PNG、JPG、GIF、WEBP）');
+
+                    // ✅ 數量上限
+                    if (files.length > 5) {
+                        showAlert('warning', '超出上限', '一次最多只能拖曳 5 張圖片');
                         return;
                     }
 
+                    // ✅ 檢查是否選擇工單
+                    if (!selectedTicket.value || !selectedTicket.value.ticketID) {
+                        showAlert('warning', '請先選擇工單', '開啟對話後再上傳圖片');
+                        return;
+                    }
+
+                    // ✅ 僅允許圖片格式
+                    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+                    const invalidFiles = files.filter(f => !allowedTypes.includes(f.type));
+
+                    if (invalidFiles.length > 0) {
+                        showAlert('warning', '格式錯誤', '僅支援上傳圖片（PNG、JPG、GIF、WEBP）');
+                        return;
+                    }
+
+                    // ✅ 檔案大小限制（10MB）
+                    const oversize = files.filter(f => f.size > 10 * 1024 * 1024);
+                    if (oversize.length > 0) {
+                        showAlert('warning', '檔案過大', `有 ${oversize.length} 張圖片超過 10MB`);
+                        return;
+                    }
+
+                    // ✅ 開始上傳
                     const form = new FormData();
                     files.forEach(f => form.append('files', f));
+
                     isUploading.value = true;
                     uploadProgress.value = 0;
 
@@ -1246,21 +900,27 @@
                                 if (evt.total) uploadProgress.value = Math.round((evt.loaded * 100) / evt.total);
                             }
                         });
-
-                        if (resp.data.success && Array.isArray(resp.data.urls)) {
-                            for (const url of resp.data.urls) await sendMessage(url);
-                            showAlert('success', '上傳完成', `${resp.data.urls.length} 個附件已上傳`);
+                    if (resp.data.success && Array.isArray(resp.data.urls)) {
+                          const groups = chunk(resp.data.urls, 4);
+                          for (const group of groups) {
+                            await sendMessage('', group);
+                          }
+                          showAlert('success', '上傳完成', `${resp.data.urls.length} 張圖片已上傳`);
                         } else {
-                            showAlert('error', '上傳失敗', resp.data.message || '請稍後再試');
+                          showAlert('error', '上傳失敗', resp.data.message || '請稍後再試');
                         }
                     } catch (err) {
                         console.error(err);
-                        showAlert('error', '錯誤', '上傳附件時發生錯誤');
+                        showAlert('error', '錯誤', '圖片上傳時發生錯誤');
                     } finally {
                         isUploading.value = false;
                         uploadProgress.value = 0;
+                        const overlay = document.querySelector('#chatModal .modal-body .drag-overlay');
+                        if (overlay) overlay.removeEventListener('wheel', overlayWheelHandler);
                     }
                 }
+
+
 
                 function onDragLeave(e) {
                     e.preventDefault();
@@ -1285,19 +945,15 @@
                 }
 
                 // ====================== 圖片預覽 ======================
-                function isImage(url) { return /\.(png|jpe?g|gif|webp)$/i.test(url); }
-                function isPdf(url) { return /\.pdf$/i.test(url); }
-
                 function openImagePreview(url) {
-                    imageList.value = messages.value.filter(m => m.attachmentURL && isImage(m.attachmentURL)).map(m => m.attachmentURL);
-                    currentImageIndex.value = imageList.value.indexOf(url);
+                    const allImages = messages.value.flatMap(m => imageListFrom(m.attachmentURL));
+                    if (!allImages.includes(url)) return; 
+                    imageList.value = allImages;
+                    currentImageIndex.value = allImages.indexOf(url);
                     previewImageUrl.value = url;
-                    if (!imagePreviewModal) {
-                        const modalEl = document.getElementById('imagePreviewModal');
-                        if (modalEl) imagePreviewModal = new bootstrap.Modal(modalEl);
-                    }
-                    imagePreviewModal.show();
+                    getModal('imagePreviewModal').show();
                 }
+
 
                 function prevImage() {
                     if (!imageList.value.length) return;
@@ -1311,8 +967,50 @@
                     previewImageUrl.value = imageList.value[currentImageIndex.value];
                 }
 
+                // ====================== 多張圖片 2×2 佈局 ======================
+                // 將 attachmentURL（可能是字串/逗號字串/陣列/空）轉成圖片陣列
+                function imageListFrom(attachmentURL) {
+                  if (!attachmentURL) return [];
+
+                  // ✅ 若是 JSON 格式字串，先嘗試解析
+                  if (typeof attachmentURL === 'string' && attachmentURL.trim().startsWith('[')) {
+                    try {
+                      const parsed = JSON.parse(attachmentURL);
+                      if (Array.isArray(parsed)) return parsed.map(normalizeUrl).filter(isImageUrl);
+                    } catch { /* 忽略錯誤 */ }
+                  }
+
+                  // ✅ 若是陣列
+                  if (Array.isArray(attachmentURL)) {
+                    return attachmentURL.map(normalizeUrl).filter(isImageUrl);
+                  }
+
+                  // ✅ 若是逗號分隔字串
+                  return attachmentURL
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean)
+                    .map(normalizeUrl)
+                    .filter(isImageUrl);
+                }
+
+                // ✅ 確保 URL 格式完整（ImgBB / 本地 皆可顯示）
+                function normalizeUrl(u) {
+                  if (!u) return '';
+                  if (/^https?:\/\//i.test(u)) return u; // 外部圖（ImgBB）
+                  return '/' + u.replace(/^\/+/, '');   // 本地路徑補 /
+                }
+
+                // ✅ 判斷是否為圖片
+                function isImageUrl(url) {
+                  return /\.(png|jpe?g|gif|webp)$/i.test(String(url || ''));
+                }
+
+
+
                 // ====================== 工具 ======================
-                function scrollToBottom() {
+                async function scrollToBottom() {
+                    await nextTick();
                     const el = document.querySelector('#chatModal .modal-body');
                     if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
                 }
@@ -1321,18 +1019,25 @@
                     return iso ? new Date(iso).toLocaleString() : '';
                 }
 
+                // 把陣列切成每組 N
+                function chunk(arr, size) {
+                  const out = [];
+                  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+                  return out;
+                }
 
                 return {
-                    tickets, selectedTicket, messages, newMessage, showAll,
-                    feedback, hasFeedback, fileInput, ticketTypes, newTicket,
-                    openChat, sendMessage, triggerFile, handleFiles,
-                    formatTime, openNewTicketModal, submitNewTicket,
-                    isImage, isPdf, openImagePreview, previewImageUrl,
-                    imageList, currentImageIndex, prevImage, nextImage,
-                    isLoadingMessages, uploadProgress, isUploading, isDragOver,
-                    onDragEnter, onDragOver, onDragLeave, onDrop, handleEnter,
-                    overlayWheelHandler,hoveredIndex
+                  tickets, selectedTicket, messages, newMessage, showAll,
+                  feedback, hasFeedback, fileInput, ticketTypes, newTicket,
+                  openChat, sendMessage, triggerFile, handleFiles,
+                  formatTime, openNewTicketModal, submitNewTicket,
+                  openImagePreview, previewImageUrl,submitFeedback,
+                  imageList, currentImageIndex, prevImage, nextImage,
+                  isLoadingMessages, uploadProgress, isUploading, isDragOver,
+                  onDragEnter, onDragOver, onDragLeave, onDrop, handleEnter,
+                  overlayWheelHandler, hoveredIndex, submitFeedback, imageListFrom
                 };
+
             }
         }).mount('#chatApp');
     </script>

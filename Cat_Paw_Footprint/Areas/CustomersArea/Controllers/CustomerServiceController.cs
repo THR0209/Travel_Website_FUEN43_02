@@ -51,7 +51,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// GET: /CustomersArea/CustomerService/Index
 		/// </summary>
 		/// <returns></returns>
-		[HttpGet("")]
+		[HttpGet]
 		public IActionResult Index() => View();
 
 		// ======================= 取得工單列表 =======================
@@ -61,7 +61,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// GET: /CustomersArea/CustomerService/GetTickets
 		/// </summary>
 		/// <returns></returns>
-		[HttpGet("")]
+		[HttpGet]
 		public async Task<IActionResult> GetTickets()
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -93,7 +93,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// ======================= 建立新工單 =======================
-		[HttpPost("")]
+
+		/// <summary>
+		/// 建立新客服工單（前台客戶端）
+		/// </summary>
+		/// <param name="vm"></param>
+		/// <returns></returns>
+		[HttpPost]
 		public async Task<IActionResult> CreateTicket([FromBody] CustomerSupportTicketViewModel vm)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -164,7 +170,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// </summary>
 		/// <param name="ticketId"></param>
 		/// <returns></returns>
-		[HttpGet("")]
+		[HttpGet]
 		public async Task<IActionResult> GetMessages(int ticketId)
 		{
 			var msgs = await _msgService.GetByTicketIdAsync(ticketId, 0, 50);
@@ -179,7 +185,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// </summary>
 		/// <param name="vm"></param>
 		/// <returns></returns>
-		[HttpPost("")]
+		[HttpPost]
 		public async Task<IActionResult> SendMessage([FromBody] CustomerSupportMessageViewModel vm)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -203,19 +209,29 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(new { success = true, message = msg });
 		}
 
-		// ======================= 上傳附件 =======================
+		// ======================= 單檔上傳附件 =======================
 
 		/// <summary>
-		/// 上傳附件 API（共用 Service）
+		/// 上傳聊天圖片（共用 Service）
 		/// POST: /CustomersArea/CustomerService/UploadAttachment
 		/// </summary>
-		/// <param name="file"></param>
-		/// <returns></returns>
-		[HttpPost("")]
+		[HttpPost]
 		public async Task<IActionResult> UploadAttachment(IFormFile file)
 		{
 			try
 			{
+				if (file == null)
+					return BadRequest(new { success = false, message = "未選擇任何圖片。" });
+
+				// 格式白名單
+				string[] allowedTypes = { "image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf" };
+				if (!allowedTypes.Contains(file.ContentType))
+					return BadRequest(new { success = false, message = "僅支援圖片或 PDF 檔案。" });
+
+				// 檔案大小上限
+				if (file.Length > 10 * 1024 * 1024)
+					return BadRequest(new { success = false, message = "檔案大小超過 10MB。" });
+
 				var url = await _attachmentService.SaveFileAsync(file);
 				return Ok(new { success = true, url });
 			}
@@ -225,6 +241,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 		}
 
+
+
 		// ======================= 多檔上傳附件 =======================
 
 		/// <summary>
@@ -233,19 +251,45 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// </summary>
 		/// <param name="files"></param>
 		/// <returns></returns>
-		[HttpPost("")]
+		[HttpPost]
 		public async Task<IActionResult> UploadMultipleAttachments(List<IFormFile> files)
 		{
 			try
 			{
+				// 1️ 檢查是否有上傳檔案
 				if (files == null || files.Count == 0)
 					return BadRequest(new { success = false, message = "未選擇任何檔案。" });
 
-				// ✅ 一次啟動所有上傳任務
+				// 2️ 限制檔案數量（例如最多 5 個）
+				if (files.Count > 5)
+					return BadRequest(new { success = false, message = "一次最多只能上傳 5 個檔案。" });
+
+				// 3️ 檔案格式限制（允許圖片 / PDF）
+				string[] allowedTypes = { "image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf" };
+				var invalidFiles = files.Where(f => !allowedTypes.Contains(f.ContentType)).ToList();
+				if (invalidFiles.Any())
+					return BadRequest(new
+					{
+						success = false,
+						message = "僅支援圖片或 PDF 格式。",
+						files = invalidFiles.Select(f => f.FileName)
+					});
+
+				// 4️ 檔案大小限制（例如：每檔 10MB 以下）
+				long maxSize = 10 * 1024 * 1024; // 10MB
+				var oversizeFiles = files.Where(f => f.Length > maxSize).ToList();
+				if (oversizeFiles.Any())
+					return BadRequest(new
+					{
+						success = false,
+						message = "部分檔案超過 10MB，請重新上傳。",
+						files = oversizeFiles.Select(f => f.FileName)
+					});
+
+				// 5️ 上傳
 				var uploadTasks = files.Select(f => _attachmentService.SaveFileAsync(f));
 				var urls = await Task.WhenAll(uploadTasks);
 
-				// ✅ 成功後回傳所有網址
 				return Ok(new { success = true, urls });
 			}
 			catch (Exception ex)
@@ -253,8 +297,6 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				return BadRequest(new { success = false, message = ex.Message });
 			}
 		}
-
-
 
 		// ======================= 評價 =======================
 
@@ -264,7 +306,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// </summary>
 		/// <param name="vm"></param>
 		/// <returns></returns>
-		[HttpPost("")]
+		[HttpPost]
 		public async Task<IActionResult> SubmitFeedback([FromBody] FeedbackViewModel vm)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -308,7 +350,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// GET: /CustomersArea/CustomerService/GetTicketTypes
 		/// </summary>
 		/// <returns></returns>
-		[HttpGet("")]
+		[HttpGet]
 		public async Task<IActionResult> GetTicketTypes()
 		{
 			try
@@ -337,7 +379,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// </summary>
 		/// <param name="ticketId"></param>
 		/// <returns></returns>
-		[HttpGet("")]
+		[HttpGet]
 		public async Task<IActionResult> GetFeedbackStatus(int ticketId)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;
@@ -357,7 +399,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		/// </summary>
 		/// <param name="ticketId"></param>
 		/// <returns></returns>
-		[HttpGet("")]
+		[HttpGet]
 		public async Task<IActionResult> GetFeedbackDetail(int ticketId)
 		{
 			var customerIdStr = User.FindFirst("CustomerId")?.Value;

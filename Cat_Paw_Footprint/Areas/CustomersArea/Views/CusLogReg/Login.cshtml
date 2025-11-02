@@ -7,7 +7,7 @@
 }
 <meta name="csrf-token" content="@tokens.RequestToken" />
 
-<div id="app">
+<div id="app" class="login-wrapper">
     <div class="card">
         <h3 class="text-center mb-4 fw-bold">會員登入</h3>
 
@@ -29,11 +29,11 @@
             <div v-for="(err, idx) in errors" :key="idx">{{ err }}</div>
         </div>
 
-        <div class="bottom-links">
+        <div class="bottom-links mt-3 text-center">
             <a asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="Register" class="text-decoration-none">會員註冊</a>
-            <span>|</span>
+            <span class="mx-1">|</span>
             <a asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="ForgotPassword" class="text-decoration-none">忘記密碼</a>
-            <span>|</span>
+            <span class="mx-1">|</span>
             <a href="/CustomersArea/guest-join.html" class="text-decoration-none">訪客對話</a>
         </div>
     </div>

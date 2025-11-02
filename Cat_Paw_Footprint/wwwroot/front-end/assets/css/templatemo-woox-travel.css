@@ -17,8 +17,31 @@ https://templatemo.com/tm-580-woox-travel
 04. 文字與連結
 05. 通用按鈕樣式
 06. 通用卡片樣式
-07. Header / Navigation
-08. Hero / Banner 區塊
+07. HEADER 導覽列與 LOGO 區塊
+08. Header Right：登入／註冊／通知／會員中心
+09. HERO / BANNER 區塊（首頁主視覺）
+10. 搜尋列 Search Bar
+11. Cat Theme 主題樣式
+12. Product Cards（行程／住宿／活動共用）
+13. Section 區塊統一樣式
+14. Newsletter 區塊
+15. Hero / Search RWD 響應式
+16. FAQ 主體樣式整合（FrontFAQs Index）
+17. 客服中心樣式整合（Support Center Index）
+18. FOOTER 區塊（頁尾資訊與社群連結）
+19. 通知下拉選單（Notification Dropdown）
+20. 回到頂端按鈕 Back-to-top
+21. 全域動畫與過渡效果
+22. Scrollbar 客製化
+23. 全域 RWD
+24. Layout Overflow 修正補丁（防止白邊）
+25. 表單與輸入欄統一風格 
+26. 動畫與過渡特效補強 
+27. 手機版整體微調 (≤576px)
+28. 平板 RWD (≤992px)
+29. 大型桌面 (≥1400px)
+30. 通知中心專屬樣式（Notifications）
+31.
 ======================================================= */
 
 
@@ -160,11 +183,19 @@ img {
         box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
     }
 
-
-/* =======================================================
+.btn-outline-secondary {
+    border: 1px solid;
+    background: transparent;
+    border-radius: 999px;
+    transition: all 0.25s ease;
+}
+    .btn-outline-secondary:hover {
+        box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
+    }
+    /* =======================================================
 📗 06. 通用卡片樣式
 ======================================================= */
-.card {
+    .card {
     max-width: 500px;
     width: 100%;
     border-radius: 16px;
@@ -184,7 +215,7 @@ img {
 }
 
 /* =======================================================
-📘 HEADER 導覽列與 LOGO 區塊
+📘 07. HEADER 導覽列與 LOGO 區塊
 ======================================================= */
 
 /* Header 主容器 */
@@ -230,7 +261,7 @@ img {
     }
 
 /* =======================================================
-📗 Header Right：登入／註冊／通知／會員中心
+📗 08. Header Right：登入／註冊／通知／會員中心
 ======================================================= */
 .header-right {
     display: flex;
@@ -251,7 +282,7 @@ img {
         }
 
 /* =======================================================
-📘 HERO / BANNER 區塊（首頁主視覺）
+📘 09. HERO / BANNER 區塊（首頁主視覺）
 ======================================================= */
 .hero {
     position: relative;
@@ -295,7 +326,7 @@ img {
 
 
 /* =======================================================
-📘 搜尋列 Search Bar
+📘 10. 搜尋列 Search Bar
 ======================================================= */
 .search-bar {
     display: grid;
@@ -332,7 +363,7 @@ img {
     }
 
 /* =======================================================
-📗 Cat Theme 主題樣式
+📗 11. Cat Theme 主題樣式
 ======================================================= */
 .cat-theme {
     background-image: radial-gradient(ellipse at 10% 0%, rgba(34, 179, 193, 0.06), transparent 40%), radial-gradient(ellipse at 90% 10%, rgba(108, 214, 224, 0.06), transparent 40%);
@@ -346,7 +377,7 @@ img {
 }
 
 /* =======================================================
-📗 Product Cards（行程／住宿／活動共用）
+📗 12. Product Cards（行程／住宿／活動共用）
 ======================================================= */
 .product-card {
     background: #fff;
@@ -414,7 +445,7 @@ img {
 }
 
 /* =======================================================
-📗 Section 區塊統一樣式
+📗 13. Section 區塊統一樣式
 ======================================================= */
 .section {
     padding: 56px 0;
@@ -440,7 +471,7 @@ img {
     }
 
 /* =======================================================
-📗 Newsletter 區塊
+📗 14. Newsletter 區塊
 ======================================================= */
 .newsletter {
     background: linear-gradient(135deg, var(--brand) 0%, #6CD6E0 100%);
@@ -456,7 +487,7 @@ img {
     }
 
 /* =======================================================
-📗 Hero / Search RWD 響應式
+📗 15. Hero / Search RWD 響應式
 ======================================================= */
 @media (max-width: 992px) {
     .search-bar {
@@ -488,7 +519,7 @@ img {
 }
 
 /* =======================================================
-📘 FAQ 主體樣式整合（FrontFAQs Index）
+📘 16. FAQ 主體樣式整合（FrontFAQs Index）
 ======================================================= */
 
 /* ========== Hero 區 ========== */
@@ -649,29 +680,48 @@ img {
     scroll-behavior: smooth;
     padding: 1rem 0.5rem;
 }
-    /* 🔹 scrollbar 背景軌道 */
-    .faq-popular-carousel::-webkit-scrollbar-track {
-        background: transparent;
-        border-radius: 999px;
-    }
-    /* 🔹 scrollbar 滑塊（短條效果）*/
-    .faq-popular-carousel::-webkit-scrollbar-thumb {
-        background: linear-gradient(90deg, #22b3c1 0%, #7ec8e3 100%);
-        border-radius: 999px;
-        width: 30%;
-    }
-        /* 🔹 hover 效果：稍微亮一點 */
-        .faq-popular-carousel::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(90deg, #2ec8d8 0%, #9ad8ef 100%);
-        }
-    /* 🔹 讓滾輪不貼邊，而是置中顯示 */
-    .faq-popular-carousel::-webkit-scrollbar-track-piece:start {
-        background: linear-gradient(to right, transparent 40%, #f0f0f0 40%);
+/* =======================================================
+🔹 熱門常見問題滾輪（灰色 + 短條 + RWD 自動隱藏）
+======================================================= */
+    .faq-popular-carousel::-webkit-scrollbar {
+        height: 8px; /* 滾輪高度略薄 */
     }
 
-    .faq-popular-carousel::-webkit-scrollbar-track-piece:end {
-        background: linear-gradient(to left, transparent 40%, #f0f0f0 40%);
+    /* 軌道背景透明，乾淨 */
+    .faq-popular-carousel::-webkit-scrollbar-track {
+        background: transparent;
     }
+
+    /* 滾輪顏色與長度調整 */
+    .faq-popular-carousel::-webkit-scrollbar-thumb {
+        background: linear-gradient(to right, transparent 35%, #7ec8e3 35%, #7ec8e3 65%, transparent 65%);
+        border-radius: 999px;
+    }
+
+        /* 滑過時加深色調 */
+        .faq-popular-carousel::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient( to right, transparent 35%, #2ec8d8 35%, #9ad8ef 65%, transparent 65% );
+        }
+
+
+    /* 去除前後多餘漸層 */
+    .faq-popular-carousel::-webkit-scrollbar-track-piece:start,
+    .faq-popular-carousel::-webkit-scrollbar-track-piece:end {
+        background: transparent;
+    }
+
+    /* 拖曳時滑鼠樣式與選取防止 */
+    .faq-popular-carousel.dragging {
+        cursor: grabbing;
+        user-select: none;
+    }
+/* 手機板時自動隱藏滾輪 */
+@media (max-width: 768px) {
+    .faq-popular-carousel::-webkit-scrollbar {
+        display: none; /* 🔹 完全隱藏滾輪 */
+    }
+}
+
 
 .faq-popular-item {
     flex: 0 0 260px;
@@ -819,36 +869,693 @@ img {
     }
 }
 
+/* ======================================================= 
+ 📘 17. 客服中心樣式整合（Support Center Index）
+======================================================= */
 
-/* ======================================================= 📘 FOOTER 區塊（頁尾資訊與社群連結） ======================================================= */ /* 🔹 Footer 主體 */
+/* ====================== 全域樣式 ====================== */
 
+.support-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ====================== 卡片樣式 ====================== */
+/* 共用卡片樣式 (支援卡片與工單卡片) */
+.support-card, .ticket-card {
+    border-radius: 1rem;
+    box-shadow: 0 4px 14px #0001;
+    background: #fff;
+    transition: all .25s ease;
+    padding: 1.5rem;
+}
+
+    /* 卡片懸浮時的互動樣式 */
+    .support-card:hover, .ticket-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px #0002;
+    }
+
+/* ====================== 版面留白與呼吸空間 ====================== */
+
+/* 整體容器上下增加空間 */
+#chatApp {
+    margin-top: 64px !important;
+    margin-bottom: 80px !important;
+}
+
+    /* 標題列與內容的距離稍微拉開 */
+    #chatApp .d-flex.mb-4 {
+        margin-bottom: 2.5rem !important;
+    }
+
+/* 三欄之間與頁面邊界再多一點間距 */
+.equal-row {
+    gap: 2rem !important;
+    margin-top: 0.5rem;
+}
+
+/* Modal 的上下 padding 更柔和（避免貼邊） */
+.modal-body {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+/* ========== 工單卡片貓掌堆疊效果 + 閃光動畫 ========== */
+.ticket-grid {
+    position: relative;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1.5rem 1rem 2rem;
+    scrollbar-gutter: stable both-edges;
+    perspective: 1000px;
+    transition: max-height 0.5s ease;
+}
+
+/* 疊層外層容器 */
+.ticket-card-wrapper {
+    position: relative;
+    z-index: calc(100 - var(--index, 0));
+}
+
+    .ticket-card-wrapper:hover {
+        transition: transform 0.3s ease, z-index 0.1s;
+    }
+
+
+/* 每張卡片本體 */
+.ticket-card {
+    background: #fff;
+    border: 2px solid #7ec8e3;
+    box-shadow: 0 4px 14px rgba(0, 123, 156, 0.1);
+    border-radius: 1rem;
+    padding: 1.2rem;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    position: relative;
+    z-index: 5;
+    cursor: pointer;
+    transform-origin: center bottom;
+    overflow: hidden; /* 讓閃光不超出邊框 */
+}
+
+/* 疊層：每張卡往下疊 */
+.ticket-card-wrapper:nth-child(n+2) {
+    margin-top: -2.3rem;
+}
+
+/* 微旋轉創造層次 */
+.ticket-card-wrapper:nth-child(odd) .ticket-card {
+    transform: rotate(-1.2deg);
+}
+
+.ticket-card-wrapper:nth-child(even) .ticket-card {
+    transform: rotate(1.2deg);
+}
+
+/* 滑鼠懸浮效果：卡片微微浮起 */
+.ticket-card:hover {
+    transform: rotate(0deg) scale(1.03) translateY(-6px);
+    z-index: 10;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+    border-color: #7ec8e3;
+    background: #f9fcfd;
+}
+
+/* 陰影動畫（像貓掌壓著） */
+.ticket-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 1rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05) inset;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ticket-card:hover::before {
+    opacity: 1;
+}
+
+/* ✨ 閃光特效 (hover 時閃過一條柔光) */
+.ticket-card::after {
+    content: '🐾';
+    position: absolute;
+    font-size: 2rem;
+    right: 12px;
+    top: 10px;
+    opacity: 0;
+    transform: scale(0.5) rotate(-10deg);
+    transition: all 0.4s ease;
+}
+
+.ticket-card:hover::after {
+    opacity: 0.9;
+    transform: scale(1) rotate(10deg);
+}
+
+@keyframes card-shine {
+    0% {
+        left: -80%;
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    100% {
+        left: 120%;
+        opacity: 0;
+    }
+}
+
+/* 標題樣式 */
+.ticket-card h5 {
+    font-size: 1.05rem;
+    color: #007b9c;
+}
+
+/* 狀態徽章微調 */
+.badge.bg-info {
+    background-color: #5ab8d5 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffd966 !important;
+}
+
+
+/* 美化滾動條 */
+.ticket-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ticket-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.15);
+    border-radius: 10px;
+}
+
+/* ✅ hover 才顯示的查看對話按鈕 */
+.ticket-chat-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+    opacity: 0; /* 預設隱藏 */
+    transform: scale(0.9); /* 稍微縮小 */
+    pointer-events: none; /* 防止 hover 時誤觸 */
+}
+
+/* hover 卡片時淡入 */
+.ticket-card:hover .ticket-chat-btn {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+/* 按鈕 hover 效果 */
+.ticket-chat-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.ticket-chat-btn i {
+    margin: 0;
+}
+
+/* 小螢幕：改為直排 */
+@media (max-width: 768px) {
+    .ticket-card-wrapper:nth-child(n+2) {
+        margin-top: 1rem;
+    }
+
+    .ticket-card {
+        transform: none !important;
+    }
+
+    .ticket-grid:hover .ticket-card-wrapper,
+    .ticket-grid:active .ticket-card-wrapper {
+        transform: none;
+    }
+}
+
+/* ========== 展開／收起動畫 ========== */
+.ticket-fade-enter-active,
+.ticket-fade-leave-active {
+    transition: all 0.35s ease;
+}
+
+.ticket-fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+}
+
+.ticket-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+}
+
+/* 🔧 移除「查看更多工單」按鈕的 focus 藍光與背景變色 */
+.btn-outline-primary:focus,
+.btn-outline-primary.btn:focus {
+    color: #007b9c !important; /* 原本文字顏色 */
+    background-color: #fff !important; /* 保持白底 */
+    border-color: #7ec8e3 !important; /* 主題邊框色 */
+    box-shadow: none !important; /* 移除藍色外框 */
+    outline: none !important;
+}
+
+/* ====================== 聊天訊息 ====================== */
+#chatModal .modal-content {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* 上方標題列 */
+#chatModal .modal-header {
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+
+/* 讓聊天內容能滾動，同時成為定位基準 */
+#chatModal .modal-body {
+    position: relative; /* 成為定位基準 */
+    background: #f0f8fa;
+    height: 60vh;
+    overflow-y: auto; /* ✅ 確保這裡是 auto，而不是 hidden */
+    scrollbar-gutter: stable both-edges;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+    /* 拖曳提示層 */
+    #chatModal .modal-body .drag-overlay {
+        position: fixed;
+        top: 50%; /* 垂直置中 */
+        left: 50%; /* 水平置中 */
+        transform: translate(-50%, -50%); /* 完整置中 */
+        width: 85%;
+        max-width: 500px;
+        height: 40%;
+        background: rgba(255,255,255,0.92);
+        border: 3px dashed #7ec8e3;
+        border-radius: 1rem;
+        box-shadow: 0 0 20px rgba(126,200,227,0.35);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        z-index: 2000; /* 高於 modal 內容但低於 backdrop */
+        pointer-events: auto;
+        transition: opacity .25s ease;
+    }
+
+/* 拖曳時聊天區加邊框高亮 */
+.drag-over {
+    outline: 3px dashed #7ec8e3;
+    outline-offset: -8px;
+    background: #e8f9fd !important;
+    transition: background 0.3s ease;
+}
+
+/* 聊天訊息列：採用直列排列，區分自己與他人對齊方式 */
+.chat-message-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+    /* 自己的訊息靠右 */
+    .chat-message-row.me {
+        align-items: flex-end;
+    }
+
+    /* 其他人的訊息靠左 */
+    .chat-message-row.other {
+        align-items: flex-start;
+    }
+
+/* 聊天泡泡基本樣式 */
+.chat-bubble {
+    max-width: 72%;
+    padding: 12px 18px;
+    border-radius: 1.4em;
+    box-shadow: 0 2px 8px #0002;
+    font-size: 1.08em;
+    word-break: break-word;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+}
+
+    /*  客戶（自己）訊息反白樣式 */
+    .chat-bubble.me,
+    .chat-bubble.me * {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+    }
+
+        .chat-bubble.me::selection,
+        .chat-bubble.me *::selection {
+            background: rgba(255, 255, 255, 0.85) !important;
+            color: #004d61 !important;
+        }
+
+    /*  客服訊息反白樣式 */
+    .chat-bubble.other,
+    .chat-bubble.other * {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+    }
+
+        .chat-bubble.other::selection,
+        .chat-bubble.other *::selection {
+            background: rgba(126, 200, 227, 0.4) !important;
+            color: #000 !important;
+        }
+
+    /* 自己訊息的顏色與圓角調整 */
+    .chat-bubble.me {
+        background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
+        color: #fff;
+        border-bottom-right-radius: .3em;
+    }
+
+    /* 他人訊息的顏色與圓角調整 */
+    .chat-bubble.other {
+        background: #f4f7fa;
+        color: #234;
+        border-bottom-left-radius: .3em;
+    }
+
+    /* 訊息內圖片淡入效果 */
+    .chat-bubble img {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+        .chat-bubble img.loaded {
+            opacity: 1;
+        }
+
+/* 訊息 metadata（例如姓名、時間、身分） */
+.chat-meta {
+    font-size: 0.9em;
+    opacity: .7;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.empty-chat-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 55vh;
+    color: #666;
+    text-align: center;
+}
+
+    .empty-chat-placeholder i {
+        font-size: 2.5rem;
+        color: #9ab;
+        margin-bottom: .75rem;
+    }
+/* 讓客服資訊永遠在最上方顯示 */
+.ticket-info-bar {
+    font-size: 0.95rem;
+    color: #234;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.spinner-border {
+    animation-duration: 0.8s !important;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #7ec8e3, #b4e1eb);
+}
+
+/* ====================== 星級評價 ====================== */
+/* 星星互動樣式（若未使用 JS 控制，僅外觀） */
+.star {
+    cursor: pointer;
+    font-size: 1.8rem;
+    color: #ddd;
+    transition: color 0.2s;
+}
+
+    .star.active {
+        color: #f4b400;
+    }
+
+/* ====================== 三欄布局 ====================== */
+/* 使用彈性盒三欄排版，會根據寬度換行 */
+.equal-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.equal-col {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+}
+
+    /* 每欄內的卡片讓內容垂直填滿 */
+    .equal-col > .support-card {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+/* 🐾 空狀態建立新工單按鈕 hover 效果 */
+.btn-outline-primary.mt-3:hover {
+    background: linear-gradient(90deg,#7ec8e3,#b4e1eb);
+    color: #fff !important;
+    border-color: #7ec8e3 !important;
+    transform: scale(1.05);
+    transition: all 0.25s ease;
+}
+
+/* 行動裝置斷點：窄螢幕時改為直列 */
+@media (max-width: 992px) {
+    .equal-row {
+        flex-direction: column;
+    }
+}
+
+/* ====================== 附件預覽 ====================== */
+.attach-preview {
+    margin-top: 8px;
+}
+
+    .attach-preview img {
+        max-width: 220px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px #0002;
+    }
+
+/* ====================== 下拉選單顏色調整 ====================== */
+.form-select {
+    background-color: #fff !important; /* 白色背景 */
+    border: 1px solid #ced4da !important; /* ✅ 明確顯示邊框 */
+    border-radius: 12px !important; /* ✅ 圓角一致 */
+    color: #333 !important;
+    padding: 0.5rem 1rem !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+    /* hover 與 focus 效果 */
+    .form-select:hover,
+    .form-select:focus {
+        border-color: #7ec8e3 !important; /* 主題藍 */
+        box-shadow: 0 0 0 0.15rem rgba(126, 200, 227, .25) !important;
+        outline: none !important;
+    }
+
+    /* 修正 option 背景色 */
+    .form-select option {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+
+        /* hover option 效果 */
+        .form-select option:hover {
+            background-color: #e8f4ff !important;
+        }
+
+/* ====================== 輸入欄位顏色統一 ====================== */
+.form-control {
+    color: #222 !important; /* 黑色文字 */
+    background-color: #fff !important; /* 白底 */
+    border-color: #ccc !important; /* 預設灰框 */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    /* 聚焦時顯示主題藍色外框 */
+    .form-control:focus {
+        border-color: #7ec8e3 !important;
+        box-shadow: 0 0 0 0.15rem rgba(126, 200, 227, .25);
+    }
+
+    /* Placeholder 顏色柔和一點 */
+    .form-control::placeholder {
+        color: #999;
+    }
+
+/* ====================== 圖片預覽 ======================*/
+#imagePreviewModal .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+#imagePreviewModal .btn-light {
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+    #imagePreviewModal .btn-light:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+#imagePreviewModal img {
+    transition: transform 0.25s ease;
+}
+
+    #imagePreviewModal img:hover {
+        transform: scale(1.02);
+    }
+
+#imagePreviewModal.fade:not(.show) {
+    opacity: 0 !important;
+}
+
+/* === 一則訊息內的圖片 2×2 佈局 === */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr)); /* 2 欄 */
+    gap: 8px;
+    margin-top: 8px;
+}
+
+    .image-grid img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.15);
+        cursor: zoom-in;
+        transition: transform .2s ease;
+    }
+
+        .image-grid img:hover {
+            transform: scale(1.03);
+        }
+
+@media (max-width: 480px) {
+    .image-grid {
+        grid-template-columns: repeat(2, minmax(90px, 1fr));
+        gap: 6px;
+    }
+
+        .image-grid img {
+            height: 100px;
+        }
+}
+
+
+/* ====================== 禁用訊息區樣式 ====================== */
+/* 完成工單或不可輸入時，顯示禁用提示 */
+.chat-disabled {
+    background: #eef1f4;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    color: #888;
+    font-size: 0.95rem;
+}
+
+/* ======================================================= 
+ 📘 18. FOOTER 區塊（頁尾資訊與社群連結） 
+======================================================= */ 
+/* 🔹 Footer 主體 */
 footer {
-    background: linear-gradient(135deg, #22B3C1 0%, #1893a0 100%);
+    background: var(--brand);
     color: #fff;
-    padding: 60px 0 30px;
+    padding: 16px 0 12px !important;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
     position: relative;
     overflow: hidden;
 }
     /* 🔹 Footer 上方貓掌分隔線 */
 
     footer::before {
-        content: '🐾 🐾 🐾 🐾 🐾';
-        position: absolute;
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #fff;
-        font-size: 18px;
-        opacity: .5;
+        content: none !important;
     }
     /* 🔹 Footer 容器設定 */
 
     footer .footer-container {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 40px;
+        gap: 20px;
         width: min(1200px, 90vw);
         margin: 0 auto;
+    }
+
+    /* Footer 內部間距再縮小 */
+    footer .row.g-4 {
+        row-gap: 0.75rem !important;
+    }
+
+    /* 小標題間距縮小 */
+    footer .footer-title {
+        margin-bottom: 0.3rem !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* 清單間距調整 */
+    footer ul li {
+        line-height: 1.3;
+    }
+
+    /* 分隔線與底部資訊間距縮小 */
+    footer hr {
+        margin: 0.6rem 0 !important;
+    }
+
+    /* 版權列更緊湊 */
+    footer .text-secondary {
+        font-size: 0.8rem !important;
+        color: rgba(255,255,255,0.8) !important;
+    }
+
+    /* 社群連結調整尺寸 */
+    footer .d-flex.gap-3 a {
+        font-size: 0.9rem;
     }
 /* ======================================================= 📗 Footer 品牌區塊 ======================================================= */
 
@@ -917,7 +1624,9 @@ footer {
     .footer-contact p {
         margin-bottom: .25rem;
     }
-/* ======================================================= 📗 Footer 社群連結 ======================================================= */
+/* ======================================================= 
+📗 Footer 社群連結 
+======================================================= */
 
 .footer-social {
     display: flex;
@@ -943,12 +1652,14 @@ footer {
             transform: translateY(-3px);
             box-shadow: 0 4px 10px rgba(255,255,255,.25);
         }
-/* ======================================================= 📗 Footer 版權資訊 ======================================================= */
+/* ======================================================= 
+📗 Footer 版權資訊 
+======================================================= */
 
 .footer-bottom {
     text-align: center;
-    padding-top: 40px;
-    margin-top: 30px;
+    padding-top: 20px;
+    margin-top: 10px;
     border-top: 1px solid rgba(255,255,255,0.25);
     font-size: .9rem;
     color: rgba(255,255,255,0.8);
@@ -963,8 +1674,11 @@ footer {
         .footer-bottom a:hover {
             text-decoration: underline;
         }
-/* ======================================================= 📗 Footer 裝飾元素 ======================================================= */ /* 🐾 背景裝飾貓掌圖案 */
+/* ======================================================= 
+    📗 Footer 裝飾元
+======================================================= */ 
 
+/* 🐾 背景裝飾貓掌圖案 */
 footer .paw-bg {
     position: absolute;
     width: 120px;
@@ -976,52 +1690,31 @@ footer .paw-bg {
     transform: rotate(20deg);
     z-index: 0;
 }
-/* ======================================================= 📗 Footer 響應式調整 ======================================================= */
+/* ======================================================= 
+    📗 Footer 響應式調整
+======================================================= */
 
+/* 平板以下 */
 @media (max-width: 992px) {
     footer {
         padding: 50px 0 25px;
-    }
-
-    .footer-container {
-        gap: 30px;
-    }
-
-    .footer-brand {
-        align-items: center;
-        text-align: center;
-    }
-
-    .footer-social {
-        justify-content: center;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
     }
 }
 
+/* 手機 */
 @media (max-width: 576px) {
     footer {
         padding: 40px 0 20px;
-    }
-
-    .footer-container {
-        grid-template-columns: 1fr;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
         text-align: center;
-    }
-
-    .footer-links {
-        align-items: center;
-    }
-
-    .footer-contact {
-        text-align: center;
-    }
-
-    .footer-bottom {
-        font-size: .85rem;
     }
 }
 
 /* =======================================================
-📘 通知下拉選單（Notification Dropdown）
+📘 19. 通知下拉選單（Notification Dropdown）
 ======================================================= */
 .dropdown-menu.notif-dropdown {
     position: fixed !important;
@@ -1048,41 +1741,60 @@ footer .paw-bg {
 }
 
 /* =======================================================
-📘 回到頂端按鈕 Back-to-top
+📘 20. 回到頂端按鈕 Back-to-top
 ======================================================= */
 .back-to-top {
     position: fixed;
     right: 24px;
     bottom: 24px;
-    width: 46px;
-    height: 46px;
-    background-color: var(--brand);
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--brand) 0%, #7ec8e3 100%);
     color: #fff;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    box-shadow: 0 8px 18px rgba(34, 179, 193, 0.35);
     cursor: pointer;
-    transition: all .25s ease;
+    transition: all 0.35s ease;
     opacity: 0;
     visibility: hidden;
+    transform: translateY(20px);
     z-index: 1000;
 }
 
     .back-to-top.show {
         opacity: 1;
         visibility: visible;
+        transform: translateY(0);
     }
 
     .back-to-top:hover {
-        background-color: var(--brand-dark);
-        transform: translateY(-3px);
+        background: linear-gradient(135deg, #2ec8d8 0%, #9ad8ef 100%);
+        transform: translateY(-6px) scale(1.08);
+        box-shadow: 0 12px 24px rgba(34, 179, 193, 0.45);
     }
 
+    .back-to-top i {
+        animation: paw-bounce 2s infinite ease-in-out;
+    }
+
+/* 小小浮動動畫（像貓爪輕拍一樣） */
+@keyframes paw-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+
 /* =======================================================
-📘 全域動畫與過渡效果
+📘 21. 全域動畫與過渡效果
 ======================================================= */
 .fade-in-up {
     opacity: 0;
@@ -1118,29 +1830,31 @@ footer .paw-bg {
     }
 
 /* =======================================================
-📘 Scrollbar 客製化
+📘 22. Scrollbar 客製化
 ======================================================= */
+/* === 修正滾輪顏色為中性色 === */
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(34, 179, 193, .5);
+    background-color: rgba(160, 160, 160, 0.6) !important;
     border-radius: 999px;
-    transition: background-color .2s;
 }
 
     ::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(34, 179, 193, .8);
+        background-color: rgba(120, 120, 120, 0.8) !important;
     }
 
 ::-webkit-scrollbar-track {
-    background: #7ec8e3;
+    background: #f5f5f5 !important;
 }
 
+
+
 /* =======================================================
-📘 全域 RWD 修正
+📘 23. 全域 RWD
 ======================================================= */
 @media (max-width: 992px) {
     footer {
@@ -1159,13 +1873,6 @@ footer .paw-bg {
     }
 }
 
-@media (max-width: 576px) {
-    footer {
-        border-top-left-radius: 30px;
-        border-top-right-radius: 30px;
-        text-align: center;
-    }
-
     .footer-bottom {
         font-size: 0.8rem;
     }
@@ -1181,7 +1888,7 @@ footer .paw-bg {
 }
 
 /* =======================================================
-📘 Layout Overflow 修正補丁（防止白邊）
+📘 24. Layout Overflow 修正補丁（防止白邊）
 ======================================================= */
 html, body {
     overflow-x: hidden;
@@ -1210,8 +1917,8 @@ html, body {
 }
 
 /* =======================================================
-    📗 表單與輸入欄統一風格 
-   ======================================================= */ 
+📗 25. 表單與輸入欄統一風格 
+======================================================= */ 
 input, select, textarea {
     border: 1px solid #d9e7ea;
     border-radius: 8px;
@@ -1228,9 +1935,9 @@ input, select, textarea {
     }
 
 
-/* ======================================================= 
-    📗 動畫與過渡特效補強 
-   ======================================================= */ 
+/* =======================================================
+📗 26. 動畫與過渡特效補強 
+======================================================= */ 
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -1260,9 +1967,9 @@ input, select, textarea {
 .scale-up {
     animation: scaleUp .6s ease forwards;
 }
-/* ======================================================= 
-    📗 手機版整體微調 (≤576px)
-   ======================================================= */
+/* =======================================================
+📗27. 手機版整體微調 (≤576px)
+======================================================= */
 @media (max-width: 576px) {
     body {
         font-size: .95rem;
@@ -1367,9 +2074,10 @@ input, select, textarea {
     .dropdown-menu {
         max-width: 92vw;
     }
+}
 /* ======================================================= 
-    📗 平板 RWD (≤992px) 
-   ======================================================= */
+📗28. 平板 RWD (≤992px) 
+======================================================= */
 
 @media (max-width: 992px) {
     .section-title h2 {
@@ -1394,8 +2102,8 @@ input, select, textarea {
     }
 }
 /* ======================================================= 
-    📗 大型桌面 (≥1400px)
-   ======================================================= */
+📗29. 大型桌面 (≥1400px)
+======================================================= */
 
 @media (min-width: 1400px) {
     body {
@@ -1408,5 +2116,422 @@ input, select, textarea {
 
     .search-bar {
         max-width: 900px;
+    }
+}
+
+/*=======================================================
+📗 30. 通知中心專屬樣式（Notifications）
+======================================================= */
+
+/* ========== 全站底色與字體 ========== */
+body {
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    font-family: "Poppins", "Noto Sans TC", sans-serif;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* ========== 主容器 ========== */
+.notif-wrapper {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 28px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+}
+
+/* ========== 左側分類 ========== */
+.notif-sidebar {
+    background: linear-gradient(135deg, #d9f1ff, #f7fbff);
+    border-radius: 20px;
+    padding: 1.6rem 1rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    height: fit-content;
+}
+
+    .notif-sidebar h5 {
+        color: #3388cc;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+.notif-category {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    .notif-category li {
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #2255aa;
+        font-weight: 500;
+    }
+
+        .notif-category li:hover {
+            background: #e6f3ff;
+            transform: translateX(4px);
+        }
+
+        .notif-category li.active {
+            background: var(--brand) !important;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(34, 179, 193, 0.25);
+        }
+
+        .notif-category li i {
+            font-size: 1rem;
+        }
+
+/* ========== 右側內容 ========== */
+.notif-content {
+    background: #fefefe;
+    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    min-height: 520px;
+}
+
+.notif-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+    cursor: pointer;
+    border-left: 5px solid transparent;
+}
+
+    .notif-card:hover {
+        transform: translateY(-4px);
+        border-left-color: #22b3c1;
+    }
+
+    .notif-card.is-read {
+        opacity: 0.6;
+    }
+
+.notif-title {
+    font-weight: 600;
+    color: #2255aa;
+}
+
+.notif-message {
+    color: #444;
+    margin: 0.4rem 0;
+}
+
+.notif-time {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* 全部標示為已讀按鈕 */
+#markAllReadBtn:hover {
+    background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(34,179,193,0.3);
+}
+
+/* 通知中心下拉樣式（顯示筆數選單）*/
+
+/* 包一層，讓外框完整呈現 */
+.select-wrap {
+    position: relative !important;
+    display: inline-block !important;
+    /* 避免父層裁切下拉 */
+    overflow: visible !important;
+}
+
+#perPageSelect,
+.notif-content .form-select {
+    border: 1px solid #ced4da !important;
+    border-radius: 12px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23333' height='12' viewBox='0 0 20 20' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M5 8l5 5 5-5H5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 28px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+    background-origin: border-box;
+    background-clip: padding-box;
+}
+
+    /* Hover / Focus 效果 */
+    #perPageSelect:hover,
+    #perPageSelect:focus,
+    .notif-content .form-select:hover,
+    .notif-content .form-select:focus {
+        border-color: #7ec8e3 !important;
+        box-shadow: 0 0 0 0.15rem rgba(126,200,227,.25) !important;
+        outline: none !important;
+    }
+
+    /* 下拉清單項目 */
+    #perPageSelect option {
+        background-color: #fff;
+        color: #333;
+    }
+
+/* 通知中心：顯示筆數一行排列 + 縮小 select */
+.perpage-group {
+    gap: .4rem;
+    flex-wrap: nowrap !important; /* 這行很關鍵，避免換行 */
+    white-space: nowrap; /* 讓「顯示」「筆資料」不被斷行 */
+}
+
+/* 通知中心下拉樣式（顯示筆數選單）*/
+#notifSearch {
+    border-radius: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    width: 200px;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+    /* hover 與 focus 效果 */
+    #notifSearch:hover,
+    #notifSearch:focus {
+        border-color: #1893a0;
+        background-color: #e8faff;
+        box-shadow: 0 0 0 4px rgba(34, 179, 193, 0.1);
+        outline: none;
+    }
+
+/* 🔹 清除按鈕樣式（fa-times） */
+#clearSearchBtn {
+    color: #22B3C1;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+    #clearSearchBtn:hover {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+
+/* 響應式 */
+@media (max-width: 992px) {
+    .notif-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .notif-sidebar {
+        display: flex;
+        overflow-x: auto;
+        gap: 0.8rem;
+    }
+
+    .notif-category li {
+        white-space: nowrap;
+        flex: 0 0 auto;
+    }
+}
+
+/* 小螢幕時調整寬度 */
+@media (max-width: 576px) {
+    #notifSearch {
+        width: 100%;
+        font-size: 14px;
+    }
+
+    #perPageSelect {
+        width: 100%;
+        font-size: 14px;
+    }
+}
+
+/*=======================================================
+📗 31. 登入頁面專屬樣式（Login Page）
+======================================================= */
+.login-wrapper {
+    min-height: 100vh; /* 讓畫面撐滿整個視窗 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    padding: 1.5rem;
+}
+
+    /* 卡片內部微調 */
+    .login-wrapper .card {
+        max-width: 420px;
+        width: 100%;
+        border-radius: 20px;
+        padding: 2rem 2rem 1.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+        animation: fadeInUp .6s ease forwards;
+    }
+
+    /* 錯誤訊息區塊 */
+    .login-wrapper .alert {
+        font-size: 0.95rem;
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+    }
+
+/* 底部連結置中 + 間距柔和 */
+.bottom-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    color: #555;
+}
+
+    .bottom-links a {
+        color: #22b3c1;
+        font-weight: 500;
+        transition: color 0.25s;
+    }
+
+        .bottom-links a:hover {
+            color: #1893a0;
+        }
+
+/* RWD：手機時稍微縮小 */
+@media (max-width: 576px) {
+    .login-wrapper .card {
+        padding: 1.6rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* =======================================================
+📗 32.Register Page 置中樣式
+======================================================= */
+.register-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    padding: 1.5rem;
+}
+
+    /* 註冊卡片 */
+    .register-wrapper .card {
+        max-width: 500px;
+        width: 100%;
+        border-radius: 20px;
+        padding: 2rem 2rem 1.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeInUp .6s ease forwards;
+    }
+
+    /* 輸入框間距與 placeholder 顏色 */
+    .register-wrapper .form-control::placeholder {
+        color: #999;
+    }
+
+    /* 訊息提示 */
+    .register-wrapper .alert {
+        font-size: 0.95rem;
+        border-radius: 10px;
+        padding: 0.8rem 1rem;
+    }
+
+/* 底部連結區 */
+.bottom-links {
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+    .bottom-links a {
+        color: #22b3c1;
+        font-weight: 500;
+        transition: color 0.25s ease;
+    }
+
+        .bottom-links a:hover {
+            color: #1893a0;
+        }
+
+/* RWD 手機版微調 */
+@media (max-width: 576px) {
+    .register-wrapper .card {
+        padding: 1.6rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+}
+
+
+/* =======================================================
+📗 33. Auth Pages（登入 / 註冊 / 忘記密碼 共用樣式）
+======================================================= */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    padding: 1.5rem;
+}
+
+    /* 卡片外觀 */
+    .auth-wrapper .card {
+        max-width: 420px;
+        width: 100%;
+        border-radius: 20px;
+        padding: 2rem 2rem 1.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        animation: fadeInUp .6s ease forwards;
+    }
+
+    /* 輸入欄 */
+    .auth-wrapper .form-control::placeholder {
+        color: #999;
+    }
+
+/* 底部連結 */
+.bottom-links {
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+    .bottom-links a {
+        color: #22b3c1;
+        font-weight: 500;
+        transition: color 0.25s ease;
+    }
+
+        .bottom-links a:hover {
+            color: #1893a0;
+        }
+
+/* 響應式：手機微調 */
+@media (max-width: 576px) {
+    .auth-wrapper .card {
+        padding: 1.6rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
     }
 }

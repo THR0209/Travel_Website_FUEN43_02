@@ -202,30 +202,37 @@ namespace Cat_Paw_Footprint.Repositories
 			{
 				GroupId = group.GroupId,
 				UploaderType = dto.UploaderType,   // Guide / Customer / Guest
-				FilePath = dto.PhotoUrl,           // 可相對或絕對路徑
+				FilePath = dto.FilePath,           // 可相對或絕對路徑
 				Latitude = (decimal?)dto.Latitude,
 				Longitude = (decimal?)dto.Longitude,
 				UploadTime = DateTime.UtcNow
 			};
 
 			// 3️⃣ 根據上傳者類型填欄位
-			switch (dto.UploaderType)
+			if (dto.UploaderType == "Guide")
 			{
-				case "Guide":
-					photo.GuideId = dto.UploaderId;
-					break;
+				photo.GuideId = dto.GuideId;     // ✅ 導遊ID
+			}
+			else if (dto.UploaderType == "Customer")
+			{
+				photo.CustomerId = dto.CustomerId?.ToString();// ✅ 會員ID
+			}
+			else if (dto.UploaderType == "Guest")
+			{
+				if (!string.IsNullOrEmpty(dto.DeviceId))
+				{
+					var guest = await _db.TourGroupGuests
+						.FirstOrDefaultAsync(g => g.DeviceId == dto.DeviceId && g.GroupId == group.GroupId);
 
-				case "Customer":
-					photo.CustomerId = dto.UploaderId?.ToString();
-					break;
-
-				case "Guest":
-					if (Guid.TryParse(dto.GuestId?.ToString(), out Guid guestGuid))
-						photo.GuestId = guestGuid;
-					break;
-
-				default:
-					throw new Exception("未知的上傳者類型");
+					if (guest != null)
+					{
+						photo.GuestId = guest.GuestId; // ✅ 透過 DeviceId 查出 GuestId
+					}
+					else
+					{
+						Console.WriteLine($"⚠️ 找不到對應的訪客 DeviceId={dto.DeviceId} GroupId={group.GroupId}");
+					}
+				}
 			}
 
 			// 4️⃣ 寫入 GroupPhotos
@@ -237,26 +244,28 @@ namespace Cat_Paw_Footprint.Repositories
 			{
 				GroupId = group.GroupId,
 				SenderType = dto.UploaderType,
-				Content = $"上傳了一張照片 📸：{dto.PhotoUrl}",
+				Content = $"上傳了一張照片 📸：<br><img src=\"{dto.FilePath}\" style=\"max-width:100%;border-radius:8px;\" />",
 				SendTime = DateTime.UtcNow
 			};
 
 			switch (dto.UploaderType)
 			{
 				case "Guide":
-					message.GuideId = dto.UploaderId;
+					message.GuideId = dto.GuideId;
 					break;
-
 				case "Customer":
-					message.CustomerId = dto.UploaderId?.ToString();
+					message.CustomerId = dto.CustomerId?.ToString();
 					break;
-
 				case "Guest":
-					// 若訪客存在，查找 GuestId
-					var guest = await _db.TourGroupGuests
-						.FirstOrDefaultAsync(g => g.DeviceId == dto.DeviceId && g.GroupId == group.GroupId);
-					if (guest != null)
-						message.GuestId = guest.GuestId;
+					if (photo.GuestId.HasValue)
+					{
+						message.GuestId = photo.GuestId;
+						Console.WriteLine($"✅ 已綁定訪客 GuestId={photo.GuestId}");
+					}
+					else
+					{
+						Console.WriteLine($"⚠️ 未取得 GuestId，可能是 DeviceId 無效或未註冊");
+					}
 					break;
 			}
 
@@ -278,7 +287,7 @@ namespace Cat_Paw_Footprint.Repositories
 
 		public async Task<GroupLocations> InsertLocationAsync(GroupLocationRequestDto dto)// 導遊與遊客設集合地或遊客發送自己位置
 		{
-			Console.WriteLine($"📡 InsertLocationAsync 呼叫: GroupCode={dto.GroupCode}, GroupId={dto.GroupId}, SenderType={dto.SenderType}, Lat={dto.Latitude}, Lng={dto.Longitude}");
+			Console.WriteLine($"📡 InsertLocationAsync 呼叫: GroupCode={dto.GroupCode}, GroupId={dto.GroupId}, SenderType={dto.SenderType}, Lat={dto.Latitude}, Lng={dto.Longitude},cusid={dto.CustomerId}");
 
 			var group = await _db.TourGroups
 				.FirstOrDefaultAsync(g => g.GroupCode == dto.GroupCode);

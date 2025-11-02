@@ -16,6 +16,7 @@ public partial class webtravel2Context : DbContext
     {
     }
 
+	public DbSet<PendingPayment> PendingPayments { get; set; }
 	//public virtual DbSet<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; }
 
 	public virtual DbSet<CouponPics> CouponPics { get; set; }
@@ -937,7 +938,7 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<TripProjectDetails>(entity =>
         {
-            entity.HasNoKey();
+			entity.HasKey(e => e.ProjectDetailID);
 
             entity.Property(e => e.TripType).HasMaxLength(50);
 
@@ -961,8 +962,6 @@ public partial class webtravel2Context : DbContext
                 .HasForeignKey(d => d.TransportID)
                 .HasConstraintName("FK__TripProje__Trans__59C55456");
         });
-
-
 
         OnModelCreatingPartial(modelBuilder);
     }

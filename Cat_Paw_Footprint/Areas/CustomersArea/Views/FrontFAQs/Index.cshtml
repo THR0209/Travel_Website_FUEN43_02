@@ -145,40 +145,86 @@
                 showFaqDetail(result, catName);
             });
         }
-function showFaqDetail(faqs, title) {
-    // 🔹 筆數顯示
-    const countText = faqs.length > 0 ? `（${faqs.length} 筆）` : '';
+        function showFaqDetail(faqs, title) {
+            // 🔹 筆數顯示
+            const countText = faqs.length > 0 ? `（${faqs.length} 筆）` : '';
 
-    let html = `
-        <h4 class="fw-bold mb-4 text-primary">
-            <i class="fa-solid fa-lightbulb text-warning"></i>  ${title}${countText}
-        </h4>`;
+            let html = `
+                <h4 class="fw-bold mb-4 text-primary">
+                    <i class="fa-solid fa-lightbulb text-warning"></i>  ${title}${countText}
+                </h4>`;
 
-    if (faqs.length === 0) {
-        html += '<div class="alert alert-warning">查無相關問題</div>';
-    } else {
-        faqs.forEach((faq, idx) => {
-            html += `
-                <div class="faq-card" data-id="${idx}">
-                    <div class="faq-card-question">
-                        <span><i class="fas fa-question-circle me-2 text-primary"></i>${faq.question}</span>
-                        <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
-                    </div>
-                    <div class="faq-card-answer">${faq.answer}</div>
-                </div>`;
+            if (faqs.length === 0) {
+                html += '<div class="alert alert-warning">查無相關問題</div>';
+            } else {
+                faqs.forEach((faq, idx) => {
+                    html += `
+                        <div class="faq-card" data-id="${idx}">
+                            <div class="faq-card-question">
+                                <span><i class="fas fa-question-circle me-2 text-primary"></i>${faq.question}</span>
+                                <span class="faq-icon"><i class="fas fa-chevron-down"></i></span>
+                            </div>
+                            <div class="faq-card-answer">${faq.answer}</div>
+                        </div>`;
+                });
+            }
+
+            $('#faqDetailList').html(html);
+
+            // 啟用展開/收合
+            $('.faq-card').on('click', function () {
+                $(this).toggleClass('open');
+            });
+
+            // 🔹 自動捲動至 FAQ 區塊
+            $('html, body').animate({ scrollTop: $('#faqDetailList').offset().top - 100 }, 500);
+        }
+
+        // 🔹 讓熱門常見問題可以用滑鼠拖曳 / 觸控滑動
+        const carousel = document.getElementById("hotFaqCarousel");
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        carousel.addEventListener("mousedown", (e) => {
+            isDown = true;
+            carousel.classList.add("dragging");
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
         });
-    }
 
-    $('#faqDetailList').html(html);
+        carousel.addEventListener("mouseleave", () => {
+            isDown = false;
+            carousel.classList.remove("dragging");
+        });
 
-    // 啟用展開/收合
-    $('.faq-card').on('click', function () {
-        $(this).toggleClass('open');
-    });
+        carousel.addEventListener("mouseup", () => {
+            isDown = false;
+            carousel.classList.remove("dragging");
+        });
 
-    // 🔹 自動捲動至 FAQ 區塊
-    $('html, body').animate({ scrollTop: $('#faqDetailList').offset().top - 100 }, 500);
-}
+        carousel.addEventListener("mousemove", (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - carousel.offsetLeft;
+            const walk = (x - startX) * 1.2; // 拖曳速度比例
+            carousel.scrollLeft = scrollLeft - walk;
+        });
+
+        // 🔹 支援觸控滑動（手機／平板）
+        let touchStartX = 0;
+        let touchScrollLeft = 0;
+
+        carousel.addEventListener("touchstart", (e) => {
+            touchStartX = e.touches[0].pageX;
+            touchScrollLeft = carousel.scrollLeft;
+        });
+
+        carousel.addEventListener("touchmove", (e) => {
+            const x = e.touches[0].pageX;
+            const walk = (x - touchStartX) * 1.2;
+            carousel.scrollLeft = touchScrollLeft - walk;
+        });
 
 
     </script>

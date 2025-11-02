@@ -59,13 +59,14 @@
     <div class="d-flex flex-wrap gap-2 align-items-center my-3">
         <div class="input-group w-auto">
             <span class="input-group-text">我的優惠券</span>
-            <select class="form-select" v-model="selectedCouponCode">
-                <option value="" disabled>請選擇可用的優惠券</option>
-                <option v-for="c in coupons" :key="c.couponId" :value="c.couponCode">
-                    {{ c.name || ('優惠券#' + c.couponId) }}（代碼: {{ c.couponCode }}）
+            <select class="form-select" v-model="selectedCouponCode" v-on:change ="onCouponChange">
+                <option value="__PLEASE__" disabled>請選擇優惠券</option>
+                <option value="__NONE__">無</option>
+                <option v-for="c in coupons" :key="c.couponId" :value="c.code">
+                    {{ couponLabel(c) }}
                 </option>
             </select>
-            <button class="btn btn-outline-primary" v-on:click="applySelectedCoupon" :disabled="!selectedCouponCode">套用</button>
+            <button class="btn btn-outline-primary" v-on:click="applySelectedCoupon" :disabled="!selectedCouponCode ||selectedCouponCode==='__PLEASE__'|| selectedCouponCode==='__NONE__'">套用</button>
             <button class="btn btn-outline-secondary" v-on:click="clearCoupon">清除</button>
         </div>
 
@@ -77,10 +78,10 @@
         <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
 
         <!-- 只把勾選的商品送去模擬付款 -->
-        <form id="payCreditForm" method="post" action="/CustomersArea/Payment/CheckoutCredit">
+        <form id="payCreditForm" method="post" action="/CustomersArea/Payment/CheckoutCredit" v-on:submit.prevent="beforePaySubmit">
             <!-- 一定要在 form 裡面產生真正的 input，template 有時被瀏覽器忽略 -->
             <div style="display:none">
-                <input v-for="pid in selected" :key="'sel-'+pid" type="hidden"  name="productIds" :value="pid" />
+                <input v-for="pid in selected" :key="'sel-'+pid" type="hidden" name="productIds" :value="pid" />
             </div>
             <div class="d-flex gap-2">
                 <!-- submit 沒問題；但禁用條件要確認有勾選 -->
@@ -136,8 +137,9 @@
                 const discountHint = ref('');
                 const selected = ref([]);
                 const checkAll = ref(false);
-                const selectedCouponCode = ref('');
+                const selectedCouponCode = ref('__PLEASE__');
                 const coupons = ref([]);
+                const couponSelectLocked = ref(false);
                 const discount = computed(() => {
                   if (!selectedCouponCode.value) return 0;
 
@@ -159,43 +161,14 @@
 
                 const finalTotal = computed(() => Math.max(0, (total.value || 0) - discount.value));
 
+                function unlockCouponSelect(){
+                  couponSelectLocked.value = false;
+                }
+
                 function toDate(v){
                   if(!v) return '';
                   const d = new Date(v);
                   return isNaN(d) ? '' : d.toLocaleDateString('zh-TW');
-                }
-                async function applySelectedCoupon(){
-                  if(!selectedCouponCode.value) return;
-                  await Swal.fire({
-                    icon: 'success',
-                    title: '已套用優惠券',
-                    text: '結帳金額已依優惠券即時更新',
-                    timer: 1500,
-                    showConfirmButton: false
-                    });
-
-                    await axios.post('/CustomersArea/Cart/apply-coupon',
-                    new URLSearchParams({ code: selectedCouponCode.value })
-                  );
-                }
-                async function loadCoupons(){
-                  try {
-                    const res = await axios.get('/CustomersArea/Coupons/api');
-                    const raw = Array.isArray(res.data) ? res.data : [];
-
-                    coupons.value = raw.map(c => ({
-                      couponId: c.couponId ?? c.CouponID ?? 0,
-                      couponCode: c.couponCode ?? c.CouponCode ?? '',   // ← 加這個
-                      disCountCode: c.disCountCode ?? c.DisCountCode ?? '',
-                      name: c.name ?? c.couponDesc ?? c.CouponDesc ?? '',
-                      discountType: Number(c.discountType ?? c.DiscountType ?? 0),
-                      discountValue: Number(c.discountValue ?? c.DiscountValue ?? 0),
-                      expireAt: c.expireAt ?? c.endTime ?? c.EndTime ?? null
-                    }));
-                    } catch (err) {
-                    console.error('載入優惠券失敗', err);
-                    coupons.value = [];
-                    }
                 }
 
                 async function addDemo(){
@@ -212,6 +185,87 @@
                     console.error(err);
                     alert('加入範例商品失敗：' + (err?.response?.status || ''));
                   }
+                }
+
+                function couponLabel(c){
+                  const name = c.name || ('優惠券#' + c.couponId);
+                  const exp  = c.expireAt ? toDate(c.expireAt) : '';
+                  return exp ? `${name}（期限：${exp}）` : name;
+                }
+
+                async function onCouponChange(){
+                // 選「無」就立刻清掉後端 Session 的 CART_COUPON，避免後續 CheckoutCredit 抓到舊券
+                if (selectedCouponCode.value === '__NONE__') {
+                  try {
+                    await axios.post('/CustomersArea/Cart/clear-coupon');
+                  } finally {
+                    discountHint.value = '';
+                    // 不要把 selectedCouponCode 置空，保留 'none' 才不會又被誤認為有券
+                  }
+                }
+                }
+
+                async function loadCoupons(){
+                  try {
+                    const res = await axios.get('/CustomersArea/Coupons/api');
+                    const raw = Array.isArray(res.data) ? res.data : [];
+
+                    coupons.value = raw.map(c => ({
+                      couponId: c.couponId ?? c.CouponID ?? 0,
+                      code: c.code ?? c.couponCode ?? c.CouponCode ?? c.disCountCode ?? c.DisCountCode ?? '',                      
+                      name: c.name ?? c.couponDesc ?? c.CouponDesc ?? '',
+                      discountType: Number(c.discountType ?? c.DiscountType ?? 0),
+                      discountValue: Number(c.discountValue ?? c.DiscountValue ?? 0),
+                      expireAt: c.expireAt ?? c.endDate ?? c.EndDate ?? null
+                    }));
+                    if (!selectedCouponCode.value) selectedCouponCode.value = '__PLEASE__';
+                    } catch (err) {
+                    console.error('載入優惠券失敗', err);
+                    coupons.value = [];
+                  }
+                }
+
+                async function applySelectedCoupon(){
+                  try{
+                    if (selectedCouponCode.value === '__PLEASE__') return;
+
+                    if (selectedCouponCode.value === '__NONE__') {
+                    await axios.post('/CustomersArea/Cart/clear-coupon');
+                    discountHint.value = '';
+                    await reload();
+                    couponSelectLocked.value = true;
+                    await Swal.fire({ icon:'success', title:'不套用優惠券', timer:1200, showConfirmButton:false });
+                    return;
+                    }
+
+                    const res = await axios.post('/CustomersArea/Cart/apply-coupon',
+                     new URLSearchParams({ code: selectedCouponCode.value })
+                    );
+                    discountHint.value = res.data?.hint || '已套用優惠券';
+                    await reload();
+                    couponSelectLocked.value = true;
+                    await Swal.fire({
+                    icon: 'success',
+                    title: '已套用優惠券',
+                    text: '結帳金額已依優惠券即時更新',
+                    timer: 1500,
+                    showConfirmButton: false
+                    });
+                    }catch(err){
+                      console.error(err);
+                      await Swal.fire({icon:'error', title:'套用失敗', text: err?.response?.data?.error || ''});
+                    }
+                }
+
+                async function beforePaySubmit(e){
+                  try {
+                    // 若選「無」→ 再清一次後端券
+                    if (selectedCouponCode.value === '__NONE__') {
+                      await axios.post('/CustomersArea/Cart/clear-coupon');
+                    }
+                  } catch {}
+                  // 真的提交表單
+                  e.target.submit();
                 }
 
                 async function payByTransfer(){
@@ -339,7 +393,7 @@
                     await axios.post('/CustomersArea/Cart/clear-coupon');
                   }finally{
                     couponCode.value = '';
-                    selectedCouponCode.value = '';
+                    selectedCouponCode.value = '__PLEASE__';
                     discountHint.value = '';
                     await reload();
                   }
@@ -356,16 +410,16 @@
 
                 onMounted(async () => {
                   await reload();
-                  await loadCoupons();
+                  await loadCoupons();                  
                 });
 
                 return {
-                  items, total, couponCode, discountHint,
-                  selected, checkAll, toggleAll, batchRemove,
-                  inc, dec, update, remove,applyCouponById,
-                  clearCoupon,checkout,finalTotal,addDemo,customerId,
-                  payByTransfer,loadCoupons,clearCart,coupons
-                  ,applySelectedCoupon,toDate,selectedCouponCode
+                  items,couponLabel,couponCode,discountHint,unlockCouponSelect,
+                  selected,checkAll,toggleAll,batchRemove,customerId,total,
+                  inc, dec, update, remove,applyCouponById,clearCart,coupons,
+                  clearCoupon,checkout,finalTotal,addDemo,selectedCouponCode,
+                  payByTransfer,loadCoupons,toDate,applySelectedCoupon,
+                  beforePaySubmit,onCouponChange
                 };
               }
             }).mount('#cartApp');

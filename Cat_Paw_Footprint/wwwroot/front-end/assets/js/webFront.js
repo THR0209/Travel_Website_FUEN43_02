@@ -63,16 +63,38 @@ window.updateList = async function () {
             </div>
         `).join('');
 
-        // === 🔹加在這裡！綁定點擊事件 ===
+        // === 🔹 綁定通知點擊事件（含客服評價提醒導向） ===
         document.querySelectorAll('.notif-item').forEach(item => {
             item.addEventListener('click', async function () {
                 const id = this.dataset.id;
+                const title = this.querySelector('.fw-bold')?.textContent || "";
+                const msg = this.querySelector('.small.text-muted')?.textContent || "";
+
                 try {
+                    // ✅ 標記已讀
                     await axios.post('/CustomersArea/Notifications/MarkAsRead', { id });
-                    this.classList.add('opacity-50'); // 立即透明化
-                    await window.updateUnread(); // 更新紅點數
+                    this.classList.add('opacity-50');
+                    await window.updateUnread();
+
+                    // ✅ 檢查是否為「客服相關通知」
+                    if (
+                        title.includes('客服服務已完成') ||
+                        title.includes('客服評價提醒') ||
+                        title.includes('客服回覆') ||
+                        title.includes('客服訊息')
+                    ) {
+                        const match = msg.match(/#\s*(\d+)/);
+                        if (match && match[1]) {
+                            const ticketId = match[1];
+                            // 直接導向客服中心，帶上 ticketId 參數
+                            window.location.href = `/CustomersArea/CustomerService/Index?ticketId=${ticketId}`;
+                            return;
+                        }
+                    }
+
+
                 } catch (err) {
-                    console.error("❌ 標記為已讀失敗", err);
+                    console.error("❌ 標記通知為已讀失敗", err);
                     window.showAlert('error', '錯誤', '無法標記通知為已讀');
                 }
             });
@@ -81,7 +103,8 @@ window.updateList = async function () {
         console.error("載入通知清單失敗", e);
         window.showAlert('warning', '載入失敗', '通知清單載入失敗');
     }
-};
+}; // ✅ ← 補上這個收尾大括號
+
 
 // ----------- 全域函式：桌面推播通知 -----------
 window.showDesktopNotification = async function (title, message) {
@@ -103,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ----------- Header縮放、回到頂部、Hero動畫 -----------
     const header = document.querySelector('.site-header');
-    const toTop = document.getElementById('toTop');
+    const toTop = document.getElementById('backToTop');
     const heroMedia = document.getElementById('heroMedia');
 
     window.addEventListener('scroll', () => {
@@ -204,23 +227,43 @@ document.addEventListener('DOMContentLoaded', function () {
     const badge = document.getElementById("notifBadge");
     const list = document.getElementById("notifList");
 
-    const connection = new signalR.HubConnectionBuilder()
+    // ✅ 新增自動重連設定
+    window.connection = new signalR.HubConnectionBuilder()
         .withUrl("/notificationHub")
+        .withAutomaticReconnect([0, 2000, 5000, 10000])
         .build();
 
+    // ✅ 設定接收事件
     connection.on("ReceiveNotification", (title, message, type) => {
+        console.log("📨 收到通知:", { title, message, type });
         window.showAlert('info', title, message, 4000);
         window.updateUnread();
         window.updateList();
         window.showDesktopNotification(title, message);
     });
 
-    connection.start()
-        .then(() => console.log("✅ SignalR 已連線"))
-        .catch(err => {
-            console.error("SignalR 錯誤：", err);
-            window.showAlert('error', '通知系統錯誤', '無法連線至伺服器');
-        });
+    // ✅ 自動重連機制
+    connection.onreconnected(() => {
+        console.log("🔁 SignalR 已重新連線");
+        window.updateUnread();
+        window.updateList();
+    });
+
+    // ✅ 啟動連線（含重試機制）
+    async function startConnection() {
+        try {
+            await connection.start();
+            console.log("✅ SignalR 已連線");
+            await window.updateUnread();
+            await window.updateList();
+        } catch (err) {
+            console.error("SignalR 連線失敗，5秒後重試:", err);
+            setTimeout(startConnection, 5000);
+        }
+    }
+    startConnection();
+
+
 
     // ----------- 登出時中斷 SignalR -----------
     const logoutForm = document.querySelector('form[action*="CusLogReg/Logout"]');

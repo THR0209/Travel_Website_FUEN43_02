@@ -12,11 +12,11 @@
         body {
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
             margin: 0;
-            background: #f7f8fa;
+            background: #f4f7fb;
         }
 
         header {
-            background: #fff;
+            background: #a5d8ff;
             border-bottom: 1px solid #eee;
             transition: 0.3s ease;
         }
@@ -33,7 +33,7 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 1rem;
-            background: #fff;
+            background: #e7f5ff;
             margin-bottom: 12px;
         }
 
@@ -58,12 +58,12 @@
             margin-bottom: 4px
         }
         .me .bubble {
-            background-color: #8f94fb;
+            background-color: #748ffc;
             color: #fff;
         }
 
         .other .bubble {
-            background-color: #e9ecef;
+            background-color: #dee2e6;
             color: #333;
         }
 
@@ -114,18 +114,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 6px 12px;
             cursor: pointer;
         }
 
         .action-bar {
             display: flex;
             gap: 8px;
-            padding: 8px 16px;
+            padding: 6px 12px;
+            background: #f1f3f5;
+            border-top: 1px solid #dee2e6;
         }
 
         .action-btn {
-            background: #6c63ff;
+            background: #5c7cfa;
             border: none;
             color: white;
             padding: 6px 10px;
@@ -141,9 +143,9 @@
             cursor: pointer;
         }
 
-            .action-btn:hover {
-                background: #594bff;
-            }
+        .action-btn:hover {
+            background: #4c6ef5;
+        }
 
         .leave-btn {
             background: #ff6b6b;
@@ -156,7 +158,20 @@
         }
 
             .leave-btn:hover {
-                background: #ff4b4b;
+                background: #fa5252;
+            }
+        .plain-btn {
+            all: unset; /* 移除全域按鈕樣式 */
+            cursor: pointer;
+            display: inline-flex; /* 對齊用 */
+            align-items: center;
+            justify-content: center;
+            color: #495057; /* 控制 svg 顏色 */
+            transition: color 0.2s;
+        }
+
+            .plain-btn:hover {
+                color: #1c7ed6; /* hover 變藍 */
             }
     </style>
 </head>
@@ -166,16 +181,10 @@
         <header>
             <div class="top-bar" @click="isHeaderOpen = !isHeaderOpen">
                 <h4>🐾 群組聊天室 <span style="color:#888">代碼：{{ groupCode }}</span></h4>
-                <button class="toggle-btn">
-                    {{ isHeaderOpen ? '▲ 收合' : '▼ 展開' }}
-                </button>
-            </div>
-
-            <div class="action-bar" v-show="isHeaderOpen">
-                <button @click="Photomsg" class="action-btn">📷 照片</button>
-                <button @click="Locationmsg" class="action-btn">📍 位置</button>
                 <button @click="leaveChat" class="leave-btn">離開</button>
             </div>
+
+            
         </header>
 
         <main>
@@ -190,7 +199,7 @@
                             <img :src="m.url" style="max-width:100%;border-radius:8px;" />
                         </div>
                         <div v-else-if="m.type === 'location'">
-                            <a :href="'https://www.google.com/maps?q=' + m.lat + ',' + m.lng" target="_blank">現在位置</a>
+                            <a :href="'https://www.google.com/maps?q=' + m.lat + ',' + m.lng" target="_blank">此成員目前位置</a>
                         </div>
                     </div>
                 </div>
@@ -198,8 +207,23 @@
 
             <div class="row">
                 <input v-model.trim="text" @keyup.enter="sendText" placeholder="輸入訊息..." />
+                <button @click="$refs.photoInput.click()" class="plain-btn">📷</button>
+                <button @click="Locationmsg" class="plain-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                         viewBox="0 0 24 24" fill="none">
+                        <path d="M5.7 15C4.03377 15.6353 3 16.5205 3 17.4997C3 19.4329 7.02944 21 12 21C16.9706 21 21 19.4329 21 17.4997C21 16.5205 19.9662 15.6353 18.3 15M12 9H12.01M18 9C18 13.0637 13.5 15 12 18C10.5 15 6 13.0637 6 9C6 5.68629 8.68629 3 12 3C15.3137 3 18 5.68629 18 9ZM13 9C13 9.55228 12.5523 10 12 10C11.4477 10 11 9.55228 11 9C11 8.44772 11.4477 8 12 8C12.5523 8 13 8.44772 13 9Z"
+                              stroke="currentColor" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
                 <button @click="sendText">發送</button>
             </div>
+            <input type="file"
+                   accept="image/*"
+                   capture="environment"
+                   style="display:none"
+                   ref="photoInput"
+                   @change="Photomsg" />
         </main>
     </div>
 
@@ -219,30 +243,45 @@
 
                 // ⚙️ 如果會員登入，使用會員名稱代替訪客暱稱
                 if (hasCustomer) {
-                    const customerName = localStorage.getItem("CatPaw_CustomerName") || "會員";
-                    localStorage.setItem("CatPaw_TemporaryName", customerName);
-                    console.log(`👤 已切換為會員模式：${customerName}`);
+                    const customerName = localStorage.getItem("CatPaw_CustomerName");
+                    const hasTempName = localStorage.getItem("CatPaw_TemporaryName");
+
+                    // 只有當 TemporaryName 尚未設定時才寫入
+                    if (!hasTempName && customerName) {
+                        localStorage.setItem("CatPaw_TemporaryName", customerName);
+                        console.log(`👤 初次設定會員暱稱：${customerName}`);
+                    } else {
+                        console.log(`👤 保留現有暱稱：${hasTempName}`);
+                    }
                 }
 
                 // ⚙️ 不再導向別的 HTML（因為共用一頁）
             })();
             createApp({
                 data() {
-
-
-
                     return {
-                        isHeaderOpen: true,
+                        
                         groupCode: localStorage.getItem("CatPaw_GroupCode") || "",
                         customerId: hasCustomer || null,
                         deviceId: hasDevice || null,
                         senderType: hasCustomer ? "Customer" : "Guest",
-                        temporaryName,
+                        temporaryName: temporaryName,
                         connection: null,
                         messages: [],
                         text: ""
                     };
                 },
+                created() {
+                    // ⚙️ 僅在 localStorage 未同步時才補同步，不覆蓋 Vue 現有值
+                    if (this.senderType === "Customer") {
+                        const storedName = localStorage.getItem("CatPaw_CustomerName");
+                        if (storedName && !localStorage.getItem("CatPaw_TemporaryName")) {
+                            localStorage.setItem("CatPaw_TemporaryName", storedName);
+                            this.temporaryName = storedName;
+                        }
+                    }
+                },
+                
                 mounted() {
                     this.loadHistory();
                     this.initSignalR();
@@ -282,13 +321,12 @@
 
                         // 接收照片
                         this.connection.on('ReceivePhoto', (p) => {
-
                             this.pushFeed({
-                                messagename: p.Username || '匿名',
+                                messagename: p.username || '匿名',
                                 type: 'photo',
                                 sender: p.SenderType || 'Guest',
                                 time: p.UploadTime ? new Date(p.UploadTime).toLocaleString() : '',
-                                url: p.PhotoUrl || p.Url,
+                                url: p.url || p.Url || p.PhotoUrl || p.photoUrl, // ✅ 只要這裡有正確連結就會顯示
                                 content: '上傳照片'
                             });
                         });
@@ -373,20 +411,99 @@
                             console.error("❌ 發送訊息失敗:", err);
                         }
                     },
-                    async Photomsg() {
+                    async Photomsg(event) {
                         // 未來可實作上傳照片功能
-                        alert("📷 上傳照片功能尚未實作");
-                        try {
-                            const payload = {
-                                groupCode: this.groupCode,
-                                senderType: this.senderType,   // "Guide" / "Guest" / "Customer"
-                                name: this.temporaryName,
+                        const file = event.target.files[0];
+                        if (!file) return;
 
+                        try {
+                            if (!file.type.startsWith("image/")) {
+                                alert("只能上傳圖片");
+                                return;
                             }
+                            let uploadFile = file;
+                            if (file.size > 2 * 1024 * 1024) { // 2MB
+                                uploadFile = await this.compressImage(file, 2); // 目標2MB
+                            }
+                            if (!navigator.geolocation) {
+                                alert("❌ 你的瀏覽器不支援定位功能");
+                                return;
+                            }
+
+                            // 2️⃣ 取得經緯度（包成 Promise）
+                            const position = await new Promise((resolve, reject) => {
+                                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                    enableHighAccuracy: true, // 高精度
+                                    timeout: 10000,           // 最多等10秒
+                                    maximumAge: 0
+                                });
+                            });
+
+                            // 3️⃣ 拆出座標
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+
+                            // 準備 FormData
+                            const formData = new FormData();
+                            formData.append("GroupCode", this.groupCode);
+                            formData.append("UploaderType", this.senderType); // Guide / Guest / Customer
+                            formData.append("name", this.temporaryName);
+                            formData.append("photo", uploadFile); // 圖片本體
+                            formData.append("DeviceId", this.deviceId || ""); // 訪客模式可附上
+                            formData.append("Latitude", latitude || ""); // 可擴充定位資訊
+                            formData.append("Longitude", longitude || "");
+
+                            // ✅ 若是會員，加上 customerId
+                            if (this.senderType === "Customer" && this.customerId) {
+                                formData.append("CustomerId", this.customerId);
+                            }
+
+                            // ✅ 若是導遊，加上 guideId（若有）
+                            if (this.senderType === "Guide" && this.guideId) {
+                                formData.append("GuideId", this.guideId);
+                            }
+
+                            // 呼叫 API (你的後端是 API Controller)
+                            const res = await axios.post('/api/TalkMessageApi/UploadPhoto', formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+
+                            console.log("✅ 照片上傳成功:", res.data);
                         } catch (err) {
-                            console.error("❌ 發送照片失敗:", err);
+                            console.error("❌ 上傳照片失敗:", err);
+                            alert("上傳失敗，請再試一次");
+                        } finally {
+                            // 清空 input (否則相同檔案無法重選)
+                            event.target.value = "";
                         }
 
+
+                    },
+                    async compressImage(file, maxMB = 2) {
+                        const img = await createImageBitmap(file);
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+
+                        // 調整尺寸（寬度不超過 1280px）
+                        const maxWidth = 1280;
+                        let { width, height } = img;
+                        if (width > maxWidth) {
+                            height = (maxWidth / width) * height;
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        let quality = 0.9; // 初始品質
+                        let blob;
+
+                        do {
+                            blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", quality));
+                            quality -= 0.1;
+                        } while (blob.size > maxMB * 1024 * 1024 && quality > 0.2);
+
+                        return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
                     },
                     async Locationmsg() {
                         try {
@@ -420,6 +537,9 @@
                                 longitude: longitude,
                                 deviceId: this.deviceId
                             };
+                            if (this.senderType === "Customer" && this.customerId) {
+                                payload.customerId = this.customerId;
+                            }
 
                             // 5️⃣ 發送到後端 API
                             const res = await axios.post('/api/TalkMessageApi/SetLocation', payload);

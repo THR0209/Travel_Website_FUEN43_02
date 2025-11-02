@@ -19,7 +19,9 @@ using Cat_Paw_Footprint.Services;
 using ClosedXML.Parser;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.SecretManager.V1;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using static Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController;
 
@@ -63,6 +65,7 @@ namespace Cat_Paw_Footprint
 					opt.SignIn.RequireConfirmedAccount = false;
 					opt.Password.RequiredLength = 6;
 				})
+				.AddErrorDescriber<CustomIdentityErrorDescriber>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders()
 				.AddDefaultUI();
@@ -78,18 +81,24 @@ namespace Cat_Paw_Footprint
 				options.Cookie.Name = ".CatPaw.Vendor.Auth";
 				options.LoginPath = "/Vendor/VendorHome/Login";
 				options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			})
 			.AddCookie("CustomerAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Customer.Auth";
 				options.LoginPath = "/CustomersArea/CusLogReg/Login";
 				options.AccessDeniedPath = "/CustomersArea/CusLogReg/Login";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			})
 			.AddCookie("EmployeeAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Employee.Auth";
 				options.LoginPath = "/Employee/EmployeeAuth/Login";
 				options.AccessDeniedPath = "/Home/Index";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			});
 
 			// 授權權限設定
@@ -139,6 +148,8 @@ namespace Cat_Paw_Footprint
 				options.IdleTimeout = TimeSpan.FromHours(9);
 				options.Cookie.HttpOnly = true;
 				options.Cookie.IsEssential = true;
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			});
 
 			#region DI 註冊資料存取層與服務層
@@ -174,6 +185,9 @@ namespace Cat_Paw_Footprint
             builder.Services.AddScoped<MemberLevelService>();
 
             #endregion
+			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
+			builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+			#endregion
 
             builder.Services.AddHttpContextAccessor();
 
@@ -187,13 +201,13 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
-			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CustomerEmailSender>();
 			
 			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
 			builder.Services.AddHostedService<CouponExpiryChecker>();
-
-
+			//清理購物車DB
+			builder.Services.Configure<CleanupOptions>(builder.Configuration.GetSection("CleanupOptions"));
+			builder.Services.AddHostedService<PendingPaymentsCleanupService>();
 			var app = builder.Build();
 			app.MapHub<ChatHub>("/chatHub");
 			// Configure the HTTP request pipeline.
@@ -271,7 +285,9 @@ namespace Cat_Paw_Footprint
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
-			app.MapHub<NotificationHub>("/notificationHub");
+			app.MapHub<NotificationHub>("/notificationHub")
+				.RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = "CustomerAuth" });
+
 
 			app.Run();
 		}

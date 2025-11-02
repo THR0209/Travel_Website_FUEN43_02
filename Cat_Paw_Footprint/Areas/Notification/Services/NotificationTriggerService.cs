@@ -26,7 +26,17 @@ namespace Cat_Paw_Footprint.Services
 
 		public async Task NotifyOrderCreatedAsync(int customerId, int orderId)
 		{
-			await SendAsync(customerId, "訂單成立通知", $"您的訂單 #{orderId} 已成立並完成付款，感謝您的購買！", "訂單");
+			await SendAsync(customerId, "訂單成立通知", $"您的訂單 #{orderId} 已成立並完成付款，感謝您的購買！", "訂單通知");
+		}
+
+		public async Task NotifyPaymentSuccessAsync(int customerId, int orderId)
+		{
+			await SendAsync(
+				customerId,
+				"付款成功通知",
+				$"您的訂單 #{orderId} 已成功付款，我們將為您準備旅程的詳細資訊，敬請期待！ 🐾",
+				"訂單通知"
+			);
 		}
 
 		public async Task NotifyCustomerServiceReplyAsync(int customerId, int ticketId)
@@ -75,6 +85,16 @@ namespace Cat_Paw_Footprint.Services
 			await _hub.Clients.User(customerId.Value.ToString())
 				.SendAsync("ReceiveNotification", title, message, type);
 		}
+
+		public async Task SendCustomAsync(int customerId, string title, string message, string type)
+		{
+			if (customerId <= 0) return;
+
+			await _notifSvc.AddNotificationAsync(customerId, title, message, type);
+			await _hub.Clients.User(customerId.ToString())
+				.SendAsync("ReceiveNotification", title, message, type);
+		}
+
 
 	}
 }

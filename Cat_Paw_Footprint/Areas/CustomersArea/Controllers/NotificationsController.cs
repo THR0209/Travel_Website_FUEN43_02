@@ -19,7 +19,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_notificationService = notificationService;
 		}
 
-		/// <summary>通知中心主頁</summary>
+		/// <summary>
+		/// 通知中心主頁
+		/// GET: /CustomersArea/Notifications/Index
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
@@ -38,7 +42,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return View(vmList);
 		}
 
-		/// <summary>標示單筆為已讀</summary>
+		/// <summary>
+		/// 標示單筆為已讀
+		/// POST: /CustomersArea/Notifications/MarkAsRead
+		/// </summary>
+		/// <param name="request"></param>
+		/// <returns></returns>
 		[HttpPost]
 		public async Task<IActionResult> MarkAsRead([FromBody] MarkReadRequest request)
 		{
@@ -60,7 +69,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 		}
 
-		/// <summary>未讀通知數量（給 Layout 用）</summary>
+		/// <summary>
+		/// 未讀通知數量（給 Layout 用）
+		/// GET: /CustomersArea/Notifications/GetUnreadCount
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public async Task<IActionResult> GetUnreadCount()
 		{
@@ -69,7 +82,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Json(new { count });
 		}
 
-		/// <summary>最新通知 3 筆（給 Layout 用）</summary>
+		/// <summary>
+		/// 最新通知 3 筆（給 Layout 用）
+		/// GET: /CustomersArea/Notifications/GetLatestNotifications
+		/// </summary>
+		/// <returns></returns>
 		[HttpGet]
 		public async Task<IActionResult> GetLatestNotifications()
 		{
@@ -87,6 +104,31 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				});
 			return Json(list);
 		}
+
+		/// <summary>
+		/// 全部標示為已讀
+		/// POST: /CustomersArea/Notifications/MarkAllAsRead
+		/// </summary>
+		/// <returns></returns>
+		[HttpPost]
+		public async Task<IActionResult> MarkAllAsRead()
+		{
+			try
+			{
+				if (!User.Identity?.IsAuthenticated ?? true)
+					return Unauthorized(new { success = false, message = "未登入" });
+
+				await _notificationService.MarkAllAsReadAsync(CurrentCustomerId);
+				return Ok(new { success = true, message = "全部已標示為已讀" });
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"❌ MarkAllAsRead 發生例外：{ex.Message}\n{ex.StackTrace}");
+				return StatusCode(500, new { success = false, message = ex.Message });
+			}
+		}
+
+
 	}
 
 	public class MarkReadRequest
