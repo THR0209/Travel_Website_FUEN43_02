@@ -55,12 +55,15 @@ namespace Cat_Paw_Footprint.ViewModel
 		public int GroupId { get; set; }// 群組Id
 		public Guid? GuestId { get; set; }// 遊客ID
 		public int? UploaderId { get; set; }// 上傳者ID
+		public string? CustomerId { get; set; }// 會員ID
+		public int? GuideId { get; set; }// 導遊ID
 		public string UploaderType { get; set; } = null!; // "Guide" / "Guest"/ "Customer"
-		public string PhotoUrl { get; set; } = null!;     // 檔案存好後的 URL
+		public string? FilePath { get; set; }              // 檔案儲存後的相對路徑，例如 "/uploads/..."
 		public double? Latitude { get; set; }             // 可選GPS
 		public double? Longitude { get; set; }
 		public string? DeviceId { get; set; }
 		public string? name { get; set; }// 上傳者稱呼
+		public IFormFile? Photo { get; set; } // 實際上傳的圖片檔
 	}
 
 	public class GroupPhotoResponseDto// 上傳照片回應

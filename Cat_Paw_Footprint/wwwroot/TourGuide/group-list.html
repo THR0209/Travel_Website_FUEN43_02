@@ -61,6 +61,12 @@
 </head>
 
 <body>
+    <script>
+        // ✅ 未登入導遊直接導回登入頁
+        if (!localStorage.getItem("guideId")) {
+            window.location.href = "login.html";
+        }
+    </script>
     <div id="app" class="group-card">
         <h2>
             <i class="fa-solid fa-users-line me-2 text-primary"></i> 我的群組
@@ -129,10 +135,11 @@
         </div>
 
         <div class="footer-text">
-            <a href="login.html" class="text-decoration-none me-2">
-                <i class="fa-solid fa-right-from-bracket me-1"></i> 登出 / 重新登入
-            </a>
+            <button class="btn btn-outline-danger btn-sm" @click="logout">
+                <i class="fa-solid fa-right-from-bracket me-1"></i> 登出
+            </button>
         </div>
+
     </div>
 
     <script>
@@ -204,6 +211,18 @@
                     localStorage.setItem("groupCode", g.groupCode);
                     localStorage.setItem("groupName", g.groupName);
                     location.href = "chat.html";
+                },
+                logout() {
+                    if (confirm("確定要登出嗎？")) {
+                        localStorage.removeItem("guideId");
+                        localStorage.removeItem("guideName");
+                        localStorage.removeItem("guideAccount");
+                        localStorage.removeItem("role");
+                        localStorage.removeItem("groupId");
+                        localStorage.removeItem("groupCode");
+                        localStorage.removeItem("groupName");
+                        location.href = "login.html";
+                    }
                 },
             },
         }).mount("#app");

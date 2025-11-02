@@ -51,11 +51,9 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Controllers
 		/// 群組上傳照片
 		/// </summary>
 		[HttpPost]
-		public async Task<IActionResult> UploadPhoto([FromBody] GroupPhotoRequestDto dto)
+		[Consumes("multipart/form-data")]
+		public async Task<IActionResult> UploadPhoto([FromForm] GroupPhotoRequestDto dto)
 		{
-			if (dto == null || string.IsNullOrWhiteSpace(dto.GroupCode) || string.IsNullOrWhiteSpace(dto.PhotoUrl))
-				return BadRequest(new { success = false, message = "缺少必要欄位（群組代碼或圖片連結）" });
-
 			var result = await _msgSvc.UploadPhotoAsync(dto);
 			return Ok(result);
 		}
@@ -68,7 +66,10 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Controllers
 		{
 			if (dto == null || dto.GroupId <= 0)
 				return BadRequest(new { success = false, message = "群組ID不得為空" });
-
+			if(dto.name==null)
+			{
+				dto.name = "導遊";
+			}
 			var result = await _msgSvc.SetLocationAsync(dto);
 			return Ok(result);
 		}

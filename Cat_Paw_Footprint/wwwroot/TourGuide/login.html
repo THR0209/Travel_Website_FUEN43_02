@@ -11,6 +11,9 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+    <!-- ✅ 引用 PWA manifest -->
+    <link rel="manifest" href="/TourGuide/manifest.json" />
+
     <style>
         body {
             background: #f8f9fa;
@@ -87,6 +90,19 @@
                     messageColor: "#555"
                 };
             },
+            mounted() {
+                // ✅ 若已登入過，直接導向群組清單
+                if (localStorage.getItem("guideId")) {
+                    location.href = "group-list.html";
+                }
+
+                // ✅ 註冊 Service Worker
+                if ("serviceWorker" in navigator) {
+                    navigator.serviceWorker.register("/TourGuide/service-worker.js")
+                        .then(() => console.log("✅ Service Worker 已註冊"))
+                        .catch(err => console.error("❌ SW 註冊失敗:", err));
+                }
+            },
             methods: {
                 async login() {
                     this.message = "";
@@ -109,14 +125,32 @@
                             return;
                         }
 
-                        // 儲存導遊資訊
+                        // ✅ 儲存導遊資訊
                         localStorage.setItem("guideAccount", data.account || this.account);
                         localStorage.setItem("guideName", data.guideName || "");
                         localStorage.setItem("guideId", data.guideId || "");
+                        localStorage.setItem("role", "Guide");
+
+                        // ✅ 登入後請求通知權限
+                        if ("Notification" in window) {
+                            if (Notification.permission !== "granted") {
+                                Notification.requestPermission().then(result => {
+                                    if (result === "granted") {
+                                        console.log("✅ 通知權限已允許");
+                                    } else {
+                                        console.warn("⚠️ 使用者拒絕通知權限");
+                                    }
+                                });
+                            } else {
+                                console.log("✅ 通知權限先前已允許");
+                            }
+                        }
 
                         this.message = "登入成功，導向中...";
                         this.messageColor = "green";
                         setTimeout(() => location.href = "group-list.html", 800);
+
+
                     } catch (e) {
                         this.message = "伺服器錯誤";
                         this.messageColor = "red";

@@ -65,6 +65,7 @@ namespace Cat_Paw_Footprint
 					opt.SignIn.RequireConfirmedAccount = false;
 					opt.Password.RequiredLength = 6;
 				})
+				.AddErrorDescriber<CustomIdentityErrorDescriber>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders()
 				.AddDefaultUI();
