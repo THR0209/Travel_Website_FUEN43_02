@@ -17,6 +17,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 		// trip / hotel / ticket / car
 		public string Type { get; set; } = "trip";
 
+		public List<string>? Departures { get; set; }
+
+
 		// 側邊篩選
 		[Range(0, double.MaxValue)] public decimal? MinPrice { get; set; }
 		[Range(0, double.MaxValue)] public decimal? MaxPrice { get; set; }

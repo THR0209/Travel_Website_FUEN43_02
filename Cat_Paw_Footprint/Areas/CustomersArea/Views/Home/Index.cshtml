@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "首頁";
     var isHomePage =
         string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase) &&
@@ -69,6 +68,7 @@
             width: 100%;
             height: 480px;
             overflow: visible; /* 允許下拉超出 Banner */
+            z-index: 5000;
         }
 
         #heroMedia {
@@ -95,7 +95,7 @@
             border-radius: 20px;
             box-shadow: 0 6px 25px rgba(0,0,0,.30);
             padding: 18px;
-            z-index: 1000;
+            z-index: 99999 !important; /* 抬高父層：子層下拉才有機會蓋住後面 */
             pointer-events: auto;
         }
 
@@ -152,6 +152,12 @@
                 font-weight: 500;
             }
 
+        /* 保險：避免後面區塊不小心蓋過來 */
+        .section, .container {
+            position: relative;
+            z-index: 1; /* 低於搜尋列即可 */
+        }
+            
         .dropdown-panel {
             position: absolute;
             top: 115%;
@@ -269,6 +275,12 @@
             line-height: 1.2; /* 可依視覺調整 */
         }
 
+        /* 放到你的全域樣式最後面 */
+        .daterangepicker {
+            position: fixed; /* 元件本來就是固定定位，明確指定 */
+            z-index: 1000002 !important; /* 高過任何卡片/輪播 */
+        }
+
 
         /* 裝飾（避免擋點擊） */
         .floating-paws {
@@ -373,7 +385,7 @@
 <!-- ===== Hero / Banner ===== -->
 <section class="hero mt-3">
     <img src="https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=1800&auto=format&fit=crop" alt="帶貓旅行的海邊日落" id="heroMedia" />
-    
+
     <!-- Trip.com 風格搜尋列 -->
     <div class="search-wrapper">
         <h1 class="display-6 fw-bolder mb-3">帶著毛孩去旅行，探索下一站</h1>
@@ -406,7 +418,7 @@
 
                 <!-- 日期（daterangepicker：起訖 + 時間） -->
                 <div class="search-select">
-                    <label class="float-label">出發時間-返程時間</label>
+                    <label class="float-label" id="dateTitle">出發時間-返程時間</label>
                     <input type="text" class="search-input" id="dateLabel" placeholder="選擇日期與時間" autocomplete="off" />
                 </div>
 
@@ -447,7 +459,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="/CustomersArea/Products/Search" class="btn btn-outline-primary rounded-pill fw-bold">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "trip" })" class="btn btn-outline-primary rounded-pill fw-bold">
                 查看所有行程 <i class="fa-solid fa-arrow-right ms-2"></i>
             </a>
             <div class="swiper-nav d-flex align-items-center gap-2">
@@ -494,7 +506,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="/CustomersArea/Products/Search?type=hotel" class="btn btn-outline-primary rounded-pill fw-bold">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "hotel" })" class="btn btn-outline-primary rounded-pill fw-bold">
                 查看所有住宿 <i class="fa-solid fa-arrow-right ms-2"></i>
             </a>
             <div class="swiper-nav d-flex align-items-center gap-2">
@@ -540,7 +552,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="/CustomersArea/Products/Search?type=ticket" class="btn btn-outline-primary rounded-pill fw-bold">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "ticket" })" class="btn btn-outline-primary rounded-pill fw-bold">
                 查看所有門票 <i class="fa-solid fa-arrow-right ms-2"></i>
             </a>
             <div class="swiper-nav d-flex align-items-center gap-2">
@@ -586,7 +598,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="/CustomersArea/Products/Search?type=car" class="btn btn-outline-primary rounded-pill fw-bold">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "car" })" class="btn btn-outline-primary rounded-pill fw-bold">
                 查看所有交通 <i class="fa-solid fa-arrow-right ms-2"></i>
             </a>
             <div class="swiper-nav d-flex align-items-center gap-2">
@@ -630,7 +642,7 @@
             <a class="link-primary" asp-controller="Promotions" asp-action="Index">全部優惠</a>
         </div>
 
-      @*   <!-- 載入中 -->
+        @*   <!-- 載入中 -->
         <div v-if="isLoading" class="text-center py-5">
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2 mb-0 text-muted">載入中...</p>
@@ -659,96 +671,6 @@
         </div>
     </div>
 </section>
-
-
-
-@* <!-- Deals Grid -->
-<section class="section" id="deals">
-    <div class="container">
-        <div class="section-title text-center mb-5">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#7ec8e3;">
-                <i class="fa-solid fa-gift me-2"></i> 精選特惠
-            </h2>
-            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
-        </div>
-        <div class="row g-3 g-md-4">
-            <!-- 6 張商品卡 -->
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="日月潭 單車">
-                        <span class="badge-live">🔥 今日限定</span>
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">南投｜日月潭環潭自行車・SUP 立槳</h3>
-                        <div class="product-meta">4.7★ (1,122) ・ 台灣・3 小時</div>
-                        <div class="price">NT$ 980 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop" alt="浮潛">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">墾丁｜浮潛＆潮間帶生態導覽</h3>
-                        <div class="product-meta">4.3★ (523) ・ 台灣・半日</div>
-                        <div class="price">NT$ 1,200 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1518544801976-3e188ee7a9a2?q=80&w=1600&auto=format&fit=crop" alt="九份">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">新北｜九份黃金老街・阿妹茶樓</h3>
-                        <div class="product-meta">4.8★ (3,102) ・ 台灣・1 日</div>
-                        <div class="price">NT$ 1,050 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop" alt="韓國 咖啡">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">首爾｜文青咖啡巷弄漫遊</h3>
-                        <div class="product-meta">4.5★ (812) ・ 韓國・2 小時</div>
-                        <div class="price">NT$ 1,180 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1494475673543-6a6a27143b22?q=80&w=1600&auto=format&fit=crop" alt="藍山">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">澳洲｜藍山新秘境・空中步道</h3>
-                        <div class="product-meta">4.6★ (655) ・ 澳洲・1 日</div>
-                        <div class="price">NT$ 3,100 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?q=80&w=1600&auto=format&fit=crop" alt="巴黎">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">法國｜塞納河左岸夜色</h3>
-                        <div class="product-meta">4.9★ (1,210) ・ 法國・2 小時</div>
-                        <div class="price">NT$ 2,900 起</div>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </div>
-</section> *@
 
 <!-- ====================== 常見問題（ API 熱門資料） ====================== -->
 <section class="section" id="faqSection">
@@ -821,57 +743,11 @@
           app.mount(appId);
         }
 
-        // 住宿 / 門票 / 交通
+        // 住宿 / 門票 / 交通 / 熱門行程載入
         mountFeatured('#hot-app',    '/CustomersArea/Products/GetHotProducts',    '.hot-swiper',    '.hot-prev',    '.hot-next');
         mountFeatured('#hotels-app',    '/CustomersArea/Products/GetFeaturedHotels',    '.hotels-swiper',    '.hotel-prev',    '.hotel-next');
         mountFeatured('#tickets-app',   '/CustomersArea/Products/GetFeaturedTickets',   '.tickets-swiper',   '.ticket-prev',   '.ticket-next');
         mountFeatured('#transports-app','/CustomersArea/Products/GetFeaturedTransports','.transports-swiper','.transport-prev','.transport-next');
-
-        /* ====================== Vue 熱門行程載入 ====================== */
-        // const hotApp = Vue.createApp({
-        //     data() {
-        //         return { products: [] };
-        //     },
-        //     mounted() {
-        //         axios.get('/CustomersArea/Products/GetHotProducts')
-        //             .then(res => { this.products = res.data; })
-        //             .then(() => {
-        //                 this.$nextTick(() => {
-        //                     new Swiper('.swiper', {
-        //                         slidesPerView: 1.3,
-        //                         spaceBetween: 16,
-        //                         navigation: {
-        //                             nextEl: '.swiper-next',
-        //                             prevEl: '.swiper-prev',
-        //                         },
-        //                         breakpoints: {
-        //                             576: { slidesPerView: 2 },
-        //                             768: { slidesPerView: 3 },
-        //                             992: { slidesPerView: 4 }
-        //                         }
-        //                     });
-        //                 });
-        //             })
-        //             .catch(err => console.error('熱門商品載入失敗', err));
-        //     }
-        // });
-        // hotApp.mount('#hot-app');
-
-
-        /* ====================== Vue 精選住宿載入 ====================== */
-
-
-
-        
-        /* ====================== Vue 精選景點載入 ====================== */
-
-
-
-
-        /* ====================== Vue 熱門租車載入 ====================== */
-
-
-
 
         /* ====================== Vue 優惠活動載入 ====================== */
         const app = Vue.createApp({
@@ -998,7 +874,7 @@
           // ✅ 套用對照表更新 UI
           $('#destinationInput').attr('placeholder', SEARCH_CONFIG[type].destinationPlaceholder);
           $('#peopleLabel').text(SEARCH_CONFIG[type].peopleLabel + "： " + $('#peopleCount').text());
-          
+
           // ✅ 切換分類時重置旅客數
           cnt = 2;
           syncPeople();
@@ -1077,9 +953,19 @@
 
         /* 日期：daterangepicker（僅日期，不含時間） */
         $('#dateLabel').daterangepicker({
+          parentEl: 'body',     // 讓面板直接掛在 body
+          drops: 'down',        // 或 'auto'，避免向上長被裁
+          opens: 'center',      // 依你的版面調整
           autoUpdateInput: false,
           minDate: moment().startOf('day'), // ✅ 禁止選過去
-          locale: { format: 'YYYY/MM/DD', cancelLabel: '清除', applyLabel:'確定' }
+          locale: {
+              format: 'YYYY/MM/DD',
+              cancelLabel: '清除',
+              applyLabel:'確定',
+              daysOfWeek: ['日','一','二','三','四','五','六'],
+              monthNames: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+              firstDay: 0,
+          }
         }, function(start, end){
           $('#startDate').val(start.format('YYYY/MM/DD'));
           $('#endDate').val(end.format('YYYY/MM/DD'));

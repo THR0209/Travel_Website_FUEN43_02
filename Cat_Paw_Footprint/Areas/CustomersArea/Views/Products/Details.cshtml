@@ -132,6 +132,26 @@
             background: #fff5f5 !important;
         }
 
+        /* 總金額列 */
+        .total-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #e5eef7;
+        }
+
+            .total-row .label {
+                font-weight: 800;
+            }
+
+            .total-row .value {
+                font-weight: 900;
+                font-size: 1.1rem;
+                color: #0f766e;
+            }
+
         /* Tabs */
         .nav-tabs .nav-link {
             border: none;
@@ -145,7 +165,7 @@
                 border-color: #22B3C1;
             }
 
-        /* 行程介紹（沿用你後台概念，但換前台語彙和配色）  :contentReference[oaicite:5]{index=5} */
+        /* 行程介紹樣式 */
         .timeline {
             position: relative;
             margin: 1rem 0 0 1rem;
@@ -214,6 +234,104 @@
             object-fit: cover;
             border-radius: 10px;
         }
+
+        /* --- daterangepicker 微客製 --- */
+        .daterangepicker {
+            border-radius: 16px;
+            border: 1px solid #e6e6e6;
+            box-shadow: 0 10px 30px rgba(0,0,0,.08);
+            font-family: 'Public Sans', system-ui, -apple-system, 'Noto Sans TC', sans-serif;
+        }
+
+            .daterangepicker .drp-calendar.left .calendar-table thead tr:nth-child(1) th {
+                font-size: 20px;
+                font-weight: 700;
+                padding: 20px 24px;
+            }
+
+            .daterangepicker .drp-calendar .prev, .daterangepicker .drp-calendar .next {
+                width: 20px;
+                height: 20px;
+                border-radius: 10px;
+                border: 1px solid #dfe6e9;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+            }
+
+                .daterangepicker .drp-calendar .prev:hover, .daterangepicker .drp-calendar .next:hover {
+                    background: #f7f9fa;
+                }
+
+            .daterangepicker .calendar-table thead tr:nth-child(2) th {
+                color: #7f8c8d;
+                font-weight: 600;
+                padding: 8px 0;
+            }
+
+            .daterangepicker .calendar-table td {
+                height: 20px;
+                vertical-align: top;
+                position: relative;
+                padding-top: 6px;
+                font-weight: 700;
+            }
+
+                .daterangepicker .calendar-table td:after {
+                    content: attr(data-price);
+                    position: absolute;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    bottom: 6px;
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #7f8c8d;
+                    white-space: nowrap;
+                }
+
+            .daterangepicker td.off, .daterangepicker td.disabled {
+                color: #c9c9c9 !important;
+            }
+
+                .daterangepicker td.off:after, .daterangepicker td.disabled:after {
+                    color: #d8d8d8;
+                }
+
+            .daterangepicker td.active, .daterangepicker td.active:hover {
+                background: #22B3C1;
+                border-radius: 10px;
+                color: #fff !important;
+            }
+
+                .daterangepicker td.active:after {
+                    color: #e8ffff;
+                }
+
+            .daterangepicker td.available:hover {
+                background: #eaf7f8;
+                border-radius: 10px;
+            }
+
+        .drp-footer-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px 6px;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+            .drp-footer-note i {
+                font-style: normal;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                border: 1px solid #cfd8dc;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
     </style>
 }
 
@@ -272,7 +390,7 @@
                     </div>
                 </div>
 
-                <!-- 行程介紹：依「景點 / 餐食 / 住宿 / 交通」分段，並以 Day Timeline 呈現（參考後台寫法）  :contentReference[oaicite:6]{index=6} -->
+                <!-- 行程介紹 -->
                 <div class="tab-pane fade" id="tab-itin">
                     <!-- 景點 -->
                     <div class="mb-4">
@@ -295,7 +413,6 @@
                                             }
                                         </ul>
 
-                                        <!-- 若有任何圖片，做一個 carousel -->
                                         @{
                                             var imgs = day.Items.SelectMany(x => x.Pictures).Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
                                             if (imgs.Count == 0) { imgs = new() { "/images/NoImage.png" }; }
@@ -499,36 +616,44 @@
             </div>
         </div>
 
-        <!-- 右側預訂盒（沿用你現有的訂位流程） -->
+        <!-- 右側預訂盒 -->
         <aside>
             <div class="book-box">
-                <div class="price mb-1">NT$ @Model.ProductPrice.ToString("N0") <span class="text-muted fs-6">起</span></div>
+                <!-- 將單價寫入 data-unit，方便 JS 讀取 -->
+                <div class="price mb-1" id="unitPrice" data-unit="@Model.ProductPrice">NT$ @Model.ProductPrice.ToString("N0") <span class="text-muted fs-6">起</span></div>
                 <div class="small text-muted mb-2">價格依日期與方案而異</div>
 
                 <form asp-area="CustomersArea" asp-controller="Cart" asp-action="Add" method="post" id="bookForm">
                     <input type="hidden" name="productId" value="@Model.ProductID" />
                     <input type="hidden" name="start" id="startDate" />
-                    <input type="hidden" name="end" id="endDate" />
-                    <input type="hidden" name="people" id="peopleInput" value="2" />
+                    <input type="hidden" name="people" id="peopleInput" value="1" />
 
                     <div class="control">
-                        <label class="form-label mb-1 fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> 選擇日期</label>
+                        <label class="form-label mb-1 fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> 選擇出發日期</label>
                         <input type="text" class="form-control" id="dateLabel"
                                data-min="@minDate:yyyy-MM-dd"
                                data-max="@(maxDate?.ToString("yyyy-MM-dd") ?? "")"
-                               placeholder="選擇日期" readonly />
+                               placeholder="選擇出發日期" readonly />
                     </div>
+
                     <div class="control">
                         <label class="form-label mb-1 fw-bold"><i class="fa-solid fa-user-group me-1"></i> 旅客</label>
                         <div class="people-inline">
-                            <span id="peopleLabel" class="fw-semibold">2 位旅客</span>
+                            <span id="peopleLabel" class="fw-semibold">1 位旅客</span>
                             <div>
                                 <button type="button" class="btn btn-outline-secondary btn-sm" id="minus">-</button>
-                                <span id="peopleCount" class="fw-semibold">2</span>
+                                @* <span id="peopleCount" class="fw-semibold">1</span> *@
                                 <button type="button" class="btn btn-outline-secondary btn-sm" id="plus">+</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 總金額 -->
+                    <div class="total-row">
+                        <span class="label">總金額</span>
+                        <span class="value" id="totalAmount">NT$ 0</span>
+                    </div>
+
                     <button type="submit" class="btn-book mt-2">加入購物車</button>
                 </form>
             </div>
@@ -542,80 +667,93 @@
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        (function(){
+        (function () {
             // 畫廊
-            $('.thumb').on('click', function(){
+            $('.thumb').on('click', function () {
                 $('.thumb').removeClass('active'); $(this).addClass('active');
                 $('#heroImg img').attr('src', $(this).data('url'));
             });
 
-            // 人數
-            let cnt = 2; function sync(){ $('#peopleCount').text(cnt); $('#peopleLabel').text(cnt+' 位旅客'); $('#peopleInput').val(cnt); }
-            $('#plus').on('click', e=>{ e.preventDefault(); cnt++; sync(); });
-            $('#minus').on('click', e=>{ e.preventDefault(); if(cnt>1) cnt--; sync(); });
+            // 單價（來自 data-unit）
+            const unit = (() => {
+                const v = Number($('#unitPrice').data('unit'));
+                return isNaN(v) ? 0 : v;
+            })();
+
+            // 千分位/貨幣
+            const fmtCurrency = n => new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 }).format(n);
+
+            // 旅客數 + 總金額同步
+            let cnt = 2;
+            function updateTotal() {
+                $('#totalAmount').text(fmtCurrency(unit * cnt));
+            }
+            function sync() {
+                $('#peopleCount').text(cnt);
+                $('#peopleLabel').text(cnt + ' 位旅客');
+                $('#peopleInput').val(cnt);
+                updateTotal();
+            }
+            $('#plus').on('click', e => { e.preventDefault(); cnt++; sync(); });
+            $('#minus').on('click', e => { e.preventDefault(); if (cnt > 1) cnt--; sync(); });
             sync();
 
-            // 日期（禁過去、尊重上下架、結束日至少+1）
-            const minStr = $('#dateLabel').data('min'); const maxStr = $('#dateLabel').data('max');
-            const minDate = minStr ? moment(minStr) : moment().startOf('day');
-            const maxDate = maxStr ? moment(maxStr) : false;
+            // 日期（單日）
             $('#dateLabel').daterangepicker({
-                autoUpdateInput:false, minDate:minDate, maxDate:maxDate || undefined,
-                locale:{ format:'YYYY-MM-DD', cancelLabel:'清除', applyLabel:'確定' }
-            }).on('apply.daterangepicker', function(ev, picker){
-                let s = picker.startDate.clone().startOf('day'), e = picker.endDate.clone().startOf('day');
-                if(!e.isAfter(s)){ e = s.clone().add(1,'day'); picker.setEndDate(e); }
-                $('#startDate').val(s.format('YYYY-MM-DD')); $('#endDate').val(e.format('YYYY-MM-DD'));
-                $('#dateLabel').val(s.format('YYYY-MM-DD')+' - '+e.format('YYYY-MM-DD'));
-            }).on('cancel.daterangepicker', function(){ $(this).val(''); $('#startDate,#endDate').val(''); });
+                singleDatePicker: true,
+                autoUpdateInput: false,
+                showDropdowns: true,
+                alwaysShowCalendars: true,
+                opens: 'center',
+                minDate: moment(),
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    cancelLabel: '清除',
+                    applyLabel: '確定',
+                    daysOfWeek: ['日', '一', '二', '三', '四', '五', '六'],
+                    monthNames: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+                    firstDay: 0
+                },
+                linkedCalendars: true,
+                autoApply: true,
+            })
+            .on('apply.daterangepicker', function (ev, picker) {
+                let s = picker.startDate.clone().startOf('day');
+                $('#startDate').val(s.format('YYYY-MM-DD'));
+                $('#dateLabel').val(s.format('YYYY-MM-DD'));
+            })
+            .on('cancel.daterangepicker', function () {
+                $(this).val('');
+                $('#startDate').val('');
+            });
 
-            // 送出驗證
-            $('#bookForm').on('submit', function(e){
-                e.preventDefault(); // 防止表單傳統提交
+            // 送出驗證（只檢查 start）
+            $('#bookForm').on('submit', function (e) {
+                e.preventDefault();
 
-                if(!$('#startDate').val() || !$('#endDate').val()){
+                if (!$('#startDate').val()) {
                     $('#dateLabel').addClass('is-invalid');
-                    Swal.fire({ icon:'warning', title:'請先選擇日期', confirmButtonColor:'#22B3C1' });
+                    Swal.fire({ icon: 'warning', title: '請先選擇日期', confirmButtonColor: '#22B3C1' });
                     return false;
                 }
 
                 const form = e.target;
                 const formData = new FormData(form);
 
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ok) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '已加入購物車',
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                        if (typeof updateCartCount === 'function') {
-                            updateCartCount(data.count);
+                fetch(form.action, { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.ok) {
+                            Swal.fire({ icon: 'success', title: '已加入購物車', showConfirmButton: false, timer: 1500 });
+                            if (typeof updateCartCount === 'function') updateCartCount(data.count);
+                        } else {
+                            Swal.fire({ icon: 'error', title: '加入失敗', text: data.error || '發生未知的錯誤', confirmButtonColor: '#22B3C1' });
                         }
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '加入失敗',
-                            text: data.error || '發生未知的錯誤',
-                            confirmButtonColor: '#22B3C1'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: '發生錯誤',
-                        text: '無法連線到伺服器',
-                        confirmButtonColor: '#22B3C1'
+                    })
+                    .catch(err => {
+                        console.error('Error:', err);
+                        Swal.fire({ icon: 'error', title: '發生錯誤', text: '無法連線到伺服器', confirmButtonColor: '#22B3C1' });
                     });
-                });
             });
         })();
     </script>

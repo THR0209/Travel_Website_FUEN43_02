@@ -1,0 +1,43 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.SearchResultsVM
+
+<div class="results-header mb-3 p-3 rounded-4"
+     style="background:linear-gradient(90deg,#f7fbff,#ffffff);border:1px solid #eef3f8;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between">
+        <div class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
+
+            @if (!string.IsNullOrWhiteSpace(Model?.Input?.Destination))
+            {
+                <span class="chip"><i class="fa-solid fa-location-dot me-1"></i>@Model!.Input!.Destination</span>
+            }
+
+            @if (Model?.Input?.Departures != null && Model.Input.Departures.Any())
+            {
+                foreach (var dep in Model.Input.Departures)
+                {
+                    <span class="chip"><i class="fa-solid fa-train me-1"></i>@dep</span>
+                }
+            }
+
+            @if (Model?.Input?.MinPrice != null || Model?.Input?.MaxPrice != null)
+            {
+                <span class="chip">
+                    <i class="fa-solid fa-dollar-sign me-1"></i>
+                    @((Model.Input?.MinPrice ?? 0).ToString("N0")) ~ @((Model.Input?.MaxPrice ?? 20000).ToString("N0"))
+                </span>
+            }
+
+            @if (string.IsNullOrWhiteSpace(Model?.Input?.Destination)
+                        && (Model?.Input?.Departures == null || !Model.Input.Departures.Any())
+                        && Model?.Input?.MinPrice == null && Model?.Input?.MaxPrice == null)
+            {
+                <span class="text-muted small">目前尚未選擇任何篩選條件。</span>
+            }
+        </div>
+
+        <div class="text-end mt-2 mt-md-0">
+            <button id="clearFiltersBtn" type="button" class="btn btn-outline-danger rounded-pill">
+                <i class="fa-solid fa-xmark me-1"></i> 清除篩選條件
+            </button>
+        </div>
+    </div>
+</div>
