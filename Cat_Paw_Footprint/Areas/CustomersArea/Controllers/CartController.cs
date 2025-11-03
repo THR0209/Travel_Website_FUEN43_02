@@ -62,13 +62,17 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 		// 加入購物車（以資料庫 ProductID 為準）
 		[HttpPost("add")]
-		public async Task<IActionResult> Add([FromForm] int productId, [FromForm] int qty = 1)
+		public async Task<IActionResult> Add([FromForm] int productId, [FromForm] int people = 1)
 		{
+			// 後端防呆
+			var qty = Math.Max(1, people);
+
 			var p = await _db.Products.AsNoTracking().FirstOrDefaultAsync(x => x.ProductID == productId);
 			if (p == null) return NotFound();
 
 			var items = GetCart();
 			var exist = items.FirstOrDefault(x => x.ProductId == productId);
+
 			if (exist == null)
 			{
 				items.Add(new CartItem
@@ -76,16 +80,18 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					ProductId = p.ProductID,
 					ProductName = p.ProductName ?? $"商品 {p.ProductID}",
 					Price = p.ProductPrice ?? 0,
-					Qty = Math.Max(1, qty),
+					Qty = qty,
 					ImageUrl = p.ProductImage != null
-								  ? "data:image/png;base64," + Convert.ToBase64String(p.ProductImage)
-								  : Url.Content("~/images/NoImage.png")
+						? "data:image/png;base64," + Convert.ToBase64String(p.ProductImage)
+						: Url.Content("~/images/NoImage.png")
 				});
 			}
 			else
 			{
-				exist.Qty += Math.Max(1, qty);
+				// 若重複加入相同商品，直接加總數量
+				exist.Qty += qty;
 			}
+
 			SaveCart(items);
 			return Ok(new { ok = true, count = items.Count });
 		}

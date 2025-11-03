@@ -1,0 +1,11 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.SearchResultsVM
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
+
+<div>
+    @await Html.PartialAsync("_SearchHeader", Model)
+    <section id="result">
+        @await Html.PartialAsync("_SearchResultsList",
+                Model,
+                new ViewDataDictionary(ViewData) { ["ListAction"] = "Search" })
+    </section>
+</div>

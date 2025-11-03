@@ -15,7 +15,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 	public class ProductsController : Controller
 	{
 		private readonly webtravel2Context _context;
-		private const int PageSize = 12;
+		private const int PageSize = 9;
 
 		public ProductsController(webtravel2Context context)
 		{
@@ -23,103 +23,231 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		}
 
 		// GET: /CustomersArea/Products/Search
+		// Areas/CustomersArea/Controllers/ProductsController.cs
+
 		[HttpGet]
-		public async Task<IActionResult> Search([FromQuery] SearchInput input, int page = 1, string sort = "pop")
+		public async Task<IActionResult> Search([FromQuery] SearchInput input, string sort = "pop", int page = 1)
 		{
-			// 基本防呆（即使前端驗證，也要後端把關）
-			if (string.IsNullOrWhiteSpace(input.Destination) || input.Start == null || input.End == null)
+			input ??= new SearchInput();
+			input.Type = string.IsNullOrWhiteSpace(input.Type) ? "trip" : input.Type.Trim().ToLower();
+
+			bool isAjax = string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+
+			IQueryable<SearchResultItemVM> q;
+
+			// === 資料來源 ===
+			if (input.Type == "trip")
 			{
-				TempData["SwalWarning"] = "請選擇「目的地」與「旅行日期」。";
-				return RedirectToAction("Index", "Home", new { area = "CustomersArea" });
+				q = _context.Products
+					.AsNoTracking()
+					.Where(p => p.IsActive == true)
+					.Select(p => new SearchResultItemVM
+					{
+						ProductID = p.ProductID,
+						Name = p.ProductName,
+						RegionName = p.Region.RegionName,
+						MinPrice = (int)(p.ProductPrice ?? 0),
+						CoverImageUrl = string.IsNullOrEmpty(p.ProductImageUrl) ? "/images/NoImage.png" : p.ProductImageUrl,
+						// for keyword exact-match
+						Keywords = p.ProductsKeywords.Select(pk => pk.Keyword.Keyword).ToList()
+					});
 			}
-
-			var startDate = input.Start.Value.Date;
-			var endDate = input.End.Value.Date;
-
-			// 基礎查詢：已上架 + 與日期有交集（ReleaseDate~RemovalDate 內）
-			var query = _context.Products
-				.AsNoTracking()
-				.Where(p => p.IsActive == true);
-			//.Where(p =>
-			//	(p.StartDate == null || p.StartDate.Value.Date <= endDate) &&
-			//	(p.RemovalDate == null || p.RemovalDate.Value.Date >= startDate)
-			//);
-
-			// 目的地（用 RegionName / Name 模糊比對；依你的 schema 調整）
-			var key = input.Destination.Trim();
-			query = query.Where(p =>
-				//EF.Functions.Like(p.ProductsKeywords, $"%{key}%") ||
-				EF.Functions.Like(p.ProductName, $"%{key}%")
-			);
-
-			// 類別（依你的欄位調整）
-			if (!string.IsNullOrWhiteSpace(input.Type))
+			else
 			{
-				switch (input.Type)
+				int productType = input.Type switch
 				{
-					//case "trip": query = query.Where(p => p.Category == "Trip" || p.Category == "Tour"); break;
-					//case "hotel": query = query.Where(p => p.Category == "Hotel"); break;
-					//case "ticket": query = query.Where(p => p.Category == "Ticket" || p.Category == "Attraction"); break;
-					//case "car": query = query.Where(p => p.Category == "Car" || p.Category == "Transport"); break;
-				}
+					"hotel" => 1,
+					"ticket" => 2,
+					"car" => 3,
+					_ => 0
+				};
+
+				q = _context.SemiSelfProducts
+					.AsNoTracking()
+					.Where(p => p.IsActive == true && (productType == 0 || p.ProductType == productType))
+					.Select(p => new SearchResultItemVM
+					{
+						ProductID = p.ProductID,
+						Name = p.ProductName,
+						RegionName = p.Region.RegionName,
+						MinPrice = (int)(p.ProductPrice ?? 0),
+						CoverImageUrl = string.IsNullOrEmpty(p.ProductImageUrl) ? "/images/NoImage.png" : p.ProductImageUrl,
+						Keywords = p.SemiKeywords.Select(sk => sk.Keyword.Keyword).ToList()
+					});
 			}
 
-			// 旅客數（若你有容量欄位可加；沒有可略）
-			if (input.People > 0)
+			// === 目的地/關鍵字（輸入框）===
+			if (!string.IsNullOrWhiteSpace(input.Destination))
 			{
-				// e.g. if (p.Capacity != null) query = query.Where(p => p.Capacity >= input.People);
+				var key = input.Destination.Trim();
+				q = q.Where(x =>
+					EF.Functions.Like(x.Name, $"%{key}%") ||          // 名稱模糊
+					EF.Functions.Like(x.RegionName, $"%{key}%") ||    // 區域模糊
+					x.Keywords.Any(k => k == key));                   // 關鍵字完全相等
 			}
 
-			// 側邊篩選
-			if (input.MinPrice.HasValue) query = query.Where(p => (p.ProductPrice ?? 0) >= input.MinPrice.Value);
-			if (input.MaxPrice.HasValue) query = query.Where(p => (p.ProductPrice ?? 0) <= input.MaxPrice.Value);
-			//if (input.MinRating.HasValue) query = query.Where(p => (p.Rating ?? 0) >= input.MinRating.Value);
-			// 若有天數欄位可追加：
-			// if (input.MinDays.HasValue) query = query.Where(p => (p.DurationDays ?? 0) >= input.MinDays.Value);
-			// if (input.MaxDays.HasValue) query = query.Where(p => (p.DurationDays ?? 0) <= input.MaxDays.Value);
-
-			// 排序
-			query = sort switch
+			// === 出發地（checkbox 多選）：名稱模糊 + 關鍵字完全相等 ===
+			if (input.Departures != null && input.Departures.Any())
 			{
-				"price_asc" => query.OrderBy(p => p.ProductPrice),
-				"price_desc" => query.OrderByDescending(p => p.ProductPrice),
-				//"rating" => query.OrderByDescending(p => p.Rating),
-				_ => query.OrderByDescending(p => p.Views).ThenByDescending(p => p.StartDate) // 依時間排序的部分可能要更改
+				var deps = input.Departures;
+				q = q.Where(x =>
+					deps.Any(dep => x.Name.Contains(dep)) ||          // 名稱包含任一出發地
+					x.Keywords.Any(k => deps.Contains(k)));           // 關鍵字完全相等
+			}
+
+			// === 價格 ===
+			if (input.MinPrice.HasValue) q = q.Where(x => x.MinPrice >= input.MinPrice.Value);
+			if (input.MaxPrice.HasValue) q = q.Where(x => x.MinPrice <= input.MaxPrice.Value);
+
+			// === 排序 ===
+			sort = (sort ?? "pop").ToLower();
+			q = sort switch
+			{
+				"price_asc" => q.OrderBy(x => x.MinPrice),
+				"price_desc" => q.OrderByDescending(x => x.MinPrice),
+				"name" => q.OrderBy(x => x.Name),
+				_ => q.OrderByDescending(x => x.ProductID)
 			};
 
-			// 總數 + 分頁 + 投影
-			var total = await query.CountAsync();
-			var items = await query
-				.Skip((page - 1) * PageSize)
-				.Take(PageSize)
-				.Select(p => new SearchResultItemVM
-				{
-					ProductID = p.ProductID,
-					Name = p.ProductName,
-					RegionName = p.Region.RegionName,
-					MinPrice = p.ProductPrice ?? 0,
-					//Rating = p.Rating ?? 0,
-					//DurationText = p.DurationText,
-					CoverImageUrl = string.IsNullOrEmpty(p.ProductImageUrl) ? "/images/NoImage.png" : p.ProductImageUrl
-				})
-				.ToListAsync();
+			// === 分頁 ===
+			const int pageSize = 9;
+			page = Math.Max(1, page);
+			var total = await q.CountAsync();
+			var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
 			var vm = new SearchResultsVM
 			{
 				Input = input,
 				Sort = sort,
 				Page = page,
-				PageSize = PageSize,
+				PageSize = pageSize,
 				TotalCount = total,
 				Items = items
 			};
 
-			// AJAX：只回傳列表 Partial
-			var isAjax = HttpContext.Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-			if (isAjax) return PartialView("_SearchResultsList", vm);
+			// AJAX：回傳 header + list wrapper
+			if (isAjax)
+				return PartialView("_SearchResultsWrapper", vm);
 
-			return View(vm);
+			// 首次載入：整頁
+			return View("Search", vm);
 		}
+
+
+
+		// ✅ 查看所有：行程/住宿/門票/交通（不用目的地/日期），可篩選/排序/分頁
+		// ✅ 完整替換原 Browse action
+		[HttpGet]
+		public async Task<IActionResult> Browse([FromQuery] SearchInput input, string sort = "pop", int page = 1)
+		{
+			input ??= new SearchInput();
+			input.Type = string.IsNullOrWhiteSpace(input.Type) ? "trip" : input.Type.Trim().ToLower();
+
+			bool isAjax = string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+
+			IQueryable<SearchResultItemVM> q;
+
+			// === 資料來源 ===
+			if (input.Type == "trip")
+			{
+				q = _context.Products
+					.AsNoTracking()
+					.Where(p => p.IsActive == true)
+					.Select(p => new SearchResultItemVM
+					{
+						ProductID = p.ProductID,
+						Name = p.ProductName,
+						RegionName = p.Region.RegionName,
+						MinPrice = (int)(p.ProductPrice ?? 0),
+						CoverImageUrl = string.IsNullOrEmpty(p.ProductImageUrl) ? "/images/NoImage.png" : p.ProductImageUrl,
+
+						// 🔑 為了篩選關鍵字
+						Keywords = p.ProductsKeywords.Select(pk => pk.Keyword.Keyword).ToList()
+					});
+			}
+			else
+			{
+				int productType = input.Type switch
+				{
+					"hotel" => 1,
+					"ticket" => 2,
+					"car" => 3,
+					_ => 0
+				};
+
+				q = _context.SemiSelfProducts
+					.AsNoTracking()
+					.Where(p => p.IsActive == true && (productType == 0 || p.ProductType == productType))
+					.Select(p => new SearchResultItemVM
+					{
+						ProductID = p.ProductID,
+						Name = p.ProductName,
+						RegionName = p.Region.RegionName,
+						MinPrice = (int)(p.ProductPrice ?? 0),
+						CoverImageUrl = string.IsNullOrEmpty(p.ProductImageUrl) ? "/images/NoImage.png" : p.ProductImageUrl,
+
+						Keywords = p.SemiKeywords.Select(sk => sk.Keyword.Keyword).ToList()
+					});
+			}
+
+			// === 🔎 目的地/關鍵字 模糊搜尋 ===
+			if (!string.IsNullOrWhiteSpace(input.Destination))
+			{
+				var key = input.Destination.Trim();
+				q = q.Where(x =>
+					EF.Functions.Like(x.Name, $"%{key}%") ||             // 名稱模糊搜尋
+					EF.Functions.Like(x.RegionName, $"%{key}%") ||       // 區域模糊搜尋
+					x.Keywords.Any(k => k == key));                      // 關鍵字完全相等
+			}
+
+			// === 🧭 出發地篩選 ===
+			if (input.Departures != null && input.Departures.Any())
+			{
+				var deps = input.Departures;
+				q = q.Where(x =>
+					deps.Any(dep => x.Name.Contains(dep)) ||              // 名稱包含任一出發地（模糊）
+					x.Keywords.Any(k => deps.Contains(k)));              // 關鍵字完全相等
+			}
+
+			// === 💰 價格篩選 ===
+			if (input.MinPrice.HasValue) q = q.Where(x => x.MinPrice >= input.MinPrice.Value);
+			if (input.MaxPrice.HasValue) q = q.Where(x => x.MinPrice <= input.MaxPrice.Value);
+
+			// === 📊 排序 ===
+			sort = (sort ?? "pop").ToLower();
+			q = sort switch
+			{
+				"price_asc" => q.OrderBy(x => x.MinPrice),
+				"price_desc" => q.OrderByDescending(x => x.MinPrice),
+				"name" => q.OrderBy(x => x.Name),
+				_ => q.OrderByDescending(x => x.ProductID)
+			};
+
+			// === 📄 分頁 ===
+			const int pageSize = 9;
+			page = Math.Max(1, page);
+			var total = await q.CountAsync();
+			var items = await q.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+			var vm = new SearchResultsVM
+			{
+				Input = input,
+				Sort = sort,
+				Page = page,
+				PageSize = pageSize,
+				TotalCount = total,
+				Items = items
+			};
+
+			// === 📤 AJAX → 回傳 partial ===
+			if (isAjax)
+				return PartialView("_BrowseResultsWrapper", vm);
+
+			// === 📃 首次載入 ===
+			return View("Browse", vm);
+		}
+
+
 
 		// GET: /CustomersArea/Products/Details/5
 		[HttpGet]

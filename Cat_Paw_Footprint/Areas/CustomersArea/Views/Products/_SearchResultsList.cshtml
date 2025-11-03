@@ -3,11 +3,16 @@
     string q = Model?.Input?.Destination ?? "";
     string start = Model?.Input?.Start?.ToString("yyyy-MM-dd") ?? "";
     string end = Model?.Input?.End?.ToString("yyyy-MM-dd") ?? "";
-    int people = Model?.Input?.People ?? 2;
+    int? people = Model?.Input?.People;
     string type = Model?.Input?.Type ?? "trip";
     decimal? minPrice = Model?.Input?.MinPrice;
     decimal? maxPrice = Model?.Input?.MaxPrice;
     double? minRating = Model?.Input?.MinRating;
+    // 取得目前所在 Action，若取不到就預設用 "Search"
+    var actionName =
+    (ViewData["ListAction"] as string)
+    ?? ViewContext?.RouteData?.Values["action"]?.ToString()
+    ?? "Search"; // 這個最後的備援已經不會被用到（因為父頁會傳）
 }
 
 <style>
@@ -29,11 +34,19 @@
     <div class="text-muted small">
         共 <b>@Model.TotalCount</b> 項結果
     </div>
-    <form method="get" class="d-flex gap-2 align-items-center" id="sortForm">
+    <form method="get"
+          asp-area="CustomersArea"
+          asp-controller="Products"
+          asp-action="@actionName"
+          class="d-flex gap-2 align-items-center" id="sortForm">
         <input type="hidden" name="destination" value="@q" />
         <input type="hidden" name="start" value="@start" />
         <input type="hidden" name="end" value="@end" />
-        <input type="hidden" name="people" value="@people" />
+        @* ✅ 只有有人數時才帶參數 *@
+        @if (people.HasValue)
+        {
+            <input type="hidden" name="people" value="@people" />
+        }
         <input type="hidden" name="type" value="@type" />
         <input type="hidden" name="MinPrice" value="@minPrice" />
         <input type="hidden" name="MaxPrice" value="@maxPrice" />
@@ -41,10 +54,14 @@
         <input type="hidden" name="page" value="@Model.Page" />
 
         <select name="sort" class="form-select sort" id="sortSelect">
-            <option value="pop" @@(Model.Sort=="pop" ? "selected" : "")>熱門排序</option>
-            <option value="price_asc" @@(Model.Sort=="price_asc" ? "selected" : "")>價格（低 → 高）</option>
-            <option value="price_desc" @@(Model.Sort=="price_desc" ? "selected" : "")>價格（高 → 低）</option>
-            <option value="rating" @@(Model.Sort=="rating" ? "selected" : "")>評分</option>
+            <option value="pop"
+                    selected="@(Model?.Sort == "pop" ? "selected" : null)">熱門排序</option>
+            <option value="price_asc"
+                    selected="@(Model?.Sort == "price_asc" ? "selected" : null)">價格：低 → 高</option>
+            <option value="price_desc"
+                    selected="@(Model?.Sort == "price_desc" ? "selected" : null)">價格：高 → 低</option>
+            @* <option value="rating"
+                selected="@(Model?.Sort == "rating" ? "selected" : null)">評分優先</option> *@
         </select>
     </form>
 </div>
@@ -93,22 +110,22 @@
                     int next = current + 1;
                 }
                 <li class="page-item @(current==1?"disabled":"")">
-                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=1, destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">第一頁</a>
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { area = "CustomersArea", page = 1, destination = q, start, end, people, type, sort = Model.Sort, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating })">第一頁</a>
                 </li>
                 <li class="page-item @(current==1?"disabled":"")">
-                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=(prev<1?1:prev), destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">上一頁</a>
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { area = "CustomersArea", page = (prev < 1 ? 1 : prev), destination = q, start, end, people, type, sort = Model.Sort, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating })">上一頁</a>
                 </li>
                 @for (int i = Math.Max(1, current-2); i <= Math.Min(total, current+2); i++)
                 {
                     <li class="page-item @(i==current?"active":"")">
-                        <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=i, destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">@i</a>
+                        <a class="page-link ajax-link" href="@Url.Action(actionName, new { area = "CustomersArea", page = i, destination = q, start, end, people, type, sort = Model.Sort, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating })">@i</a>
                     </li>
                 }
                 <li class="page-item @(current==total?"disabled":"")">
-                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=(next>total?total:next), destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">下一頁</a>
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { area = "CustomersArea", page = (next > total ? total : next), destination = q, start, end, people, type, sort = Model.Sort, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating })">下一頁</a>
                 </li>
                 <li class="page-item @(current==total?"disabled":"")">
-                    <a class="page-link ajax-link" href="@Url.Action("Search", new { area="CustomersArea", page=total, destination=q, start, end, people, type, sort=Model.Sort, MinPrice=minPrice, MaxPrice=maxPrice, MinRating=minRating })">最後一頁</a>
+                    <a class="page-link ajax-link" href="@Url.Action(actionName, new { area = "CustomersArea", page = total, destination = q, start, end, people, type, sort = Model.Sort, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating })">最後一頁</a>
                 </li>
             </ul>
         </nav>
@@ -122,3 +139,5 @@ else
         <a asp-area="CustomersArea" asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill">回首頁重新搜尋</a>
     </div>
 }
+
+
