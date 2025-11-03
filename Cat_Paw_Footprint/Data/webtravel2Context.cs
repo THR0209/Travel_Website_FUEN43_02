@@ -181,7 +181,7 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<CustomerCouponsRecords>(entity =>
         {
-            entity.HasNoKey();
+            entity.HasKey(e => new { e.CustomerID, e.CouponID });
 
             entity.HasOne(d => d.Coupon).WithMany()
                 .HasForeignKey(d => d.CouponID)

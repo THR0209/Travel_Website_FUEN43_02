@@ -129,14 +129,20 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			{
 				return BadRequest(new { success = false, error = result });
 			}
-            //如果註冊成功 發放新客戶優惠券
-            // ✅ 發放新客戶優惠券
-            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Account == account);
-            if (customer != null)
+			//如果註冊成功 發放新客戶優惠券
+			// ✅ 發放新客戶優惠券
+			var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Account == account);
+            try
             {
-                await _memberLevelService.GrantCouponsForTypeAsync(customer.CustomerID, "Register");
+                if (customer != null)
+                    await _memberLevelService.GrantCouponsForTypeAsync(customer.CustomerID, "Register");
             }
-           
+            catch (Exception ex)
+            {
+                Console.WriteLine($"發放優惠券時發生錯誤: {ex.Message}");
+            }
+
+
 
             return Ok(new { success = true, message = "註冊成功", redirectUrl = "/CustomersArea/CusLogReg/Login" });
 		}

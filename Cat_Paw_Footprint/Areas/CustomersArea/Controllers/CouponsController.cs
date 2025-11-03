@@ -69,9 +69,6 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                            }).ToList();
 
 
-
-
-
             // 3️⃣ 分類回傳（避免 null 問題）
             var usable = coupons.Where(c => !(bool)c.IsUsed && !c.IsExpired).ToList();
             var used = coupons.Where(c => (bool)c.IsUsed).ToList();
