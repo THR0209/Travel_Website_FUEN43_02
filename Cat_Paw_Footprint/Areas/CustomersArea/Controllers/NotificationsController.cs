@@ -133,6 +133,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 	public class MarkReadRequest
 	{
-		public int Id { get; set; }
+		public int Id { get; set; }   
+		//test
 	}
 }
