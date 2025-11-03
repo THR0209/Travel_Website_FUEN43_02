@@ -6,16 +6,20 @@
     <title>導遊聊天室（手機版）</title>
 
     <!-- Libraries -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js?v=20251103"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js?v=20251103"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js?v=20251103"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11?v=20251103"></script>
+    <script src="/front-end/assets/js/webFront.js?v=20251103"></script>
 
     <style>
         :root {
-            --border: #e5e7eb;
-            --muted: #6b7280;
-            --bg: #f7f8fa;
-            --card: #fff;
+            --border: #f3cbaa;
+            --muted: #9b7653;
+            --bg: linear-gradient(135deg, #fff8f2, #fde5cc);
+            --card: #fffdfa;
+            --orange: #ff8c42;
+            --orange-dark: #c45a00;
         }
 
         * {
@@ -28,13 +32,13 @@
 
         body {
             margin: 0;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: "Segoe UI", "微軟正黑體", system-ui, -apple-system, Roboto, Arial, sans-serif;
             background: var(--bg);
-            color: #111827;
+            color: #3a2b22;
         }
 
         header {
-            background: #fff;
+            background: var(--card);
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -43,50 +47,21 @@
             position: sticky;
             top: 0;
             z-index: 20;
+            color: var(--orange-dark);
+            font-weight: 600;
         }
 
-        .side-wrapper {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        a {
+            color: var(--orange);
+            text-decoration: none;
         }
 
-        .toggle-btn {
-            background: #fff;
-            border: 1px solid #ddd;
-            font-size: 1.2rem;
-            color: #555;
-            padding: 6px 8px;
-            border-radius: 50%;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-            .toggle-btn:hover {
-                background: #f5f5f5;
-                transform: scale(1.05);
+            a:hover {
+                text-decoration: underline;
             }
 
-        .side {
-            position: absolute;
-            top: 50px;
-            right: 10px;
-            width: 250px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 16px;
-            z-index: 50;
-        }
-
-        .fade-enter-active, .fade-leave-active {
-            transition: all 0.25s ease;
-        }
-
-        .fade-enter-from, .fade-leave-to {
-            opacity: 0;
-            transform: translateY(-6px);
+        .muted {
+            color: var(--muted);
         }
 
         main {
@@ -99,16 +74,16 @@
         .chat {
             flex: 1;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
             padding: 1rem;
-            background: #fff;
+            background: var(--card);
             margin-top: 8px;
-            margin-bottom: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .msg {
-            margin-bottom: .75rem;
+            margin-bottom: 0.75rem;
         }
 
             .msg.me {
@@ -117,26 +92,27 @@
 
         .bubble {
             display: inline-block;
-            padding: .6rem .9rem;
+            padding: 0.6rem 0.9rem;
             border-radius: 1rem;
             max-width: 75%;
             word-break: break-word;
         }
 
         .meta {
-            font-size: .85rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: var(--muted);
             margin-bottom: 4px;
         }
 
         .me .bubble {
-            background-color: #8f94fb;
+            background-color: var(--orange);
             color: #fff;
         }
 
         .other .bubble {
-            background-color: #e9ecef;
-            color: #333;
+            background-color: #fff1e3;
+            color: #3a2b22;
+            border: 1px solid #f5c799;
         }
 
         .row {
@@ -145,42 +121,69 @@
             align-items: center;
             margin-top: 8px;
             padding: 8px 0;
-            background: #fff;
-            border-top: 1px solid #eee;
+            background: var(--card);
+            border-top: 1px solid var(--border);
         }
 
-        textarea {
+        .chat-input {
             flex: 1;
-            padding: .6rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
+            padding: 8px 10px;
+            border: 1px solid #f3cbaa;
             border-radius: 6px;
-            resize: none;
+            font-size: 14px;
+            background: #fffdfa;
         }
 
-        button {
-            
-            border: none;
-            color: #fff;
-            border-radius: 6px;
-            padding: .6rem 1rem;
+        .plain-btn {
+            all: unset;
             cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
+            font-size: 1.5rem;
+            line-height: 1;
         }
 
-            button:hover {
-                background: #6c6ffb;
+        .chat-send {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 999px;
+            background: var(--orange);
+            color: white;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+            .chat-send:hover {
+                background: #ffa861;
+                box-shadow: 0 0 0.4rem rgba(255, 140, 66, 0.35);
+                transform: translateY(-2px);
+            }
+
+            .chat-send:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+        .btn-return {
+            background: transparent;
+            color: var(--orange-dark);
+            border: 1px solid var(--orange);
+            border-radius: 999px;
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+            .btn-return:hover {
+                background: var(--orange);
+                color: #fff;
+                box-shadow: 0 0 0.4rem rgba(255, 140, 66, 0.35);
+                transform: translateY(-2px);
             }
 
         @media (max-width: 768px) {
             header {
                 padding-right: 48px;
-            }
-
-            .side {
-                width: calc(100% - 20px);
-                right: 10px;
             }
 
             main {
@@ -195,37 +198,10 @@
             .row {
                 position: sticky;
                 bottom: 0;
-                background: #fff;
-                border-top: 1px solid #ddd;
+                background: var(--card);
+                border-top: 1px solid var(--border);
                 padding: 10px;
             }
-        }
-        .chat-input {
-            flex: 1;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .chat-send {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 6px;
-            background: #2563eb;
-            color: white;
-            cursor: pointer;
-        }
-
-            .chat-send:disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-        .plain-btn {
-            all: unset; /* 清掉所有繼承樣式 */
-            cursor: pointer; /* 還原可點擊游標 */
-            font-size: 1.5rem; /* 你想要的大小 */
-            line-height: 1;
         }
     </style>
 </head>
@@ -237,9 +213,11 @@
                 <strong>{{ groupName }}</strong>
                 <span class="muted">（代碼：{{ groupCode }}）</span>
             </div>
-            <div class="muted">導遊：{{ guideName || guideAccount }}</div>
+            <div class="muted">{{ guideName || guideAccount }}</div>
 
-            <p class="muted" style="margin-top:24px"><a href="group-list.html">← 返回群組清單</a></p>
+            <button @click="backToGroupList" class="btn-return">
+                返回清單
+            </button>
         </header>
 
         <main>
@@ -584,6 +562,23 @@
                             alert("⚠️ 無法取得定位");
                         }
                     }
+                }, backToGroupList() {
+                    Swal.fire({
+                        icon: "question",
+                        title: "返回群組清單？",
+                        text: "若返回，將離開當前聊天室。",
+                        showCancelButton: true,
+                        confirmButtonText: "返回",
+                        cancelButtonText: "取消",
+                        confirmButtonColor: "#ff8c42",
+                        cancelButtonColor: "#aaa",
+                        background: "#fffdfa"
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            showAlert("success", "已返回", "正在導向群組清單...");
+                            setTimeout(() => (location.href = "group-list.html"), 1000);
+                        }
+                    });
                 }
             }
         }).mount('#app');

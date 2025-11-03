@@ -14,6 +14,17 @@
         string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "CustomersArea", StringComparison.OrdinalIgnoreCase);
+
+    
+    string customerName = "";
+    string customerLevelName = "";
+
+    if (isCustomerLoggedIn)
+    {
+        var claims = customerAuth.Principal.Claims;
+        customerName = claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "";
+        customerLevelName = claims.FirstOrDefault(c => c.Type == "LevelName")?.Value ?? "";
+    }
 }
 
 <!DOCTYPE html>
@@ -148,7 +159,21 @@
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                        <span class="link-text"><i class="fa-solid fa-user me-1"></i>會員中心</span>
+                                        <span class="link-text">
+                                            <i class="fa-solid fa-user me-1"></i>
+                                            @if (isCustomerLoggedIn)
+                                            {
+                                                @customerName
+                                                @if (!string.IsNullOrEmpty(customerLevelName))
+                                                {
+                                                    <span class="badge bg-primary ms-1">@customerLevelName</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                @:會員中心
+                                            }
+                                        </span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end mt-2 shadow user-dropdown">
                                         <li>

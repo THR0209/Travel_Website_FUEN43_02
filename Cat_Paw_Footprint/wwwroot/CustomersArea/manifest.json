@@ -1,12 +1,12 @@
 {
   "name": "貓爪足跡",
   "short_name": "旅行社",
-  "start_url": "/CustomersArea/Home/Index?v=4",
+  "start_url": "/CustomersArea/Home/Index?v=5",
   "scope": "/CustomersArea/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#317EFB",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "icons": [
     {
       "src": "/CustomersArea/icon-192.png?v=4",
