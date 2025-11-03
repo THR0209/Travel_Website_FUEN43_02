@@ -1,8 +1,9 @@
 ﻿using Cat_Paw_Footprint.Areas.TourGuideArea.ViewModel;
-using Cat_Paw_Footprint.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.ViewModel;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Presentation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.TourGuideArea.Repositories
@@ -21,7 +22,9 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Repositories
 			.Where(e => e.Account == account)
 			.Select(e => new TGLoginDto
 			{
+				Password = e.Password,
 				EmployeeID = e.EmployeeID,
+				GuideId = e.EmployeeID,
 				EmployeeName = e.EmployeeProfile.EmployeeName,
 				RoleID = e.RoleID,
 				RoleName = e.Role.RoleName,

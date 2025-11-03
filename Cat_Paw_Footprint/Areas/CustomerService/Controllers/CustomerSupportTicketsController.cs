@@ -1,9 +1,12 @@
 ﻿using Cat_Paw_Footprint.Areas.CustomerService.Services; // 匯入客戶服務工單相關業務邏輯服務介面
 using Cat_Paw_Footprint.Areas.CustomerService.ViewModel; // 匯入工單 ViewModel
-using Microsoft.AspNetCore.Authorization; // 匯入身份驗證/授權相關功能
+using Cat_Paw_Footprint.Areas.Notification.Services; // 匯入通知服務介面
 using Cat_Paw_Footprint.Data; // 匯入資料庫 DbContext
 using Cat_Paw_Footprint.Models; // 匯入資料庫模型
+using Cat_Paw_Footprint.Services;
+using Microsoft.AspNetCore.Authorization; // 匯入身份驗證/授權相關功能
 using Microsoft.AspNetCore.Mvc; // 匯入 MVC 控制器相關功能
+using Microsoft.AspNetCore.SignalR; // 匯入 SignalR 功能
 using Microsoft.EntityFrameworkCore; // 匯入 Entity Framework Core
 
 namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
@@ -16,21 +19,37 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 	{
 		private readonly ICustomerSupportTicketsService _service;
 		private readonly webtravel2Context _context;
+		private readonly INotificationTriggerService _notifTrigger;
 
-		public CustomerSupportTicketsController(ICustomerSupportTicketsService service, webtravel2Context context)
+		public CustomerSupportTicketsController(ICustomerSupportTicketsService service, webtravel2Context context,
+	INotificationTriggerService notifTrigger)
 		{
 			_service = service;
 			_context = context;
+			_notifTrigger = notifTrigger;
 		}
 
 		/// <summary>
-		/// 主頁：顯示目前員工的所有工單
+		/// 主頁：顯示目前員工的所有工單（SuperAdmin 可查看全部）
 		/// </summary>
 		public async Task<IActionResult> Index()
 		{
 			var empId = User.FindFirst("EmployeeID")?.Value;
-			var tickets = (await _service.GetAllAsync())
-				.Where(t => t.EmployeeID?.ToString() == empId);
+			var roleName = User.FindFirst("RoleName")?.Value ?? "";
+			var allTickets = await _service.GetAllAsync();
+
+			IEnumerable<CustomerSupportTicketViewModel> tickets;
+
+			// 🔹 若為 SuperAdmin，查看所有工單；否則只看自己負責的
+			if (roleName.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase))
+			{
+				tickets = allTickets;
+			}
+			else
+			{
+				tickets = allTickets.Where(t => t.EmployeeID?.ToString() == empId);
+			}
+
 			return View(tickets);
 		}
 
@@ -202,11 +221,20 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			ticket.StatusID = vm.StatusID;
 			ticket.PriorityID = vm.PriorityID;
 			ticket.TicketTypeID = vm.TicketTypeID;
-
 			await _service.UpdateAsync(ticket);
+
+			// 🔹 檢查是否變更為「已完成」
+			var completedStatus = await _context.TicketStatus
+				.FirstOrDefaultAsync(s => s.StatusDesc.Contains("已完成"));
+
+			if (completedStatus != null && vm.StatusID == completedStatus.StatusID)
+			{
+				await _notifTrigger.NotifyTicketCompletedAsync(ticket.TicketID);
+			}
 
 			return Json(new { success = true });
 		}
+
 
 		/// <summary>
 		/// 刪除工單，會檢查是否有關聯 Feedback

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cat_Paw_Footprint.Models
 {
@@ -15,5 +16,8 @@ namespace Cat_Paw_Footprint.Models
 		public DateTime SendTime { get; set; }// 發送時間
 
 		public TourGroups Group { get; set; } = null!;
+
+		[NotMapped]
+		public string? UserName { get; set; }
 	}
 }

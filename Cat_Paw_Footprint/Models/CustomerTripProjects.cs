@@ -6,7 +6,7 @@ namespace Cat_Paw_Footprint.Models;
 
 public partial class CustomerTripProjects
 {
-	public virtual Customers? CustomerID { get; set; }
+	public int? CustomerID { get; set; }
 
 	[Key]
 	public int ProjectID { get; set; }
@@ -20,4 +20,10 @@ public partial class CustomerTripProjects
     public DateTime? CreateTime { get; set; }
 
     public DateTime? UpdateTime { get; set; }
+
+    public int? TotalDays { get; set; }
+
+    // 🟢 新增：一對多關聯 — 對應 TripProjectDetails
+    public virtual ICollection<TripProjectDetails>? TripProjectDetails { get; set; }
+
 }

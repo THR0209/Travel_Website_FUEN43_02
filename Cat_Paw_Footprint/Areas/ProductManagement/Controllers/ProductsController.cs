@@ -449,7 +449,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 					//using var br = new BinaryReader(vm.UploadImage.OpenReadStream());
 					//entity.ProductImage = br.ReadBytes((int)vm.UploadImage.Length);
 
-                    vm.Product.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(vm.UploadImage);
+                    entity.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(vm.UploadImage);
                 }
 
 				_context.Products.Update(entity);

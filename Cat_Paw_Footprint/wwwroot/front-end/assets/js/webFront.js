@@ -1,19 +1,135 @@
-﻿// ----------- 登入強制跳轉（Razor注入於頁面） -----------
-if (typeof isCustomerLoggedIn !== "undefined") {
-    document.addEventListener('DOMContentLoaded', function () {
-        if (isCustomerLoggedIn !== "true") {
-            window.location.href = "/CustomersArea/CusLogReg/Login";
-        }
-    });
-}
+﻿// ===================================================
+// 🐾 Cat Paw Footprint - Web Front 全域前端腳本
+// 功能：導覽列互動、通知系統、彈窗提示、動畫初始化
+// ===================================================
 
-// ----------- Header縮放、回到頂部、Hero動畫 -----------
+// ----------- 統一彈窗函式（全域通用） -----------
+window.showAlert = function (type, title, text, timer = 2000) {
+    Swal.fire({
+        icon: type,
+        title: `🐾 ${title}`,
+        text,
+        timer,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        toast: false,
+        position: "center",
+        background: "#fff",
+        customClass: { popup: 'shadow-sm rounded-3' }
+    });
+};
+
+// ----------- 全域函式：更新未讀通知數 -----------
+window.updateUnread = async function () {
+    try {
+        const res = await axios.get("/CustomersArea/Notifications/GetUnreadCount");
+        const count = res.data.count;
+        const badge = document.getElementById("notifBadge");
+
+        if (!badge) return;
+
+        if (count > 0) {
+            badge.style.display = "inline-block";
+            badge.innerText = count > 99 ? "99+" : count;
+        } else {
+            badge.style.display = "none";
+        }
+    } catch (e) {
+        console.error("❌ 更新未讀通知數失敗", e);
+    }
+};
+
+// ----------- 全域函式：更新通知下拉列表 -----------
+window.updateList = async function () {
+    try {
+        const res = await axios.get("/CustomersArea/Notifications/GetLatestNotifications");
+        const data = res.data;
+        const list = document.getElementById("notifList");
+
+        if (!list) return;
+
+        if (!data || data.length === 0) {
+            list.innerHTML = `<div class="text-center text-muted py-3">目前沒有通知 💤</div>`;
+            return;
+        }
+
+        // === 通知清單動態生成 ===
+        list.innerHTML = data.map(n => `
+            <div class="notif-item border px-3 py-2 ${n.isRead ? 'opacity-50' : ''}" 
+                 data-id="${n.notificationID}" style="cursor:pointer;">
+                <div class="fw-bold text-truncate">${n.title}</div>
+                <div class="small text-muted text-truncate">${n.message}</div>
+                <div class="text-end small text-secondary">${dayjs(n.createdAt).format('MM/DD HH:mm')}</div>
+            </div>
+        `).join('');
+
+
+        // === 🔹 綁定通知點擊事件（含客服評價提醒導向） ===
+        document.querySelectorAll('.notif-item').forEach(item => {
+            item.addEventListener('click', async function () {
+                const id = this.dataset.id;
+                const title = this.querySelector('.fw-bold')?.textContent || "";
+                const msg = this.querySelector('.small.text-muted')?.textContent || "";
+
+                try {
+                    // ✅ 標記已讀
+                    await axios.post('/CustomersArea/Notifications/MarkAsRead', { id });
+                    this.classList.add('opacity-50');
+                    await window.updateUnread();
+
+                    // ✅ 檢查是否為「客服相關通知」
+                    if (
+                        title.includes('客服服務已完成') ||
+                        title.includes('客服評價提醒') ||
+                        title.includes('客服回覆') ||
+                        title.includes('客服訊息')
+                    ) {
+                        const match = msg.match(/#\s*(\d+)/);
+                        if (match && match[1]) {
+                            const ticketId = match[1];
+                            // 直接導向客服中心，帶上 ticketId 參數
+                            window.location.href = `/CustomersArea/CustomerService/Index?ticketId=${ticketId}`;
+                            return;
+                        }
+                    }
+
+
+                } catch (err) {
+                    console.error("❌ 標記通知為已讀失敗", err);
+                    window.showAlert('error', '錯誤', '無法標記通知為已讀');
+                }
+            });
+        });
+    } catch (e) {
+        console.error("載入通知清單失敗", e);
+        window.showAlert('warning', '載入失敗', '通知清單載入失敗');
+    }
+}; // ✅ ← 補上這個收尾大括號
+
+
+// ----------- 全域函式：桌面推播通知 -----------
+window.showDesktopNotification = async function (title, message) {
+    if (!("Notification" in window)) return;
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+        new Notification(title, { body: message, icon: "/images/logo.png" });
+    }
+};
+
+// ----------- 主程式初始化 -----------
 document.addEventListener('DOMContentLoaded', function () {
+
+    // ----------- 登入強制跳轉（Razor注入於頁面） -----------
+    if (typeof isCustomerLoggedIn !== "undefined" && isCustomerLoggedIn !== "true") {
+        window.location.href = "/CustomersArea/CusLogReg/Login";
+        return;
+    }
+
+    // ----------- Header縮放、回到頂部、Hero動畫 -----------
     const header = document.querySelector('.site-header');
-    const toTop = document.getElementById('toTop');
+    const toTop = document.getElementById('backToTop');
     const heroMedia = document.getElementById('heroMedia');
 
-    // Header縮放
     window.addEventListener('scroll', () => {
         const y = window.scrollY || window.pageYOffset;
         if (header) header.classList.toggle('shrink', y > 8);
@@ -24,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 回到頂部按鈕
     if (toTop) toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
     // ----------- Swiper熱門輪播 -----------
@@ -47,22 +162,23 @@ document.addEventListener('DOMContentLoaded', function () {
     $.getJSON('/CustomersArea/FrontFAQs/api/hot', function (faqs) {
         let html = `<div class="accordion" id="homeHotFaqAccordionInner">`;
         faqs.forEach((faq, idx) => {
-            let answer = faq.answer ? faq.answer.replace(/<\s*p(\s+[^>]*)?>/gi, '<div$1>').replace(/<\s*\/\s*p\s*>/gi, '</div>') : '';
-            let answerText = answer.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, '').trim();
-            let answerHtml = answerText ? answer : '<div class="text-muted">暫無答案</div>';
+            const answer = faq.answer
+                ? faq.answer.replace(/<\s*p(\s+[^>]*)?>/gi, '<div$1>').replace(/<\s*\/\s*p\s*>/gi, '</div>')
+                : '<div class="text-muted">暫無答案</div>';
             html += `
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="homeHotHeading${idx}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#homeHotCollapse${idx}" aria-expanded="false" aria-controls="homeHotCollapse${idx}">
-                        ${faq.question}
-                    </button>
-                </h2>
-                <div id="homeHotCollapse${idx}" class="accordion-collapse collapse"
-                    aria-labelledby="homeHotHeading${idx}" data-bs-parent="#homeHotFaqAccordionInner">
-                    <div class="accordion-body">${answerHtml}</div>
-                </div>
-            </div>`;
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="homeHotHeading${idx}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#homeHotCollapse${idx}" aria-expanded="false"
+                            aria-controls="homeHotCollapse${idx}">
+                            ${faq.question}
+                        </button>
+                    </h2>
+                    <div id="homeHotCollapse${idx}" class="accordion-collapse collapse"
+                        aria-labelledby="homeHotHeading${idx}" data-bs-parent="#homeHotFaqAccordionInner">
+                        <div class="accordion-body">${answer}</div>
+                    </div>
+                </div>`;
         });
         html += `</div>`;
         $('#homeHotFaqAccordion').html(html);
@@ -73,41 +189,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const faqLink = document.querySelector('.faq-nav-link');
     const faqNav = faqLink?.closest('li');
 
-    // ✅ 修正版：更嚴謹判斷首頁
-    const isHome =
-        path === '/customersarea/home/index' ||
-        path === '/customersarea/home' ||
-        path === '/customersarea' ||
-        path === '/customersarea/' ||
-        path === '/customersarea/home/index/';
-
     if (faqLink) {
         faqLink.addEventListener('click', function (e) {
-            e.preventDefault(); // ✅ 先阻止預設行為
+            e.preventDefault();
 
-            if (isHome) {
-                // ✅ 在首頁 → 平滑滾動到 FAQ 區塊
+            // 1️ 如果目前在首頁 → 平滑滾動到 FAQ 區
+            if (path.includes('/customersarea/home') || path === '/customersarea' || path === '/customersarea/') {
                 const faqTarget = document.querySelector('#faqSection');
                 if (faqTarget) {
-                    window.scrollTo({
-                        top: faqTarget.offsetTop - 60,
-                        behavior: 'smooth'
-                    });
+                    window.scrollTo({ top: faqTarget.offsetTop - 60, behavior: 'smooth' });
                 } else {
                     console.warn('⚠️ 找不到 #faqSection 元素');
                 }
-            } else {
-                // ✅ 不在首頁 → 導向 FAQ 專頁
+            }
+            // 2️ 不在首頁 → 先導向首頁並自動滾動
+            else {
                 window.location.href = '/CustomersArea/FrontFAQs/Index';
             }
         });
     }
 
-
-
-
-
-    // ----------- 自動標示 active（在 FAQ 頁面時） -----------
+    // 加上 active 樣式判斷（仍保留原行為）
     if (path.includes('/customersarea/frontfaqs/index')) {
         document.querySelectorAll('.navbar-nav .nav-link').forEach(link => link.classList.remove('active'));
         if (faqLink) {
@@ -116,14 +218,89 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ----------- 支援一般錨點平滑滾動（首頁其他區） -----------
+
+    // ----------- 支援一般錨點平滑滾動 -----------
     $('.nav-link[href^="#"]').on('click', function (e) {
         const target = $(this).attr('href');
         if ($(target).length) {
             e.preventDefault();
-            $('html, body').animate({
-                scrollTop: $(target).offset().top - 60
-            }, 500);
+            $('html, body').animate({ scrollTop: $(target).offset().top - 60 }, 500);
         }
     });
+
+    // ----------- 即時通知系統（SignalR） -----------
+    const badge = document.getElementById("notifBadge");
+    const list = document.getElementById("notifList");
+
+    // ✅ 新增自動重連設定
+    window.connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub", {
+            withCredentials: true
+         })
+        .withAutomaticReconnect([0, 2000, 5000, 10000])
+        .build();
+
+    // ✅ 設定接收事件
+    connection.on("ReceiveNotification", (title, message, type) => {
+        console.log("📨 收到通知:", { title, message, type });
+        window.showAlert('info', title, message, 4000);
+        window.updateUnread();
+        window.updateList();
+        window.showDesktopNotification(title, message);
+    });
+
+    // ✅ 連線關閉時自動刷新 cookie 並重連
+    connection.onclose(async () => {
+        console.warn("🔴 SignalR 已斷線，嘗試刷新 cookie 後重連...");
+        try {
+            // 🔹 用 axios 發一個 request，確保 cookie 有附上
+            await axios.get("/CustomersArea/Notifications/GetUnreadCount");
+        } catch { }
+        // 🔹 延遲 1.5 秒後重新啟動連線
+        setTimeout(startConnection, 1500);
+    });
+
+    // ✅ 自動重連機制
+    connection.onreconnected(() => {
+        console.log("🔁 SignalR 已重新連線");
+        window.updateUnread();
+        window.updateList();
+    });
+
+    // ✅ 啟動連線（含重試機制）
+    async function startConnection() {
+        try {
+            await connection.start();
+            console.log("✅ SignalR 已連線");
+            await window.updateUnread();
+            await window.updateList();
+        } catch (err) {
+            console.error("SignalR 連線失敗，5秒後重試:", err);
+            setTimeout(startConnection, 5000);
+        }
+    }
+
+    // 🔹 延遲執行：確保 Cookie / Service Worker / Vue 都已初始化
+    window.addEventListener('load', () => {
+        setTimeout(startConnection, 800); // 延遲 0.8 秒啟動 SignalR
+    });
+
+
+
+    // ----------- 登出時中斷 SignalR -----------
+    const logoutForm = document.querySelector('form[action*="CusLogReg/Logout"]');
+    if (logoutForm) {
+        logoutForm.addEventListener('submit', function () {
+            try {
+                if (connection && connection.stop) connection.stop();
+            } catch (e) { console.warn("SignalR 停止失敗", e); }
+            if (badge) badge.style.display = "none";
+            if (list) list.innerHTML = `<div class="text-center text-muted py-3">請重新登入後查看通知</div>`;
+        });
+    }
+
+    // ----------- 初始化通知系統 -----------
+    window.updateUnread();
+    window.updateList();
 });
+

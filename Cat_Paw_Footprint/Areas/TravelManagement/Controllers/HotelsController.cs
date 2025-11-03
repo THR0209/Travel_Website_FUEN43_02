@@ -1,4 +1,5 @@
-﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.Helper;
+using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -17,11 +18,13 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 	public class HotelsController : Controller
     {
         private readonly webtravel2Context _context;
+		private readonly IConfiguration _configuration;
 
-        public HotelsController(webtravel2Context context)
+		public HotelsController(webtravel2Context context, IConfiguration configuration)
         {
             _context = context;
-        }
+			_configuration = configuration; // 這樣就能存取 secrets.json
+		}
 
         // GET: TravelManagement/Hotels
         public async Task<IActionResult> Index()
@@ -123,7 +126,12 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
             ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName");
             ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
             ViewBag.KeywordID = new SelectList(_context.Keywords, "KeywordID", "Keyword");
-            return View();
+
+			// 從 secrets.json 讀取 Google Maps API Key
+			var apiKey = _configuration["GoogleMaps:ApiKey"];
+			ViewBag.GoogleMapsApiKey = apiKey;
+
+			return View();
         }
 
 		// POST: TravelManagement/Hotels/Create
@@ -159,13 +167,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					{
 						if (file.Length > 0) // 確保有檔案
 						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
 							var pic = new HotelPics
 							{
 								HotelID = hotel.HotelID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file)
 							};
 
 							_context.HotelPics.Add(pic);
@@ -247,8 +252,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 				// 圖片
 				PictureIds = hotels.HotelPics.Select(p => p.HotelPicID).ToList(),
-				PictureBase64 = hotels.HotelPics
-					   .Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture))
+				PictureUrl = hotels.HotelPics
+					   .Select(p => p.PictureUrl)
 					   .ToList()
 			};
 
@@ -256,7 +261,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", hotels.DistrictID);
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", hotels.RegionID);
 			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "KeywordID", "Keyword", viewModel.KeywordID);
-						
+
+			ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
+
 			return View(viewModel);
 		}
 
@@ -311,13 +318,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					{
 						if (file.Length > 0)
 						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
 							var pic = new HotelPics
 							{
 								HotelID = hotel.HotelID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file)
 							};
 							_context.HotelPics.Add(pic);
 						}

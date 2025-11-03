@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>導遊聊天室（手機版）</title>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
+
+    <style>
+        :root {
+            --border: #e5e7eb;
+            --muted: #6b7280;
+            --bg: #f7f8fa;
+            --card: #fff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: #111827;
+        }
+
+        header {
+            background: #fff;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .side-wrapper {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .toggle-btn {
+            background: #fff;
+            border: 1px solid #ddd;
+            font-size: 1.2rem;
+            color: #555;
+            padding: 6px 8px;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .toggle-btn:hover {
+                background: #f5f5f5;
+                transform: scale(1.05);
+            }
+
+        .side {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            width: 250px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 16px;
+            z-index: 50;
+        }
+
+        .fade-enter-active, .fade-leave-active {
+            transition: all 0.25s ease;
+        }
+
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 56px);
+            padding: 0 12px;
+        }
+
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #fff;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .msg {
+            margin-bottom: .75rem;
+        }
+
+            .msg.me {
+                text-align: right;
+            }
+
+        .bubble {
+            display: inline-block;
+            padding: .6rem .9rem;
+            border-radius: 1rem;
+            max-width: 75%;
+            word-break: break-word;
+        }
+
+        .meta {
+            font-size: .85rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .me .bubble {
+            background-color: #8f94fb;
+            color: #fff;
+        }
+
+        .other .bubble {
+            background-color: #e9ecef;
+            color: #333;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+            padding: 8px 0;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        textarea {
+            flex: 1;
+            padding: .6rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: none;
+        }
+
+        button {
+            
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            padding: .6rem 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+            button:hover {
+                background: #6c6ffb;
+            }
+
+        @media (max-width: 768px) {
+            header {
+                padding-right: 48px;
+            }
+
+            .side {
+                width: calc(100% - 20px);
+                right: 10px;
+            }
+
+            main {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .chat {
+                height: 65vh;
+            }
+
+            .row {
+                position: sticky;
+                bottom: 0;
+                background: #fff;
+                border-top: 1px solid #ddd;
+                padding: 10px;
+            }
+        }
+        .chat-input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .chat-send {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+        }
+
+            .chat-send:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        .plain-btn {
+            all: unset; /* 清掉所有繼承樣式 */
+            cursor: pointer; /* 還原可點擊游標 */
+            font-size: 1.5rem; /* 你想要的大小 */
+            line-height: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <div>
+                <strong>{{ groupName }}</strong>
+                <span class="muted">（代碼：{{ groupCode }}）</span>
+            </div>
+            <div class="muted">導遊：{{ guideName || guideAccount }}</div>
+
+            <p class="muted" style="margin-top:24px"><a href="group-list.html">← 返回群組清單</a></p>
+        </header>
+
+        <main>
+            <section class="chat">
+                <div v-for="item in feed"
+                     :key="item._k"
+                     class="msg"
+                     :class="(item.sender && item.sender.indexOf('自己') !== -1) ? 'me' : 'other'">
+                    <div class="bubble">
+                        <div class="meta">{{ item.sender }} · {{ item.time }}</div>
+                        <div v-if="item.type==='text'" v-html="item.content"></div>
+                        <div v-else-if="item.type==='photo'"><img :src="item.url" style="max-width:100%;border-radius:8px;" /></div>
+                        <div v-else-if="item.type === 'location'">
+                            <a :href="'https://www.google.com/maps?q=' + item.lat + ',' + item.lng" target="_blank">現在位置</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <input v-model.trim="text"
+                           @keyup.enter="sendText"
+                           placeholder="輸入訊息..."
+                           class="chat-input" />
+
+                    <button @click="setLocation" class="plain-btn">📍</button>
+                    <button @click="$refs.photoInput.click()" class="plain-btn">📷</button>
+                    <button @click="sendText"
+                            :disabled="!text"
+                            class="chat-send">
+                        送出
+                    </button>
+                    <span class="err" v-if="errText">{{ errText }}</span>
+                </div>
+            </section>
+            <input type="file"
+                   ref="photoInput"
+                   accept="image/*"
+                   capture="environment"
+                   style="display:none"
+                   @change="Photomsg" />
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        // 兼容大小駝峰的取值工具：優先取 PascalCase，沒有就取 camelCase
+        const pick = (obj, pascal, camel) => obj?.[pascal] ?? obj?.[camel];
+
+        createApp({
+            data() {
+                return {
+                    showSide: false,
+                    // 判斷「自己」
+                    myRole: 'Guide',
+                    myName: localStorage.getItem('guideName') || '',
+
+                    // 頁面抬頭資訊
+                    guideName: localStorage.getItem('guideName') || '',
+                    guideAccount: localStorage.getItem('guideAccount') || '',
+                    groupCode: localStorage.getItem('groupCode') || '',
+                    groupName: localStorage.getItem('groupName') || '',
+                    groupId: Number(localStorage.getItem('groupId') || 0),
+                    guideId: Number(localStorage.getItem('guideId') || 0),
+
+                    connection: null,
+                    feed: [],
+                    seen: new Set(),  // 去重集合
+                    text: '', photoUrl: '', lat: null, lng: null,
+                    errText: ''
+                };
+            },
+
+            mounted() {
+                if (!this.groupCode) { alert('缺少 groupCode'); return; }
+                this.loadHistory().then(() => this.scrollBottom());
+                this.initSignalR();
+            },
+
+            methods: {
+                tz(t) {
+                    if (!t) return '';
+                    const d = new Date(t);
+                    return isNaN(d.getTime()) ? '' : d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+                },
+                keyOf(item) {
+                    if (item.MessageId) return 'm:' + item.MessageId;
+                    if (item.PhotoId) return 'p:' + item.PhotoId;
+                    if (item.LocationId) return 'l:' + item.LocationId;
+                    return 'x:' + JSON.stringify(item);
+                },
+                pushUnique(item) {
+                    const k = this.keyOf(item);
+                    if (this.seen.has(k)) return;
+                    this.seen.add(k);
+                    this.feed.push({ _k: crypto?.randomUUID?.() || Date.now().toString(), ...item });
+                    this.$nextTick(this.scrollBottom);
+                },
+                label(senderType, userName) {
+                    return (senderType === this.myRole && userName === this.myName)
+                        ? '自己'
+                        : `${userName || '匿名'}（${senderType}）`;
+                },
+                scrollBottom() {
+                    const el = document.querySelector('.chat');
+                    if (el) el.scrollTop = el.scrollHeight;
+                },
+
+                // 歷史訊息：兼容 m.UserName / m.userName 等命名
+
+                async loadHistory() {
+                    try {
+                        const { data } = await axios.get(`/api/TourGuideArea/TGMessageApi/GetHistory/${this.groupCode}`);
+                        (data || []).forEach(m => {
+                            const MessageId = pick(m, 'MessageId', 'messageId');
+                            const UserName = pick(m, 'UserName', 'userName');
+                            const SenderType = pick(m, 'SenderType', 'senderType');
+                            const Content = pick(m, 'Content', 'content');
+                            const SendTime = pick(m, 'SendTime', 'sendTime');
+
+                            this.pushUnique({
+                                type: 'text',
+                                sender: this.label(SenderType, UserName),
+                                time: this.tz(SendTime),
+                                content: Content,
+                                MessageId
+                            });
+                        });
+                        console.log('✅ history loaded:', (data || []).length);
+                    } catch (err) {
+                        console.error('❌ loadHistory fail', err);
+                    }
+                },
+
+                // 即時訊息：三個事件都做大小駝峰兼容
+                async initSignalR() {
+                    this.connection = new signalR.HubConnectionBuilder()
+                        .withUrl('/chatHub')
+                        .withAutomaticReconnect()
+                        .build();
+
+                    this.connection.on('ReceiveMessage', m => {
+                        const MessageId = pick(m, 'MessageId', 'messageId');
+                        const UserName = pick(m, 'UserName', 'userName');
+                        const SenderType = pick(m, 'SenderType', 'senderType');
+                        const Content = pick(m, 'Content', 'content');
+                        const SendTime = pick(m, 'SendTime', 'sendTime');
+
+                        this.pushUnique({
+                            type: 'text',
+                            sender: this.label(SenderType, UserName),
+                            time: this.tz(SendTime),
+                            content: Content,
+                            MessageId
+                        });
+                    });
+
+                    this.connection.on('ReceivePhoto', p => {
+                        const PhotoId = pick(p, 'PhotoId', 'photoId');
+                        const Url = pick(p, 'Url', 'url');
+                        const UploadTime = pick(p, 'UploadTime', 'uploadTime');
+                        const UserName = pick(p, 'UserName', 'userName') || p.username || '匿名';
+                        const SenderType = pick(p, 'SenderType', 'senderType');
+
+                        this.pushUnique({
+                            type: 'photo',
+                            sender: this.label(SenderType, UserName),
+                            time: this.tz(UploadTime),
+                            url: Url || p.url || p.PhotoUrl || p.photoUrl,
+                            PhotoId
+                        });
+                    });
+
+                    this.connection.on('ReceiveLocation', l => {
+                        const Latitude = pick(l, 'Latitude', 'latitude');
+                        const Longitude = pick(l, 'Longitude', 'longitude');
+                        const UserName = pick(l, 'UserName', 'userName') || l.username || '匿名';
+                        const SenderType = pick(l, 'SenderType', 'senderType');
+                        const SendTime = pick(l, 'SendTime', 'sendTime');
+
+
+
+                        this.pushUnique({
+                            type: 'location',
+                            sender: this.label(SenderType, UserName),
+                            time: this.tz(SendTime),
+                            lat: Latitude,
+                            lng: Longitude,
+                            content: '客戶目前位置'
+                        });
+                    });
+
+                    this.connection.onclose(err => console.error('❌ SignalR 關閉', err));
+                    this.connection.onreconnecting(() => console.warn('⚠️ 重新連線中…'));
+                    this.connection.onreconnected(() => console.log('✅ 已重連'));
+
+                    await this.connection.start();
+                    await this.connection.invoke('JoinGroup', this.groupCode);
+                },
+
+                // 動作：送出後不自行 push，等 Hub 回推（避免重複）
+                async sendText() {
+                    if (!this.text.trim()) return;
+                    try {
+                        await axios.post('/api/TourGuideArea/TGMessageApi/SendMessage', {
+                            groupId: this.groupId,
+                            groupCode: this.groupCode,
+                            senderType: 'Guide',
+                            guideId: this.guideId,
+                            content: this.text
+                        });
+                        this.text = '';
+                    } catch { this.errText = '發送失敗'; }
+                },
+
+                
+                async Photomsg(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    try {
+                        if (!file.type.startsWith("image/")) {
+                            alert("只能上傳圖片");
+                            return;
+                        }
+
+                        let uploadFile = file;
+                        if (file.size > 2 * 1024 * 1024) { // 超過2MB就壓縮
+                            uploadFile = await this.compressImage(file, 2);
+                        }
+
+                        // 取得定位
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 0
+                            });
+                        });
+
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // ✅ 組 FormData（與後端 [FromForm] 對應）
+                        const formData = new FormData();
+                        formData.append("GroupCode", this.groupCode);
+                        formData.append("UploaderType", "Guide"); // 固定導遊
+                        formData.append("name", this.guideName || "導遊");
+                        formData.append("photo", uploadFile);
+                        formData.append("GuideId", this.guideId);
+                        formData.append("Latitude", latitude);
+                        formData.append("Longitude", longitude);
+
+                        // ✅ 呼叫導遊區域的 API
+                        const res = await axios.post('/api/TourGuideArea/TGMessageApi/UploadPhoto', formData, {
+                            headers: { "Content-Type": "multipart/form-data" },
+                        });
+
+                        console.log("✅ 照片上傳成功:", res.data);
+                    } catch (err) {
+                        console.error("❌ 上傳照片失敗:", err);
+                        alert("上傳失敗，請再試一次");
+                    } finally {
+                        event.target.value = ""; // 清空選擇檔案
+                    }
+                },
+                async compressImage(file, maxMB = 2) {
+                    const img = await createImageBitmap(file);
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    // 調整尺寸（寬度不超過 1280px）
+                    const maxWidth = 1280;
+                    let { width, height } = img;
+                    if (width > maxWidth) {
+                        height = (maxWidth / width) * height;
+                        width = maxWidth;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    let quality = 0.9; // 初始品質
+                    let blob;
+
+                    do {
+                        blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", quality));
+                        quality -= 0.1;
+                    } while (blob.size > maxMB * 1024 * 1024 && quality > 0.2);
+
+                    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+                },
+
+                async setLocation() {
+                    try {
+                        // 1️⃣ 先請求瀏覽器定位
+                        if (!navigator.geolocation) {
+                            alert("❌ 你的瀏覽器不支援定位功能");
+                            return;
+                        }
+
+                        // 2️⃣ 取得經緯度（包成 Promise）
+                        const position = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                enableHighAccuracy: true, // 高精度
+                                timeout: 10000,           // 最多等10秒
+                                maximumAge: 0
+                            });
+                        });
+
+                        // 3️⃣ 拆出座標
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        console.log("📍 取得位置成功:", latitude, longitude);
+
+                        // 4️⃣ 準備要送的 payload
+                        const payload = {
+                            groupCode: this.groupCode,
+                            senderType: 'Guide',   // "Guide" / "Guest" / "Customer"
+                            name: this.temporaryName,
+                            latitude: latitude,
+                            longitude: longitude,
+                            deviceId: this.deviceId,
+                            guideId: this.guideId
+                        };
+                        
+
+                        // 5️⃣ 發送到後端 API
+                        const res = await axios.post('/api/TalkMessageApi/SetLocation', payload);
+                        console.log("✅ 發送定位成功:", res.data);
+                        console.log("✅ 發送定位成功:", this.guideId);
+
+                    } catch (err) {
+                        console.error("❌ 發送位置失敗:", err);
+                        if (err.code === 1) {
+                            alert("⚠️ 定位被拒絕，請允許瀏覽器取用位置");
+                        } else if (err.code === 2) {
+                            alert("⚠️ 無法取得位置，請檢查裝置的GPS是否開啟");
+                        } else if (err.code === 3) {
+                            alert("⚠️ 定位逾時，請再試一次");
+                        } else {
+                            alert("⚠️ 無法取得定位");
+                        }
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

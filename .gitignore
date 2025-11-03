@@ -534,3 +534,5 @@ Cat_Paw_Footprint/obj/
 Cat_Paw_Footprint/bin/Debug/net8.0/
 
 *.bin
+
+Cat_Paw_Footprint/efpt.config.json

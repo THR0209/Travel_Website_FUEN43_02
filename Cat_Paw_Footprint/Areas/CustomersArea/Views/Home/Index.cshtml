@@ -1,7 +1,14 @@
-﻿
 @{
     ViewData["Title"] = "首頁";
+    var isHomePage =
+        string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase) &&
+        string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "CustomersArea", StringComparison.OrdinalIgnoreCase);
 }
+
+<script>
+    window.isHomePage = @(isHomePage.ToString().ToLower());
+</script>
 
 @section Styles {
     <style>
@@ -53,89 +60,707 @@
             filter: hue-rotate(180deg);
         }
     </style>
+
+    <style>
+        /* ===== Banner / 搜尋列 ===== */
+        .hero {
+            position: relative;
+            height: 520px;
+            border-radius: 0 0 40px 40px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+        }
+
+        #heroMedia {
+            filter: brightness(0.65) saturate(1.15);
+            transition: transform 0.8s ease, filter 1s ease;
+        }
+
+        .hero:hover #heroMedia {
+            transform: scale(1.05);
+            filter: brightness(0.75);
+        }
+
+        .hero-content {
+            display: none;
+        }
+        /* ===== Hero 飄浮貓掌動畫 ===== */
+        .floating-paws {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+            .floating-paws span {
+                position: absolute;
+                font-size: 2rem;
+                opacity: 0.15;
+                animation: pawFloat 10s linear infinite;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            }
+
+                /* 🐾 不同貓掌的起始位置與動畫時間 */
+                .floating-paws span:nth-child(1) {
+                    left: 15%;
+                    animation-duration: 12s;
+                    animation-delay: 0s;
+                    font-size: 2.3rem;
+                }
+
+                .floating-paws span:nth-child(2) {
+                    left: 45%;
+                    animation-duration: 15s;
+                    animation-delay: 3s;
+                    font-size: 2rem;
+                }
+
+                .floating-paws span:nth-child(3) {
+                    left: 75%;
+                    animation-duration: 13s;
+                    animation-delay: 6s;
+                    font-size: 2.6rem;
+                }
+
+        /* 🐾 飄浮動畫 */
+        @@keyframes pawFloat {
+            0%
+
+        {
+            transform: translateY(100%) rotate(0deg) scale(1);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 0.2;
+        }
+
+        50% {
+            transform: translateY(-50%) rotate(15deg) scale(1.1);
+            opacity: 0.25;
+        }
+
+        90% {
+            opacity: 0.15;
+        }
+
+        100% {
+            transform: translateY(-120%) rotate(-15deg) scale(1);
+            opacity: 0;
+        }
+
+        }
+
+        /* 🐾 RWD 微調（手機上貓掌更小、更慢） */
+        @@media (max-width: 768px) {
+            .floating-paws span
+
+        {
+            font-size: 1.6rem;
+            animation-duration: 14s;
+        }
+
+        }
+
+        .search-wrapper {
+            position: absolute;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1100px;
+            background: rgba(255,255,255,.94);
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0,0,0,.30);
+            padding: 18px;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+            /* 滑鼠懸停：微亮浮起效果 */
+            .search-wrapper:hover {
+                transform: translateX(-50%) translateY(-3px);
+                background: rgba(255, 255, 255, 0.72);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 0 16px rgba(126, 200, 227, 0.3);
+            }
+            /* 標題文字更醒目 */
+            .search-wrapper h1 {
+                font-weight: 700;
+                text-align: center;
+                margin-bottom: 1.2rem;
+                letter-spacing: 1px;
+            }
+        .search-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1.2rem;
+        }
+
+        .search-tab {
+            padding: 6px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #555;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(126, 200, 227, 0.3);
+            transition: all 0.25s ease;
+        }
+
+            .search-tab.active {
+                background: linear-gradient(135deg, #7ec8e3, #22b3c1);
+                color: #fff;
+                box-shadow: 0 4px 10px rgba(34, 179, 193, 0.3);
+            }
+
+        .search-box {
+            display: grid;
+            gap: 12px;
+            align-items: center;
+            grid-template-columns: 2.2fr 2.2fr 1.6fr 140px;
+        }
+
+        .search-select {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(200, 225, 240, 0.8);
+            border-radius: 14px;
+            padding: 12px 16px;
+            transition: all 0.25s ease;
+        }
+
+            .search-select:focus-within {
+                border-color: #7ec8e3;
+            }
+
+
+        .search-btn {
+            background: linear-gradient(135deg, #7ec8e3, #22b3c1);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 0;
+            transition: all 0.3s ease;
+        }
+
+            .search-btn:hover {
+                background: linear-gradient(135deg, #22b3c1, #7ec8e3);
+                box-shadow: 0 4px 12px rgba(34, 179, 193, 0.4);
+            }
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-weight: 600;
+            color: #222;
+        }
+
+            .search-input::placeholder {
+                color: #6b7d90;
+                font-weight: 500;
+            }
+
+        /* 保險：避免後面區塊不小心蓋過來 */
+        .section, .container {
+            position: relative;
+            z-index: 1; /* 低於搜尋列即可 */
+        }
+            
+        .dropdown-panel {
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            display: none;
+            z-index: 2147483647 !important;
+            animation: dropdownFade 0.15s ease;
+            max-height: none;
+            overflow: visible !important;
+            max-width: 100vw !important;
+            overflow: hidden;
+            height: auto !important;
+            box-sizing: border-box;
+            z-index: 999999 !important;
+        }
+
+            .dropdown-panel::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .dropdown-panel::-webkit-scrollbar-thumb {
+                background-color: rgba(126, 200, 227, 0.5);
+                border-radius: 4px;
+            }
+
+                .dropdown-panel::-webkit-scrollbar-thumb:hover {
+                    background-color: rgba(126, 200, 227, 0.8);
+                }
+
+
+        @@keyframes dropdownFade {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        .suggest-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0,1fr));
+            gap: 8px;
+        }
+
+        .suggest-item {
+            cursor: pointer;
+            padding: 8px 10px;
+            border: 1px solid #eef3fb;
+            border-radius: 10px;
+            background: #fafcff;
+            font-size: 0.95rem;
+        }
+
+            /* 🐾 Hover 感覺柔和且有亮邊 */
+            .suggest-item:hover {
+                background: #e6f8fc;
+                border-color: #b4e3f0;
+                box-shadow: 0 0 6px rgba(126, 200, 227, 0.25);
+                transform: translateY(-2px);
+            }
+
+
+        /* 旅客數：改為內嵌控制（無下拉） */
+        .people-inline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .people-inline .ctrl {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .people-inline button {
+                width: 32px;
+                height: 32px;
+                line-height: 30px;
+                align-items: center;
+                /* text-align: center; */
+            }
+
+
+        /* 讓人數欄位自動撐到和其他 search-select 一樣高度 */
+        .search-select .people-inline {
+            height: 100%;
+        }
+
+        /* ===== Swiper Arrow Buttons ===== */
+        .swiper-btn {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all .25s;
+            color: #7ec8e3;
+        }
+
+            .swiper-btn:hover {
+                background: #7ec8e3;
+                color: #fff;
+                box-shadow: 0 4px 10px rgba(34,179,193,0.4);
+            }
+
+        .swiper-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-title {
+            display: -webkit-box; /* 建立多行彈性盒 */
+            -webkit-box-orient: vertical; /* 垂直方向排列 */
+            -webkit-line-clamp: 2; /* 限制為 2 行 */
+            overflow: hidden; /* 超出隱藏 */
+            text-overflow: ellipsis; /* 加上省略號 */
+            white-space: normal; /* 允許換行 */
+            word-break: break-word; /* 中文或長字自動斷行 */
+            min-height: 3em; /* 避免只有一行時高度不齊 */
+        }
+
+
+
+        /* 讓數字與字不會撐大高度 */
+        .people-inline span,
+        .people-inline .ctrl * {
+            line-height: 1.2; /* 可依視覺調整 */
+        }
+
+
+        /* 裝飾（避免擋點擊） */
+        .floating-paws {
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+
+    <style>
+        /* ====================== FAQ ====================== */
+        #faqSection {
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .faq-item {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid #d8ebff;
+        }
+
+            .faq-item:hover {
+                transform: scale(1.01);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            }
+
+        .faq-question {
+            background: linear-gradient(90deg, #eaf6ff, #f9f9fd);
+            color: #2255aa;
+            font-weight: 600;
+            padding: 1.1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            transition: background .3s, color .3s;
+        }
+
+            .faq-question i {
+                transition: transform .3s ease;
+                color: #7ec8e3;
+            }
+
+        .faq-item.active .faq-question {
+            background: linear-gradient(90deg, #dff1ff, #f4faff);
+            color: #226dd3;
+        }
+
+            .faq-item.active .faq-question i {
+                transform: rotate(180deg);
+            }
+
+        .faq-answer {
+            padding: 1.2rem 1.5rem;
+            color: #444;
+            display: none;
+            line-height: 1.8;
+            background: #fff;
+            border-top: 1px solid #d8ebff;
+            font-size: 1rem;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            animation: fadeIn .4s ease;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .faq-question {
+                font-size: 1rem;
+                padding: 1rem 1.2rem;
+            }
+
+            .faq-answer {
+                font-size: 0.95rem;
+                padding: 1rem 1.2rem;
+            }
+        }
+    </style>
 }
 
 <!-- Hero -->
+<!-- ===== Hero / Banner ===== -->
 <section class="hero mt-3">
-    <!-- 以貓為主題的 Banner 圖片（可改成本機 /uploads/banner-cat.jpg） -->
     <img src="https://images.unsplash.com/photo-1519052537078-e6302a4968d4?q=80&w=1800&auto=format&fit=crop" alt="帶貓旅行的海邊日落" id="heroMedia" />
-    <div class="hero-content">
+
+    <!-- Trip.com 風格搜尋列 -->
+    <div class="search-wrapper">
         <h1 class="display-6 fw-bolder mb-3">帶著毛孩去旅行，探索下一站</h1>
-        <div class="search-bar">
-            <input class="search-input" type="search" placeholder="找寵物友善目的地或行程（例：寵物餐廳、寵物旅館）" />
-            <div class="search-chip search-hide-md">出發日期</div>
-            <div class="search-chip">2 位旅客</div>
-            <button class="btn-brand">搜尋</button>
+        <!-- 分類 Tab -->
+        <div class="search-tabs">
+            <div class="search-tab active" data-type="trip">套裝行程</div>
+            <div class="search-tab" data-type="hotel">住宿</div>
+            <div class="search-tab" data-type="ticket">景點門票</div>
+            <div class="search-tab" data-type="car">租車</div>
         </div>
+
+        <!-- 搜尋表單（跳轉到後端搜尋） -->
+        <form asp-area="CustomersArea" asp-controller="Products" asp-action="Search" method="get" id="topSearchForm">
+            <input type="hidden" name="type" id="searchType" value="trip" />
+            <input type="hidden" name="start" id="startDate" />
+            <input type="hidden" name="end" id="endDate" />
+            <input type="hidden" name="people" id="peopleInput" value="2" />
+
+            <div class="search-box">
+                <!-- 目的地（可輸入 + 建議；點選後會關閉下拉） -->
+                <div class="search-select" id="destSelect">
+                    <label class="float-label">目的地</label>
+                    <input type="text" class="search-input" id="destinationInput" name="destination"
+                           placeholder="請輸入或選擇目的地" autocomplete="off" />
+                    <div class="dropdown-panel" id="destPanel">
+                        <div class="mb-2 fw-bold">熱門目的地</div>
+                        <div class="suggest-grid" id="destSuggest"></div>
+                    </div>
+                </div>
+
+                <!-- 日期（daterangepicker：起訖 + 時間） -->
+                <div class="search-select">
+                    <label class="float-label" id="dateTitle">出發時間-返程時間</label>
+                    <input type="text" class="search-input" id="dateLabel" placeholder="選擇日期與時間" autocomplete="off" />
+                </div>
+
+                <!-- 旅客數（內嵌控制，無下拉） -->
+                <div class="search-select">
+                    <label class="float-label">人數</label>
+                    <div class="people-inline">
+                        <span class="fw-semibold" id="peopleLabel"><span class="fw-semibold" id="peopleCount">2</span> 位旅客</span>
+                        <div class="ctrl">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded" id="minus"><i class="fa-solid fa-minus"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded" id="plus"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 搜尋 -->
+                <button type="submit" class="btn btn-outline-primary">搜尋</button>
+            </div>
+        </form>
     </div>
+
     <!-- 飄浮貓掌裝飾 -->
     <div class="floating-paws" aria-hidden="true">
         <span>🐾</span><span>🐾</span><span>🐾</span>
     </div>
 </section>
 
-<!-- Trending Slider (Swiper) -->
-<!-- 本週熱門商品 -->
-<section class="section" id="popular">
-    <div class="container">
-        <div class="section-title text-center mb-5">
-            <h2 class="fw-bold" style="letter-spacing:2px;">
-                <i class="fa-solid fa-fire me-2"></i>本週熱門商品
+
+
+<!-- 為你精選熱門行程 -->
+<section class="section" id="hotProducts" v-cloak>
+    <div class="container" id="hot-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px">
+                <i class="fa-solid fa-paw me-2"></i>精選熱門行程
             </h2>
-            <div style="width:60px; height:3px; margin:10px auto 0; border-radius:2px;"></div>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
-        <div class="d-flex justify-content-end gap-2 mb-3">
-            <div class="swiper-prev btn btn-outline-secondary btn-sm rounded-pill">◀</div>
-            <div class="swiper-next btn btn-outline-secondary btn-sm rounded-pill">▶</div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "trip" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有行程 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn hot-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn hot-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
         </div>
-        <div class="swiper" aria-label="熱門行程輪播">
+
+        <!-- Swiper -->
+        <div class="swiper hot-swiper" aria-label="熱門商品輪播">
             <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1543852786-1cf6624b9987?q=80&w=1600&auto=format&fit=crop" alt="寵物友善咖啡廳" />
-                            <span class="badge-live">毛孩歡迎</span>
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🔥 熱門</span>
                         </div>
-                        <div class="product-body">
-                            <h3 class="product-title">台北｜寵物友善咖啡館巡禮</h3>
-                            <div class="product-meta">4.7★ ・ 台灣・3 小時</div>
-                            <div class="price">NT$ 690 起</div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                        </div>
+                        <!-- 新增 查看詳情按鈕 -->
+                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            查看詳情
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 精選住宿 -->
+<section class="section" id="featured-hotels" v-cloak>
+    <div class="container" id="hotels-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px">
+                <i class="fa-solid fa-bed me-2"></i>精選住宿
+            </h2>
+            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "hotel" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有住宿 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn hotel-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn hotel-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="swiper hotels-swiper" aria-label="精選住宿">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🏨 精選</span>
+                        </div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                        </div>
+                        <!-- 新增 查看詳情按鈕 -->
+                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            查看詳情
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 精選景點門票 -->
+<section class="section" id="featured-tickets" v-cloak>
+    <div class="container" id="tickets-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px">
+                <i class="fa-solid fa-ticket me-2"></i>精選景點門票
+            </h2>
+            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "ticket" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有門票 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn ticket-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn ticket-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="swiper tickets-swiper" aria-label="精選景點門票">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🎟️ 熱賣</span>
+                        </div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                            <!-- 新增 查看詳情按鈕 -->
+                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                查看詳情
+                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </article>
                 </div>
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="寵物友善步道" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 精選交通 -->
+<section class="section" id="featured-transports" v-cloak>
+    <div class="container" id="transports-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px">
+                <i class="fa-solid fa-car-side me-2"></i>精選交通
+            </h2>
+            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "car" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有交通 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn transport-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn transport-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="swiper transports-swiper" aria-label="精選交通">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                    <article class="product-card shadow-sm">
+                        <div class="product-thumb position-relative">
+                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🚗 熱門</span>
                         </div>
-                        <div class="product-body">
-                            <h3 class="product-title">新北｜毛孩森林步道＋河濱散步</h3>
-                            <div class="product-meta">4.8★ ・ 台灣・1 日</div>
-                            <div class="price">NT$ 1,080 起</div>
-                        </div>
-                    </article>
-                </div>
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=1600&auto=format&fit=crop" alt="寵物泳池" />
-                        </div>
-                        <div class="product-body">
-                            <h3 class="product-title">桃園｜寵物泳池戲水日</h3>
-                            <div class="product-meta">4.6★ ・ 台灣・半日</div>
-                            <div class="price">NT$ 850 起</div>
-                        </div>
-                    </article>
-                </div>
-                <div class="swiper-slide">
-                    <article class="product-card">
-                        <div class="product-thumb">
-                            <img src="https://images.unsplash.com/photo-1583511655826-05700d52f4d9?q=80&w=1600&auto=format&fit=crop" alt="寵物友善露營" />
-                        </div>
-                        <div class="product-body">
-                            <h3 class="product-title">苗栗｜寵物友善露營＆星空晚餐</h3>
-                            <div class="product-meta">4.5★ ・ 台灣・2 日</div>
-                            <div class="price">NT$ 2,980 起</div>
+                        <div class="product-body p-3">
+                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                            <!-- 新增 查看詳情按鈕 -->
+                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                查看詳情
+                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
                         </div>
                     </article>
                 </div>
@@ -153,14 +778,14 @@
             <a class="link-primary" asp-controller="Promotions" asp-action="Index">全部優惠</a>
         </div>
 
-      @*   <!-- 載入中 -->
+        @*   <!-- 載入中 -->
         <div v-if="isLoading" class="text-center py-5">
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2 mb-0 text-muted">載入中...</p>
         </div> *@
 
         <!-- 有資料 -->
-        <div v-else-if="promotions.length > 0" class="row g-3 g-md-4">
+        <div v-if="promotions.length > 0" class="row g-3 g-md-4">
             <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
                 <article class="product-card h-100 shadow-sm rounded">
                     <div class="product-thumb position-relative">
@@ -183,107 +808,18 @@
     </div>
 </section>
 
-
-
-<!-- Deals Grid -->
-<section class="section" id="deals">
-    <div class="container">
-        <div class="section-title text-center mb-5">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#7ec8e3;">
-                <i class="fa-solid fa-gift me-2"></i> 精選特惠
-            </h2>
-            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
-        </div>
-        <div class="row g-3 g-md-4">
-            <!-- 6 張商品卡 -->
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=1600&auto=format&fit=crop" alt="日月潭 單車">
-                        <span class="badge-live">🔥 今日限定</span>
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">南投｜日月潭環潭自行車・SUP 立槳</h3>
-                        <div class="product-meta">4.7★ (1,122) ・ 台灣・3 小時</div>
-                        <div class="price">NT$ 980 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=1600&auto=format&fit=crop" alt="浮潛">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">墾丁｜浮潛＆潮間帶生態導覽</h3>
-                        <div class="product-meta">4.3★ (523) ・ 台灣・半日</div>
-                        <div class="price">NT$ 1,200 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1518544801976-3e188ee7a9a2?q=80&w=1600&auto=format&fit=crop" alt="九份">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">新北｜九份黃金老街・阿妹茶樓</h3>
-                        <div class="product-meta">4.8★ (3,102) ・ 台灣・1 日</div>
-                        <div class="price">NT$ 1,050 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop" alt="韓國 咖啡">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">首爾｜文青咖啡巷弄漫遊</h3>
-                        <div class="product-meta">4.5★ (812) ・ 韓國・2 小時</div>
-                        <div class="price">NT$ 1,180 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1494475673543-6a6a27143b22?q=80&w=1600&auto=format&fit=crop" alt="藍山">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">澳洲｜藍山新秘境・空中步道</h3>
-                        <div class="product-meta">4.6★ (655) ・ 澳洲・1 日</div>
-                        <div class="price">NT$ 3,100 起</div>
-                    </div>
-                </article>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100">
-                    <div class="product-thumb">
-                        <img src="https://images.unsplash.com/photo-1500534623283-312aade485b7?q=80&w=1600&auto=format&fit=crop" alt="巴黎">
-                    </div>
-                    <div class="product-body">
-                        <h3 class="product-title">法國｜塞納河左岸夜色</h3>
-                        <div class="product-meta">4.9★ (1,210) ・ 法國・2 小時</div>
-                        <div class="price">NT$ 2,900 起</div>
-                    </div>
-                </article>
-            </div>
-        </div>
-    </div>
-</section>
-
-@* 常見問題 *@
-
+<!-- ====================== 常見問題（ API 熱門資料） ====================== -->
 <section class="section" id="faqSection">
     <div class="container py-3">
         <div class="section-title mb-4">
-            <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px;color:#7ec8e3;">
+            <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px">
                 <i class="fa-solid fa-circle-question me-2"></i> 常見問題
             </h2>
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
-        <div id="homeHotFaqAccordion"></div>
+
+        <div id="faqList"></div>
+
         <div class="mt-4 text-center">
             <a href="/CustomersArea/FrontFAQs/Index"
                class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold"
@@ -314,48 +850,348 @@
 
 
 @section Scripts {
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        const app = Vue.createApp({
-          data() {
-            return {
-              promotions: [],
-              isLoading: true
+        // ✅ 初始化時搬出 dropdown-panel（確保不被 hero 包住）
+        document.addEventListener('DOMContentLoaded', () => {
+            const panel = document.getElementById('destPanel');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
             }
-          },
-          mounted() {
-            axios.get('/CustomersArea/Promotions/GetLatestPromotions')
-              .then(res => {
-                this.promotions = res.data
-              })
-              .catch(err => console.error('載入失敗：', err))
-              .finally(() => {
-                this.isLoading = false
-              })
-          }
-        })
-        app.mount('#promotion-app')
+        });
+    </script>
+
+    <script>
+
+        // 共用：建立一個 Vue + Swiper 幫手
+        function mountFeatured(appId, apiUrl, swiperSelector, prevEl, nextEl){
+          const app = Vue.createApp({
+            data(){ return { items: [] }; },
+            mounted(){
+              axios.get(apiUrl)
+                .then(res => { this.items = res.data || []; })
+                .then(() => this.$nextTick(() => {
+                  new Swiper(swiperSelector, {
+                    slidesPerView: 1.2,
+                    spaceBetween: 20,
+                    navigation: { prevEl, nextEl },
+                    breakpoints: {
+                      576:{ slidesPerView:2 },
+                      768:{ slidesPerView:3 },
+                      992:{ slidesPerView:4 }
+                    }
+                  });
+                }))
+                .catch(err => console.error('載入失敗：', apiUrl, err));
+            }
+          });
+          app.mount(appId);
+        }
+
+        // 住宿 / 門票 / 交通 / 熱門行程載入
+        mountFeatured('#hot-app',    '/CustomersArea/Products/GetHotProducts',    '.hot-swiper',    '.hot-prev',    '.hot-next');
+        mountFeatured('#hotels-app',    '/CustomersArea/Products/GetFeaturedHotels',    '.hotels-swiper',    '.hotel-prev',    '.hotel-next');
+        mountFeatured('#tickets-app',   '/CustomersArea/Products/GetFeaturedTickets',   '.tickets-swiper',   '.ticket-prev',   '.ticket-next');
+        mountFeatured('#transports-app','/CustomersArea/Products/GetFeaturedTransports','.transports-swiper','.transport-prev','.transport-next');
+
+        /* ====================== Vue 優惠活動載入 ====================== */
+        const app = Vue.createApp({
+            data() {
+                return { promotions: [], isLoading: true }
+            },
+            mounted() {
+                axios.get('/CustomersArea/Promotions/GetLatestPromotions')
+                    .then(res => { this.promotions = res.data })
+                    .catch(err => console.error('載入失敗：', err))
+                    .finally(() => { this.isLoading = false })
+            },
+            methods: {
+                formatDate(date) {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('zh-TW');
+                }
+            }
+        });
+        app.mount('#promotion-app');
 
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const hash = window.location.hash;
-            if (hash === '#faqSection') {
-                const faqTarget = document.querySelector(hash);
+        // ====================== FAQ 熱門資料載入 ======================
+        document.addEventListener('DOMContentLoaded', async () => {
+            const faqListContainer = document.getElementById('faqList');
+            try {
+                const response = await axios.get('/CustomersArea/FrontFAQs/api/hot');
+                const faqs = response.data;
+
+                if (!faqs || faqs.length === 0) {
+                    faqListContainer.innerHTML = `
+                        <div class="text-center text-muted py-5">
+                            <i class="fa-solid fa-cat" style="font-size:2rem;"></i>
+                            <p class="mt-3">目前沒有熱門常見問題喔 🐾</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '';
+                faqs.forEach(faq => {
+                    html += `
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span><i class="fa-solid fa-paw me-2"></i>${faq.question}</span>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">${faq.answer}</div>
+                        </div>`;
+                });
+                faqListContainer.innerHTML = html;
+
+                const faqItems = document.querySelectorAll('.faq-item');
+                faqItems.forEach(item => {
+                    const q = item.querySelector('.faq-question');
+                    q.addEventListener('click', () => {
+                        faqItems.forEach(i => {
+                            if (i !== item) i.classList.remove('active');
+                        });
+                        item.classList.toggle('active');
+                    });
+                });
+            } catch (err) {
+                console.error('載入 FAQ 失敗：', err);
+                faqListContainer.innerHTML = `<div class="alert alert-danger">
+                    無法載入熱門常見問題，請稍後再試。
+                </div>`;
+            }
+
+            // 只有首頁才啟用滾動（避免其他頁誤觸）
+            if (window.isHomePage && window.location.hash === '#faqSection') {
+                const faqTarget = document.querySelector('#faqSection');
                 if (faqTarget) {
                     setTimeout(() => {
                         window.scrollTo({
                             top: faqTarget.offsetTop - 60,
                             behavior: 'smooth'
                         });
-                    }, 300);
+                    }, 400);
                 }
             }
+        });
+
+    </script>
+
+    <!-- daterangepicker -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <script>
+        // Tab 對應不同搜尋欄內容
+        const SEARCH_CONFIG = {
+          trip: {
+            destinationPlaceholder: "想去哪裡玩？（例：台北、新北、花蓮）",
+            dateLabel: "旅行日期",
+            peopleLabel: "人數"
+          },
+          hotel: {
+            destinationPlaceholder: "搜尋城市、區域或飯店名稱",
+            dateLabel: "入住 - 退房",
+            peopleLabel: "房客"
+          },
+          ticket: {
+            destinationPlaceholder: "搜尋景點或城市名稱",
+            dateLabel: "使用日期",
+            peopleLabel: "入場人數"
+          },
+          car: {
+            destinationPlaceholder: "取車地點（例：台北車站、高雄左營）",
+            dateLabel: "取車 - 還車日期",
+            peopleLabel: "乘客人數"
+          }
+        };
+
+        /* ===== 搜尋列互動（修正冒泡與面板關閉） ===== */
+        // Tab
+        $('.search-tab').on('click', function () {
+          $('.search-tab').removeClass('active');
+          $(this).addClass('active');
+          const type = $(this).data('type');
+          $('#searchType').val(type);
+
+          // ✅ 套用對照表更新 UI
+          $('#destinationInput').attr('placeholder', SEARCH_CONFIG[type].destinationPlaceholder);
+          $('#peopleLabel').text(SEARCH_CONFIG[type].peopleLabel + "： " + $('#peopleCount').text());
+
+          // ✅ 切換分類時重置旅客數
+          cnt = 2;
+          syncPeople();
+
+          // ✅ 切換時清除前面所選的內容
+          $('#destinationInput').val('');
+          $('#dateLabel').val('');
+          $('#startDate').val('');
+          $('#endDate').val('');
+          $('#peopleInput').val('2');
+        });
+
+        // 建議清單
+        const TW_DESTS = [
+          "台北","新北","基隆","桃園","新竹","苗栗","台中","彰化","雲林","南投","嘉義","台南","高雄","屏東",
+          "宜蘭","花蓮","台東","澎湖","金門","連江（馬祖）","綠島","小琉球","蘭嶼"
+        ];
+
+        function renderSuggest(list){
+          const box = $('#destSuggest').empty();
+          list.forEach(name=>{
+            $('<div>', {class:'suggest-item badge text-dark', text:name})
+              .appendTo(box)
+              .on('mousedown', function(e){ // 用 mousedown 先於 document 觸發
+                e.stopPropagation();
+                $('#destinationInput').val(name).trigger('change').blur();
+                closeAllDropdowns();
+              });
+          });
+        }
+        renderSuggest(TW_DESTS);
+
+        function openDest() {
+              const input = document.getElementById('destinationInput');
+              const panel = document.getElementById('destPanel');
+
+              if (panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+              }
+
+              const rect = input.getBoundingClientRect();
+              const scrollTop = window.scrollY || document.documentElement.scrollTop;
+              const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+              const panelHeight = panel.scrollHeight || 260;
+              const spaceBelow = window.innerHeight - rect.bottom;
+              const spaceAbove = rect.top;
+
+              panel.style.position = 'absolute';
+              panel.style.left = rect.left + scrollLeft + 'px';
+              panel.style.width = rect.width + 'px';
+              panel.style.zIndex = '2147483647';
+
+              // ✅ 自動判斷：若下方空間不足，往上展開
+              if (spaceBelow < panelHeight + 20 && spaceAbove > panelHeight) {
+                panel.style.top = (rect.top + scrollTop - panelHeight - 8) + 'px';
+              } else {
+                panel.style.top = (rect.bottom + scrollTop + 6) + 'px';
+              }
+
+              panel.style.display = 'block';
+        }
+
+
+        function closeAllDropdowns(){ $('.dropdown-panel').hide(); }
+
+        // 目的地外層：只有點「非 input 區域」才切換面板
+        $('#destSelect').on('mousedown', function(e){
+          if ($(e.target).is('#destinationInput')) return;
+          e.stopPropagation();
+          renderSuggest(TW_DESTS); // ✅ 永遠重新載入完整清單
+          $('#destPanel').toggle();
+        });
+
+        // 目的地輸入框：focus / input / click / mousedown 全部阻止冒泡，並顯示面板
+        $('#destinationInput')
+          .on('focus input click mousedown', function(e){
+            e.stopPropagation();
+
+            // ✅ 關閉日期選擇器
+            if ($('#dateLabel').data('daterangepicker'))
+                $('#dateLabel').data('daterangepicker').hide();
+
+            const q = $(this).val().trim();
+            const filtered = q ? TW_DESTS.filter(x => x.toLowerCase().includes(q.toLowerCase())) : TW_DESTS;
+            // renderSuggest(filtered.length ? filtered : TW_DESTS);
+            openDest();
+          });
+
+
+        // 面板本體：阻止事件冒泡，不讓 document 關掉
+        $('#destPanel').on('mousedown click', function(e){ e.stopPropagation(); });
+
+        // 全域點擊 / 按下關閉所有下拉（mousedown 能更早吃到事件，避免閃現）
+        $(document).on('mousedown click', function(){ closeAllDropdowns(); });
+
+        /* 旅客數（內嵌控制） */
+        let cnt = Number($('#peopleInput').val() || 2);
+        function syncPeople(){
+          $('#peopleCount').text(cnt);
+          $('#peopleLabel').text(cnt + ' 位旅客');
+          $('#peopleInput').val(cnt);
+        }
+        $('#plus').on('click', function(e){ e.preventDefault(); e.stopPropagation(); cnt++; syncPeople(); });
+        $('#minus').on('click', function(e){ e.preventDefault(); e.stopPropagation(); if(cnt>1){ cnt--; syncPeople(); }});
+        syncPeople();
+
+        /* 日期：daterangepicker（僅日期，不含時間） */
+        $('#dateLabel').daterangepicker({
+          parentEl: 'body',     // 讓面板直接掛在 body
+          drops: 'down',        // 或 'auto'，避免向上長被裁
+          opens: 'center',      // 依你的版面調整
+          autoUpdateInput: false,
+          minDate: moment().startOf('day'), // ✅ 禁止選過去
+          locale: {
+              format: 'YYYY/MM/DD',
+              cancelLabel: '清除',
+              applyLabel:'確定',
+              daysOfWeek: ['日','一','二','三','四','五','六'],
+              monthNames: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+              firstDay: 0,
+          }
+        }, function(start, end){
+          $('#startDate').val(start.format('YYYY/MM/DD'));
+          $('#endDate').val(end.format('YYYY/MM/DD'));
+          $('#dateLabel').val(start.format('YYYY/MM/DD') + ' - ' + end.format('YYYY/MM/DD'));
+        }).on('cancel.daterangepicker', function(){
+          $(this).val('');
+          $('#startDate,#endDate').val('');
+        });
+
+        // 表單送出（若要驗證可在這裡做）
+        $('#topSearchForm').on('submit', function (e) {
+
+            let destination = $('#destinationInput').val().trim();
+            let start = $('#startDate').val().trim();
+            let end = $('#endDate').val().trim();
+
+            let isValid = true;
+
+            // 清除之前的錯誤樣式
+            $('#destinationInput').removeClass('is-invalid');
+            $('#dateLabel').removeClass('is-invalid');
+
+            // ✅ 驗證目的地
+            if (destination === "") {
+                $('#destinationInput').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // ✅ 驗證日期
+            if (start === "" || end === "") {
+                $('#dateLabel').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // ❌ 若不通過 → 用 SweetAlert 提示
+            if (!isValid) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: '資訊尚未填寫完整',
+                    text: '請選擇「目的地」及「旅行日期」。',
+                    confirmButtonColor: '#7ec8e3',
+                    confirmButtonText: '我知道了'
+                });
+                return false;
+            }
+
+            // ✅ 通過 → 放行表單
+            return true;
         });
 
 
     </script>
 }
-
-
-

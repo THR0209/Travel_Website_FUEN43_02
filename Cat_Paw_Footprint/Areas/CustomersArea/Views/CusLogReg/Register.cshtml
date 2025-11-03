@@ -4,49 +4,48 @@
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery
 @{
     var tokens = antiforgery.GetAndStoreTokens(Context);
-    ViewData["IsLoginPage"] = true;
 }
 <meta name="csrf-token" content="@tokens.RequestToken" />
 
-<div id="registerApp">
+<div id="registerApp" class="register-wrapper">
     <div class="card">
-        <h3 class="text-center mb-4 fw-bold">會員註冊</h3>
+        <h3 class="text-center mb-4 fw-bold">🐾 會員註冊</h3>
 
         <form v-on:submit.prevent="register">
-            @Html.AntiForgeryToken() <!-- 一定要保留給後端驗證使用 -->
+            @Html.AntiForgeryToken() <!-- 保留給後端驗證使用 -->
 
             <div class="mb-3">
-                <label class="form-label">帳號</label>
-                <input type="text" v-model="form.account" class="form-control" required>
+                <label class="form-label fw-semibold">帳號</label>
+                <input type="text" v-model="form.account" class="form-control" required placeholder="請輸入帳號">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">密碼</label>
-                <input type="password" v-model="form.password" class="form-control" required minlength="6">
+                <label class="form-label fw-semibold">密碼</label>
+                <input type="password" v-model="form.password" class="form-control" required minlength="6" placeholder="請輸入至少 6 位密碼">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">姓名</label>
-                <input type="text" v-model="form.fullName" class="form-control" required>
+                <label class="form-label fw-semibold">姓名</label>
+                <input type="text" v-model="form.fullName" class="form-control" required placeholder="請輸入姓名">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">電子郵件</label>
-                <input type="email" v-model="form.email" class="form-control" required>
+                <label class="form-label fw-semibold">電子郵件</label>
+                <input type="email" v-model="form.email" class="form-control" required placeholder="example@email.com">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">電話</label>
-                <input type="tel" v-model="form.phone" class="form-control" required>
+                <label class="form-label fw-semibold">電話</label>
+                <input type="tel" v-model="form.phone" class="form-control" required placeholder="請輸入電話號碼">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">地址</label>
-                <input type="text" v-model="form.address" class="form-control" required>
+                <label class="form-label fw-semibold">地址</label>
+                <input type="text" v-model="form.address" class="form-control" required placeholder="請輸入聯絡地址">
             </div>
 
             <div class="d-grid mt-4">
-                <button type="submit" class="btn btn-outline-primary" :disabled="loading">
+                <button type="submit" class="btn btn-outline-primary py-2 fw-semibold" :disabled="loading">
                     {{ loading ? "註冊中..." : "註冊" }}
                 </button>
             </div>
@@ -56,15 +55,14 @@
             <div :class="['alert', messageType]">{{ message }}</div>
         </div>
 
-        <div class="text-center mt-3">
-            <a href="/CustomersArea/CusLogReg/Login">已有帳號？前往登入</a>
+        <div class="text-center mt-3 bottom-links">
+            <a href="/CustomersArea/CusLogReg/Login" class="text-decoration-none">已有帳號？前往登入</a>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <!-- 引入 Vue 3 與 Axios -->
-    <script src="https://unpkg.com/vue@3.5.0/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
@@ -90,35 +88,30 @@
                 async register() {
                     this.loading = true;
                     this.message = "";
-
                     try {
                         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                        const formData = new FormData();
+                        for (const key in this.form) {
+                            formData.append(key, this.form[key]);
+                        }
 
-                                const formData = new FormData();
-        for (const key in this.form) {
-          formData.append(key, this.form[key]);
-        }
-
-        const res = await axios.post("/CustomersArea/CusLogReg/Register", formData, {
-          headers: {
-            "RequestVerificationToken": token
-          }
-        });
+                        const res = await axios.post("/CustomersArea/CusLogReg/Register", formData, {
+                            headers: { "RequestVerificationToken": token }
+                        });
 
                         if (res.data.success) {
-                            this.message = res.data.message;
+                            this.message = res.data.message || "註冊成功！";
                             this.messageType = "alert-success";
-
-                            // 1 秒後導向登入頁
                             setTimeout(() => {
                                 window.location.href = res.data.redirectUrl;
                             }, 1000);
+                        } else {
+                            this.message = res.data.error || "註冊失敗，請檢查輸入資料。";
+                            this.messageType = "alert-danger";
                         }
                     } catch (err) {
                         let msg = "註冊失敗，請稍後再試。";
-                        if (err.response && err.response.data && err.response.data.error)
-                            msg = err.response.data.error;
-
+                        if (err.response?.data?.error) msg = err.response.data.error;
                         this.message = msg;
                         this.messageType = "alert-danger";
                     } finally {
@@ -129,4 +122,3 @@
         }).mount("#registerApp");
     </script>
 }
-

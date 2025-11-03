@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>訪客聊天室</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            margin: 0;
+            background: #f4f7fb;
+        }
+
+        header {
+            background: #a5d8ff;
+            border-bottom: 1px solid #eee;
+            transition: 0.3s ease;
+        }
+
+        main {
+            padding: 16px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .chat-box {
+            height: 65vh;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #e7f5ff;
+            margin-bottom: 12px;
+        }
+
+        .msg {
+            margin-bottom: .75rem;
+        }
+
+            .msg.me {
+                text-align: right;
+            }
+
+        .bubble {
+            display: inline-block;
+            padding: .6rem .9rem;
+            border-radius: 1rem;
+            max-width: 75%;
+            word-break: break-word;
+        }
+        .meta {
+            font-size: .85rem;
+            color: #666;
+            margin-bottom: 4px
+        }
+        .me .bubble {
+            background-color: #748ffc;
+            color: #fff;
+        }
+
+        .other .bubble {
+            background-color: #dee2e6;
+            color: #333;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+        }
+
+        input,
+        button {
+            padding: .6rem;
+            font-size: 1rem;
+        }
+
+        input {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #8f94fb;
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+            button:hover {
+                background: #6c6ffb;
+            }
+        .leave-btn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+            .leave-btn:hover {
+                background: #ff4b4b;
+            }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #f1f3f5;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .action-btn {
+            background: #5c7cfa;
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .toggle-btn {
+            border: none;
+            background: none;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: #4c6ef5;
+        }
+
+        .leave-btn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+            .leave-btn:hover {
+                background: #fa5252;
+            }
+        .plain-btn {
+            all: unset; /* 移除全域按鈕樣式 */
+            cursor: pointer;
+            display: inline-flex; /* 對齊用 */
+            align-items: center;
+            justify-content: center;
+            color: #495057; /* 控制 svg 顏色 */
+            transition: color 0.2s;
+        }
+
+            .plain-btn:hover {
+                color: #1c7ed6; /* hover 變藍 */
+            }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <div class="top-bar" @click="isHeaderOpen = !isHeaderOpen">
+                <h4>🐾 群組聊天室 <span style="color:#888">代碼：{{ groupCode }}</span></h4>
+                <button @click="leaveChat" class="leave-btn">離開</button>
+            </div>
+
+            
+        </header>
+
+        <main>
+            <div class="chat-box">
+                <div v-for="m in messages" :key="m._k"
+                     class="msg"
+                     :class="m.messagename === temporaryName? 'me' : 'other'">
+                    <div class="bubble">
+                        <div class="meta">{{ m.messagename }} · {{ m.time }}</div>
+                        <div v-if="m.type === 'text'" v-html="m.content"></div>
+                        <div v-else-if="m.type === 'photo'">
+                            <img :src="m.url" style="max-width:100%;border-radius:8px;" />
+                        </div>
+                        <div v-else-if="m.type === 'location'">
+                            <a :href="'https://www.google.com/maps?q=' + m.lat + ',' + m.lng" target="_blank">此成員目前位置</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <input v-model.trim="text" @keyup.enter="sendText" placeholder="輸入訊息..." />
+                <button @click="$refs.photoInput.click()" class="plain-btn">📷</button>
+                <button @click="Locationmsg" class="plain-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                         viewBox="0 0 24 24" fill="none">
+                        <path d="M5.7 15C4.03377 15.6353 3 16.5205 3 17.4997C3 19.4329 7.02944 21 12 21C16.9706 21 21 19.4329 21 17.4997C21 16.5205 19.9662 15.6353 18.3 15M12 9H12.01M18 9C18 13.0637 13.5 15 12 18C10.5 15 6 13.0637 6 9C6 5.68629 8.68629 3 12 3C15.3137 3 18 5.68629 18 9ZM13 9C13 9.55228 12.5523 10 12 10C11.4477 10 11 9.55228 11 9C11 8.44772 11.4477 8 12 8C12.5523 8 13 8.44772 13 9Z"
+                              stroke="currentColor" stroke-width="2"
+                              stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <button @click="sendText">發送</button>
+            </div>
+            <input type="file"
+                   accept="image/*"
+                   capture="environment"
+                   style="display:none"
+                   ref="photoInput"
+                   @change="Photomsg" />
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const { createApp } = Vue;
+            const hasCustomer = localStorage.getItem("CatPaw_CustomerId");
+            const hasDevice = localStorage.getItem("CatPaw_DeviceId");
+            const temporaryName = localStorage.getItem("CatPaw_TemporaryName") || "訪客";
+            (function checkIdentity() {
+                // ⚙️ 如果沒有任何身份 → 退回加入頁
+                if (!hasCustomer && !hasDevice) {
+                    console.warn("⚠️ 無有效身份，導回訪客加入頁");
+                    window.location.href = "/CustomersArea/guest-join.html";
+                    return;
+                }
+
+                // ⚙️ 如果會員登入，使用會員名稱代替訪客暱稱
+                if (hasCustomer) {
+                    const customerName = localStorage.getItem("CatPaw_CustomerName");
+                    const hasTempName = localStorage.getItem("CatPaw_TemporaryName");
+
+                    // 只有當 TemporaryName 尚未設定時才寫入
+                    if (!hasTempName && customerName) {
+                        localStorage.setItem("CatPaw_TemporaryName", customerName);
+                        console.log(`👤 初次設定會員暱稱：${customerName}`);
+                    } else {
+                        console.log(`👤 保留現有暱稱：${hasTempName}`);
+                    }
+                }
+
+                // ⚙️ 不再導向別的 HTML（因為共用一頁）
+            })();
+            createApp({
+                data() {
+                    return {
+                        
+                        groupCode: localStorage.getItem("CatPaw_GroupCode") || "",
+                        customerId: hasCustomer || null,
+                        deviceId: hasDevice || null,
+                        senderType: hasCustomer ? "Customer" : "Guest",
+                        temporaryName: temporaryName,
+                        connection: null,
+                        messages: [],
+                        text: ""
+                    };
+                },
+                created() {
+                    // ⚙️ 僅在 localStorage 未同步時才補同步，不覆蓋 Vue 現有值
+                    if (this.senderType === "Customer") {
+                        const storedName = localStorage.getItem("CatPaw_CustomerName");
+                        if (storedName && !localStorage.getItem("CatPaw_TemporaryName")) {
+                            localStorage.setItem("CatPaw_TemporaryName", storedName);
+                            this.temporaryName = storedName;
+                        }
+                    }
+                },
+                
+                mounted() {
+                    this.loadHistory();
+                    this.initSignalR();
+                },
+                methods: {
+                    pushFeed(item) {
+                        if (item.type === 'text' && !item.content) return;
+                        this.messages.push({ _k: crypto?.randomUUID?.() || Date.now().toString(), ...item });
+                        this.$nextTick(() => {
+                            const box = document.querySelector('.chat-box');
+                            if (box) box.scrollTop = box.scrollHeight;
+                        });
+                    },
+
+                    async initSignalR() {
+                        if (!this.groupCode) { alert('缺少 groupCode'); return; }
+
+                        console.log("🎯 嘗試連線到 /chatHub...");
+
+                        this.connection = new signalR.HubConnectionBuilder()
+                            .withUrl('/chatHub')
+                            .configureLogging(signalR.LogLevel.Information)
+                            .build();
+
+                        // 接收文字
+                        this.connection.on('ReceiveMessage', (msg) => {
+                            console.log("📩 收到新訊息:", msg);
+                            this.pushFeed({
+                                messagename: msg.userName || msg.UserName || '匿名',
+                                type: 'text',
+                                sender: msg.senderType || msg.SenderType,
+                                time: msg.sendTime ? new Date(msg.sendTime).toLocaleString() :
+                                    msg.SendTime ? new Date(msg.SendTime).toLocaleString() : '',
+                                content: msg.content || msg.Content || ''
+                            });
+                        });
+
+                        // 接收照片
+                        this.connection.on('ReceivePhoto', (p) => {
+                            this.pushFeed({
+                                messagename: p.username || '匿名',
+                                type: 'photo',
+                                sender: p.SenderType || 'Guest',
+                                time: p.UploadTime ? new Date(p.UploadTime).toLocaleString() : '',
+                                url: p.url || p.Url || p.PhotoUrl || p.photoUrl, // ✅ 只要這裡有正確連結就會顯示
+                                content: '上傳照片'
+                            });
+                        });
+
+                        // 接收定位
+                        this.connection.on('ReceiveLocation', (l) => {
+                            console.log("📩 收到定位推播:", l); // ← 方便除錯
+
+                            this.pushFeed({
+                                messagename: l.username || l.UserName || '匿名',
+                                type: 'location',
+                                sender: l.senderType || l.SenderType || 'Guest',
+                                time: l.sendTime
+                                    ? new Date(l.sendTime).toLocaleString()
+                                    : l.SendTime
+                                        ? new Date(l.SendTime).toLocaleString()
+                                        : '',
+                                lat: l.latitude ?? l.Latitude,
+                                lng: l.longitude ?? l.Longitude,
+                                content: '分享位置'
+                            });
+                        });
+
+                        this.connection.onclose(err => console.error("❌ SignalR 連線中斷:", err));
+                        this.connection.onreconnecting(() => console.warn("⚠️ SignalR 嘗試重新連線中..."));
+                        this.connection.onreconnected(() => console.log("✅ SignalR 已重新連線"));
+
+                        try {
+                            await this.connection.start();
+                            await this.connection.invoke('JoinGroup', this.groupCode);
+                            console.log("✅ 已成功連線並加入群組");
+                        } catch (err) {
+                            console.error("❌ SignalR 連線失敗:", err);
+                        }
+                    },
+
+                    async loadHistory() {
+                        if (!this.groupCode) { alert('缺少 groupCode'); return; }
+                        try {
+                            const res = await axios.get(`/api/TalkMessageApi/GetHistory/${this.groupCode}`);
+                            const msgs = Array.isArray(res.data) ? res.data : [];
+                            msgs.forEach(m => {
+                                this.pushFeed({
+                                    messagename: m.userName || '匿名',
+                                    type: 'text',
+                                    sender: m.senderType || 'Guest',
+                                    time: new Date(m.sendTime).toLocaleString(),
+                                    content: m.content || ''
+                                });
+                            });
+                        } catch (err) {
+                            console.error("❌ 載入歷史訊息失敗:", err);
+                        }
+                    },
+
+                    async sendText() {
+                        if (!this.text) return;
+
+                        try {
+                            const payload = {
+                                groupCode: this.groupCode,
+                                senderType: this.senderType,   // "Guide" / "Guest" / "Customer"
+                                content: this.text
+
+                            };
+
+                            // 判斷類型自動附加對應 ID
+                            if (this.senderType === "Customer" && this.customerId) {
+                                payload.customerId = this.customerId;
+                            } else if (this.senderType === "Guest" && this.deviceId) {
+                                // 假設你的後端會根據 DeviceId 轉出 GuestId
+                                payload.deviceId = this.deviceId;
+                            } else if (this.senderType === "Guide" && this.guideId) {
+                                payload.guideId = this.guideId;
+                            }
+
+                            await axios.post('/api/TalkMessageApi/Send', payload);
+
+
+                            this.text = "";
+                        } catch (err) {
+                            console.error("❌ 發送訊息失敗:", err);
+                        }
+                    },
+                    async Photomsg(event) {
+                        // 未來可實作上傳照片功能
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        try {
+                            if (!file.type.startsWith("image/")) {
+                                alert("只能上傳圖片");
+                                return;
+                            }
+                            let uploadFile = file;
+                            if (file.size > 2 * 1024 * 1024) { // 2MB
+                                uploadFile = await this.compressImage(file, 2); // 目標2MB
+                            }
+                            if (!navigator.geolocation) {
+                                alert("❌ 你的瀏覽器不支援定位功能");
+                                return;
+                            }
+
+                            // 2️⃣ 取得經緯度（包成 Promise）
+                            const position = await new Promise((resolve, reject) => {
+                                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                    enableHighAccuracy: true, // 高精度
+                                    timeout: 10000,           // 最多等10秒
+                                    maximumAge: 0
+                                });
+                            });
+
+                            // 3️⃣ 拆出座標
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+
+                            // 準備 FormData
+                            const formData = new FormData();
+                            formData.append("GroupCode", this.groupCode);
+                            formData.append("UploaderType", this.senderType); // Guide / Guest / Customer
+                            formData.append("name", this.temporaryName);
+                            formData.append("photo", uploadFile); // 圖片本體
+                            formData.append("DeviceId", this.deviceId || ""); // 訪客模式可附上
+                            formData.append("Latitude", latitude || ""); // 可擴充定位資訊
+                            formData.append("Longitude", longitude || "");
+
+                            // ✅ 若是會員，加上 customerId
+                            if (this.senderType === "Customer" && this.customerId) {
+                                formData.append("CustomerId", this.customerId);
+                            }
+
+                            // ✅ 若是導遊，加上 guideId（若有）
+                            if (this.senderType === "Guide" && this.guideId) {
+                                formData.append("GuideId", this.guideId);
+                            }
+
+                            // 呼叫 API (你的後端是 API Controller)
+                            const res = await axios.post('/api/TalkMessageApi/UploadPhoto', formData, {
+                                headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+
+                            console.log("✅ 照片上傳成功:", res.data);
+                        } catch (err) {
+                            console.error("❌ 上傳照片失敗:", err);
+                            alert("上傳失敗，請再試一次");
+                        } finally {
+                            // 清空 input (否則相同檔案無法重選)
+                            event.target.value = "";
+                        }
+
+
+                    },
+                    async compressImage(file, maxMB = 2) {
+                        const img = await createImageBitmap(file);
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+
+                        // 調整尺寸（寬度不超過 1280px）
+                        const maxWidth = 1280;
+                        let { width, height } = img;
+                        if (width > maxWidth) {
+                            height = (maxWidth / width) * height;
+                            width = maxWidth;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        let quality = 0.9; // 初始品質
+                        let blob;
+
+                        do {
+                            blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", quality));
+                            quality -= 0.1;
+                        } while (blob.size > maxMB * 1024 * 1024 && quality > 0.2);
+
+                        return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+                    },
+                    async Locationmsg() {
+                        try {
+                            // 1️⃣ 先請求瀏覽器定位
+                            if (!navigator.geolocation) {
+                                alert("❌ 你的瀏覽器不支援定位功能");
+                                return;
+                            }
+
+                            // 2️⃣ 取得經緯度（包成 Promise）
+                            const position = await new Promise((resolve, reject) => {
+                                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                    enableHighAccuracy: true, // 高精度
+                                    timeout: 10000,           // 最多等10秒
+                                    maximumAge: 0
+                                });
+                            });
+
+                            // 3️⃣ 拆出座標
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+
+                            console.log("📍 取得位置成功:", latitude, longitude);
+
+                            // 4️⃣ 準備要送的 payload
+                            const payload = {
+                                groupCode: this.groupCode,
+                                senderType: this.senderType,   // "Guide" / "Guest" / "Customer"
+                                name: this.temporaryName,
+                                latitude: latitude,
+                                longitude: longitude,
+                                deviceId: this.deviceId
+                            };
+                            if (this.senderType === "Customer" && this.customerId) {
+                                payload.customerId = this.customerId;
+                            }
+
+                            // 5️⃣ 發送到後端 API
+                            const res = await axios.post('/api/TalkMessageApi/SetLocation', payload);
+                            console.log("✅ 發送定位成功:", res.data);
+
+                        } catch (err) {
+                            console.error("❌ 發送位置失敗:", err);
+                            if (err.code === 1) {
+                                alert("⚠️ 定位被拒絕，請允許瀏覽器取用位置");
+                            } else if (err.code === 2) {
+                                alert("⚠️ 無法取得位置，請檢查裝置的GPS是否開啟");
+                            } else if (err.code === 3) {
+                                alert("⚠️ 定位逾時，請再試一次");
+                            } else {
+                                alert("⚠️ 無法取得定位");
+                            }
+                        }
+                    },
+                    leaveChat() {
+                        if (confirm("確定要離開聊天室嗎？")) {
+                            // 清除與群組、訪客相關的資訊
+                            localStorage.removeItem("CatPaw_GroupCode");
+                            localStorage.removeItem("CatPaw_TemporaryName");
+                            localStorage.removeItem("groupCode");
+                            localStorage.removeItem("groupId");
+                            localStorage.removeItem("groupName");
+                            localStorage.removeItem("guideAccount");
+                            localStorage.removeItem("guideId");
+                            localStorage.removeItem("guideName");
+                            localStorage.removeItem("CatPaw_CustomerId");
+
+                            // 可選：若想讓後端知道訪客離線
+                            const baseUrl = window.location.origin;
+
+                            // 依身份決定跳轉
+                            if (this.senderType === "Guest") {
+                                window.location.href = `${baseUrl}/CustomersArea/guest-join.html`;
+                            } else if (this.senderType === "Customer") {
+                                localStorage.removeItem("CatPaw_DeviceId");
+                                window.location.href = `${baseUrl}/CustomersArea/home`;
+                            } else {
+                                window.location.href = `${baseUrl}/`;
+                            }
+                        }
+                    }
+                }
+            }).mount("#app");
+        });
+    </script>
+    </body>
+
+</html>

@@ -16,7 +16,8 @@ public partial class webtravel2Context : DbContext
     {
     }
 
-	public virtual DbSet<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; }
+	public DbSet<PendingPayment> PendingPayments { get; set; }
+	//public virtual DbSet<Coupon_CustomerLevels> Coupon_CustomerLevels { get; set; }
 
 	public virtual DbSet<CouponPics> CouponPics { get; set; }
 
@@ -80,7 +81,9 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<NewsTable> NewsTable { get; set; }
 
-    public virtual DbSet<OrderPaymentInfo> OrderPaymentInfo { get; set; }
+    public virtual DbSet<Notifications> Notifications { get; set; }
+
+	public virtual DbSet<OrderPaymentInfo> OrderPaymentInfo { get; set; }
 
     public virtual DbSet<OrderStatus> OrderStatus { get; set; }
 
@@ -102,7 +105,9 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<Products_Transportations> Products_Transportations { get; set; }
 
-    public virtual DbSet<Promotions> Promotions { get; set; }
+    public virtual DbSet<Products_Keywords> Products_Keywords { get; set; }
+
+	public virtual DbSet<Promotions> Promotions { get; set; }
 
     public virtual DbSet<Regions> Regions { get; set; }
 
@@ -120,7 +125,9 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<Semi_Transportations> Semi_Transportations { get; set; }
 
-    public virtual DbSet<SupportAnalysis> SupportAnalysis { get; set; }
+    public virtual DbSet<Semi_Keywords> Semi_Keywords { get; set; }
+
+	public virtual DbSet<SupportAnalysis> SupportAnalysis { get; set; }
 
     public virtual DbSet<TicketPriority> TicketPriority { get; set; }
 
@@ -138,14 +145,7 @@ public partial class webtravel2Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-		modelBuilder.Entity<Coupon_CustomerLevels>(entity =>
-		{
-			entity.HasKey(e => e.CouponLevelID); // 預計更改的
 
-			entity.HasOne(d => d.Coupon).WithMany(p => p.Coupon_CustomerLevels)
-				.HasForeignKey(d => d.CouponID)
-				.HasConstraintName("FK__Coupon_Cu__Custo__7869D707");
-		});
 
 		modelBuilder.Entity<CouponPics>(entity =>
         {
@@ -165,7 +165,7 @@ public partial class webtravel2Context : DbContext
             entity.HasIndex(e => e.CouponCode, "UQ__Coupons__D3490800F4D03A6F").IsUnique();
 
             entity.Property(e => e.CouponCode).HasMaxLength(50);
-			entity.Property(e => e.DisCountCode).HasMaxLength(50);
+			entity.Property(e => e.DiscountCode).HasMaxLength(50);
 			entity.Property(e => e.DiscountValue).HasColumnType("numeric(7, 2)");
         });
 
@@ -565,7 +565,17 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__NewsTable__Emplo__3587F3E0");
         });
 
-        modelBuilder.Entity<OrderPaymentInfo>(entity =>
+        modelBuilder.Entity<Notifications>(entity =>
+        {
+			entity.HasKey(e => e.NotificationID).HasName("PK__Notifica__20CF2E32871B0789");
+			entity.Property(e => e.Title).HasMaxLength(200);
+			entity.Property(e => e.Type).HasMaxLength(50);
+			entity.HasOne(d => d.Customer).WithMany(p => p.Notifications)
+				.HasForeignKey(d => d.CustomerID)
+				.HasConstraintName("FK__Notificat__ReadA__5C6CB6D7");
+		});
+
+		modelBuilder.Entity<OrderPaymentInfo>(entity =>
         {
             entity.HasKey(e => e.PaymentID).HasName("PK__OrderPay__9B556A58EDC4925A");
 
@@ -707,7 +717,20 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__Products___Trans__45BE5BA9");
         });
 
-        modelBuilder.Entity<Promotions>(entity =>
+        modelBuilder.Entity<Products_Keywords>(entity =>
+        {
+            entity.HasKey(e => e.ProductKeywordID);
+
+            entity.HasOne(d => d.Keyword).WithMany()
+                .HasForeignKey(d => d.KeywordID)
+                .HasConstraintName("ProKey_Keyword_FK");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductsKeywords)
+                .HasForeignKey(d => d.ProductID)
+                .HasConstraintName("ProKey_Product_FK");
+		});
+
+			modelBuilder.Entity<Promotions>(entity =>
         {
             entity.HasKey(e => e.PromoID).HasName("PK__Promotio__33D334D0D8C5EB2C");
 
@@ -775,8 +798,12 @@ public partial class webtravel2Context : DbContext
             entity.Property(e => e.ProductCode)
                 .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.ProjectName).HasMaxLength(100);
-        });
+            entity.Property(e => e.ProductName).HasMaxLength(100);
+
+			entity.HasOne(d => d.Region).WithMany(p => p.SemiSelfProducts)
+	            .HasForeignKey(d => d.RegionID)
+	            .HasConstraintName("SemiSelfProduct_Region_FK");
+		});
 
         modelBuilder.Entity<Semi_Hotels>(entity =>
         {
@@ -823,7 +850,20 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__Semi_Tran__Trans__503BEA1C");
         });
 
-        modelBuilder.Entity<SupportAnalysis>(entity =>
+		modelBuilder.Entity<Semi_Keywords>(entity =>
+		{
+			entity.HasKey(e => e.ProductKeywordID);
+
+			entity.HasOne(d => d.Keyword).WithMany()
+				.HasForeignKey(d => d.KeywordID)
+				.HasConstraintName("SemiKey_Keyword_FK");
+
+			entity.HasOne(d => d.SemiProduct).WithMany(p => p.SemiKeywords)
+				.HasForeignKey(d => d.ProductID)
+				.HasConstraintName("SemiKey_Product_FK");
+		});
+
+		modelBuilder.Entity<SupportAnalysis>(entity =>
         {
             entity.HasNoKey();
 
@@ -898,7 +938,7 @@ public partial class webtravel2Context : DbContext
 
         modelBuilder.Entity<TripProjectDetails>(entity =>
         {
-            entity.HasNoKey();
+			entity.HasKey(e => e.ProjectDetailID);
 
             entity.Property(e => e.TripType).HasMaxLength(50);
 
@@ -910,9 +950,11 @@ public partial class webtravel2Context : DbContext
                 .HasForeignKey(d => d.LocationID)
                 .HasConstraintName("FK__TripProje__Locat__56E8E7AB");
 
-            entity.HasOne(d => d.Project).WithMany()
-                .HasForeignKey(d => d.ProjectID)
-                .HasConstraintName("FK__TripProje__Proje__57DD0BE4");
+            entity.HasOne(d => d.Project)
+				.WithMany(p => p.TripProjectDetails)
+				.HasForeignKey(d => d.ProjectID)
+				.HasPrincipalKey(p => p.ProjectID) // ✅ 指定主表的主鍵
+				.HasConstraintName("FK__TripProje__Proje__57DD0BE4");
 
             entity.HasOne(d => d.Restaurant).WithMany()
                 .HasForeignKey(d => d.RestaurantID)
@@ -922,8 +964,6 @@ public partial class webtravel2Context : DbContext
                 .HasForeignKey(d => d.TransportID)
                 .HasConstraintName("FK__TripProje__Trans__59C55456");
         });
-
-
 
         OnModelCreatingPartial(modelBuilder);
     }

@@ -10,15 +10,17 @@ public partial class SemiSelfProducts
 	[Key]
 	public int ProductID { get; set; }
 
-    public string? ProjectName { get; set; }
+    public string? ProductName { get; set; }
 
-    public int? Region { get; set; }
+    public int? RegionID { get; set; }
 
     public string? ProductDesc { get; set; }
 
     public int? ProductPrice { get; set; }
 
-    public DateTime? StartDate { get; set; }
+	public int? ProductType { get; set; } // 1 = 住宿，2 = 門票， 3 = 交通
+
+	public DateTime? StartDate { get; set; }
 
     public DateTime? EndTime { get; set; }
 
@@ -27,7 +29,7 @@ public partial class SemiSelfProducts
     public DateTime? UpdateTime { get; set; }
 
 	[DisplayName("狀態")]
-	public bool? IsActive { get; set; }
+	public bool? IsActive { get; set; }  // 上下架狀態
 
 	[DisplayName("瀏覽次數")]
 	public int? Views { get; set; }
@@ -38,9 +40,15 @@ public partial class SemiSelfProducts
 
     public string? ProductCode { get; set; }
 
-    public virtual ICollection<Semi_Hotels> SemiHotels { get; set; } = new List<Semi_Hotels>();
+	public string? ProductImageUrl { get; set; }
+
+	public virtual Regions? Region { get; set; }
+
+	public virtual ICollection<Semi_Hotels> SemiHotels { get; set; } = new List<Semi_Hotels>();
 
     public virtual ICollection<Semi_Locations> SemiLocations { get; set; } = new List<Semi_Locations>();
 
     public virtual ICollection<Semi_Transportations> SemiTransportations { get; set; } = new List<Semi_Transportations>();
+
+    public virtual ICollection<Semi_Keywords> SemiKeywords { get; set; } = new List<Semi_Keywords>();
 }

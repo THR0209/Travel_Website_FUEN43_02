@@ -38,12 +38,16 @@
     <Folder Include="Areas\TravelManagement\Data\" />
     <Folder Include="Areas\TravelManagement\Views\Shared\" />
     <Folder Include="Views\Shared\test\" />
-    <Folder Include="wwwroot\uploads\group_photos\" />
+    <Folder Include="wwwroot\uploads\groupphotos\" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Admin\Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="efpt.config.json.user" />
   </ItemGroup>
 
 </Project>

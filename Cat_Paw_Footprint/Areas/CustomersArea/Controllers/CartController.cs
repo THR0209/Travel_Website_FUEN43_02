@@ -1,20 +1,24 @@
-﻿using System.Text.Json;
+﻿using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Data;
+using System.Text.Json;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
 	[Area("CustomersArea")]
 	[Route("CustomersArea/[controller]")]
-	public class CartController : Controller
+    [Authorize(AuthenticationSchemes = "CustomerAuth")]
+    public class CartController : Controller
 	{
 		private readonly webtravel2Context _db;
 		public CartController(webtravel2Context db) => _db = db;
+        private int CurrentCustomerId =>
+       int.TryParse(User.FindFirst("CustomerId")?.Value, out var id) ? id : 0;
+        private string CartKey => $"CART_ITEMS_{CurrentCustomerId}";
 
-		private const string CART_KEY = "CART_ITEMS";
-
-		private class CartItem
+        private class CartItem
 		{
 			public int ProductId { get; set; }
 			public string ProductName { get; set; } = "";
@@ -23,17 +27,21 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string ImageUrl { get; set; } = "";
 		}
 
-		private List<CartItem> GetCart()
-		{
-			var json = HttpContext.Session.GetString(CART_KEY);
-			return string.IsNullOrEmpty(json)
-				? new List<CartItem>()
-				: (JsonSerializer.Deserialize<List<CartItem>>(json) ?? new List<CartItem>());
-		}
-		private void SaveCart(List<CartItem> items)
-			=> HttpContext.Session.SetString(CART_KEY, JsonSerializer.Serialize(items));
+        private List<CartItem> GetCart()
+        {
+            if (CurrentCustomerId <= 0) return new List<CartItem>(); // 或 throw Unauthorized
+            var json = HttpContext.Session.GetString(CartKey);
+            return string.IsNullOrEmpty(json)
+                ? new List<CartItem>()
+                : (JsonSerializer.Deserialize<List<CartItem>>(json) ?? new List<CartItem>());
+        }
+        private void SaveCart(List<CartItem> items)
+        {
+            if (CurrentCustomerId <= 0) return;
+            HttpContext.Session.SetString(CartKey, JsonSerializer.Serialize(items));
+        }
 
-		[HttpGet("")]
+        [HttpGet("")]
 		[HttpGet("Index")]
 		public IActionResult Index() => View(); // Views/Cart/Index.cshtml
 
@@ -43,18 +51,28 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		{
 			var items = GetCart();
 			var total = items.Sum(x => x.Price * x.Qty);
-			return Ok(new { items, total });
+
+            object? coupon = null;
+            var cj = HttpContext.Session.GetString("CART_COUPON");
+            if (!string.IsNullOrWhiteSpace(cj))
+                coupon = JsonSerializer.Deserialize<object>(cj);
+            return Ok(new { items, total, coupon });
 		}
+
 
 		// 加入購物車（以資料庫 ProductID 為準）
 		[HttpPost("add")]
-		public async Task<IActionResult> Add([FromForm] int productId, [FromForm] int qty = 1)
+		public async Task<IActionResult> Add([FromForm] int productId, [FromForm] int people = 1)
 		{
+			// 後端防呆
+			var qty = Math.Max(1, people);
+
 			var p = await _db.Products.AsNoTracking().FirstOrDefaultAsync(x => x.ProductID == productId);
 			if (p == null) return NotFound();
 
 			var items = GetCart();
 			var exist = items.FirstOrDefault(x => x.ProductId == productId);
+
 			if (exist == null)
 			{
 				items.Add(new CartItem
@@ -62,18 +80,20 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					ProductId = p.ProductID,
 					ProductName = p.ProductName ?? $"商品 {p.ProductID}",
 					Price = p.ProductPrice ?? 0,
-					Qty = Math.Max(1, qty),
+					Qty = qty,
 					ImageUrl = p.ProductImage != null
-								  ? "data:image/png;base64," + Convert.ToBase64String(p.ProductImage)
-								  : Url.Content("~/images/NoImage.png")
+						? "data:image/png;base64," + Convert.ToBase64String(p.ProductImage)
+						: Url.Content("~/images/NoImage.png")
 				});
 			}
 			else
 			{
-				exist.Qty += Math.Max(1, qty);
+				// 若重複加入相同商品，直接加總數量
+				exist.Qty += qty;
 			}
+
 			SaveCart(items);
-			return Ok(new { ok = true });
+			return Ok(new { ok = true, count = items.Count });
 		}
 
 		[HttpPost("update")]
@@ -103,41 +123,36 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(new { ok = true });
 		}
 
-		// 結帳 → 建立未付款訂單，轉導到訂單頁
-		[HttpPost("checkout")]
-		public async Task<IActionResult> Checkout([FromForm] int customerId)
-		{
-			var items = GetCart();
-			if (items.Count == 0)
-				return BadRequest(new { ok = false, error = "購物車是空的" });
+        // 結帳 → 建立未付款訂單，轉導到訂單頁
+        [HttpPost("checkout")]
+        public async Task<IActionResult> Checkout()
+        {
+            var cid = CurrentCustomerId;
+            if (cid <= 0) return Unauthorized();
 
-			var now = DateTime.Now;
-			var created = new List<Cat_Paw_Footprint.Models.CustomerOrders>();
+            var items = GetCart();
+            if (items.Count == 0) return BadRequest(new { ok = false, error = "購物車是空的" });
 
-			foreach (var it in items)
-			{
-				var order = new Cat_Paw_Footprint.Models.CustomerOrders
-				{
-					CustomerID = customerId,     // 之後可換成登入用戶 ID
-					ProductID = it.ProductId,
-					OrderStatusID = 2,           // 2 = 未付款
-					TotalAmount = it.Price * it.Qty,
-					CreateTime = now,
-					UpdateTime = now
-				};
-				created.Add(order);
-				_db.CustomerOrders.Add(order);
-			}
+            var now = DateTime.Now;
+            foreach (var it in items)
+            {
+                _db.CustomerOrders.Add(new Models.CustomerOrders
+                {
+                    CustomerID = cid,
+                    ProductID = it.ProductId,
+                    OrderStatusID = 2,  // 未付款
+                    TotalAmount = it.Price * it.Qty,
+                    CreateTime = now,
+                    UpdateTime = now
+                });
+            }
+            await _db.SaveChangesAsync();
 
-			await _db.SaveChangesAsync(); // 這裡才會有 OrderID
-
-			SaveCart(new List<CartItem>());
-
-			// 回傳所有新建立的訂單編號，常見做法是用第一筆去付款
-			return Ok(new { ok = true, orderIds = created.Select(o => o.OrderID).ToList() });
-		}
-		// 批次刪除（接收 body: [1,2,3]）
-		[HttpPost("batch-remove")]
+            SaveCart(new List<CartItem>());
+            return Ok(new { ok = true });
+        }
+        // 批次刪除（接收 body: [1,2,3]）
+        [HttpPost("batch-remove")]
 		public IActionResult BatchRemove([FromBody] List<int> ids)
 		{
 			var items = GetCart();
@@ -146,26 +161,50 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(new { ok = true });
 		}
 
-		// 折價券：套用
-		[HttpPost("apply-coupon")]
-		public IActionResult ApplyCoupon([FromForm] string code)
-		{
-			// DEMO 規則：CODE10 = 10% off；MINUS500 = 減 500
-			var coupon = new { Code = code, Percent = 0m, Minus = 0m, Hint = "" };
+        // 折價券：套用
+        [HttpPost("apply-coupon")]
+        public async Task<IActionResult> ApplyCoupon([FromForm] string code)
+        {
+            var cid = CurrentCustomerId;
+            if (cid <= 0) return Unauthorized();
 
-			if (string.Equals(code, "CODE10", StringComparison.OrdinalIgnoreCase))
-				coupon = new { Code = code, Percent = 0.10m, Minus = 0m, Hint = "已套用 9 折" };
-			else if (string.Equals(code, "MINUS500", StringComparison.OrdinalIgnoreCase))
-				coupon = new { Code = code, Percent = 0m, Minus = 500m, Hint = "已折抵 NT$ 500" };
-			else
-				return BadRequest(new { ok = false, error = "折價碼無效" });
+            code = (code ?? "").Trim();
+            if (string.IsNullOrEmpty(code)) return BadRequest(new { ok = false, error = "請輸入折價碼" });
 
-			HttpContext.Session.SetString("CART_COUPON", JsonSerializer.Serialize(coupon));
-			return Ok(new { ok = true, hint = coupon.Hint });
-		}
+            var now = DateTime.Now;
 
-		// 折價券：清除
-		[HttpPost("clear-coupon")]
+            var q =
+				from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
+				where r.CustomerID == cid
+					  && (r.IsUsed == null || r.IsUsed == false)
+					  && (r.Coupon != null)                              // 👈 防呆
+					  && (r.Coupon.DiscountCode == code)                   // 或改為 DisCountCode，依你實際對應
+					  && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code)
+					  && (r.Coupon.StartDate == null || r.Coupon.StartDate <= now)
+					  && (r.Coupon.EndDate == null || r.Coupon.EndDate >= now) // 名稱一致！
+				select r;
+
+			var rec = await q.FirstOrDefaultAsync();
+            if (rec == null) return BadRequest(new { ok = false, error = "此折價券不可使用" });
+
+            // 寫入 Session（後續付款成功要把它標記已用）
+            var couponObj = new
+            {
+                id = rec.CouponID,
+                code = rec.Coupon.CouponCode,
+                type = rec.Coupon.DiscountType, // "percent" or "fixed"
+                value = rec.Coupon.DiscountValue,
+                hint = rec.Coupon.CouponDesc
+            };
+
+            HttpContext.Session.SetString("CART_COUPON",
+                System.Text.Json.JsonSerializer.Serialize(couponObj));
+
+            return Ok(new { ok = true, hint = couponObj.hint });
+        }
+
+        // 折價券：清除
+        [HttpPost("clear-coupon")]
 		public IActionResult ClearCoupon()
 		{
 			HttpContext.Session.Remove("CART_COUPON");
@@ -182,6 +221,47 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			if (id == 0) return NotFound(new { ok = false, error = "沒有商品資料" });
 			return Ok(new { productId = id });
+		}
+        // 依 Session 的購物車，只針對指定 productIds 建立「未付款」訂單
+        [HttpPost("checkout-by-selected")]
+        public async Task<IActionResult> CheckoutBySelected([FromForm] int[] productIds)
+        {
+            if (productIds == null || productIds.Length == 0)
+                return BadRequest(new { ok = false, error = "未指定商品" });
+            var customerId = CurrentCustomerId;
+            if (customerId <= 0) return Unauthorized();
+
+            var items = GetCart();
+            var selected = items.Where(x => productIds.Contains(x.ProductId)).ToList();
+            if (selected.Count == 0)
+                return BadRequest(new { ok = false, error = "找不到指定商品" });
+
+            var now = DateTime.Now;
+            foreach (var it in selected)
+            {
+                _db.CustomerOrders.Add(new CustomerOrders
+                {
+                    CustomerID = customerId,
+                    ProductID = it.ProductId,
+                    OrderStatusID = (int)OrderStatusId.Unpaid, // 未付款
+                    TotalAmount = it.Price * it.Qty,
+                    CreateTime = now,
+                    UpdateTime = now
+                });
+            }
+            await _db.SaveChangesAsync();
+
+            // 從購物車移除已結帳（未付款）的項目
+            items.RemoveAll(x => productIds.Contains(x.ProductId));
+            SaveCart(items);
+
+            return Ok(new { ok = true });
+        }
+		[HttpGet("count")]
+		public IActionResult GetCartCount()
+		{
+			var items = GetCart();
+			return Ok(new { count = items.Count });
 		}
 	}
 }

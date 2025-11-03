@@ -1,4 +1,5 @@
-﻿using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
+﻿using Cat_Paw_Footprint.Areas.Helper;
+using Cat_Paw_Footprint.Areas.TravelManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -17,11 +18,13 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 	public class LocationsController : Controller
     {
         private readonly webtravel2Context _context;
+		private readonly IConfiguration _configuration;
 
-        public LocationsController(webtravel2Context context)
+		public LocationsController(webtravel2Context context, IConfiguration configuration)
         {
             _context = context;
-        }
+			_configuration = configuration; // 這樣就能存取 secrets.json
+		}
 
         // GET: TravelManagement/Locations
         public async Task<IActionResult> Index()
@@ -126,6 +129,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
             ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName");
             ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
 			ViewBag.KeywordID = new SelectList(_context.Keywords, "KeywordID", "Keyword");
+
+			// 從 secrets.json 讀取 Google Maps API Key
+			var apiKey = _configuration["GoogleMaps:ApiKey"];
+			ViewBag.GoogleMapsApiKey = apiKey;
+
 			return View();
         }
 
@@ -162,14 +170,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					foreach (var file in model.Picture)
 					{
 						if (file.Length > 0) // 確保有檔案
-						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
+						{		
 							var pic = new LocationPics
 							{
 								LocationID = location.LocationID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file),
 							};
 
 							_context.LocationPics.Add(pic);
@@ -250,8 +255,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 				// 圖片
 				PictureIds = locations.LocationPics.Select(p => p.LocationPicID).ToList(),
-				PictureBase64 = locations.LocationPics
-					   .Select(p => "data:image/png;base64," + Convert.ToBase64String(p.Picture))
+				PictureUrl = locations.LocationPics
+					   .Select(p => p.PictureUrl)
 					   .ToList()
 			};
 
@@ -259,6 +264,8 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 			ViewData["DistrictID"] = new SelectList(_context.Districts, "DistrictID", "DistrictName", locations.DistrictID);
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", locations.RegionID);
 			ViewBag.Keywords = new MultiSelectList(_context.Keywords, "KeywordID", "Keyword", viewModel.KeywordID);
+
+			ViewBag.GoogleMapsApiKey = _configuration["GoogleMaps:ApiKey"];
 
 			return View(viewModel);
 		}
@@ -315,13 +322,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					{
 						if (file.Length > 0)
 						{
-							using var ms = new MemoryStream();
-							await file.CopyToAsync(ms);
-
 							var pic = new LocationPics
 							{
 								LocationID = locations.LocationID,
-								Picture = ms.ToArray()
+								PictureUrl = await ImgBBHelper.UploadSingleImageAsync(file),
 							};
 							_context.LocationPics.Add(pic);
 						}
@@ -353,8 +357,6 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 			return View(model);
 		}
-
-		
 
 		// GET: TravelManagement/Locations/Delete/5
 		public async Task<IActionResult> Delete(int? id)

@@ -4,9 +4,7 @@
 <div class="container py-4" id="orderApp" v-cloak>
     <h2>我的訂單</h2>
 
-    <div class="d-flex gap-2 mb-3 align-items-center">
-        <input v-model.number="customerId" type="number" class="form-control w-auto" placeholder="CustomerID (測試)">
-        <button class="btn btn-outline-secondary" v-on:click="reload">搜尋</button>
+    <div class="mb-3 d-flex gap-2 align-items-center">
         <a href="/CustomersArea/Cart" class="btn btn-outline-secondary ms-auto">回購物車</a>
     </div>
 
@@ -28,7 +26,7 @@
                     <td class="text-center">NT$ {{ (o.amount||0).toLocaleString() }}</td>
                     <td class="text-center">{{ toLocal(o.createTime) }}</td>
                     <td class="text-center">{{ o.customerName ?? ('客戶 ' + o.customerId) }}</td>
-                    <td class="text-center">
+                    <td class="text-center">                        
                         <span class="badge"
                               :class="o.status==='已付款' ? 'bg-success' : (o.status==='未付款' ? 'bg-warning' : (o.status==='已取消' ? 'bg-secondary' : 'bg-danger'))">
                             {{ o.status }}
@@ -36,7 +34,8 @@
                     </td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" v-on:click="detail(o.id)">明細</button>
-                        <button type="submit" class="btn btn-sm btn-primary" :disabled="o.status !== '未付款'">信用卡</button>
+                        <button class="btn btn-sm btn-primary" v-if="o.status === '未付款'" v-on:click="payOrder(o.id)">信用卡</button>
+                        <button class="btn btn-sm btn-outline-danger ms-1" v-if="o.status !== '已取消'" v-on:click="cancelOrder(o.id)">取消</button>
                     </td>
                 </tr>
                 <tr v-if="sortedOrders.length===0">
@@ -96,6 +95,19 @@
     </style>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function demo(){
+          await Swal.fire({
+            icon: 'success',
+            title: '操作成功',
+            text: '這是 SweetAlert 測試訊息',
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          });
+        }
+    </script>
     <script>
         (() => {
           const { createApp, ref, computed, onMounted } = Vue;
@@ -108,16 +120,7 @@
               const sort = ref({ key: 'createTime', dir: 'desc' });
               const detailObj = ref(null);
 
-              async function detail(id){
-                try{
-                  const { data } = await axios.get(`/CustomersArea/Orders/api/${id}`);
-                  detailObj.value = data;
-                  bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
-                }catch(e){
-                  console.error(e);
-                  alert('讀取明細失敗');
-                }
-              }
+              
               function doSort(col){
                 if (sort.value.key === col) {
                   sort.value.dir = (sort.value.dir === 'asc') ? 'desc' : 'asc';
@@ -147,18 +150,100 @@
 
               async function reload(){
                 try{
-                  const { data } = await axios.get('/CustomersArea/Orders/api', { params:{ customerId: customerId.value } });
+                  const { data } = await axios.get('/CustomersArea/Orders/api'); // ★ 不帶 customerId
                   list.value = Array.isArray(data) ? data : [];
                 }catch(e){
+                  if (e?.response?.status === 401) {
+                    // 未登入 → 轉到登入頁（CustomerAuth 的 LoginPath）
+                    window.location.href = '/CustomersArea/CusLogReg/Login?returnUrl=' + encodeURIComponent(location.pathname);
+                    return;
+                  }
                   console.error(e);
                   alert('讀取訂單失敗');
                   list.value = [];
                 }
               }
+              async function payOrder(id){
+                // 直接用 form POST（避免 405）
+                const f = document.createElement('form');
+                f.method = 'post';
+                f.action = '/CustomersArea/Payment/CheckoutCreditByOrder';
+                f.innerHTML = `<input name="orderId" value="${id}"/>`;
+                document.body.appendChild(f);
+                f.submit();
+              }
+              async function paySelectedOrdersCredit() {
+                if (!selectedOrders.value || selectedOrders.value.length === 0) {
+                alert('請先勾選要付款的訂單（未付款）');
+                return;
+                }
+                const fd = new FormData();
+                selectedOrders.value.forEach(id => fd.append('orderIds', id));
+                try {
+                await axios.post('/CustomersArea/Payment/CheckoutCreditByOrders', fd);
+                alert('付款成功！');
+                await reload(); // 重新讀訂單
+                } catch (e) {
+                console.error(e);
+                alert('付款失敗：' + (e?.response?.data || ''));
+                }
+              }
 
+              async function detail(orderId){
+                try{
+                const { data } = await axios.get(`/CustomersArea/Orders/api/${orderId}`);
+                const html = `
+                    <div class="text-start">
+                    <div><b>訂單編號：</b> ${data.orderCode}</div>
+                    <div><b>商品：</b> ${data.product}</div>
+                    <div><b>金額：</b> NT$ ${(data.amount||0).toLocaleString()}</div>
+                    <div><b>狀態：</b> ${data.status}</div>
+                    <div><b>客戶：</b> ${data.customer}</div>
+                    <div><b>建立：</b> ${data.createTime ? new Date(data.createTime).toLocaleString('zh-TW') : ''}</div>
+                    <div><b>更新：</b> ${data.updateTime ? new Date(data.updateTime).toLocaleString('zh-TW') : ''}</div>
+                    </div>`;
+                await Swal.fire({
+                    width: 600,
+                    title: '訂單明細',
+                    html,
+                    confirmButtonText: '關閉'
+                });
+                }catch(e){
+                const msg = e?.response?.data || '讀取明細失敗';
+                await Swal.fire({ icon:'error', title:'錯誤', text: msg });
+                }
+              }
+
+              async function cancelOrder(orderId){
+                const ans = await Swal.fire({
+                icon: 'question',
+                title: '要取消這筆訂單嗎？',
+                input: 'textarea',
+                inputPlaceholder: '請輸入取消原因（必填）',
+                inputValidator: v => !v ? '請輸入取消原因' : undefined,
+                showCancelButton: true,
+                confirmButtonText: '送出申請',
+                cancelButtonText: '先不要'
+                });
+                if (!ans.isConfirmed) return;
+
+                try{
+                await axios.post('/CustomersArea/Orders/cancel',
+                    new URLSearchParams({ orderId, reason: ans.value })
+                );
+                await Swal.fire({ icon:'success', title:'已送出取消申請', timer: 1800, showConfirmButton:false });
+                await reload(); // 重新載入訂單
+                }catch(e){
+                const msg = e?.response?.data?.error || '取消申請失敗';
+                await Swal.fire({ icon:'error', title:'失敗', text: msg });
+                }
+              }
               onMounted(reload);
 
-              return { customerId, list, reload, toLocal, doSort, sortIcon, sortedOrders, detail , detailObj, };
+              return { customerId, list, reload, toLocal, doSort, 
+                  sortIcon, sortedOrders, detail , detailObj,
+                  paySelectedOrdersCredit,payOrder, cancelOrder
+              };
             }
           }).mount('#orderApp');
         })();

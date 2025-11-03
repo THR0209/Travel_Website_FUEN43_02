@@ -14,4 +14,8 @@ public partial class Keywords
 
 	[Display(Name ="瀏覽次數")]
     public int? Views { get; set; }
+
+	public virtual ICollection<Products_Keywords> Products_Keywords { get; set; } = new List<Products_Keywords>();
+
+	public virtual ICollection<Semi_Keywords> Semi_Keywords { get; set; } = new List<Semi_Keywords>();
 }

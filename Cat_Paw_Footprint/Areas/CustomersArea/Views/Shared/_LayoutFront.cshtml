@@ -80,20 +80,35 @@
             </button>
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav ms-auto mb-2 me-5 mb-lg-0 justify-content-between">
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">跟團行程</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">景點門票</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">美食</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">住宿</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#">交通</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#hotProducts"><span class="link-text">跟團行程</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-tickets"><span class="link-text">景點門票</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-hotels"><span class="link-text">住宿</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-transports"><span class="link-text">交通</span></a></li>
                     <li class="nav-item border-end me-1 p-1">
-                        <a class="nav-link" asp-controller="Promotions" asp-action="index">優惠活動</a>
+                        <a class="nav-link" asp-controller="Promotions" asp-action="index"><span class="link-text">優惠活動</span></a>
                     </li>
-                    <li class="nav-item border-end me-1 p-1">
-                        <a class="nav-link faq-nav-link" href="#faqSection">
-                            常見問題
+                    <!-- 幫助中心下拉選單 -->
+                    <li class="nav-item dropdown border-end me-1 p-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="helpDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="link-text">幫助中心</span>
                         </a>
+                        <ul class="dropdown-menu shadow-sm rounded-3" aria-labelledby="helpDropdown">
+                            <li>
+                                <a class="dropdown-item faq-nav-link" href="#faqSection">
+                                    <i class="fa-solid fa-circle-info me-2 text-primary"></i> 常見問題
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="CustomersArea" asp-controller="Contact" asp-action="Index">
+                                    <i class="fa-solid fa-envelope me-2 text-primary"></i> 聯絡我們
+                                </a>
+                            </li>
+                        </ul>
                     </li>
-                    <li class="nav-item p-1"><a class="nav-link" href="#">自由行專區</a></li>
+
+                    <li class="nav-item p-1">
+                        <a class="nav-link" asp-controller="Travel" asp-action="index"><span class="link-text">自由行專區</span></a>
+                    </li>
                 </ul>
                 <div class="header-right d-flex align-items-center">
                     <nav class="main-nav flex-grow-1">
@@ -102,26 +117,42 @@
                             {
                                 <li class="nav-item ms-auto me-1">
                                     <a href="#" class="nav-link">
-                                        <i class="fa-solid fa-calendar-check me-1"></i> 每日簽到
+                                       <span class="link-text"><i class="fa-solid fa-calendar-check me-1"></i>每日簽到</span>
                                     </a>
                                 </li>
-                                <li class="nav-item me-1">
-                                    <a href="#" class="nav-link">
-                                        <i class="fa-solid fa-bell me-1"></i> 通知
+                                <li class="nav-item me-1 dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="link-text"><i class="fa-solid fa-bell"></i>通知</span>
+                                        <span id="notifBadge"
+                                              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                              style="display:none; font-size:0.7rem;">
+                                        </span>
                                     </a>
+                                    <div class="dropdown-menu dropdown-menu-end shadow p-0 notif-dropdown"
+                                         data-bs-popper="none">
+                                        <div class="p-3 border-bottom fw-bold">最新通知</div>
+                                        <div id="notifList" class="overflow-auto" style="max-height:400px; max-width:320px;">
+                                            <div class="text-center text-muted py-3">載入中...</div>
+                                        </div>
+                                        <div class="p-2 text-center border-top"
+                                             style="cursor:pointer"
+                                             onclick="window.location.href='/CustomersArea/Notifications/Index'">
+                                            <span class="text-decoration-none small text-primary">查看所有通知</span>
+                                        </div>
+                                    </div>
                                 </li>
                                 <li class="nav-item me-1">
-                                    <a href="#" class="nav-link">
-                                        <i class="fa-solid fa-cart-shopping me-1"></i> 購物車
+                                    <a href="/CustomersArea/Cart" class="nav-link">
+                                        <span class="link-text"><i class="fa-solid fa-cart-shopping me-1"></i>購物車</span><span class="badge bg-danger" id="cart-count">0</span>
                                     </a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                        <i class="fa-solid fa-user me-1"></i> 會員中心
+                                        <span class="link-text"><i class="fa-solid fa-user me-1"></i>會員中心</span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow">
+                                    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow user-dropdown">
                                         <li>
-                                            <a class="dropdown-item" href="#">
+                                            <a class="dropdown-item" href="/CustomersArea/Orders/Index">
                                                 <i class="fa-solid fa-file-invoice me-2"></i> 訂單紀錄
                                             </a>
                                         </li>
@@ -130,8 +161,27 @@
                                                 <i class="fa-solid fa-headset me-2"></i> 客服中心
                                             </a>
                                         </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="EditProfile">
+                                                <i class="fa-solid fa-user-pen me-2"></i> 會員資料
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="CustomersArea" asp-controller="CusLogReg" asp-action="ResetPasswordIslogin">
+                                                <i class="fa-solid fa-key me-2"></i> 變更密碼
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="CustomersArea" asp-controller="Coupons" asp-action="Index">
+                                                <i class="fa-solid fa-ticket me-2"></i> 我的優惠券
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="/CustomersArea/cus-join.html">
+                                                <i class="fa-solid fa-users-viewfinder me-2"></i> 加入群組
+                                            </a>
+                                        </li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <!-- 登出靠右 -->
                                         <li class="d-flex justify-content-end pe-2">
                                             <form asp-action="Logout" asp-controller="CusLogReg" asp-area="CustomersArea" method="post">
                                                 @Html.AntiForgeryToken()
@@ -139,7 +189,7 @@
                                                         class="dropdown-item text-danger d-inline-flex align-items-center"
                                                         style="background:none;border:none;width:auto;">
                                                     <span class="text-danger me-2">登出</span>
-                                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                                    <i class="fa-solid fa-right-from-bracket" style="color:#dc3545"></i>
                                                 </button>
                                             </form>
                                         </li>
@@ -212,20 +262,27 @@
     </footer>
 
     <!-- Back to top -->
-    <button class="to-top" aria-label="回到頂部" id="toTop">▲</button>
-   
-    
-    
+    <div class="back-to-top" id="backToTop">
+        <i class="fa-solid fa-paw"></i>
+    </div>
+
+
+
+
     <!-- Scripts -->
+    <!-- jQuery  -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Popper & Bootstrap  -->
     <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 外部功能庫 -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+    <!-- 專案 JS -->
     <script src="~/front-end/assets/js/isotope.min.js"></script>
     <script src="~/front-end/assets/js/owl-carousel.js"></script>
     <script src="~/front-end/assets/js/tabs.js"></script>
@@ -239,6 +296,28 @@
                 .then(reg => console.log('Service Worker 註冊成功:', reg))
                 .catch(err => console.log('Service Worker 註冊失敗:', err));
         }
+
+         // 全域購物車計數更新
+        function updateCartCount(count) {
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) cartCount.innerText = count;
+        }
+
+        // ✅ 頁面載入時，只有登入會員才呼叫購物車 API
+        document.addEventListener('DOMContentLoaded', function () {
+            const isLoggedIn = @isCustomerLoggedIn.ToString().ToLower();
+            if (!isLoggedIn) return; // 🚫 未登入就直接跳出，不呼叫 API
+
+            fetch('/CustomersArea/Cart/count')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.count > 0) updateCartCount(data.count);
+                })
+                .catch(error => console.error('Error fetching cart count:', error));
+        });
     </script>
 
     @RenderSection("Scripts", required: false)

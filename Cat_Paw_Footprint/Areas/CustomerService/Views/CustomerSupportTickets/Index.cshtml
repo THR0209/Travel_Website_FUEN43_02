@@ -4,6 +4,8 @@
     ViewData["Title"] = "工單管理";
     var currentEmpId = User.FindFirst("EmployeeID")?.Value;
     var currentEmpName = User.FindFirst("EmployeeName")?.Value ?? "未知員工";
+    var currentRoleName = User.FindFirst("RoleName")?.Value ?? "";
+
     var finishedCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
         .Count(x => x.StatusName?.Trim() == "已完成" && x.EmployeeID?.ToString() == currentEmpId);
     var processingCount = (Model ?? Enumerable.Empty<CustomerSupportTicketViewModel>())
@@ -15,7 +17,47 @@
 
 @section Styles {
     <style>
-        /* ================= 聊天輸入區 ================= */
+        /* ====================== 聊天輸入區 ====================== */
+
+        /* ====================== 聊天訊息氣泡樣式 ====================== */
+        .chat-message-row {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .chat-message-row.me {
+                align-items: flex-end; /* 自己發的靠右 */
+            }
+
+            .chat-message-row.other {
+                align-items: flex-start; /* 對方訊息靠左 */
+            }
+
+        .chat-bubble {
+            padding: 10px 14px;
+            border-radius: 14px;
+            max-width: 70%;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+            .chat-bubble.me {
+                background: #7ec8e3;
+                color: #fff;
+                border-bottom-right-radius: 3px;
+            }
+
+            .chat-bubble.other {
+                background: #f1f5f9;
+                color: #333;
+                border-bottom-left-radius: 3px;
+            }
+
+        .chat-meta {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
         .chat-input-area {
             background: linear-gradient(135deg, #f8fcfe 0%, #eef6f9 100%);
             border: 1px solid #dce8ef;
@@ -27,17 +69,7 @@
                 box-shadow: 0 0 0 4px rgba(126, 200, 227, 0.25);
             }
 
-        .chat-icon-btn,
-        .chat-send-btn {
-            display: flex; /* ✅ 讓內容可用 flex 對齊 */
-            align-items: center; /* ✅ 垂直置中 */
-            justify-content: center; /* ✅ 水平置中 */
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        /* 附件按鈕 */
+        /* 附件按鈕樣式 */
         .chat-icon-btn {
             background: transparent;
             color: #7ec8e3;
@@ -45,6 +77,7 @@
             width: 42px;
             height: 42px;
             border-radius: 50%;
+            transition: all 0.2s ease;
         }
 
             .chat-icon-btn:hover {
@@ -53,7 +86,7 @@
                 box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             }
 
-        /* 發送按鈕 */
+        /* 發送按鈕樣式 */
         .chat-send-btn {
             background: #7ec8e3;
             color: #fff;
@@ -61,6 +94,10 @@
             height: 46px;
             border-radius: 50%;
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
         }
 
             .chat-send-btn:hover {
@@ -72,100 +109,142 @@
                 transform: scale(0.95);
             }
 
-        /* 讓輸入框乾淨一點 */
+        /* 乾淨輸入框 */
         .chat-input-area input:focus {
             outline: none;
             box-shadow: none;
         }
 
-
-        /* 美化聊天室訊息泡泡 */
-        .chat-message-row {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 12px;
+        /* ====================== DataTable 樣式 ====================== */
+        table.dataTable thead th {
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+            background-color: #7ec8e3 !important;
+            color: #31708f !important;
+            font-weight: 600;
+            font-size: 1rem;
         }
 
-            .chat-message-row.me {
-                align-items: flex-end;
-            }
-
-            .chat-message-row.other {
-                align-items: flex-start;
-            }
-
-        .chat-bubble {
-            max-width: 72%;
-            padding: 12px 18px;
-            border-radius: 1.4em;
-            box-shadow: 0 2px 8px #0002;
-            position: relative;
-            font-size: 1.08em;
-            word-break: break-word;
+        /* 內容置中，主旨欄例外 */
+        #ticketTable tbody td {
+            text-align: center;
+            vertical-align: middle;
         }
 
-            .chat-bubble.me {
-                background: linear-gradient(90deg,#7ec8e3 80%,#7adfe3 100%);
-                color: #fff;
-                border-bottom-right-radius: .3em;
+        #ticketTable tbody td:nth-child(2) {
+            text-align: left;
+        }
+
+        /* 防止欄位換行 */
+        #ticketTable th, #ticketTable td {
+            white-space: nowrap;
+        }
+        /* ✅ 主旨欄（第 2 欄）允許自動換行 */
+        #ticketTable tbody td:nth-child(2),
+        #ticketTable thead th:nth-child(2) {
+            white-space: normal !important;
+            word-break: break-word; /* 長字自動斷行 */
+        }
+
+        /* table 外層容器：加橫向捲軸 */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+            /* 美化捲軸 */
+            .table-responsive::-webkit-scrollbar {
+                height: 8px;
             }
 
-            .chat-bubble.other {
+            .table-responsive::-webkit-scrollbar-thumb {
+                background: #7ec8e3;
+                border-radius: 4px;
+            }
+
+            .table-responsive::-webkit-scrollbar-track {
                 background: #f4f7fa;
-                color: #234;
-                border-bottom-left-radius: .3em;
             }
 
-        .chat-meta {
-            font-size: 0.92em;
-            opacity: .70;
-            margin-bottom: 2px;
-            display: flex;
-            align-items: center;
+        /* ====================== 圖片排列樣式 ====================== */
+
+        /* 多圖容器：兩張一排、間距 6px */
+        .chat-image-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 6px;
         }
 
-            .chat-meta .badge {
-                font-size: 0.95em;
-                margin-right: 8px;
+            /* 單張圖片樣式 */
+            .chat-image-group img,
+            .chat-image {
+                width: 100%;
+                border-radius: 10px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                cursor: zoom-in;
+                transition: transform 0.2s ease;
             }
 
-        #imagePreviewModal .btn-light {
-            opacity: 0.8;
-            transition: opacity 0.2s, transform 0.2s;
+                .chat-image-group img:hover,
+                .chat-image:hover {
+                    transform: scale(1.03);
+                }
+
+        .badge.bg-danger {
+            animation: pulseDanger 1.5s infinite;
         }
 
-            #imagePreviewModal .btn-light:hover {
-                opacity: 1;
-                transform: scale(1.1);
-            }
+        @@keyframes pulseDanger {
+            0%
 
-        #imagePreviewModal img {
-            transition: transform 0.25s ease;
+        {
+            box-shadow: 0 0 0 0 rgba(220,53,69,0.5);
         }
 
-            #imagePreviewModal img:hover {
-                transform: scale(1.02);
-            }
+        70% {
+            box-shadow: 0 0 0 8px rgba(220,53,69,0);
+        }
 
-        #imagePreviewModal .nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,.2);
-            background-color: rgba(255,255,255,0.9);
+        100% {
+            box-shadow: 0 0 0 0 rgba(220,53,69,0);
+        }
+
+        }
+
+        /* ✅ 小螢幕調整 */
+        @@media (max-width: 768px) {
+            #ticketTable
+
+        {
+            font-size: 0.9rem;
+        }
+
+        #ticketTable .btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            margin-bottom: 4px;
+        }
+
+        /* 狀態顯示改為全寬 */
+        #ticketTable .badge {
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        }
+
+        .row-pending {
+            background-color: #fff4f4 !important;
         }
     </style>
 }
 
-<!-- =============================== -->
-<!-- 📊 工單統計 + DataTable 表格 -->
-<!-- =============================== -->
+<!-- ====================== 📊 工單統計 + 表格 ====================== -->
 <div class="card shadow-sm">
     <div class="card-body">
+        <!-- 標題 -->
         <div class="mb-4 text-center">
             <span class="fw-bold" style="font-size:1.6rem; color:#7ec8e3;">
                 <i class="fa-solid fa-clipboard-list me-2"></i>工單管理
@@ -173,27 +252,31 @@
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto; border-radius:2px;"></div>
         </div>
 
-        <div class="mb-4 d-flex flex-wrap gap-3">
+        <!-- 狀態統計 -->
+        <div class="mb-4 d-flex flex-wrap gap-3 justify-content-center">
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#d9edf7;color:#31708f;">待處理 <span class="fw-bold">@pendingCount</span></div>
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#fcf8e3;color:#8a6d3b;">處理中 <span class="fw-bold">@processingCount</span></div>
             <div class="badge rounded-pill px-4 py-2 fs-5" style="background:#dff0d8;color:#3c763d;">已完成 <span class="fw-bold">@finishedCount</span></div>
         </div>
 
-        <table id="ticketTable" class="table table-striped align-middle">
-            <thead class="table-primary text-center">
-                <tr>
-                    <th>工單編號</th>
-                    <th>主旨</th>
-                    <th>分類</th>
-                    <th>客戶</th>
-                    <th>狀態</th>
-                    <th>優先度</th>
-                    <th>建立時間</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <!-- 🔹 DataTable 放進 .table-responsive，避免欄位折行 -->
+        <div class="table-responsive">
+            <table id="ticketTable" class="table table-striped align-middle w-100">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>工單編號</th>
+                        <th>主旨</th>
+                        <th>分類</th>
+                        <th>客戶</th>
+                        <th>狀態</th>
+                        <th>優先度</th>
+                        <th>建立時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 </div>
 <!-- ===============================
@@ -225,8 +308,10 @@
                     <button id="uploadBtn" class="btn chat-icon-btn me-2" title="上傳附件">
                         <i class="fa-solid fa-paperclip"></i>
                     </button>
-                    <input type="file" id="fileInput" class="d-none" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" />
-
+                    <input type="file" id="fileInput" class="d-none" accept=".png,.jpg,.jpeg,.gif,.webp" multiple />
+                    <div id="uploadProgress" class="mt-2 progress d-none" style="height:8px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width:0%"></div>
+                    </div>
                     <!-- 輸入框 -->
                     <input type="text" id="chatInput" class="form-control border-0 flex-fill bg-transparent"
                            placeholder="輸入訊息..." style="font-size:1.05em;" />
@@ -340,13 +425,39 @@
         ====================================================== */
         $(document).ready(function () {
             $('#ticketTable').DataTable({
+                responsive: {
+                breakpoints: [
+                    { name: 'desktop', width: Infinity },
+                    { name: 'tablet',  width: 992 },
+                    { name: 'mobile',  width: 768 }
+                ],
+                details: {
+                    display: $.fn.dataTable.Responsive.display.modal({
+                        header: function (row) {
+                            var data = row.data();
+                            return '工單詳情 - ' + data.ticketCode;
+                        }
+                    }),
+                    renderer: $.fn.dataTable.Responsive.renderer.tableAll({
+                        tableClass: 'table'
+                    })
+                }
+            },
+                scrollX: false,       
+                autoWidth: false,     
                 ajax: {
                     url: '/CustomerService/CustomerSupportTickets/GetTickets',
                     type: 'GET',
                     dataSrc: function (json) {
                         const empId = '@currentEmpId';
-                        // 僅顯示屬於自己（員工ID相符）的工單
-                        return json.filter(x => x.employeeID?.toString() === empId);
+                        const roleName = '@currentRoleName';
+ 
+                        // ✅ SuperAdmin 看全部，其餘只看自己
+                        if (roleName === 'SuperAdmin') {
+                            return json;
+                        } else {
+                            return json.filter(x => x.employeeID?.toString() === empId);
+                        }
                     }
                 },
                 columns: [
@@ -354,7 +465,27 @@
                     { data: "subject", title: "主旨", className: "text-start" },
                     { data: "ticketTypeName", title: "分類", className: "text-center" },
                     { data: "customerName", title: "客戶", className: "text-center" },
-                    { data: "statusName", title: "狀態", className: "text-center" },
+                    { data: "statusName", 
+                      title: "狀態", 
+                      className: "text-center",
+                      render: function (data, type, row) {
+                        let colorClass = "";
+                        switch (data?.trim()) {
+                            case "待處理":
+                                colorClass = "badge bg-danger text-white"; // 紅色強調
+                                break;
+                            case "處理中":
+                                colorClass = "badge bg-warning text-dark"; // 黃色提醒
+                                break;
+                            case "已完成":
+                                colorClass = "badge bg-success text-white"; // 綠色完成
+                                break;
+                            default:
+                                colorClass = "badge bg-secondary text-white";
+                                break;
+                        }
+                        return `<span class="${colorClass} px-3 py-2">${data ?? "未知"}</span>`;
+                    }},
                     { data: "priorityName", title: "優先度", className: "text-center" },
                     {
                         data: "createTime",
@@ -373,13 +504,13 @@
 
                             // 🔹 寄信按鈕
                             const mailBtn = `
-                                <a href="${mailUrl}" class="btn btn-outline-success send-mail-btn">
+                                <a href="${mailUrl}" class="btn btn-sm btn-outline-success send-mail-btn">
                                     <i class="fa-solid fa-paper-plane"></i> 寄信
                                 </a>`;
 
                             // 🔹 聊天室：開啟即時對話Modal
                             const chatBtn = `
-                                <button class="btn btn-outline-secondary open-chat-btn ms-1"
+                                <button class="btn btn-sm btn-outline-secondary open-chat-btn ms-1"
                                     data-ticketid="${row.ticketID}"
                                     data-ticketcode="${row.ticketCode}"
                                     data-customer="${row.customerName}"
@@ -391,7 +522,7 @@
 
                             // 🔹 編輯工單
                             const editBtn = `
-                                <button class="btn btn-outline-primary ms-1 edit-ticket-btn"
+                                <button class="btn btn-sm btn-outline-primary ms-1 edit-ticket-btn"
                                     data-ticketid="${row.ticketID}"
                                     data-ticketcode="${row.ticketCode}"
                                     data-subject="${row.subject}"
@@ -410,11 +541,27 @@
 
                     }
                 ],
-                order: [[0, 'desc']],
+                createdRow: function (row, data) {
+                    if (data.statusName?.trim() === "待處理") {
+                        $(row).addClass('row-pending');
+                    }
+                },
+                order: [[6, 'desc']],
                 language: {
-                    search: "搜尋：",
-                    zeroRecords: "找不到資料",
-                    paginate: { next: "下一頁", previous: "上一頁" }
+                    "processing": "處理中...",
+                    "loadingRecords": "載入中...",
+                    "lengthMenu": "顯示 _MENU_ 筆資料",
+                    "zeroRecords": "目前沒有資料",
+                    "info": "顯示第 _START_ 至 _END_ 筆，共 _TOTAL_ 筆",
+                    "infoEmpty": "無可顯示的資料",
+                    "infoFiltered": "(從 _MAX_ 筆資料中篩選)",
+                    "search": "搜尋：",
+                    "paginate": {
+                        "first": "第一頁",
+                        "last": "最後一頁",
+                        "next": "下一頁",
+                        "previous": "上一頁"
+                    }
                 }
             });
         });
@@ -449,12 +596,14 @@
 
             // 接收即時訊息
             connection.on("ReceiveMessage", function (msg) {
-                if (msg.ticketID != currentTicketId) return;
-                if (msg.tempId && msg.senderID == senderId)
-                    updatePendingMsg(msg.tempId, msg);
+                // 同時檢查 TempId（C#傳）與 tempId（JS內部用）
+                const tmpId = msg.tempId || msg.TempId;
+
+                if (tmpId && msg.senderID == senderId)
+                    updatePendingMsg(tmpId, msg);
                 else
                     appendMsg(msg);
-            });
+            });        
         });
 
         // 關閉聊天室時清空內容
@@ -463,39 +612,80 @@
             $('#chatBox').empty();
         });
 
+         $('#chatBox')
+         .on('dragover', e => {
+            e.preventDefault();
+            $('#chatBox').addClass('drag-over');
+        })
+        .on('dragleave drop', e => {
+            e.preventDefault();
+            $('#chatBox').removeClass('drag-over');
+        })
+        .on('drop', async e => {
+            const files = Array.from(e.originalEvent.dataTransfer.files);
+            if (files.length) {
+                $('#fileInput')[0].files = e.originalEvent.dataTransfer.files;
+                $('#fileInput').trigger('change');
+            }
+        });
         /* ======================================================
            🧩 檔案上傳與附件預覽
         ====================================================== */
         $('#uploadBtn').on('click', () => $('#fileInput').click());
 
-        $('#fileInput').on('change', function (e) {
-            const file = e.target.files[0];
-            if (!file || !currentTicketId) return;
+               $('#fileInput').on('change', async function (e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0 || !currentTicketId) return;
 
-            const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf'];
-            if (!allowed.includes(file.type)) {
-                showAlert('warning', '格式錯誤', '僅支援上傳圖片或 PDF 檔案');
-                e.target.value = '';
+            const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+            const invalid = files.filter(f => !allowed.includes(f.type));
+            if (invalid.length > 0) {
+                showAlert('warning', '格式錯誤', '僅支援圖片格式（PNG、JPG、GIF、WEBP）');
                 return;
             }
 
             const formData = new FormData();
-            formData.append('file', file);
+            files.forEach(f => formData.append('files', f));
 
-            $.ajax({
-                url: '/CustomerService/CustomerSupportMessages/UploadAttachment',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: res => {
-                    if (res.success && res.url)
-                        sendChatMsg('', res.url.startsWith('/') ? res.url : '/' + res.url);
-                    else showAlert('error', '上傳失敗', res.message || '上傳失敗');
-                },
-                error: () => showAlert('error', '上傳失敗', '請稍後再試'),
-                complete: () => e.target.value = ''
-            });
+            $('#uploadProgress').removeClass('d-none');
+            const progressBar = $('#uploadProgress .progress-bar');
+            progressBar.css('width', '0%');
+
+            try {
+                const resp = await $.ajax({
+                    url: '/CustomerService/CustomerSupportMessages/UploadMultipleAttachments',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    xhr: function () {
+                        const xhr = $.ajaxSettings.xhr();
+                        if (xhr.upload) {
+                            xhr.upload.addEventListener('progress', e => {
+                                if (e.lengthComputable) {
+                                    const percent = Math.round((e.loaded / e.total) * 100);
+                                    progressBar.css('width', percent + '%');
+                                }
+                            });
+                        }
+                        return xhr;
+                    }
+                });
+
+                if (resp.success && Array.isArray(resp.urls)) {
+                    // 合併多張圖為一則訊息
+                    sendChatMsg('', resp.urls);
+                    showAlert('success', '上傳成功', `${resp.urls.length} 張圖片已傳送`);
+                
+                } else {
+                    showAlert('error', '上傳失敗', resp.message || '請稍後再試');
+                }
+            } catch (err) {
+                showAlert('error', '錯誤', '圖片上傳時發生問題');
+            } finally {
+                $('#uploadProgress').addClass('d-none');
+                e.target.value = '';
+            }
         });
 
         /* ======================================================
@@ -504,7 +694,7 @@
         function loadHistory(ticketId) {
             const skip = 0, take = 30;
             $('#chatBox').html('<div class="text-center text-primary py-4"><i class="fa fa-spinner fa-spin"></i> 載入中...</div>');
-            $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, msgs => {
+           $.get(`/CustomerService/CustomerSupportMessages/GetMessages?ticketId=${ticketId}&skip=${skip}&take=${take}`, msgs => {
                 $('#chatBox').empty();
                 msgs.forEach(appendMsg);
             });
@@ -530,18 +720,28 @@
             let attachHtml = '';
 
             if (msg.attachmentURL) {
-                const url = msg.attachmentURL;
-                if (/\.(png|jpe?g|gif|webp)$/i.test(url)) {
-                    attachHtml = `<div class="mt-2"><img src="${url}" class="chat-image"
-                        style="max-width:240px;border-radius:8px;box-shadow:0 2px 8px #0002;cursor:zoom-in;"></div>`;
-                } else if (/\.pdf$/i.test(url)) {
-                    attachHtml = `<div class="mt-2"><a href="${url}" target="_blank">
-                        <i class="fa-solid fa-file-pdf me-1"></i> 查看 PDF</a></div>`;
-                } else {
-                    attachHtml = `<div class="mt-2"><a href="${url}" target="_blank">
-                        <i class="fa-solid fa-paperclip me-1"></i> 下載附件</a></div>`;
+                let urls = [];
+
+                // 兼容單張或多張字串
+                if (typeof msg.attachmentURL === "string") {
+                    urls = msg.attachmentURL.split(",").map(u => u.trim()).filter(Boolean);
+                } else if (Array.isArray(msg.attachmentURL)) {
+                    urls = msg.attachmentURL;
                 }
-            }
+
+                const imageUrls = urls.filter(u => /\.(png|jpe?g|gif|webp)$/i.test(u));
+                const pdfUrls = urls.filter(u => /\.pdf$/i.test(u));
+                const otherUrls = urls.filter(u => !/\.(png|jpe?g|gif|webp|pdf)$/i.test(u));
+
+                // ✅ 兩張圖片一排
+                if (imageUrls.length > 0) {
+                    attachHtml += `<div class="chat-image-group">`;
+                    for (const u of imageUrls) {
+                        attachHtml += `<img src="${u}" class="chat-image" alt="img">`;
+                    }
+                    attachHtml += `</div>`;
+                }
+             }
 
             const html = `
             <div class="chat-message-row ${alignClass}" data-tempid="${msg.tempId || ''}">
@@ -549,6 +749,18 @@
                 <div class="chat-bubble ${bubbleClass}">${contentHtml}${attachHtml}</div>
             </div>`;
             $('#chatBox').append(html);
+
+            $('.chat-image').off('click').on('click', function () {
+            const url = $(this).attr('src');
+            imageList = $('#chatBox img.chat-image').map((_, el) => $(el).attr('src')).get();
+            currentImageIndex = imageList.indexOf(url);
+            $('#previewImage').attr('src', url);
+            updateImageCounter();
+            if (!imagePreviewModal)
+                imagePreviewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
+            imagePreviewModal.show();
+             });
+
 
             // 自動捲動到底
             const box = $('#chatBox')[0];
@@ -566,7 +778,7 @@
 
             appendMsg({
                 senderID: senderId,
-                senderRole: "客服人員",
+                senderRole: "員工",
                 senderDisplayName: senderName,
                 sentTime: dayjs().format('YYYY-MM-DD HH:mm'),
                 messageContent: msg,
@@ -582,22 +794,27 @@
                 ticketID: parseInt(currentTicketId, 10),
                 senderID: parseInt(senderId, 10),
                 messageContent: msg,
-                attachmentURL: attachmentUrl,
+                attachmentURL: Array.isArray(attachmentUrl) ? JSON.stringify(attachmentUrl) : attachmentUrl,
                 tempId: tempId,
-                SenderType: "Admin",
-                SentBy: senderName
+                senderType: "Admin",
+                sentBy: senderName
             };
 
             $.ajax({
                 url: '/CustomerService/CustomerSupportMessages/PostMessage',
                 type: 'POST',
-                contentType: 'application/json',
                 data: JSON.stringify(data),
+                processData: false,
+                contentType: 'application/json; charset=utf-8',
+                success: resp => console.log("✅ 訊息成功送出", resp),
                 error: xhr => {
+                    console.error("❌ 錯誤:", xhr.responseText);
                     markMsgFailed(tempId);
                     showAlert('error', '發送失敗', xhr.responseText || '無法傳送訊息');
                 }
             });
+
+
         }
 
         /* ======================================================

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
@@ -127,10 +128,54 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			return Ok(new { success = true, message = "註冊成功", redirectUrl = "/CustomersArea/CusLogReg/Login" });
 		}
 		//客戶修改資料介面
+		[Area("CustomersArea")]
+		[Authorize(AuthenticationSchemes = "CustomerAuth")]
+		[HttpGet]
+		public async Task<IActionResult> GetProfile()
+		{
+			var claim = User.Claims.FirstOrDefault(c => c.Type == "CustomerId");
+			if (claim == null)
+				return Unauthorized(new { success = false, error = "未登入" });
+
+			int id = int.Parse(claim.Value);
+			var customer = await _context.Customers
+				.Include(c => c.CustomerProfile)
+				.FirstOrDefaultAsync(c => c.CustomerID == id);
+
+			if (customer == null)
+				return NotFound(new { success = false, error = "找不到客戶資料" });
+
+			return Ok(new
+			{
+				success = true,
+				data = new
+				{
+					fullName = customer.CustomerProfile.CustomerName,
+					phone = customer.CustomerProfile.Phone,
+					address = customer.CustomerProfile.Address,
+					idNumber = customer.CustomerProfile.IDNumber
+				}
+			});
+		}
 		[HttpGet]
 		public IActionResult EditProfile()
 		{
 			return View();
+		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> EditProfile([FromBody] CusLogRegDto dto)
+		{
+			var customerIdClaim = User.Claims.FirstOrDefault(c => c.Type == "CustomerId");
+			if (customerIdClaim == null)
+				return BadRequest(new { success = false, error = "無法取得使用者資料，請重新登入" });
+
+			dto.CustomerId = int.Parse(customerIdClaim.Value);
+			var updatedCustomer = await _svc.UpdateCustomerAsync(dto);
+			if (!string.IsNullOrEmpty(updatedCustomer?.ErrorMessage))
+				return BadRequest(new { success = false, error = updatedCustomer.ErrorMessage });
+
+			return Ok(new { success = true, message = updatedCustomer.Message });
 		}
 		//客戶修改密碼介面
 		[HttpGet]
@@ -138,6 +183,70 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		{
 			return View();
 		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> ChangePassword([FromBody] CusLogRegDto dto)// 客戶修改密碼
+		{
+			var newPassword = dto.Password;
+			var email = User.Claims.FirstOrDefault(c => c.Type == "Email")?.Value;
+			var updatedCustomer = await _svc.UpdateCustomerPasswordAsync(email, newPassword);
+			if (!string.IsNullOrEmpty(updatedCustomer?.ErrorMessage))
+			{
+				return BadRequest(new { success = false, error = updatedCustomer.ErrorMessage });
+			}
+			return Ok(new { success = true, message = updatedCustomer.Message });
+		}
+		[HttpGet]//忘記密碼介面
+		[AllowAnonymous]
+		public IActionResult ForgotPassword()
+		{
+			return View();
+		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[AllowAnonymous]
+		public async Task<IActionResult> ForgotPassword([FromBody] CusLogRegDto dto)// 忘記密碼
+		{
+			var email = dto.Email;
+			var result = await _svc.EmailToUser(email);
+			if (!string.IsNullOrEmpty(result?.ErrorMessage))
+			{
+				return BadRequest(new { success = false, error = result.ErrorMessage });
+			}
+			return Ok(new { success = true, message = "如果該 Email 存在，我們已發送重設密碼的指示。" });
+		}
+		[HttpGet]
+		[AllowAnonymous]//重設密碼介面(登入後介面)
+		public IActionResult ResetPasswordIslogin()
+		{
+			return View();
+		}
+		[HttpGet]
+		[AllowAnonymous]//重設密碼介面(忘記密碼後介面)
+		public IActionResult ResetPassword()
+		{
+			return View();
+		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[AllowAnonymous]
+		public async Task<IActionResult> ResetPassword([FromBody] CusLogRegDto dto)// 重設密碼
+		{
+			string email = dto.Email;
+			string newPassword = dto.Password;
+			if (email == null)
+			{
+				email = User.Claims.FirstOrDefault(c => c.Type == "Email")?.Value;
+			}
+			var updatedCustomer = await _svc.UpdateCustomerPasswordAsync(email, newPassword);
+			if (!string.IsNullOrEmpty(updatedCustomer?.ErrorMessage))
+			{
+				return BadRequest(new { success = false, error = updatedCustomer.ErrorMessage });
+			}
+			return Ok(new { success = true, message = updatedCustomer.Message });
+		}
+
+
 
 	}
 }

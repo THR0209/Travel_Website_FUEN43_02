@@ -24,7 +24,7 @@
 
                     <div class="mb-3">
                         <label asp-for="RestaurantAddr" class="control-label"></label>
-                        <input asp-for="RestaurantAddr" class="form-control" />
+                        <input asp-for="RestaurantAddr" class="form-control" id="RestaurantAddr" />
                         <span asp-validation-for="RestaurantAddr" class="text-danger"></span>
                     </div>                    
 
@@ -76,12 +76,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="RestaurantLat" class="control-label"></label>
-                            <input asp-for="RestaurantLat" class="form-control" />
+                            <input asp-for="RestaurantLat" class="form-control" id="RestaurantLat" readonly style="background-color:#f3f3f3;" />
                             <span asp-validation-for="RestaurantLat" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="RestaurantLng" class="control-label"></label>
-                            <input asp-for="RestaurantLng" class="form-control" />
+                            <input asp-for="RestaurantLng" class="form-control" id="RestaurantLng" readonly style="background-color:#f3f3f3;" />
                             <span asp-validation-for="RestaurantLng" class="text-danger"></span>
                         </div>
                     </div>
@@ -128,13 +128,13 @@
                     <!-- 現有圖片 (含刪除按鈕) -->
                     <div class="mb-3">
                         <div>
-                            @if (Model.PictureBase64 != null && Model.PictureBase64.Any())
+                            @if (Model.PictureUrl != null && Model.PictureUrl.Any())
                             {
-                                for (int i = 0; i < Model.PictureBase64.Count; i++)
+                                for (int i = 0; i < Model.PictureUrl.Count; i++)
                                 {
                                     <div id="pic-@Model.PictureIds[i]"
                                          style="display:inline-block; margin:10px; position:relative;">
-                                        <img src="@Model.PictureBase64[i]" style="width:120px; height:auto;" />
+                                        <img src="@Model.PictureUrl[i]" loading="lazy" style="width:120px; height:auto;" />
                                         <button type="button" class="btn btn-sm btn-danger"
                                                 style="position:absolute; top:0; right:0;"
                                                 onclick="markImageForDelete(@Model.PictureIds[i])">
@@ -160,8 +160,43 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    @* 載入 Google Maps API 並帶入後端傳來的金鑰 *@
+    <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&libraries=places"></script>
+
     <script>
-        //圖片
+        /* 自動將地址轉換為經緯度 */
+        const geocoder = new google.maps.Geocoder();
+
+        // 當使用者輸入完地址 (blur事件)
+        document.addEventListener("DOMContentLoaded", () => {
+            const addrInput = document.getElementById("RestaurantAddr");
+            const latInput = document.getElementById("RestaurantLat");
+            const lngInput = document.getElementById("RestaurantLng");
+
+            addrInput.addEventListener("blur", function () {
+                const address = this.value.trim();
+                if (!address) return;
+
+                geocoder.geocode({ address: address }, function (results, status) {
+                    if (status === "OK" && results[0]) {
+                        const loc = results[0].geometry.location;
+                        const lat = loc.lat().toFixed(6); // 取小數點6位
+                        const lng = loc.lng().toFixed(6);
+
+                        // 更新唯讀欄位顯示
+                        latInput.value = lat;
+                        lngInput.value = lng;
+
+                        console.log("✅ 地址轉換成功：", lat, lng);
+                    } else {
+                        alert("❌ 無法找到該地址，請確認輸入是否正確");
+                    }
+                });
+            });
+        });
+
+        /* 圖片 */
         // 存放暫存的檔案 (用來過濾哪些要送到後端)
         let selectedFiles = [];
 
@@ -253,7 +288,7 @@
             if (picDiv) picDiv.remove();
         }
 
-        //關鍵字
+        /* 關鍵字 */
         // 關鍵字 (維持原本的多選邏輯)
         function updateHiddenField() {
             const hiddenContainer = document.getElementById("KeywordIDsContainer");
@@ -271,7 +306,7 @@
             });
         }
 
-        // ✅ 選取關鍵字時觸發
+        // 選取關鍵字時觸發
         document.getElementById("keywordSelect").addEventListener("change", function () {
             const selectedId = this.value;
             const selectedText = this.options[this.selectedIndex].text;
@@ -293,14 +328,14 @@
             updateHiddenField();
         });
 
-        // ✅ 移除已選關鍵字
+        // 移除已選關鍵字
         function removeKeyword(id) {
             const elem = document.querySelector(`#selectedKeywords span[data-id="${id}"]`);
             if (elem) elem.remove();
             updateHiddenField();
         }
 
-        // ✅ 頁面載入時同步一次 (確保 Model 初始資料能正確存回去)
+        // 頁面載入時同步一次 (確保 Model 初始資料能正確存回去)
         document.addEventListener("DOMContentLoaded", updateHiddenField);
     </script>
 }

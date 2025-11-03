@@ -1,0 +1,419 @@
+﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
+@{
+    ViewData["Title"] = "通知中心";
+}
+
+
+<div class="notif-wrapper">
+    <!-- 左側分類 -->
+    <div class="notif-sidebar">
+        <h5><i class="fa-solid fa-filter me-1"></i>通知分類</h5>
+        <ul class="notif-category" id="notifCategory">
+            <li class="active" data-type="全部通知"><i class="fa-solid fa-bell"></i> 全部通知</li>
+            <li data-type="客服訊息"><i class="fa-solid fa-headset"></i> 客服訊息</li>
+            <li data-type="優惠活動"><i class="fa-solid fa-tags"></i> 優惠活動</li>
+            <li data-type="系統公告"><i class="fa-solid fa-bullhorn"></i> 系統公告</li>
+        </ul>
+    </div>
+
+    <!-- 右側通知內容 -->
+    <div class="notif-content">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-primary mb-0 d-flex align-items-center">
+                <i class="fa-solid fa-bell me-2"></i>
+                <span id="notifTitle">全部通知</span>
+            </h4>
+
+            <button id="markAllReadBtn" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm">
+                <i class="fa-solid fa-check-double me-1"></i> 全部標示為已讀
+            </button>
+        </div>
+
+        <!-- 🔹 顯示筆數與搜尋 -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="d-flex align-items-center perpage-group">
+                <label class="me-2 mb-0">顯示</label>
+                <select id="perPageSelect" class="form-select form-select-sm">
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+                <span class="ms-2">筆資料</span>
+            </div>
+
+            <div class="d-flex align-items-center">
+                <label for="notifSearch" class="me-2 mb-0">搜尋：</label>
+                <div class="position-relative">
+                    <input type="text" id="notifSearch" class="form-control form-control-sm pe-4" placeholder="輸入關鍵字..." style="width:200px;">
+                    <i id="clearSearchBtn" class="fa-solid fa-times position-absolute end-0 top-50 translate-middle-y me-2 text-muted" style="cursor:pointer;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔹 通知列表 -->
+        <div id="notifListArea">
+            @if (Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <div class="notif-card @(item.IsRead ? "is-read" : "")"
+                         data-id="@item.NotificationID"
+                         data-type="@item.Type">
+                        <div class="notif-title">@item.Title</div>
+                        <div class="notif-message">@item.Message</div>
+                        <div class="notif-time">
+                            建立於 @item.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                            @if (item.IsRead && item.ReadAt != null)
+                            {
+                                <span>（已讀於 @item.ReadAt.Value.ToString("HH:mm")）</span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            <!-- 🔹 提示文字（由 JS 控制顯示） -->
+            <div id="noNotifMsg" class="text-center text-secondary my-5" style="display:none;">
+                目前沒有通知 💤
+            </div>
+        </div>
+
+
+        <!-- 🔹 分頁控制 -->
+        <div class="text-center mt-3" id="notifPagination">
+            <button id="prevPageBtn" class="btn btn-outline-secondary btn-sm me-2 rounded-pill">上一頁</button>
+            <span id="pageInfo" class="text-muted"></span>
+            <button id="nextPageBtn" class="btn btn-outline-primary btn-sm ms-2 rounded-pill">下一頁</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // ------------------------------
+            // 🔹 初始化變數
+            // ------------------------------
+            let currentPage = 1;
+            let perPage = 5;
+            let allCards = Array.from(document.querySelectorAll(".notif-card"));
+            const pageInfo = document.getElementById("pageInfo");
+            const prevBtn = document.getElementById("prevPageBtn");
+            const nextBtn = document.getElementById("nextPageBtn");
+
+
+            // ------------------------------
+            // 🔹 顯示目前頁面的通知
+            // ------------------------------
+            function showPage(page) {
+                const start = (page - 1) * perPage;
+                const end = start + perPage;
+                const totalPages = Math.ceil(allCards.length / perPage);
+
+                allCards.forEach((card, idx) => {
+                    card.style.display = (idx >= start && idx < end) ? "block" : "none";
+                });
+
+                // 更新頁數顯示
+                if (pageInfo) pageInfo.textContent = `第 ${page} / ${totalPages || 1} 頁`;
+
+                // 控制按鈕
+                prevBtn.disabled = page === 1;
+                nextBtn.disabled = page >= totalPages;
+            }
+
+            // ------------------------------
+            // 🔹 分頁按鈕事件
+            // ------------------------------
+            prevBtn.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            nextBtn.addEventListener("click", () => {
+                const totalPages = Math.ceil(allCards.length / perPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+            // ------------------------------
+            // 🔹 顯示筆數改變
+            // ------------------------------
+            perPageSelect.addEventListener("change", () => {
+                perPage = parseInt(perPageSelect.value, 10);
+                allCards = Array.from(document.querySelectorAll(".notif-card"));
+                currentPage = 1;
+                showPage(currentPage);
+            });
+
+
+
+            // ------------------------------
+            // 🔹 搜尋功能（即時篩選 + 清除）
+            // ------------------------------
+            const searchInput = document.getElementById("notifSearch");
+            const clearBtn = document.getElementById("clearSearchBtn");
+
+            searchInput.addEventListener("input", () => {
+                const keyword = searchInput.value.trim().toLowerCase();
+                const all = document.querySelectorAll(".notif-card");
+
+                // 顯示或隱藏清除按鈕
+                if (keyword.length > 0) {
+                    clearBtn.style.visibility = "visible";
+                } else {
+                    clearBtn.style.visibility = "hidden";
+                }
+
+                // 篩選符合關鍵字的卡片
+                all.forEach(card => {
+                    const text = (card.textContent || "").toLowerCase();
+                    card.style.display = text.includes(keyword) ? "block" : "none";
+                });
+
+                // 搜尋後重建 allCards 陣列（只保留顯示中的）
+                allCards = Array.from(all).filter(c => c.style.display === "block");
+                currentPage = 1;
+                showPage(currentPage);
+            });
+
+            // 🔹 點清除按鈕 → 清空搜尋框 + 觸發更新
+            clearBtn.addEventListener("click", () => {
+                searchInput.value = "";
+                clearBtn.style.visibility = "hidden";
+                searchInput.dispatchEvent(new Event("input"));
+            });
+
+            // ------------------------------
+            // 🔹 點擊通知 -> 標記已讀 + 導向客服中心
+            // ------------------------------
+            document.querySelectorAll(".notif-card").forEach(card => {
+                card.addEventListener("click", async () => {
+                    const id = card.dataset.id;
+                    const type = card.dataset.type;
+                    const message = card.querySelector(".notif-message")?.textContent || "";
+
+                    try {
+                        await axios.post("/CustomersArea/Notifications/MarkAsRead", { id });
+                        card.classList.add("is-read");
+
+                        if (typeof updateUnread === "function") updateUnread();
+
+                        // ✅ 若為客服相關通知則導向客服中心
+                        if (
+                            type === "客服評價提醒" ||
+                            type === "客服回覆" ||
+                            type === "客服訊息" ||
+                            type === "客服服務已完成"
+                        ) {
+                            const match = message.match(/#\s*(\d+)/);
+                            if (match && match[1]) {
+                                const ticketId = match[1];
+                                window.location.href = `/CustomersArea/CustomerService/Index?ticketId=${ticketId}`;
+                                return;
+                            }
+                        }
+                    } catch (err) {
+                        console.error("❌ 標記通知為已讀失敗", err);
+                        window.showAlert('error', '錯誤', '無法標記通知為已讀');
+                    }
+                });
+            });
+
+
+            // ===================================================
+            // 🔹 通知分類篩選 + 分頁重設（完整版）
+            // ===================================================
+            const categoryItems = document.querySelectorAll(".notif-category li");
+            const titleSpan = document.getElementById("notifTitle");
+
+            categoryItems.forEach(cat => {
+                cat.addEventListener("click", () => {
+
+                    // ------------------------------
+                    // 🔸 1️ 更新左側分類選取樣式
+                    // ------------------------------
+                    categoryItems.forEach(c => c.classList.remove("active"));
+                    cat.classList.add("active");
+
+                    // ------------------------------
+                    // 🔸 2️ 取得目前分類與所有卡片
+                    // ------------------------------
+                    const type = cat.dataset.type;              // 當前點擊分類
+                    titleSpan.textContent = type;               // 更新右上方標題文字
+                    const notifListArea = document.getElementById("notifListArea");
+                    const all = Array.from(document.querySelectorAll(".notif-card")); // 全部通知卡片
+
+                    // 先隱藏全部卡片（稍後再依條件顯示）
+                    all.forEach(card => (card.style.display = "none"));
+
+
+                    // ===================================================
+                    // 🔹 3️ 篩選邏輯：決定哪些卡片要顯示
+                    // ===================================================
+                    const filtered = all.filter(card => {
+                        const cardType = card.dataset.type; // 每張卡片的通知類型
+
+                        // ✅ (1) 全部通知 → 顯示全部
+                        if (type === "全部通知") return true;
+
+                        // ✅ (2) 客服訊息分類 → 包含所有客服相關通知
+                        //     包含以下任一類型都會被顯示：
+                        //     「客服訊息」、「客服回覆」、「客服服務已完成」、「客服評價提醒」
+                        if (type === "客服訊息") {
+                            return cardType.includes("客服");
+                        }
+
+                        // ✅ (3) 其他分類 → 精準比對類型名稱
+                        //     例如「優惠活動」、「系統公告」等。
+                        return cardType === type;
+                    });
+
+
+                    // ===================================================
+                    // 🔹 4️ 若該分類沒有符合項目 → 顯示提示訊息
+                    // ===================================================
+                    let noMsg = document.getElementById("noNotifMsg");
+
+                    // 如果提示訊息元素不存在，先建立一個
+                    if (!noMsg) {
+                        noMsg = document.createElement("div");
+                        noMsg.id = "noNotifMsg";
+                        noMsg.className = "text-center text-secondary my-5";
+                        noMsg.textContent = "目前沒有通知 💤";
+                        noMsg.style.display = "none";
+                        notifListArea.appendChild(noMsg);
+                    }
+
+                    // 若沒有任何符合的卡片 → 顯示「目前沒有通知 💤」
+                    if (filtered.length === 0) {
+                        noMsg.style.display = "block";
+                    } else {
+                        // 有資料 → 隱藏提示，顯示卡片
+                        noMsg.style.display = "none";
+                        filtered.forEach(card => (card.style.display = "block"));
+                    }
+
+
+                    // ===================================================
+                    // 🔹 5️ 重新整理分頁控制
+                    // ===================================================
+                    allCards = filtered; // 更新目前可見的通知集合
+                    currentPage = 1;     // 回到第一頁
+                    showPage(currentPage);
+                    updateNoNotifMessage();
+                });
+            });
+
+            // ------------------------------
+            // 🔹 全部標示為已讀
+            // ------------------------------
+            document.getElementById("markAllReadBtn")?.addEventListener("click", async () => {
+                const btn = document.getElementById("markAllReadBtn");
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> 標示中...`;
+
+                try {
+                    const res = await axios.post("/CustomersArea/Notifications/MarkAllAsRead");
+
+                    if (res.data.success) {
+                        document.querySelectorAll(".notif-card").forEach(c => {
+                            c.style.transition = "opacity 0.4s";
+                            c.style.opacity = "0.6";
+                            c.classList.add("is-read");
+                        });
+
+                        window.showAlert("success", "全部已讀", "所有通知已標示為已讀 🐾");
+                        if (typeof updateUnread === "function") updateUnread();
+                    } else {
+                        window.showAlert("info", "操作失敗", res.data.message || "");
+                    }
+                } catch (err) {
+                    console.error("❌ 全部標示為已讀失敗", err);
+                    window.showAlert("error", "錯誤", "操作失敗，請稍後再試");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> 全部標示為已讀`;
+                }
+            });
+
+
+            // ------------------------------
+            // 🔹 SignalR 新通知接收事件
+            // ------------------------------
+            async function bindNotificationEvents() {
+                if (!window.connection) {
+                    console.warn("⚠️ 尚未載入 webFront.js，2 秒後重試...");
+                    return setTimeout(bindNotificationEvents, 2000);
+                }
+
+                try {
+                    if (window.connection.state === signalR.HubConnectionState.Disconnected) {
+                        await window.connection.start();
+                        console.log("✅ 通知中心已連上 SignalR");
+                    }
+
+                    window.connection.off("ReceiveNotification");
+                    window.connection.on("ReceiveNotification", (title, message, type) => {
+                        console.log("📩 收到通知中心訊息", { title, message, type });
+
+                        const notifListArea = document.getElementById("notifListArea");
+                        const now = dayjs().format("YYYY-MM-DD HH:mm");
+
+                        const newCard = document.createElement("div");
+                        newCard.className = "notif-card";
+                        newCard.setAttribute("data-type", type);
+                        newCard.innerHTML = `
+                            <div class="notif-title">${title}</div>
+                            <div class="notif-message">${message}</div>
+                            <div class="notif-time">建立於 ${now}</div>
+                        `;
+
+                        notifListArea.prepend(newCard);
+                        allCards = [newCard, ...allCards]; // 放入分頁控制陣列
+                        currentPage = 1;
+                        showPage(currentPage);
+
+                        // 動畫效果
+                        newCard.style.opacity = "0";
+                        newCard.style.transform = "translateY(-10px)";
+                        newCard.style.transition = "all 0.4s ease";
+                        setTimeout(() => {
+                            newCard.style.opacity = "1";
+                            newCard.style.transform = "translateY(0)";
+                        }, 10);
+
+                        window.showAlert('info', title, message);
+                        if (typeof updateUnread === "function") updateUnread();
+                    });
+
+                } catch (e) {
+                    console.warn("⚠️ 通知中心無法掛接 SignalR:", e);
+                    setTimeout(bindNotificationEvents, 3000);
+                }
+            }
+
+            bindNotificationEvents();
+            showPage(currentPage);
+
+            // 🔹 頁面載入時，檢查是否有通知，若沒有則顯示提示
+            const noMsg = document.getElementById("noNotifMsg");
+            function updateNoNotifMessage() {
+                if (allCards.length === 0) {
+                    noMsg.style.display = "block";
+                } else {
+                    noMsg.style.display = "none";
+                }
+            }
+            updateNoNotifMessage();
+            });
+    </script>
+
+}
+
+    

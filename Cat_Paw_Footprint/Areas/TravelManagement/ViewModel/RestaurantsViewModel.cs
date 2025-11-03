@@ -14,10 +14,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "美食地址")]
 		public string? RestaurantAddr { get; set; }
 
-		[Display(Name = "經度")]
+		[Display(Name = "緯度")]
 		public decimal? RestaurantLat { get; set; }
 
-		[Display(Name = "緯度")]
+		[Display(Name = "經度")]
 		public decimal? RestaurantLng { get; set; }
 
 		[Display(Name = "美食介紹")]
@@ -59,6 +59,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		//多張圖片，用 IFormFile 來接收
 		[Display(Name = "美食圖片")]
 		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
+
+		[Display(Name = "美食圖片")]
+		public List<string>? PictureUrl { get; set; } = new List<string>();
 
 		//多張圖片，轉成 Base64 字串，用於顯示圖片
 		public List<string> PictureBase64 { get; set; } = new();

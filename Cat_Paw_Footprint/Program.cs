@@ -4,6 +4,7 @@ using Cat_Paw_Footprint.Areas.CustomerService.Repositories;
 using Cat_Paw_Footprint.Areas.CustomerService.Services;
 using Cat_Paw_Footprint.Areas.Employee.Repositories;
 using Cat_Paw_Footprint.Areas.Employee.Services;
+using Cat_Paw_Footprint.Areas.Notification.Services;
 using Cat_Paw_Footprint.Areas.Order.Models;
 using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Areas.TourGuideArea.Repositories;
@@ -18,7 +19,9 @@ using Cat_Paw_Footprint.Services;
 using ClosedXML.Parser;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.SecretManager.V1;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using static Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController;
 
@@ -29,6 +32,14 @@ namespace Cat_Paw_Footprint
 		public static void Main(string[] args)
 		{
 			var builder = WebApplication.CreateBuilder(args);
+
+			/* 加入 secrets.json（使用者祕密設定）
+			   這樣 _config["GoogleMaps:ApiKey"] 就能正確讀到
+			*/
+			builder.Configuration
+				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+				.AddUserSecrets<Program>(optional: true)
+				.AddEnvironmentVariables();
 
 			// 1️⃣ 取得 Google Cloud SQL 連線字串
 			var credential = GoogleCredential.FromFile(@"C:\GoogleCloudSql\Keys\web-travel-ap.json");
@@ -54,6 +65,7 @@ namespace Cat_Paw_Footprint
 					opt.SignIn.RequireConfirmedAccount = false;
 					opt.Password.RequiredLength = 6;
 				})
+				.AddErrorDescriber<CustomIdentityErrorDescriber>()
 				.AddEntityFrameworkStores<ApplicationDbContext>()
 				.AddDefaultTokenProviders()
 				.AddDefaultUI();
@@ -61,26 +73,33 @@ namespace Cat_Paw_Footprint
 			// 多身分驗證（Vendor/Customer/Employee）
 			builder.Services.AddAuthentication(options =>
 			{
-				options.DefaultScheme = "VendorAuth";
-				options.DefaultChallengeScheme = "VendorAuth";
+				options.DefaultScheme = "VendorAuth"; //通用預設
+				options.DefaultChallengeScheme = "VendorAuth"; //驗證失敗時要導去哪個登入頁面
+				options.DefaultAuthenticateScheme = "VendorAuth"; //伺服器收到請求時，決定從哪個 cookie 中「讀出使用者身分」
 			})
 			.AddCookie("VendorAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Vendor.Auth";
 				options.LoginPath = "/Vendor/VendorHome/Login";
 				options.AccessDeniedPath = "/Vendor/VendorHome/Denied";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			})
 			.AddCookie("CustomerAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Customer.Auth";
-				options.LoginPath = "/CustomersArea/Account/Login";
-				options.AccessDeniedPath = "/CustomersArea/Account/Index";
+				options.LoginPath = "/CustomersArea/CusLogReg/Login";
+				options.AccessDeniedPath = "/CustomersArea/CusLogReg/Login";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			})
 			.AddCookie("EmployeeAuth", options =>
 			{
 				options.Cookie.Name = ".CatPaw.Employee.Auth";
 				options.LoginPath = "/Employee/EmployeeAuth/Login";
 				options.AccessDeniedPath = "/Home/Index";
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			});
 
 			// 授權權限設定
@@ -109,7 +128,7 @@ namespace Cat_Paw_Footprint
 				options.AddPolicy("AreaOrder", policy =>
 					policy.AddAuthenticationSchemes("EmployeeAuth")
 						  .RequireAuthenticatedUser()
-						  .RequireClaim("RoleName", "Sales", "SuperAdmin"));
+						  .RequireClaim("RoleName", "Sales", "SuperAdmin", "CustomerService"));
 
 				options.AddPolicy("AreaProductManagement", policy =>
 					policy.AddAuthenticationSchemes("EmployeeAuth")
@@ -130,6 +149,8 @@ namespace Cat_Paw_Footprint
 				options.IdleTimeout = TimeSpan.FromHours(9);
 				options.Cookie.HttpOnly = true;
 				options.Cookie.IsEssential = true;
+				options.Cookie.SameSite = SameSiteMode.None;                 // ★
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 			});
 
 			#region DI 註冊資料存取層與服務層
@@ -158,7 +179,12 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddSignalR();
 			builder.Services.AddScoped<ITalkMessageRepository, TalkMessageRepository>();
 			builder.Services.AddScoped<ITalkMessageService, TalkMessageService>();
-
+			builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+			builder.Services.AddScoped<INotificationService, NotificationService>();
+			builder.Services.AddScoped<INotificationTriggerService, NotificationTriggerService>();
+			builder.Services.AddScoped<ICouponExpiryChecker, CouponExpiryChecker>();
+			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
+			builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 			#endregion
 
 			builder.Services.AddHttpContextAccessor();
@@ -173,13 +199,13 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
-			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 			builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, CustomerEmailSender>();
-			// 其它註冊...
+			
 			builder.Services.AddScoped<ICustomerLevelService, CustomerLevelService>();
-
-
-
+			builder.Services.AddHostedService<CouponExpiryChecker>();
+			//清理購物車DB
+			builder.Services.Configure<CleanupOptions>(builder.Configuration.GetSection("CleanupOptions"));
+			builder.Services.AddHostedService<PendingPaymentsCleanupService>();
 			var app = builder.Build();
 			app.MapHub<ChatHub>("/chatHub");
 			// Configure the HTTP request pipeline.
@@ -247,6 +273,7 @@ namespace Cat_Paw_Footprint
 
 			app.UseAuthentication();
 			app.UseAuthorization();
+			app.MapControllers();
 
 			app.MapControllerRoute(
 				name: "areas",
@@ -256,6 +283,9 @@ namespace Cat_Paw_Footprint
 				pattern: "{controller=Home}/{action=Index}/{id?}");
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
+			app.MapHub<NotificationHub>("/notificationHub")
+				.AllowAnonymous();
+
 
 			app.Run();
 		}

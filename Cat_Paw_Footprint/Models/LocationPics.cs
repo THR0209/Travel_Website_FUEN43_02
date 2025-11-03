@@ -12,5 +12,7 @@ public partial class LocationPics
 
     public byte[]? Picture { get; set; }
 
-    public virtual Locations? Location { get; set; }
+	public string? PictureUrl { get; set; }
+
+	public virtual Locations? Location { get; set; }
 }

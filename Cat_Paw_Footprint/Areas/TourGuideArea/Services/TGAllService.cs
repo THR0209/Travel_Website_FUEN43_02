@@ -56,6 +56,7 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Services
 			{
 				Account = guide.Account,
 				Success = true,
+				GuideId = guide.EmployeeID ?? 0,
 				Message = "登入成功",
 				GuideName = guide.EmployeeName,
 				Token = null // 預留擴充用
@@ -104,9 +105,6 @@ namespace Cat_Paw_Footprint.Areas.TourGuideArea.Services
 				Message = message
 			};
 		}
-
-		
-		
 		public async Task<List<GroupInfoResponseDto>> GetGroupsByGuideIdAsync(int guideId)//根據導遊Id取得群組列表
 		{
 			var allGroups = await _repo.GetTourGroupsByGuideIdAsync(guideId);

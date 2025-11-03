@@ -27,9 +27,9 @@ namespace Cat_Paw_Footprint.Areas.Order.Services
 
 			// 2) 套等級門檻
 			int level = 0; // 鐵
-			if (total >= 30000m) level = 3; // 金
+			if (total >= 45000m) level = 3; // 金
 			else if (total >= 15000m) level = 2; // 銀
-			else if (total > 0m) level = 1; // 銅（成為會員且消費任意金額）
+			else if (total > 200m) level = 1; // 銅（成為會員且消費任意金額）
 
 			// 3) 寫回 Customers.Level
 			var c = await _db.Customers.FirstOrDefaultAsync(x => x.CustomerID == customerId);

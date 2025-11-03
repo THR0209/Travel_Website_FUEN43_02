@@ -12,5 +12,7 @@ public partial class RestaurantPics
 
     public byte[]? Picture { get; set; }
 
-    public virtual Restaurants? Restaurant { get; set; }
+	public string? PictureUrl { get; set; }
+
+	public virtual Restaurants? Restaurant { get; set; }
 }

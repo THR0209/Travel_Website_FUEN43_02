@@ -1,0 +1,157 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.SearchResultsVM
+@{
+    ViewData["Title"] = "瀏覽 " + (Model?.Input?.Type ?? "trip");
+}
+
+@section Styles {
+    <style>
+        .search-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px
+        }
+        @@media (max-width:992px) {
+            .search-layout
+
+        {
+            grid-template-columns: 1fr
+        }
+
+        }
+
+        .filter-card {
+            border: 1px solid #eef3f8;
+            border-radius: 14px;
+            padding: 16px;
+            background: #fff
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: .9rem;
+            color: #334155
+        }
+    </style>
+}
+
+<div class="container py-3">
+    <div class="search-layout">
+        <!-- 左側：篩選 -->
+        <aside>
+            <div class="filter-card">
+                <form id="filterForm" method="get"
+                      action="@Url.Action("Browse","Products",new{area="CustomersArea"})">
+                    <input type="hidden" name="type" value="@Model?.Input?.Type" />
+                    <input type="hidden" name="sort" value="@Model?.Sort" />
+
+                    <div class="mb-3">
+                        <label class="form-label">目的地 / 關鍵字</label>
+                        <input class="form-control" name="Destination" value="@Model?.Input?.Destination" placeholder="輸入關鍵字..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">出發地</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @{
+                                var locations = new[] { "台北", "新北市", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "嘉義", "台南", "高雄", "屏東", "花蓮", "台東", "宜蘭", "雲林", "基隆" };
+                                var selected = Model?.Input?.Departures ?? new List<string>();
+                            }
+                            @foreach (var loc in locations)
+                            {
+                                <div class="form-check me-2">
+                                    <input class="form-check-input departure-checkbox"
+                                           type="checkbox"
+                                           name="Departures"
+                                           value="@loc"
+                                           id="chk_@loc"
+                                           @(selected.Contains(loc) ? "checked" : "") />
+                                    <label class="form-check-label" for="chk_@loc">@loc</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label class="form-label">價格區間</label>
+                        <div class="d-flex gap-2">
+                            <input class="form-control" type="number" name="MinPrice" value="@(Model?.Input?.MinPrice)" placeholder="最低" min="0" />
+                            <input class="form-control" type="number" name="MaxPrice" value="@(Model?.Input?.MaxPrice)" placeholder="最高" min="0" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">套用篩選</button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- 右側：條件列 + 結果 -->
+        <section id="result-wrapper">
+            @await Html.PartialAsync("_BrowseResultsWrapper", Model)
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (() => {
+          const wrapper   = document.getElementById('result-wrapper');
+          const filterForm = document.getElementById('filterForm');
+
+          function buildUrlFromForm(f){
+            return f.action + (f.action.includes('?') ? '&' : '?')
+                 + new URLSearchParams(new FormData(f)).toString();
+          }
+
+          function ajaxLoad(urlOrForm){
+            const url = (urlOrForm instanceof HTMLFormElement)
+              ? buildUrlFromForm(urlOrForm)
+              : urlOrForm;
+
+            fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
+              .then(r => r.text())
+              .then(html => {
+                wrapper.innerHTML = html;
+                window.history.replaceState({}, '', url);
+                bindEvents();
+              });
+          }
+
+          function bindEvents(){
+            // 綁清除
+            const clearBtn = wrapper.querySelector('#clearFiltersBtn');
+            clearBtn?.addEventListener('click', clearFilters);
+          }
+
+          // ✅ 清除篩選
+          function clearFilters(){
+            filterForm.reset();
+            ajaxLoad(filterForm);
+            Swal.fire({icon:'success',title:'已清除篩選條件',timer:1200,showConfirmButton:false});
+          }
+
+          // ✅ 即時勾選「出發地」→ 篩選
+          document.querySelectorAll('.departure-checkbox').forEach(chk => {
+            chk.addEventListener('change', () => ajaxLoad(filterForm));
+          });
+
+          // 左側篩選表單送出
+          filterForm?.addEventListener('submit', e => {
+            e.preventDefault();
+            ajaxLoad(filterForm);
+          });
+
+          // 初始
+          bindEvents();
+        })();
+    </script>
+}
+
+

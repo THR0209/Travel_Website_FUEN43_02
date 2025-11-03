@@ -15,10 +15,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "住宿地址")]
 		public string? HotelAddr { get; set; }
 
-		[Display(Name = "經度")]
+		[Display(Name = "緯度")]
 		public decimal? HotelLat { get; set; }
 
-		[Display(Name = "緯度")]
+		[Display(Name = "經度")]
 		public decimal? HotelLng { get; set; }
 
 		[Display(Name = "住宿介紹")]
@@ -56,6 +56,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 
 		[NotMapped] // 不會影響資料庫
 		public string IsActiveText => (bool)IsActive ? "啟用" : "停用";
+
+		[Display(Name = "住宿圖片")]
+		public List<string>? PictureUrl { get; set; } = new List<string>();
 
 		//多張圖片，用 IFormFile 來接收
 		[Display(Name = "住宿圖片")]

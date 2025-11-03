@@ -1,4 +1,4 @@
-﻿@model Cat_Paw_Footprint.Models.Coupons
+﻿@model Cat_Paw_Footprint.Areas.CouponManagement.ViewModel.CouponViewModel
 
 @{
     ViewData["Title"] = "新增優惠券";
@@ -15,16 +15,22 @@
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <div class="mb-3 mt-3">
+                        @* <div class="mb-3 mt-3">
                             <label asp-for="CouponCode" class="form-label fw-semibold"></label>
                             <input asp-for="CouponCode" class="form-control" placeholder="輸入流水號" />
                             <span asp-validation-for="CouponCode" class="text-danger"></span>
+                        </div> *@
+
+                        <div class="mb-3 mt-3">
+                            <label asp-for="CouponName" class="form-label fw-semibold"></label>
+                            <input asp-for="CouponName" class="form-control" placeholder="輸入優惠券名稱" />
+                            <span asp-validation-for="CouponName" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3 mt-3">
-                            <label asp-for="DisCountCode" class="form-label fw-semibold"></label>
-                            <input asp-for="DisCountCode" class="form-control" placeholder="輸入優惠券折扣代碼" />
-                            <span asp-validation-for="DisCountCode" class="text-danger"></span>
+                            <label asp-for="DiscountCode" class="form-label fw-semibold"></label>
+                            <input asp-for="DiscountCode" class="form-control" placeholder="輸入優惠券折扣代碼" />
+                            <span asp-validation-for="DiscountCode" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
@@ -36,8 +42,8 @@
                         <div class="mb-3">
                             <label asp-for="DiscountType" class="form-label fw-semibold"></label>
                             <select asp-for="DiscountType" class="form-select">
-                                <option value="0">百分比折扣 (%)</option>
-                                <option value="1">固定金額折扣 ($)</option>
+                                <option value="1">百分比折扣 (%)</option>
+                                <option value="2">固定金額折扣 ($)</option>
                             </select>
                             <span asp-validation-for="DiscountType" class="text-danger"></span>
                         </div>
@@ -55,9 +61,9 @@
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="EndTime" class="form-label fw-semibold"></label>
-                            <input asp-for="EndTime" class="form-control" type="date" />
-                            <span asp-validation-for="EndTime" class="text-danger"></span>
+                            <label asp-for="EndDate" class="form-label fw-semibold"></label>
+                            <input asp-for="EndDate" class="form-control" type="date" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3 form-check">

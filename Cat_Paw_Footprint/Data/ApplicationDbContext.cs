@@ -14,6 +14,7 @@ namespace Cat_Paw_Footprint.Data
 		public DbSet<Vendors> Vendors { get; set; } = null!;
 		public DbSet<Customers> Customers { get; set; } = null!;
 		public DbSet<Models.CustomerProfile> CustomerProfiles { get; set; }
+
 		protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
@@ -28,6 +29,7 @@ namespace Cat_Paw_Footprint.Data
 				.HasForeignKey(c => c.Level)
 				.HasPrincipalKey(l => l.Level);
 			builder.Entity<CustomerProfile>().ToTable("CustomerProfile");
+
 		}
 	}
 }

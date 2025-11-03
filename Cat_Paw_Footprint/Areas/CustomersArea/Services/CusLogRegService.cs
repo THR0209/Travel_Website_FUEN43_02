@@ -200,17 +200,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 					}
 					customer.FullName = model.FullName;
 					customer.CustomerProfile.CustomerName = model.FullName;
-					customer.CustomerProfile.Email = model.Email;
 					customer.CustomerProfile.Phone = model.Phone;
 					customer.CustomerProfile.Address = model.Address;
 					customer.CustomerProfile.IDNumber = model.IDNumber;
-				
+
 				//_context.Customers.Update(customer); // 不需要這行，EF Core 會自動追蹤變更
-				//以下更新identity user的email跟電話
+				//以下更新identity user的電話
 				var user = await _userManager.FindByIdAsync(customer.UserId);
 					if (user != null)
 					{
-						user.Email = model.Email;
 						user.PhoneNumber = model.Phone;
 						var result = await _userManager.UpdateAsync(user);
 						if (!result.Succeeded)
@@ -241,6 +239,61 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 		public async Task<CusLogRegDto?> GetCustomerByAccountAsync(string Account)// 根據帳號查詢客戶
 		{
 			return await _repo.GetCustomerByAccountAsync(Account);
+		}
+		public async Task<CusLogRegDto?> UpdateCustomerPasswordAsync(string Email, string newPassword)// 客戶修改密碼(同時作用於找回密碼)
+		{
+			using var transaction = await _context.Database.BeginTransactionAsync(); // 開始交易
+			try
+			{
+				var customerProfile = await _context.CustomerProfiles
+					.Include(cp => cp.Customer)
+					.FirstOrDefaultAsync(cp => cp.Email == Email);
+
+				if (customerProfile == null)
+					return new CusLogRegDto { ErrorMessage = "Email 不存在" };
+
+				var user = await _userManager.FindByIdAsync(customerProfile.Customer.UserId);
+				if (user == null)
+					return new CusLogRegDto { ErrorMessage = "使用者不存在" };
+
+				var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+				var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+				if (!result.Succeeded)
+					throw new Exception(string.Join(";", result.Errors.Select(e => e.Description)));
+
+				// 同步更新你自己的客戶表
+				customerProfile.Customer.Password = user.PasswordHash;
+				await _context.SaveChangesAsync();
+
+				await transaction.CommitAsync(); // 所有都成功才提交
+				return new CusLogRegDto { Message = "密碼更新成功" };
+			}
+			catch (Exception ex)
+			{
+				await transaction.RollbackAsync();
+				return new CusLogRegDto { ErrorMessage = $"密碼更新失敗: {ex.Message}" };
+			}
+		}
+		public async Task<CusLogRegDto?> EmailToUser(string Email)// 發送電子郵件給使用者(找回密碼)
+		{
+			var customerProfile = await _context.CustomerProfiles
+				.Include(cp => cp.Customer)
+				.FirstOrDefaultAsync(cp => cp.Email == Email);
+			if (customerProfile == null)
+				return new CusLogRegDto { ErrorMessage = "Email 不存在" };
+			var user = await _userManager.FindByIdAsync(customerProfile.Customer.UserId);
+			if (user == null)
+				return new CusLogRegDto { ErrorMessage = "使用者不存在" };
+			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+			var resetLink = $"https://localhost:7132/CustomersArea/CusLogReg/ResetPassword?email={Email}&token={Uri.EscapeDataString(token)}";
+			var subject = "密碼重設請求";
+			var body = $@"
+			<p>您好 {customerProfile.Customer.FullName},</p>
+			<p>我們收到您重設密碼的請求。請點擊下方連結以設定新密碼：</p>
+			<p><a href='{resetLink}'>重設密碼</a></p>
+			<p>如果您沒有提出此請求，請忽略此郵件。</p>";
+			await _emailSender.SendEmailAsync(Email, subject, body);
+			return new CusLogRegDto { Message = "重設密碼的連結已發送至您的電子郵件。" };
 		}
 	}
 }

@@ -14,10 +14,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		[Display(Name = "景點地址")]
 		public string? LocationAddr { get; set; }
 
-		[Display(Name = "經度")]
+		[Display(Name = "緯度")]
 		public decimal? LocationLat { get; set; }
 
-		[Display(Name = "緯度")]
+		[Display(Name = "經度")]
 		public decimal? LocationLng { get; set; }
 
 		[Display(Name = "景點介紹")]
@@ -62,6 +62,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		//多張圖片，用 IFormFile 來接收
 		[Display(Name = "景點圖片")]
 		public List<IFormFile>? Picture { get; set; } = new List<IFormFile>();
+
+		[Display(Name = "景點圖片")]
+		public List<string>? PictureUrl { get; set; } = new List<string>();
 
 		// 舊圖片的 ID，用來刪除對應圖片
 		public List<int>? PictureIds { get; set; }

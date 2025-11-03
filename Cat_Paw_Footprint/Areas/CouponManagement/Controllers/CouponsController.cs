@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Cat_Paw_Footprint.Areas.CouponManagement.ViewModel;
+using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Cat_Paw_Footprint.Models;
-using Cat_Paw_Footprint.Data;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 {
@@ -32,19 +33,31 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 		public async Task<IActionResult> Details(int? id)
 		{
 			if (id == null)
-			{
 				return NotFound();
-			}
 
-			var coupons = await _context.Coupons
-				.FirstOrDefaultAsync(m => m.CouponID == id);
-			if (coupons == null)
-			{
+			var coupon = await _context.Coupons
+				.Where(c => c.CouponID == id)
+				.Select(c => new CouponViewModel
+				{
+					CouponID = c.CouponID,
+					CouponName = c.CouponName,
+					CouponDesc = c.CouponDesc,
+					DiscountType = c.DiscountType,
+					DiscountValue = c.DiscountValue,
+					StartDate = c.StartDate,
+					EndDate = c.EndDate,
+					IsActive = c.IsActive,
+					TargetType = c.TargetType,
+					DiscountCode = c.DiscountCode
+				})
+				.FirstOrDefaultAsync();
+
+			if (coupon == null)
 				return NotFound();
-			}
 
-			return View(coupons);
+			return View(coupon);
 		}
+
 
 		// GET: CouponManagement/Coupons/Create
 		public IActionResult Create()
@@ -57,15 +70,33 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create([Bind("CouponID,CouponCode,CouponDesc,DiscountType,DiscountValue,StartDate,EndTime,IsActive,DiscountCode")] Coupons coupons)
+		public async Task<IActionResult> Create(CouponViewModel vm)
 		{
-			if (ModelState.IsValid)
+			if (!ModelState.IsValid)
 			{
-				_context.Add(coupons);
-				await _context.SaveChangesAsync();
-				return RedirectToAction(nameof(Index));
+				return View(vm);
 			}
-			return View(coupons);
+
+			var coupon = new Coupons
+			{
+				CouponName = vm.CouponName,
+				CouponDesc = vm.CouponDesc,
+				DiscountType = vm.DiscountType,
+				DiscountValue = vm.DiscountValue,
+				StartDate = vm.StartDate,
+				EndDate = vm.EndDate,
+				IsActive = vm.IsActive,
+				DiscountCode = vm.DiscountCode,
+				TargetType = vm.TargetType,
+				CreatedAt = DateTime.Now,
+				CreatedBy = User.Identity?.Name ?? "System"
+			};
+
+			_context.Coupons.Add(coupon);
+			await _context.SaveChangesAsync();
+
+			return RedirectToAction(nameof(Index));
+			
 		}
 
 		// GET: CouponManagement/Coupons/Edit/5
@@ -89,7 +120,7 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(int id, [Bind("CouponID, CouponCode,CouponDesc,DiscountType,DiscountValue,StartDate,EndTime,IsActive,DiscountCode")] Coupons coupons)
+		public async Task<IActionResult> Edit(int id, [Bind("CouponID, CouponCode,CouponDesc,DiscountType,DiscountValue,StartDate,EndDate,IsActive,DiscountCode")] Coupons coupons)
 		{
 			if (id != coupons.CouponID)
 			{
