@@ -1,0 +1,241 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.Controllers.ContactFormVm
+@{
+    ViewData["Title"] = "聯絡我們";
+}
+
+
+@section Styles {
+    <style>
+        /* 🐾 浮動貓掌動畫 */
+        .floating-paws {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+            .floating-paws span {
+                position: absolute;
+                color: rgba(126,200,227,0.15);
+                font-size: 1.6rem;
+                animation: floatPaw 12s linear infinite;
+            }
+
+                .floating-paws span:nth-child(1) {
+                    left: 10%;
+                    animation-delay: 0s;
+                }
+
+                .floating-paws span:nth-child(2) {
+                    left: 35%;
+                    animation-delay: 3s;
+                }
+
+                .floating-paws span:nth-child(3) {
+                    left: 60%;
+                    animation-delay: 6s;
+                }
+
+                .floating-paws span:nth-child(4) {
+                    left: 80%;
+                    animation-delay: 9s;
+                }
+
+        @@keyframes floatPaw {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-10vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* ✨ 小卡樣式 */
+        .contact-card {
+            background: #ffffffee;
+            backdrop-filter: blur(8px);
+            max-width: 550px;
+            transition: transform .3s ease, box-shadow .3s ease;
+            animation: fadeInUp .6s ease;
+        }
+
+            .contact-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 輸入樣式 */
+        .form-control {
+            font-size: 0.9rem;
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+            .form-control:focus {
+                border-color: #7ec8e3;
+                box-shadow: 0 0 0 .15rem rgba(126,200,227,0.3);
+            }
+
+        /* 按鈕樣式 */
+        .btn-send {
+            background: linear-gradient(90deg,#7ec8e3 0%,#22b3c1 100%);
+            color: white;
+            border: none;
+            transition: all .3s ease;
+            font-size: 0.9rem;
+        }
+
+            .btn-send:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 3px 8px rgba(34,179,193,0.25);
+            }
+    </style>
+}
+
+<div id="contactApp" class="contact-page container py-5">
+    <div class="floating-paws" aria-hidden="true">
+        <span>🐾</span><span>🐾</span><span>🐾</span><span>🐾</span>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card contact-card shadow border-0 rounded-4 mx-auto">
+                <div class="card-header text-white fw-bold py-2"
+                     style="background: linear-gradient(90deg,#7ec8e3 20%,#22b3c1 100%); font-size: 1.1rem;">
+                    <i class="fa-solid fa-envelope-open-text me-2"></i> 聯絡我們
+                </div>
+
+                <div class="card-body p-3">
+                    <p class="text-secondary mb-3 small">
+                        有任何問題或建議嗎？請填寫以下表單，我們會盡快與您聯繫 💌
+                    </p>
+
+                    <form id="contactForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold small"><i class="fa-solid fa-user"></i> 姓名</label>
+                            <input type="text" v-model="form.name" class="form-control rounded-pill py-2">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold small"><i class="fa-solid fa-envelope"></i> 電子郵件</label>
+                            <input type="email" v-model="form.email" class="form-control rounded-pill py-2">
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold small"><i class="fa-solid fa-pen-to-square"></i> 主旨</label>
+                            <input type="text" v-model="form.subject" class="form-control rounded-pill py-2">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small"><i class="fa-solid fa-comment-dots"></i> 訊息內容</label>
+                            <textarea v-model="form.message" class="form-control rounded-4 shadow-sm small" rows="4"></textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-send px-4 py-2 rounded-pill fw-semibold small" :disabled="loading">
+                                <i v-if="!loading" class="fa-solid fa-paper-plane"></i>
+                                <i v-else class="fa-solid fa-spinner fa-spin"></i>
+                                {{ loading ? ' 寄送中...' : ' 寄出' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { 
+    <script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                form: { name: '', email: '', subject: '', message: '' },
+                loading: false
+            };
+        },
+        methods: {
+            async sendForm(e) {
+                e.preventDefault(); // 阻止表單預設提交
+                console.log("🚀 sendForm triggered");
+
+                if (!this.form.name.trim()) {
+                    window.showAlert('warning', '提醒', '請輸入您的姓名');
+                    return;
+                }
+                if (!this.form.email.trim()) {
+                    window.showAlert('warning', '提醒', '請輸入您的 Email');
+                    return;
+                }
+
+                const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                if (!emailRegex.test(this.form.email.trim())) {
+                    window.showAlert('warning', '提醒', '請輸入有效的 Email 格式，例如：catpaw@example.com');
+                    return;
+                }
+
+                if (!this.form.subject.trim()) {
+                    window.showAlert('warning', '提醒', '請輸入主旨');
+                    return;
+                }
+                if (!this.form.message.trim()) {
+                    window.showAlert('warning', '提醒', '請輸入您的訊息內容');
+                    return;
+                }
+
+                this.loading = true;
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    const res = await axios.post('/CustomersArea/Contact/Send', this.form, {
+                        headers: { 'RequestVerificationToken': token }
+                    });
+
+                    if (res.data?.status === 'success') {
+                        window.showAlert('success', '寄信成功', '您的訊息已送出，我們會盡快回覆您！');
+                        this.form = { name: '', email: '', subject: '', message: '' };
+                    } else {
+                        throw new Error(res.data?.message || '寄信失敗，請稍後再試');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    window.showAlert('error', '寄信失敗', err.message);
+                } finally {
+                    this.loading = false;
+                }
+            }
+        },
+        mounted() {
+            const form = document.getElementById('contactForm');
+            if (form) {
+                form.addEventListener('submit', this.sendForm);
+            }
+        }
+    }).mount('#contactApp');
+    </script>
+}

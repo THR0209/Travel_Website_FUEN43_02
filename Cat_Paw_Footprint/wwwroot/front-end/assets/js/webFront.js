@@ -7,7 +7,7 @@
 window.showAlert = function (type, title, text, timer = 2000) {
     Swal.fire({
         icon: type,
-        title,
+        title: `🐾 ${title}`,
         text,
         timer,
         showConfirmButton: false,
@@ -55,13 +55,14 @@ window.updateList = async function () {
 
         // === 通知清單動態生成 ===
         list.innerHTML = data.map(n => `
-            <div class="border-bottom py-2 px-2 notif-item ${n.isRead ? 'opacity-50' : ''}"
+            <div class="notif-item border px-3 py-2 ${n.isRead ? 'opacity-50' : ''}" 
                  data-id="${n.notificationID}" style="cursor:pointer;">
-                <div class="fw-bold">${n.title}</div>
-                <div class="small text-muted">${n.message}</div>
+                <div class="fw-bold text-truncate">${n.title}</div>
+                <div class="small text-muted text-truncate">${n.message}</div>
                 <div class="text-end small text-secondary">${dayjs(n.createdAt).format('MM/DD HH:mm')}</div>
             </div>
         `).join('');
+
 
         // === 🔹 綁定通知點擊事件（含客服評價提醒導向） ===
         document.querySelectorAll('.notif-item').forEach(item => {
@@ -188,24 +189,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const faqLink = document.querySelector('.faq-nav-link');
     const faqNav = faqLink?.closest('li');
 
-    const isHome =
-        path.includes('/customersarea/home') ||
-        path === '/customersarea' ||
-        path === '/customersarea/';
-
     if (faqLink) {
         faqLink.addEventListener('click', function (e) {
             e.preventDefault();
-            if (isHome) {
+
+            // 1️ 如果目前在首頁 → 平滑滾動到 FAQ 區
+            if (path.includes('/customersarea/home') || path === '/customersarea' || path === '/customersarea/') {
                 const faqTarget = document.querySelector('#faqSection');
-                if (faqTarget) window.scrollTo({ top: faqTarget.offsetTop - 60, behavior: 'smooth' });
-                else console.warn('⚠️ 找不到 #faqSection 元素');
-            } else {
+                if (faqTarget) {
+                    window.scrollTo({ top: faqTarget.offsetTop - 60, behavior: 'smooth' });
+                } else {
+                    console.warn('⚠️ 找不到 #faqSection 元素');
+                }
+            }
+            // 2️ 不在首頁 → 先導向首頁並自動滾動
+            else {
                 window.location.href = '/CustomersArea/FrontFAQs/Index';
             }
         });
     }
 
+    // 加上 active 樣式判斷（仍保留原行為）
     if (path.includes('/customersarea/frontfaqs/index')) {
         document.querySelectorAll('.navbar-nav .nav-link').forEach(link => link.classList.remove('active'));
         if (faqLink) {
@@ -213,6 +217,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (faqNav) faqNav.classList.add('active');
         }
     }
+
 
     // ----------- 支援一般錨點平滑滾動 -----------
     $('.nav-link[href^="#"]').on('click', function (e) {
@@ -229,7 +234,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ✅ 新增自動重連設定
     window.connection = new signalR.HubConnectionBuilder()
-        .withUrl("/notificationHub")
+        .withUrl("/notificationHub", {
+            withCredentials: true
+         })
         .withAutomaticReconnect([0, 2000, 5000, 10000])
         .build();
 
@@ -240,6 +247,17 @@ document.addEventListener('DOMContentLoaded', function () {
         window.updateUnread();
         window.updateList();
         window.showDesktopNotification(title, message);
+    });
+
+    // ✅ 連線關閉時自動刷新 cookie 並重連
+    connection.onclose(async () => {
+        console.warn("🔴 SignalR 已斷線，嘗試刷新 cookie 後重連...");
+        try {
+            // 🔹 用 axios 發一個 request，確保 cookie 有附上
+            await axios.get("/CustomersArea/Notifications/GetUnreadCount");
+        } catch { }
+        // 🔹 延遲 1.5 秒後重新啟動連線
+        setTimeout(startConnection, 1500);
     });
 
     // ✅ 自動重連機制
@@ -261,7 +279,11 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(startConnection, 5000);
         }
     }
-    startConnection();
+
+    // 🔹 延遲執行：確保 Cookie / Service Worker / Vue 都已初始化
+    window.addEventListener('load', () => {
+        setTimeout(startConnection, 800); // 延遲 0.8 秒啟動 SignalR
+    });
 
 
 
@@ -281,3 +303,4 @@ document.addEventListener('DOMContentLoaded', function () {
     window.updateUnread();
     window.updateList();
 });
+

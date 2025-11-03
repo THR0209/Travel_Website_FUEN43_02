@@ -80,20 +80,34 @@
             </button>
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav ms-auto mb-2 me-5 mb-lg-0 justify-content-between">
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#hotProducts">跟團行程</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-tickets">景點門票</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-hotels">住宿</a></li>
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-transports">交通</a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#hotProducts"><span class="link-text">跟團行程</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-tickets"><span class="link-text">景點門票</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-hotels"><span class="link-text">住宿</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-transports"><span class="link-text">交通</span></a></li>
                     <li class="nav-item border-end me-1 p-1">
-                        <a class="nav-link" asp-controller="Promotions" asp-action="index">優惠活動</a>
+                        <a class="nav-link" asp-controller="Promotions" asp-action="index"><span class="link-text">優惠活動</span></a>
                     </li>
-                    <li class="nav-item border-end me-1 p-1">
-                        <a class="nav-link faq-nav-link" href="#faqSection">
-                            常見問題
+                    <!-- 幫助中心下拉選單 -->
+                    <li class="nav-item dropdown border-end me-1 p-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="helpDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="link-text">幫助中心</span>
                         </a>
+                        <ul class="dropdown-menu shadow-sm rounded-3" aria-labelledby="helpDropdown">
+                            <li>
+                                <a class="dropdown-item faq-nav-link" href="#faqSection">
+                                    <i class="fa-solid fa-circle-info me-2 text-primary"></i> 常見問題
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="CustomersArea" asp-controller="Contact" asp-action="Index">
+                                    <i class="fa-solid fa-envelope me-2 text-primary"></i> 聯絡我們
+                                </a>
+                            </li>
+                        </ul>
                     </li>
+
                     <li class="nav-item p-1">
-                        <a class="nav-link" asp-controller="Travel" asp-action="index">自由行專區</a>
+                        <a class="nav-link" asp-controller="Travel" asp-action="index"><span class="link-text">自由行專區</span></a>
                     </li>
                 </ul>
                 <div class="header-right d-flex align-items-center">
@@ -103,12 +117,12 @@
                             {
                                 <li class="nav-item ms-auto me-1">
                                     <a href="#" class="nav-link">
-                                        <i class="fa-solid fa-calendar-check me-1"></i> 每日簽到
+                                       <span class="link-text"><i class="fa-solid fa-calendar-check me-1"></i>每日簽到</span>
                                     </a>
                                 </li>
                                 <li class="nav-item me-1 dropdown">
                                     <a href="#" class="nav-link dropdown-toggle position-relative" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fa-solid fa-bell"></i> 通知
+                                        <span class="link-text"><i class="fa-solid fa-bell"></i>通知</span>
                                         <span id="notifBadge"
                                               class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                               style="display:none; font-size:0.7rem;">
@@ -129,14 +143,14 @@
                                 </li>
                                 <li class="nav-item me-1">
                                     <a href="/CustomersArea/Cart" class="nav-link">
-                                        <i class="fa-solid fa-cart-shopping me-1"></i> 購物車 <span class="badge bg-danger" id="cart-count">0</span>
+                                        <span class="link-text"><i class="fa-solid fa-cart-shopping me-1"></i>購物車</span><span class="badge bg-danger" id="cart-count">0</span>
                                     </a>
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                        <i class="fa-solid fa-user me-1"></i> 會員中心
+                                        <span class="link-text"><i class="fa-solid fa-user me-1"></i>會員中心</span>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow">
+                                    <ul class="dropdown-menu dropdown-menu-end mt-2 shadow user-dropdown">
                                         <li>
                                             <a class="dropdown-item" href="/CustomersArea/Orders/Index">
                                                 <i class="fa-solid fa-file-invoice me-2"></i> 訂單紀錄
@@ -168,7 +182,6 @@
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <!-- 登出靠右 -->
                                         <li class="d-flex justify-content-end pe-2">
                                             <form asp-action="Logout" asp-controller="CusLogReg" asp-area="CustomersArea" method="post">
                                                 @Html.AntiForgeryToken()
@@ -176,7 +189,7 @@
                                                         class="dropdown-item text-danger d-inline-flex align-items-center"
                                                         style="background:none;border:none;width:auto;">
                                                     <span class="text-danger me-2">登出</span>
-                                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                                    <i class="fa-solid fa-right-from-bracket" style="color:#dc3545"></i>
                                                 </button>
                                             </form>
                                         </li>

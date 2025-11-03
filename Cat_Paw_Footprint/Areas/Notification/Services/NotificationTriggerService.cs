@@ -1,9 +1,8 @@
 ﻿using Cat_Paw_Footprint.Areas.Notification.Services;
 using Cat_Paw_Footprint.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
 using Cat_Paw_Footprint.Hubs;
-
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Services
 {
@@ -16,19 +15,20 @@ namespace Cat_Paw_Footprint.Services
 		public NotificationTriggerService(
 			INotificationService notifSvc,
 			webtravel2Context db,
-			IHubContext<NotificationHub> hub
-		)
+			IHubContext<NotificationHub> hub)
 		{
 			_notifSvc = notifSvc;
 			_db = db;
 			_hub = hub;
 		}
 
+		// 🔹 訂單建立
 		public async Task NotifyOrderCreatedAsync(int customerId, int orderId)
 		{
 			await SendAsync(customerId, "訂單成立通知", $"您的訂單 #{orderId} 已成立並完成付款，感謝您的購買！", "訂單通知");
 		}
 
+		// 🔹 付款成功
 		public async Task NotifyPaymentSuccessAsync(int customerId, int orderId)
 		{
 			await SendAsync(
@@ -39,16 +39,19 @@ namespace Cat_Paw_Footprint.Services
 			);
 		}
 
+		// 🔹 客服回覆
 		public async Task NotifyCustomerServiceReplyAsync(int customerId, int ticketId)
 		{
-			await SendAsync(customerId,"客服回覆通知",$"客服人員回覆了您的工單 #{ticketId}","客服訊息");
+			await SendAsync(customerId, "客服回覆通知", $"客服人員回覆了您的工單 #{ticketId}", "客服訊息");
 		}
 
+		// 🔹 每日簽到提醒
 		public async Task NotifyDailySignInAsync(int customerId)
 		{
 			await SendAsync(customerId, "每日簽到提醒", "別忘了每日簽到領取爪爪幣！", "系統提醒");
 		}
 
+		// 🔹 優惠券即將到期
 		public async Task NotifyCouponExpiringAsync(int daysBefore = 3)
 		{
 			var now = DateTime.Now;
@@ -62,22 +65,45 @@ namespace Cat_Paw_Footprint.Services
 							(r.IsUsed == false || r.IsUsed == null))
 				.ToListAsync();
 
-            foreach (var r in expiring)
-            {
-                if (r.CustomerID > 0)
-                {
-                    await SendAsync(
-                        r.CustomerID,
-                        "優惠券即將到期",
-                        $"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期。",
-                        "優惠券"
-                    );
-                }
-            }
+			foreach (var r in expiring)
+			{
+				if (r.CustomerID > 0)
+				{
+					await SendAsync(
+						r.CustomerID,
+						"優惠券即將到期",
+						$"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期。",
+						"優惠券"
+					);
+				}
+			}
+		}
 
-        }
+		// 🆕 🔹 客服工單完成通知
+		public async Task NotifyTicketCompletedAsync(int ticketId)
+		{
+			var ticket = await _db.CustomerSupportTickets
+				.Include(t => t.Customer)
+				.FirstOrDefaultAsync(t => t.TicketID == ticketId);
 
-        private async Task SendAsync(int? customerId, string title, string message, string type)
+			if (ticket == null || ticket.CustomerID == null)
+				return;
+
+			var customerId = ticket.CustomerID.Value;
+			var subject = ticket.Subject ?? "(無主題)";
+
+			await SendAsync(
+				customerId,
+				"客服服務已完成",
+				$"您的客服工單 # {ticket.TicketID} 「{subject}」 已處理完成，請留下服務評價 🐾",
+				"客服評價提醒"
+			);
+		}
+
+		// ------------------------
+		// 🧩 共用內部函式
+		// ------------------------
+		private async Task SendAsync(int? customerId, string title, string message, string type)
 		{
 			if (customerId == null || customerId <= 0) return;
 
@@ -85,7 +111,6 @@ namespace Cat_Paw_Footprint.Services
 			await _hub.Clients.User(customerId.Value.ToString())
 				.SendAsync("ReceiveNotification", title, message, type);
 		}
-
 		public async Task SendCustomAsync(int customerId, string title, string message, string type)
 		{
 			if (customerId <= 0) return;
@@ -94,7 +119,5 @@ namespace Cat_Paw_Footprint.Services
 			await _hub.Clients.User(customerId.ToString())
 				.SendAsync("ReceiveNotification", title, message, type);
 		}
-
-
 	}
 }
