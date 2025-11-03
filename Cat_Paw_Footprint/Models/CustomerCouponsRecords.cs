@@ -13,6 +13,8 @@ public partial class CustomerCouponsRecords
 
     public DateTime? UsedTime { get; set; }
 
+    public DateTime? ExpireTime { get; set; }
+
     public virtual Coupons? Coupon { get; set; }
 
     public virtual Customers? Customer { get; set; }

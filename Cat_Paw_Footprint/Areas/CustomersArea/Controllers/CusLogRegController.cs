@@ -17,12 +17,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 	{
 		private readonly ApplicationDbContext _context;
 		private readonly ICusLogRegService _svc;//處理客戶個資與登入邏輯
+        private readonly MemberLevelService _memberLevelService;
 
-		public CusLogRegController(ApplicationDbContext context, ICusLogRegService svc)
+        public CusLogRegController(ApplicationDbContext context, ICusLogRegService svc,
+        MemberLevelService memberLevelService)
 		{
 			_context = context;
 			_svc = svc;
-		}
+            _memberLevelService = memberLevelService;
+        }
 		//客戶首頁
 		[HttpGet]
 		[AllowAnonymous]
@@ -131,8 +134,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Account == account);
             if (customer != null)
             {
-                _memberLevelService.GrantCouponsForType(customer.CustomerID, "Register");
+                await _memberLevelService.GrantCouponsForTypeAsync(customer.CustomerID, "Register");
             }
+           
 
             return Ok(new { success = true, message = "註冊成功", redirectUrl = "/CustomersArea/CusLogReg/Login" });
 		}

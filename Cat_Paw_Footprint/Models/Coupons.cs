@@ -43,5 +43,7 @@ public partial class Coupons
 
     public bool IsDeleted { get; set; }
 
+    public int? ValidDays { get; set; } // 有效天數（領取後）
+
     public virtual ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 }

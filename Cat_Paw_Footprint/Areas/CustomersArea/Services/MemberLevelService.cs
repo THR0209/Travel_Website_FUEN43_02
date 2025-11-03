@@ -1,7 +1,8 @@
-﻿using System;
-using System.Linq;
-using Cat_Paw_Footprint.Data;
+﻿using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace Cat_Paw_Footprint.Services
 {
@@ -53,40 +54,49 @@ namespace Cat_Paw_Footprint.Services
                     _ => "Level_Iron"
                 };
 
-                GrantCouponsForType(customerId, targetType);
+                GrantCouponsForTypeAsync(customerId, targetType);
             }
         }
 
         /// <summary>
-        /// 發放指定類型的優惠券（包含新註冊與等級升級）
+        /// 非同步發放指定類型的優惠券（例如新註冊、會員升級）
         /// </summary>
-        public void GrantCouponsForType(int customerId, string targetType)
+        public async Task GrantCouponsForTypeAsync(int customerId, string targetType)
         {
             var now = DateTime.Now;
 
-            var coupons = _context.Coupons
+            var coupons = await _context.Coupons
                 .Where(c => c.IsActive)
                 .Where(c => c.TargetType == targetType)
                 .Where(c => c.StartDate <= now && c.EndDate >= now)
-                .ToList();
+                .ToListAsync();
 
             foreach (var cpn in coupons)
             {
-                bool alreadyHas = _context.CustomerCouponsRecords
-                    .Any(r => r.CustomerID == customerId && r.CouponID == cpn.CouponID);
+                bool alreadyHas = await _context.CustomerCouponsRecords
+                    .AnyAsync(r => r.CustomerID == customerId && r.CouponID == cpn.CouponID);
 
                 if (!alreadyHas)
                 {
-                    _context.CustomerCouponsRecords.Add(new CustomerCouponsRecords
+                    // 🔹 有設定 ValidDays → 用今天 + ValidDays 計算過期日
+                    //    否則就沿用原本的 EndDate。
+                    DateTime? expireTime = cpn.ValidDays.HasValue
+                    ? now.AddDays(cpn.ValidDays.Value)
+                    : cpn.EndDate;
+
+                    await _context.CustomerCouponsRecords.AddAsync(new CustomerCouponsRecords
                     {
                         CustomerID = customerId,
                         CouponID = cpn.CouponID,
-                        IsUsed = false
+                        IsUsed = false,
+                        ExpireTime = expireTime   // ✅ 使用有效期欄位
                     });
                 }
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+
     }
 }
