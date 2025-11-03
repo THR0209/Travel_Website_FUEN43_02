@@ -577,7 +577,7 @@
 
 <!-- 精選交通 -->
 <section class="section" id="featured-transports" v-cloak>
-    <div class="container" id="transports-app">
+    <div class="container" id="transports-app">  
         <div class="section-title text-center mb-4">
             <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
                 <i class="fa-solid fa-car-side me-2"></i>精選交通
@@ -619,22 +619,26 @@
             </div>
         </div>
     </div>
-</section>
+</section>  
 
 
 <!-- 最新優惠活動 -->
+@*
 <section class="section" id="deals" v-cloak>
     <div class="container" id="promotion-app">
         <div class="section-title d-flex justify-content-between align-items-center">
-            <h2>最新優惠活動</h2>
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+                <i class="menu-icon tf-icons fa-solid fa-bullhorn"></i>
+                最新優惠活動
+            </h2>
             <a class="link-primary" asp-controller="Promotions" asp-action="Index">全部優惠</a>
         </div>
 
-      @*   <!-- 載入中 -->
+      <!-- 載入中 -->
         <div v-if="isLoading" class="text-center py-5">
             <div class="spinner-border text-primary" role="status"></div>
             <p class="mt-2 mb-0 text-muted">載入中...</p>
-        </div> *@
+        </div> 
 
         <!-- 有資料 -->
         <div v-if="promotions.length > 0" class="row g-3 g-md-4">
@@ -646,7 +650,14 @@
                     <div class="product-body p-3">
                         <h5 class="product-title mb-1">{{ p.promoName }}</h5>
                         <p class="product-meta text-muted small mb-1">{{ formatDate(p.startTime) }}</p>
-                        @* <div class="price fw-bold text-primary">NT$ {{ p.price }} 起</div> *@
+                        <div class="price fw-bold text-primary">NT$ {{ p.price }} 起</div>
+
+                        <!-- 新增 查看詳情按鈕 -->
+                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                            查看詳情
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </a>
                     </div>
                 </article>
             </div>
@@ -658,7 +669,66 @@
             <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
         </div>
     </div>
+</section>  *@
+
+<!-- 最新優惠活動 -->
+<section class="section" id="deals" v-cloak>
+    <div class="container" id="promotion-app">
+        <div class="section-title text-center mb-4">
+            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+                <i class="fa-solid fa-bullhorn me-2"></i>最新優惠活動
+            </h2>
+            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="/CustomersArea/Promotions/Index"
+               class="btn btn-outline-primary rounded-pill fw-bold">
+                查看所有優惠 <i class="fa-solid fa-arrow-right ms-2"></i>
+            </a>
+            <div class="swiper-nav d-flex align-items-center gap-2">
+                <div class="swiper-btn promotion-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                <div class="swiper-btn promotion-next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <!-- ✅ 用 items.length 判斷 -->
+        <div v-if="items.length > 0">
+            <div class="swiper promotions-swiper" aria-label="最新優惠活動">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="p in items" :key="p.promoID">
+                        <!-- 新增 查看詳情按鈕 -->
+                        <a :href="'/CustomersArea/Promotions/Details/' + p.promoID">
+                            <article class="product-card shadow-sm">
+                                <div class="product-thumb position-relative">
+                                    <img :src="p.imageUrl" class="w-100 rounded-top" :alt="p.promoName">
+                                    <span class="badge bg-warning position-absolute top-0 start-0 m-2">🔥 限時</span>
+                                </div>
+                                <div class="product-body p-3">
+                                    <h5 class="fw-bold mb-1 product-title">{{ p.promoName }}</h5>
+                                    <p class="text-muted small mb-1">
+                                        <i class="fa-regular fa-calendar me-1"></i>
+                                        {{ formatDate(p.startTime) }} - {{ formatDate(p.endTime) }}
+                                    </p>
+                                    <p class="small text-muted fw-bold text-primary">{{ p.promoDesc }}</p>
+                                </div>
+                            </article>
+                            <span class="btn btn-outline-primary w-100 rounded-pill fw-bold">查看詳情 <i class="fa-solid fa-arrow-right ms-1"></i></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 無資料提示 -->
+        <div v-else class="text-center text-muted py-5">
+            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
+        </div>
+    </div>
 </section>
+
+
 
 
 
@@ -800,6 +870,12 @@
         function mountFeatured(appId, apiUrl, swiperSelector, prevEl, nextEl){
           const app = Vue.createApp({
             data(){ return { items: [] }; },
+            methods: {
+              formatDate(d){
+                if(!d) return '';
+                return new Date(d).toLocaleDateString('zh-TW');
+                }
+            },
             mounted(){
               axios.get(apiUrl)
                 .then(res => { this.items = res.data || []; })
@@ -826,6 +902,9 @@
         mountFeatured('#hotels-app',    '/CustomersArea/Products/GetFeaturedHotels',    '.hotels-swiper',    '.hotel-prev',    '.hotel-next');
         mountFeatured('#tickets-app',   '/CustomersArea/Products/GetFeaturedTickets',   '.tickets-swiper',   '.ticket-prev',   '.ticket-next');
         mountFeatured('#transports-app','/CustomersArea/Products/GetFeaturedTransports','.transports-swiper','.transport-prev','.transport-next');
+        mountFeatured('#promotion-app','/CustomersArea/Promotions/GetLatestPromotions','.promotions-swiper','.promotion-prev','.promotion-next');
+
+
 
         /* ====================== Vue 熱門行程載入 ====================== */
         // const hotApp = Vue.createApp({
@@ -874,24 +953,24 @@
 
 
         /* ====================== Vue 優惠活動載入 ====================== */
-        const app = Vue.createApp({
-            data() {
-                return { promotions: [], isLoading: true }
-            },
-            mounted() {
-                axios.get('/CustomersArea/Promotions/GetLatestPromotions')
-                    .then(res => { this.promotions = res.data })
-                    .catch(err => console.error('載入失敗：', err))
-                    .finally(() => { this.isLoading = false })
-            },
-            methods: {
-                formatDate(date) {
-                    const d = new Date(date);
-                    return d.toLocaleDateString('zh-TW');
-                }
-            }
-        });
-        app.mount('#promotion-app');
+        // const app = Vue.createApp({
+        //     data() {
+        //         return { promotions: [], isLoading: true }
+        //     },
+        //     mounted() {
+        //         axios.get('/CustomersArea/Promotions/GetLatestPromotions')
+        //             .then(res => { this.promotions = res.data })
+        //             .catch(err => console.error('載入失敗：', err))
+        //             .finally(() => { this.isLoading = false })
+        //     },
+        //     methods: {
+        //         formatDate(date) {
+        //             const d = new Date(date);
+        //             return d.toLocaleDateString('zh-TW');
+        //         }
+        //     }
+        // });
+        // app.mount('#promotion-app');
 
 
         // ====================== FAQ 熱門資料載入 ======================

@@ -25,67 +25,103 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
         // GET: CustomersArea/Promotions
         public async Task<IActionResult> Index()
         {
-            var activePromotions = await _context.Promotions.Where
-                (p=> p.IsActive && 
-                 p.StartTime <= DateTime.Now && 
-                 p.EndTime >= DateTime.Now).OrderByDescending(p=> p.StartTime).ToListAsync();
+            return View();
+        }
 
-			return View(activePromotions);
+        // 🟢 2️⃣ Vue 用的 API：顯示所有優惠活動
+        [HttpGet]
+        public async Task<IActionResult> GetAllActivePromotions()
+        {
+            var promos = await _context.Promotions
+                .Where(p => p.IsActive) // 只撈啟用的
+                .OrderByDescending(p => p.StartTime)
+                .Select(p => new
+                {
+                    p.PromoID,
+                    p.PromoName,
+                    p.PromoDesc,
+                    p.StartTime,
+                    p.EndTime,
+                    ImageUrl = "/images/NoImage.png" // 統一預設圖
+                })
+                .ToListAsync();
+
+            return Json(promos);
         }
 
         // GET: CustomersArea/Promotions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+           // var promo = await _context.Promotions
+           //.Where(p => p.PromoID == id && p.IsActive)
+           //.Select(p => new
+           //{
+           //    p.PromoID,
+           //    p.PromoName,
+           //    p.PromoDesc,
+           //    p.StartTime,
+           //    p.EndTime,
+           //    ImageUrl = "/images/NoImage.png"
+           //})
+           //.FirstOrDefaultAsync();
 
-            var promotions = await _context.Promotions
-                .FirstOrDefaultAsync(m => m.PromoID == id);
-            if (promotions == null)
-            {
-                return NotFound();
-            }
+           // if (promo == null)
+           //     return NotFound();
 
-            return View(promotions);
+            return View();
         }
 
-		// 新增：給 Vue.js 撈資料的 JSON Action
-		[HttpGet]
-		public async Task<IActionResult> GetActivePromotions()
-		{
-			var promos = await _context.Promotions
-				//.Where(p => p.IsActive &&
-				//			p.StartTime <= DateTime.Now &&
-				//			p.EndTime >= DateTime.Now)
-				//.OrderByDescending(p => p.StartTime)
-				//.Select(p => new
-				//{
-				//	p.PromoID,
-				//	p.PromoName,
-				////	p.ImageUrl,
-    //                p.StartTime
-				//})
+        [HttpGet]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var promo = await _context.Promotions
+                .Where(p => p.PromoID == id && p.IsActive)
+                .Select(p => new
+                {
+                    p.PromoID,
+                    p.PromoName,
+                    p.PromoDesc,
+                    p.StartTime,
+                    p.EndTime,
+                    p.DiscountType,
+                    p.DiscountValue,
+                    ImageUrl = "/images/NoImage.png"
+                })
+                .FirstOrDefaultAsync();
+
+            if (promo == null)
+                return NotFound();
+
+            return Json(promo);
+        }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetLatestPromotions()
+        {
+            var promos = await _context.Promotions
                 .Where(p => p.IsActive)
-				.ToListAsync();
+                .OrderByDescending(p => p.StartTime)
+                .Take(5)
+                .Select(p => new
+                {
+                    p.PromoID,
+                    p.PromoName,
+                    p.PromoDesc,
+                    p.StartTime,
+                    p.EndTime,
+                   // ImageUrl = string.IsNullOrEmpty(p.ImageUrl) ? "/images/NoImage.png" : p.ImageUrl
+                    ImageUrl = "/images/NoImage.png" // 固定給一張
+                })
+                .ToListAsync();
 
-			return Json(promos);
-		}
+            return Json(promos);
+        }
 
-		[HttpGet]
-		public async Task<IActionResult> GetLatestPromotions()
-		{
-			var promos = await _context.Promotions
-				.Where(p => p.IsActive)
-				//.OrderByDescending(p => p.StartTime)
-				.Take(3)
-				.ToListAsync();
 
-			return Json(promos);
-		}
-
-		private bool PromotionsExists(int id)
+        private bool PromotionsExists(int id)
         {
             return _context.Promotions.Any(e => e.PromoID == id);
         }

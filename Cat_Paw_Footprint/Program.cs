@@ -187,7 +187,7 @@ namespace Cat_Paw_Footprint
             #endregion
 			builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 			builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
-			#endregion
+			//#endregion
 
             builder.Services.AddHttpContextAccessor();
 

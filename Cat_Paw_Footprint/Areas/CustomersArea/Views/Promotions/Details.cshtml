@@ -1,72 +1,82 @@
-﻿@model Cat_Paw_Footprint.Models.Promotions
-
-@{
-    ViewData["Title"] = "優惠";
+﻿@{
+    ViewData["Title"] = "優惠活動詳情";
 }
 
-<h1>Details</h1>
+<section class="section py-5" id="promotion-detail" v-cloak>
+    <div class="container">
+        <!-- 載入成功 -->
+        <div v-if="promotion" class="card shadow-sm border-0 rounded-4">
+            <img :src="promotion.imageUrl || '/images/NoImage.png'"
+                 class="card-img-top rounded-top-4"
+                 :alt="promotion.promoName">
+            <div class="card-body p-4">
+                <h2 class="fw-bold mb-3 text-primary">{{ promotion.promoName }}</h2>
+                <p class="text-muted mb-2">
+                    <i class="fa-regular fa-calendar me-1"></i>
+                    {{ formatDate(promotion.startTime) }} ~ {{ formatDate(promotion.endTime) }}
+                </p>
+                <p class="mb-3">{{ promotion.promoDesc }}</p>
 
-<div>
-    <h4>Promotions</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PromoName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PromoName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PromoDesc)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PromoDesc)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DiscountType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DiscountType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DiscountValue)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DiscountValue)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsActive)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsActive)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreateTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreateTime)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdateTime)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdateTime)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.PromoID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                    <span class="badge bg-info text-dark">折扣類型：{{ discountTypeText(promotion.discountType) }}</span>
+                    <span class="badge bg-warning text-dark">折扣值：{{ promotion.discountValue }}</span>
+                </div>
+
+                <div class="mt-4">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                        返回首頁
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                        返回列表
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 無資料 -->
+        <div v-else class="text-center py-5 text-muted">
+            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">找不到指定的優惠活動</p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return { promotion: null }
+            },
+            methods: {
+                formatDate(dateStr) {
+                    if (!dateStr) return ''
+                    const date = new Date(dateStr)
+                    return isNaN(date) ? '' : date.toLocaleDateString('zh-TW')
+                },
+                discountTypeText(type) {
+                    switch (type) {
+                        case 1: return '百分比折扣'
+                        case 2: return '固定金額折扣'
+                        default: return '未知'
+                    }
+                }
+            },
+            mounted() {
+                const id = window.location.pathname.split('/').pop()
+                axios.get(`/CustomersArea/Promotions/GetById/${id}`)
+                    .then(res => {
+                        this.promotion = res.data
+                        console.log('優惠活動載入成功：', res.data)
+                    })
+                    .catch(err => {
+                        console.error('載入優惠活動失敗：', err)
+                    })
+            }
+        })
+
+        app.mount('#promotion-detail')
+    </script>
+}

@@ -1,51 +1,69 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Models.Promotions>
-
-@{
+﻿@{
     ViewData["Title"] = "優惠活動";
 }
 
-<h1>優惠活動</h1>
+<h1 class="text-center my-4 fw-bold" style="color:#22B3C1;">
+    <i class="fa-solid fa-bullhorn me-2"></i>優惠活動
+</h1>
 
 <div id="promotion-list" class="container my-5" v-cloak>
-    @* <h2>🔥 最新優惠活動</h2> *@
-    <div class="row g-3 g-md-4">
+    <!-- 有資料 -->
+    <div v-if="promotions.length > 0" class="row g-3 g-md-4">
         <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
-            <article class="product-card h-100">
-                <div class="product-thumb position-relative">
-                    <img :src="p.imageUrl || '/images/default.jpg'" :alt="p.promoName" class="w-100 rounded-3">
-                </div>
-                <div class="product-body mt-2">
-                    <h5 class="fw-bold">{{ p.promoName }}</h5>
-                    <div class="text-muted small">開始時間：{{ formatDate(p.startTime) }}</div>
-                </div>
-            </article>
+            <a :href="'/CustomersArea/Promotions/Details/' + p.promoID" class="text-decoration-none text-dark">
+                <article class="product-card h-100 shadow-sm rounded">
+                    <div class="product-thumb position-relative">
+                        <img :src="p.imageUrl || '/images/NoImage.png'"
+                             :alt="p.promoName"
+                             class="w-100 rounded-top">
+                    </div>
+                    <div class="product-body p-3">
+                        <h5 class="fw-bold mb-1">{{ p.promoName }}</h5>
+                        <p class="text-muted small mb-1">
+                            <i class="fa-regular fa-calendar me-1"></i>
+                            {{ formatDate(p.startTime) }} ~ {{ formatDate(p.endTime) }}
+                        </p>
+                        <p class="small text-secondary">{{ p.promoDesc }}</p>
+                    </div>
+                </article>
+            </a>
         </div>
+    </div>
+
+    <!-- 無資料 -->
+    <div v-else class="text-center text-muted py-5">
+        <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+        <p class="mt-2 mb-0">目前沒有可顯示的優惠活動</p>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    @* <script src="~/js/promotions.js"></script> *@
 
     <script>
         const app = Vue.createApp({
-          data() {
-            return { promotions: [] }
-          },
-          methods: {
-            formatDate(dateStr) {
-              const date = new Date(dateStr)
-              return date.toLocaleDateString('zh-TW')
+            data() {
+                return { promotions: [] }
+            },
+            methods: {
+                formatDate(dateStr) {
+                    if (!dateStr) return ''
+                    const date = new Date(dateStr)
+                    return isNaN(date) ? '' : date.toLocaleDateString('zh-TW')
+                }
+            },
+            mounted() {
+                axios.get('/CustomersArea/Promotions/GetAllActivePromotions')
+                    .then(res => {
+                        this.promotions = res.data || []
+                        console.log('載入優惠活動成功：', this.promotions)
+                    })
+                    .catch(err => console.error('載入優惠活動失敗：', err))
             }
-          },
-          mounted() {
-            axios.get('/CustomersArea/Promotions/GetActivePromotions')
-              .then(res => { this.promotions = res.data })
-              .catch(err => console.error('載入失敗：', err))
-          }
         })
 
         app.mount('#promotion-list')
     </script>
 }
+

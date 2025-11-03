@@ -1,6 +1,7 @@
 using Cat_Paw_Footprint.Areas.CustomersArea.Services;
 using Cat_Paw_Footprint.Areas.CustomersArea.ViewModel;
 using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -125,7 +126,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			{
 				return BadRequest(new { success = false, error = result });
 			}
-			return Ok(new { success = true, message = "註冊成功", redirectUrl = "/CustomersArea/CusLogReg/Login" });
+            //如果註冊成功 發放新客戶優惠券
+            // ✅ 發放新客戶優惠券
+            var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Account == account);
+            if (customer != null)
+            {
+                _memberLevelService.GrantCouponsForType(customer.CustomerID, "Register");
+            }
+
+            return Ok(new { success = true, message = "註冊成功", redirectUrl = "/CustomersArea/CusLogReg/Login" });
 		}
 		//客戶修改資料介面
 		[Area("CustomersArea")]
