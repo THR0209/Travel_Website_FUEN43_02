@@ -18,14 +18,16 @@
 
     <!-- 右側通知內容 -->
     <div class="notif-content">
-        <h4 class="fw-bold text-primary mb-3 d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fa-solid fa-bell me-2"></i><span id="notifTitle">全部通知</span>
-            </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-primary mb-0 d-flex align-items-center">
+                <i class="fa-solid fa-bell me-2"></i>
+                <span id="notifTitle">全部通知</span>
+            </h4>
+
             <button id="markAllReadBtn" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm">
                 <i class="fa-solid fa-check-double me-1"></i> 全部標示為已讀
             </button>
-        </h4>
+        </div>
 
         <!-- 🔹 顯示筆數與搜尋 -->
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -51,21 +53,13 @@
 
         <!-- 🔹 通知列表 -->
         <div id="notifListArea">
-            @if (!Model.Any())
+            @if (Model.Any())
             {
-                <div class="text-center text-secondary my-5">目前沒有通知 💤</div>
-            }
-            else
-            {
-                var notifList = Model.ToList();
-                for (int i = 0; i < notifList.Count; i++)
+                foreach (var item in Model)
                 {
-                    var item = notifList[i];
                     <div class="notif-card @(item.IsRead ? "is-read" : "")"
                          data-id="@item.NotificationID"
-                         data-type="@item.Type"
-                         style="display:@(i < 5 ? "block" : "none")">
-                        <!-- 預設只顯示前5筆 -->
+                         data-type="@item.Type">
                         <div class="notif-title">@item.Title</div>
                         <div class="notif-message">@item.Message</div>
                         <div class="notif-time">
@@ -78,7 +72,13 @@
                     </div>
                 }
             }
+
+            <!-- 🔹 提示文字（由 JS 控制顯示） -->
+            <div id="noNotifMsg" class="text-center text-secondary my-5" style="display:none;">
+                目前沒有通知 💤
+            </div>
         </div>
+
 
         <!-- 🔹 分頁控制 -->
         <div class="text-center mt-3" id="notifPagination">
@@ -226,39 +226,89 @@
             });
 
 
-            // ------------------------------
-            // 🔹 分類篩選 + 重設分頁
-            // ------------------------------
+            // ===================================================
+            // 🔹 通知分類篩選 + 分頁重設（完整版）
+            // ===================================================
             const categoryItems = document.querySelectorAll(".notif-category li");
             const titleSpan = document.getElementById("notifTitle");
 
             categoryItems.forEach(cat => {
                 cat.addEventListener("click", () => {
+
+                    // ------------------------------
+                    // 🔸 1️ 更新左側分類選取樣式
+                    // ------------------------------
                     categoryItems.forEach(c => c.classList.remove("active"));
                     cat.classList.add("active");
 
-                    const type = cat.dataset.type;
-                    titleSpan.textContent = type;
+                    // ------------------------------
+                    // 🔸 2️ 取得目前分類與所有卡片
+                    // ------------------------------
+                    const type = cat.dataset.type;              // 當前點擊分類
+                    titleSpan.textContent = type;               // 更新右上方標題文字
+                    const notifListArea = document.getElementById("notifListArea");
+                    const all = Array.from(document.querySelectorAll(".notif-card")); // 全部通知卡片
 
-                    // 篩選符合的通知
-                    allCards.forEach(card => {
-                        if (type === "全部通知" || card.dataset.type === type) {
-                            card.style.display = "block";
-                        } else {
-                            card.style.display = "none";
+                    // 先隱藏全部卡片（稍後再依條件顯示）
+                    all.forEach(card => (card.style.display = "none"));
+
+
+                    // ===================================================
+                    // 🔹 3️ 篩選邏輯：決定哪些卡片要顯示
+                    // ===================================================
+                    const filtered = all.filter(card => {
+                        const cardType = card.dataset.type; // 每張卡片的通知類型
+
+                        // ✅ (1) 全部通知 → 顯示全部
+                        if (type === "全部通知") return true;
+
+                        // ✅ (2) 客服訊息分類 → 包含所有客服相關通知
+                        //     包含以下任一類型都會被顯示：
+                        //     「客服訊息」、「客服回覆」、「客服服務已完成」、「客服評價提醒」
+                        if (type === "客服訊息") {
+                            return cardType.includes("客服");
                         }
+
+                        // ✅ (3) 其他分類 → 精準比對類型名稱
+                        //     例如「優惠活動」、「系統公告」等。
+                        return cardType === type;
                     });
 
-                    // 重新過濾後重建陣列
-                    allCards = Array.from(document.querySelectorAll(".notif-card"))
-                        .filter(c => type === "全部通知" || c.dataset.type === type);
 
-                    // 重設到第一頁
-                    currentPage = 1;
+                    // ===================================================
+                    // 🔹 4️ 若該分類沒有符合項目 → 顯示提示訊息
+                    // ===================================================
+                    let noMsg = document.getElementById("noNotifMsg");
+
+                    // 如果提示訊息元素不存在，先建立一個
+                    if (!noMsg) {
+                        noMsg = document.createElement("div");
+                        noMsg.id = "noNotifMsg";
+                        noMsg.className = "text-center text-secondary my-5";
+                        noMsg.textContent = "目前沒有通知 💤";
+                        noMsg.style.display = "none";
+                        notifListArea.appendChild(noMsg);
+                    }
+
+                    // 若沒有任何符合的卡片 → 顯示「目前沒有通知 💤」
+                    if (filtered.length === 0) {
+                        noMsg.style.display = "block";
+                    } else {
+                        // 有資料 → 隱藏提示，顯示卡片
+                        noMsg.style.display = "none";
+                        filtered.forEach(card => (card.style.display = "block"));
+                    }
+
+
+                    // ===================================================
+                    // 🔹 5️ 重新整理分頁控制
+                    // ===================================================
+                    allCards = filtered; // 更新目前可見的通知集合
+                    currentPage = 1;     // 回到第一頁
                     showPage(currentPage);
+                    updateNoNotifMessage();
                 });
             });
-
 
             // ------------------------------
             // 🔹 全部標示為已讀
@@ -350,7 +400,18 @@
 
             bindNotificationEvents();
             showPage(currentPage);
-        });
+
+            // 🔹 頁面載入時，檢查是否有通知，若沒有則顯示提示
+            const noMsg = document.getElementById("noNotifMsg");
+            function updateNoNotifMessage() {
+                if (allCards.length === 0) {
+                    noMsg.style.display = "block";
+                } else {
+                    noMsg.style.display = "none";
+                }
+            }
+            updateNoNotifMessage();
+            });
     </script>
 
 }

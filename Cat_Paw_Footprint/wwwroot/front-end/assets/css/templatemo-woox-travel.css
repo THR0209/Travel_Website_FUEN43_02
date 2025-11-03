@@ -104,8 +104,9 @@ header, nav, section, article, aside, footer, hgroup {
 ======================================================= */
 body {
     font-family: "Chiron GoRound TC", 'Noto Sans TC', system-ui, "Poppins", sans-serif;
-    color: var(--text);
-    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+    background-attachment: fixed;
+    color: #1f2937;
     overflow-x: hidden;
 }
 
@@ -114,12 +115,15 @@ a {
     text-decoration: none;
     transition: color .25s ease;
 }
-
-h1, h2, h3, h4, h5, h6 {
-    margin: 0;
-    color: #2a2a2a;
-    font-weight: 700;
+    a:hover {
+    color: var(--brand);
 }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin: 0;
+        color: #2a2a2a;
+        font-weight: 700;
+    }
 
 p {
     font-size: 15px;
@@ -169,6 +173,23 @@ img {
         transform: translateY(-2px);
     }
 
+.btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand), #22b3c1);
+    border: 1px solid var(--brand);
+    border-radius: 999px; /* pill 造型 */
+    font-weight: 600;
+    box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
+    transition: all 0.25s ease;
+}
+
+    .btn-primary:hover {
+        background: #fff;
+        color: var(--brand);
+        border-color: var(--brand);
+        box-shadow: 0 0 0.6rem rgba(102, 188, 217, 0.4);
+    }
+
 .btn-outline-primary {
     color: var(--brand);
     border: 1px solid var(--brand);
@@ -192,10 +213,10 @@ img {
     .btn-outline-secondary:hover {
         box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
     }
-    /* =======================================================
+/* =======================================================
 📗 06. 通用卡片樣式
 ======================================================= */
-    .card {
+/*    .card {
     max-width: 500px;
     width: 100%;
     border-radius: 16px;
@@ -205,7 +226,7 @@ img {
     opacity: 0;
     transform: translateY(30px);
     animation: fadeInUp .6s forwards;
-}
+}*/
 
 @keyframes fadeInUp {
     to {
@@ -220,13 +241,17 @@ img {
 
 /* Header 主容器 */
 .site-header {
-    position: sticky;
+    position: relative;
     top: 0;
     z-index: 1030;
-    background: #fff;
     box-shadow: 0 2px 12px rgba(0, 0, 0, .06);
-    transition: all .25s ease;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px) saturate(180%);
+    transition: all .3s ease;
 }
+    .site-header.scrolled {
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
 
     /* Header 縮小狀態 */
     .site-header.shrink {
@@ -249,16 +274,96 @@ img {
         color: var(--brand);
     }
 
-/* 主導覽列 */
+/* =======================================================
+🐾 主導覽列樣式（文字、底線、箭頭對齊最終版）
+======================================================= */
+
+/* --- 主導覽列基本樣式 --- */
 .nav-link {
     color: #334155;
     font-weight: 600;
     transition: color 0.25s ease;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.5;
+    padding: 8px 12px;
+    vertical-align: middle;
+    gap: 6px; /* 確保文字、icon、badge 間有距離 */
 }
 
-    .nav-link:hover {
-        color: var(--brand);
+    /* --- hover 底線動畫，只作用於文字部分（不包含箭頭與 badge） --- */
+    .nav-link .link-text {
+        position: relative;
+        display: inline-block;
     }
+
+        .nav-link .link-text::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            width: 0;
+            height: 2px;
+            background: var(--brand);
+            transition: width .3s ease;
+        }
+
+    /* hover 時底線只在文字下方展開 */
+    .nav-link:hover .link-text::after {
+        width: 100%;
+    }
+
+    /* --- 保護 badge 不被底線劃過 --- */
+    .nav-link .badge {
+        position: relative;
+        z-index: 1;
+    }
+
+/* =======================================================
+🐾 Dropdown Arrow 水平置於文字右側修正版
+======================================================= */
+.navbar .nav-item.dropdown .nav-link.dropdown-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center;
+    gap: 6px; /* 文字與箭頭間距 */
+    vertical-align: middle !important;
+    line-height: 1.5 !important; /* ✅ 與一般 nav-link 一致 */
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+    /* 箭頭統一樣式 */
+    .navbar .nav-item.dropdown .nav-link.dropdown-toggle::after {
+        content: "";
+        display: inline-block;
+        width: 0;
+        height: 0;
+        margin-left: 4px;
+        border-top: 0.35em solid currentColor;
+        border-right: 0.35em solid transparent;
+        border-left: 0.35em solid transparent;
+        vertical-align: middle;
+        position: static !important;
+        transform: none;
+    }
+
+/* 展開時旋轉箭頭 */
+.navbar .nav-item.dropdown.show .nav-link.dropdown-toggle::after {
+    transform: rotate(180deg) !important;
+}
+
+/* 手機版微調間距 */
+@media (max-width: 768px) {
+    .navbar .nav-item.dropdown .nav-link.dropdown-toggle {
+        gap: 8px;
+    }
+}
+
+
+
 
 /* =======================================================
 📗 08. Header Right：登入／註冊／通知／會員中心
@@ -286,12 +391,13 @@ img {
 ======================================================= */
 .hero {
     position: relative;
-    height: 56vh;
+    height: 52vh;
     min-height: 420px;
     max-height: 720px;
     overflow: hidden;
     border-radius: 24px;
     z-index: 1;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
     /* Hero 圖片 */
@@ -449,6 +555,8 @@ img {
 ======================================================= */
 .section {
     padding: 56px 0;
+    position: relative;
+    z-index: 2;
 }
 
 .section-title {
@@ -460,7 +568,8 @@ img {
 
     .section-title h2 {
         font-weight: 900;
-        letter-spacing: .5px;
+        text-align: center;
+        letter-spacing: 2px;
     }
 
     .section-title div {
@@ -468,6 +577,7 @@ img {
         height: 3px;
         background: var(--brand);
         border-radius: 2px;
+        margin: 10px auto;
     }
 
 /* =======================================================
@@ -687,28 +797,7 @@ img {
         height: 8px; /* 滾輪高度略薄 */
     }
 
-    /* 軌道背景透明，乾淨 */
-    .faq-popular-carousel::-webkit-scrollbar-track {
-        background: transparent;
-    }
 
-    /* 滾輪顏色與長度調整 */
-    .faq-popular-carousel::-webkit-scrollbar-thumb {
-        background: linear-gradient(to right, transparent 35%, #7ec8e3 35%, #7ec8e3 65%, transparent 65%);
-        border-radius: 999px;
-    }
-
-        /* 滑過時加深色調 */
-        .faq-popular-carousel::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient( to right, transparent 35%, #2ec8d8 35%, #9ad8ef 65%, transparent 65% );
-        }
-
-
-    /* 去除前後多餘漸層 */
-    .faq-popular-carousel::-webkit-scrollbar-track-piece:start,
-    .faq-popular-carousel::-webkit-scrollbar-track-piece:end {
-        background: transparent;
-    }
 
     /* 拖曳時滑鼠樣式與選取防止 */
     .faq-popular-carousel.dragging {
@@ -1503,18 +1592,24 @@ img {
 ======================================================= */ 
 /* 🔹 Footer 主體 */
 footer {
-    background: var(--brand);
-    color: #fff;
-    padding: 16px 0 12px !important;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
+    background: linear-gradient(135deg, #22b3c1 0%, #7ec8e3 100%);
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.1);
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
     position: relative;
     overflow: hidden;
+    z-index: 5;
 }
     /* 🔹 Footer 上方貓掌分隔線 */
 
-    footer::before {
-        content: none !important;
+    footer::after {
+        content: "🐾🐾🐾";
+        position: absolute;
+        bottom: 10px;
+        right: 5%;
+        font-size: 3rem;
+        opacity: 0.05;
+        transform: rotate(-15deg);
     }
     /* 🔹 Footer 容器設定 */
 
@@ -1706,15 +1801,15 @@ footer .paw-bg {
 /* 手機 */
 @media (max-width: 576px) {
     footer {
-        padding: 40px 0 20px;
-        border-top-left-radius: 20px;
-        border-top-right-radius: 20px;
-        text-align: center;
+        padding-top: 40px;
+        padding-bottom: 20px;
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
     }
 }
 
 /* =======================================================
-📘 19. 通知下拉選單（Notification Dropdown）
+📘 19. 通知、會員中心下拉選單（Notification Dropdown）
 ======================================================= */
 .dropdown-menu.notif-dropdown {
     position: fixed !important;
@@ -1740,6 +1835,28 @@ footer .paw-bg {
     overflow: visible !important;
 }
 
+/* 會員中心下拉選單統一對齊樣式 */
+.dropdown-menu.user-dropdown .dropdown-item {
+    display: flex !important; /* 改為 flex 排版 */
+    align-items: center !important; /* 垂直置中圖示與文字 */
+    gap: 8px !important; /* 圖示與文字間距一致 */
+    padding: 5px 10px !important; /* 統一上下間距 */
+    font-weight: 500;
+    color: #334155;
+    transition: background 0.25s ease;
+}
+
+    .dropdown-menu.user-dropdown .dropdown-item i {
+        width: 20px; /* 固定 icon 寬度讓文字對齊 */
+        text-align: center;
+        color: #7ec8e3; /* 主題色一致 */
+    }
+
+    .dropdown-menu.user-dropdown .dropdown-item:hover {
+        background-color: #f0f9ff;
+        color: #7ec8e3;
+    }
+
 /* =======================================================
 📘 20. 回到頂端按鈕 Back-to-top
 ======================================================= */
@@ -1747,16 +1864,16 @@ footer .paw-bg {
     position: fixed;
     right: 24px;
     bottom: 24px;
-    width: 52px;
-    height: 52px;
-    background: linear-gradient(135deg, var(--brand) 0%, #7ec8e3 100%);
+    width: 56px;
+    height: 56px;
+    background: radial-gradient(circle at 30% 30%, #7ec8e3, #22b3c1);
     color: #fff;
     font-size: 1.5rem;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 18px rgba(34, 179, 193, 0.35);
+    box-shadow: 0 10px 22px rgba(34,179,193,0.35);
     cursor: pointer;
     transition: all 0.35s ease;
     opacity: 0;
@@ -1772,23 +1889,29 @@ footer .paw-bg {
     }
 
     .back-to-top:hover {
-        background: linear-gradient(135deg, #2ec8d8 0%, #9ad8ef 100%);
-        transform: translateY(-6px) scale(1.08);
-        box-shadow: 0 12px 24px rgba(34, 179, 193, 0.45);
+        background: radial-gradient(circle at 30% 30%, #22b3c1, #7ec8e3);
     }
 
     .back-to-top i {
-        animation: paw-bounce 2s infinite ease-in-out;
+        animation: paw-wiggle 1.8s infinite ease-in-out;
     }
 
-/* 小小浮動動畫（像貓爪輕拍一樣） */
-@keyframes paw-bounce {
-    0%, 100% {
-        transform: translateY(0);
+
+@keyframes paw-wiggle {
+    0%,100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(10deg);
     }
 
     50% {
-        transform: translateY(-3px);
+        transform: rotate(-10deg);
+    }
+
+    75% {
+        transform: rotate(8deg);
     }
 }
 
@@ -1796,10 +1919,11 @@ footer .paw-bg {
 /* =======================================================
 📘 21. 全域動畫與過渡效果
 ======================================================= */
+/* Scroll 動畫（卡片淡入） */
 .fade-in-up {
     opacity: 0;
     transform: translateY(20px);
-    transition: all .6s ease;
+    transition: all .6s ease-out;
 }
 
     .fade-in-up.visible {
@@ -1862,9 +1986,11 @@ footer .paw-bg {
         border-top-right-radius: 40px;
     }
 
+    /* 通知下拉選單陰影＋圓角 */
     .dropdown-menu.notif-dropdown {
-        right: 16px !important;
-        top: 72px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 10px 32px rgba(0,0,0,0.12) !important;
+        overflow: hidden;
     }
 
     .back-to-top {
@@ -2122,14 +2248,6 @@ input, select, textarea {
 /*=======================================================
 📗 30. 通知中心專屬樣式（Notifications）
 ======================================================= */
-
-/* ========== 全站底色與字體 ========== */
-body {
-    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
-    font-family: "Poppins", "Noto Sans TC", sans-serif;
-    color: #333;
-    overflow-x: hidden;
-}
 
 /* ========== 主容器 ========== */
 .notif-wrapper {
@@ -2535,3 +2653,4 @@ body {
         box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
     }
 }
+

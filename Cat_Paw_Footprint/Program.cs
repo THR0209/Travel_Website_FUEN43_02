@@ -73,8 +73,9 @@ namespace Cat_Paw_Footprint
 			// 多身分驗證（Vendor/Customer/Employee）
 			builder.Services.AddAuthentication(options =>
 			{
-				options.DefaultScheme = "VendorAuth";
-				options.DefaultChallengeScheme = "VendorAuth";
+				options.DefaultScheme = "VendorAuth"; //通用預設
+				options.DefaultChallengeScheme = "VendorAuth"; //驗證失敗時要導去哪個登入頁面
+				options.DefaultAuthenticateScheme = "VendorAuth"; //伺服器收到請求時，決定從哪個 cookie 中「讀出使用者身分」
 			})
 			.AddCookie("VendorAuth", options =>
 			{
@@ -286,7 +287,7 @@ namespace Cat_Paw_Footprint
 			app.MapRazorPages();
 			app.MapHub<TicketChatHub>("/ticketChatHub");
 			app.MapHub<NotificationHub>("/notificationHub")
-				.RequireAuthorization(new AuthorizeAttribute { AuthenticationSchemes = "CustomerAuth" });
+				.AllowAnonymous();
 
 
 			app.Run();

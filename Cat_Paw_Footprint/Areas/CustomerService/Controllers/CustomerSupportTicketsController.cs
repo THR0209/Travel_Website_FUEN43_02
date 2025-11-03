@@ -229,18 +229,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 
 			if (completedStatus != null && vm.StatusID == completedStatus.StatusID)
 			{
-				// 取得客戶 ID
-				var customerId = ticket.CustomerID ?? 0;
-				if (customerId > 0)
-				{
-					// ✅ 呼叫通知服務 (確保有注入)
-					await _notifTrigger.SendCustomAsync(
-						customerId,
-						"客服服務已完成",
-						$"您的客服工單 # {ticket.TicketID} 「{ticket.Subject}」 已處理完成，請留下服務評價 🐾",
-						"客服評價提醒"
-					);
-				}
+				await _notifTrigger.NotifyTicketCompletedAsync(ticket.TicketID);
 			}
 
 			return Json(new { success = true });

@@ -950,9 +950,11 @@ public partial class webtravel2Context : DbContext
                 .HasForeignKey(d => d.LocationID)
                 .HasConstraintName("FK__TripProje__Locat__56E8E7AB");
 
-            entity.HasOne(d => d.Project).WithMany()
-                .HasForeignKey(d => d.ProjectID)
-                .HasConstraintName("FK__TripProje__Proje__57DD0BE4");
+            entity.HasOne(d => d.Project)
+				.WithMany(p => p.TripProjectDetails)
+				.HasForeignKey(d => d.ProjectID)
+				.HasPrincipalKey(p => p.ProjectID) // ✅ 指定主表的主鍵
+				.HasConstraintName("FK__TripProje__Proje__57DD0BE4");
 
             entity.HasOne(d => d.Restaurant).WithMany()
                 .HasForeignKey(d => d.RestaurantID)

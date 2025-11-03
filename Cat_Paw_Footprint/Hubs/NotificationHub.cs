@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Cat_Paw_Footprint.Hubs
 {
+
+	[Authorize(AuthenticationSchemes = "CustomerAuth")]
 	public class NotificationHub : Hub
 	{
 		// 發送給指定使用者

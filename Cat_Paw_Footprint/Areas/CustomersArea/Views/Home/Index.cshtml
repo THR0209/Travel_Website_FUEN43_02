@@ -62,26 +62,108 @@
     </style>
 
     <style>
-        /* ===== Banner / 搜尋列（新增與修正） ===== */
+        /* ===== Banner / 搜尋列 ===== */
         .hero {
             position: relative;
-            width: 100%;
-            height: 480px;
-            overflow: visible; /* 允許下拉超出 Banner */
-            z-index: 5000;
+            height: 520px;
+            border-radius: 0 0 40px 40px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
         }
 
         #heroMedia {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.65);
-            border-radius: 16px; /* 圓角交給圖片 */
-            pointer-events: none; /* 讓點擊穿透到上層搜尋列 */
+            filter: brightness(0.65) saturate(1.15);
+            transition: transform 0.8s ease, filter 1s ease;
+        }
+
+        .hero:hover #heroMedia {
+            transform: scale(1.05);
+            filter: brightness(0.75);
         }
 
         .hero-content {
             display: none;
+        }
+        /* ===== Hero 飄浮貓掌動畫 ===== */
+        .floating-paws {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+            .floating-paws span {
+                position: absolute;
+                font-size: 2rem;
+                opacity: 0.15;
+                animation: pawFloat 10s linear infinite;
+                filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            }
+
+                /* 🐾 不同貓掌的起始位置與動畫時間 */
+                .floating-paws span:nth-child(1) {
+                    left: 15%;
+                    animation-duration: 12s;
+                    animation-delay: 0s;
+                    font-size: 2.3rem;
+                }
+
+                .floating-paws span:nth-child(2) {
+                    left: 45%;
+                    animation-duration: 15s;
+                    animation-delay: 3s;
+                    font-size: 2rem;
+                }
+
+                .floating-paws span:nth-child(3) {
+                    left: 75%;
+                    animation-duration: 13s;
+                    animation-delay: 6s;
+                    font-size: 2.6rem;
+                }
+
+        /* 🐾 飄浮動畫 */
+        @@keyframes pawFloat {
+            0%
+
+        {
+            transform: translateY(100%) rotate(0deg) scale(1);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 0.2;
+        }
+
+        50% {
+            transform: translateY(-50%) rotate(15deg) scale(1.1);
+            opacity: 0.25;
+        }
+
+        90% {
+            opacity: 0.15;
+        }
+
+        100% {
+            transform: translateY(-120%) rotate(-15deg) scale(1);
+            opacity: 0;
+        }
+
+        }
+
+        /* 🐾 RWD 微調（手機上貓掌更小、更慢） */
+        @@media (max-width: 768px) {
+            .floating-paws span
+
+        {
+            font-size: 1.6rem;
+            animation-duration: 14s;
+        }
+
         }
 
         .search-wrapper {
@@ -89,55 +171,88 @@
             left: 50%;
             bottom: 40px;
             transform: translateX(-50%);
-            width: 85%;
+            width: 90%;
             max-width: 1100px;
             background: rgba(255,255,255,.94);
             border-radius: 20px;
             box-shadow: 0 6px 25px rgba(0,0,0,.30);
             padding: 18px;
-            z-index: 99999 !important; /* 抬高父層：子層下拉才有機會蓋住後面 */
+            z-index: 1000;
             pointer-events: auto;
         }
 
+            /* 滑鼠懸停：微亮浮起效果 */
+            .search-wrapper:hover {
+                transform: translateX(-50%) translateY(-3px);
+                background: rgba(255, 255, 255, 0.72);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 0 16px rgba(126, 200, 227, 0.3);
+            }
+            /* 標題文字更醒目 */
+            .search-wrapper h1 {
+                font-weight: 700;
+                text-align: center;
+                margin-bottom: 1.2rem;
+                letter-spacing: 1px;
+            }
         .search-tabs {
             display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 1.2rem;
         }
 
         .search-tab {
-            padding: 6px 16px;
-            border-radius: 25px;
+            padding: 6px 18px;
+            border-radius: 30px;
             cursor: pointer;
             font-weight: 600;
-            transition: .25s;
-            user-select: none;
+            color: #555;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(126, 200, 227, 0.3);
+            transition: all 0.25s ease;
         }
 
             .search-tab.active {
-                background: #7ec8e3;
+                background: linear-gradient(135deg, #7ec8e3, #22b3c1);
                 color: #fff;
+                box-shadow: 0 4px 10px rgba(34, 179, 193, 0.3);
             }
 
         .search-box {
             display: grid;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
-            grid-template-columns: 2.2fr 2.2fr 1.6fr 140px; /* 目的地 / 日期 / 旅客(內嵌) / 搜尋 */
+            grid-template-columns: 2.2fr 2.2fr 1.6fr 140px;
         }
 
         .search-select {
-            background: #F2FAFF;
-            padding: 12px 14px;
-            border-radius: 12px;
-            border: 1px solid #dceeff;
-            position: relative;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(200, 225, 240, 0.8);
+            border-radius: 14px;
+            padding: 12px 16px;
+            transition: all 0.25s ease;
         }
 
             .search-select:focus-within {
                 border-color: #7ec8e3;
             }
 
+
+        .search-btn {
+            background: linear-gradient(135deg, #7ec8e3, #22b3c1);
+            color: #fff;
+            font-weight: 700;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 0;
+            transition: all 0.3s ease;
+        }
+
+            .search-btn:hover {
+                background: linear-gradient(135deg, #22b3c1, #7ec8e3);
+                box-shadow: 0 4px 12px rgba(34, 179, 193, 0.4);
+            }
         .search-input {
             width: 100%;
             border: none;
@@ -159,17 +274,49 @@
         }
             
         .dropdown-panel {
-            position: absolute;
-            top: 115%;
-            left: 0;
-            width: 100%;
-            min-width: 340px;
             background: #fff;
-            padding: 12px;
             border-radius: 14px;
-            box-shadow: 0 6px 18px rgba(0,0,0,.25);
+            padding: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
             display: none;
-            z-index: 10000;
+            z-index: 2147483647 !important;
+            animation: dropdownFade 0.15s ease;
+            max-height: none;
+            overflow: visible !important;
+            max-width: 100vw !important;
+            overflow: hidden;
+            height: auto !important;
+            box-sizing: border-box;
+            z-index: 999999 !important;
+        }
+
+            .dropdown-panel::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .dropdown-panel::-webkit-scrollbar-thumb {
+                background-color: rgba(126, 200, 227, 0.5);
+                border-radius: 4px;
+            }
+
+                .dropdown-panel::-webkit-scrollbar-thumb:hover {
+                    background-color: rgba(126, 200, 227, 0.8);
+                }
+
+
+        @@keyframes dropdownFade {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         }
 
         .suggest-grid {
@@ -187,10 +334,14 @@
             font-size: 0.95rem;
         }
 
+            /* 🐾 Hover 感覺柔和且有亮邊 */
             .suggest-item:hover {
-                background: #eef8fb;
-                border-color: #d5eef5;
+                background: #e6f8fc;
+                border-color: #b4e3f0;
+                box-shadow: 0 0 6px rgba(126, 200, 227, 0.25);
+                transform: translateY(-2px);
             }
+
 
         /* 旅客數：改為內嵌控制（無下拉） */
         .people-inline {
@@ -214,15 +365,6 @@
                 /* text-align: center; */
             }
 
-        .search-btn {
-            background: #7ec8e3;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            padding: 14px 0;
-            width: 100%;
-        }
 
         /* 讓人數欄位自動撐到和其他 search-select 一樣高度 */
         .search-select .people-inline {
@@ -241,11 +383,11 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.15);
             cursor: pointer;
             transition: all .25s;
-            color: #22B3C1;
+            color: #7ec8e3;
         }
 
             .swiper-btn:hover {
-                background: #22B3C1;
+                background: #7ec8e3;
                 color: #fff;
                 box-shadow: 0 4px 10px rgba(34,179,193,0.4);
             }
@@ -273,12 +415,6 @@
         .people-inline span,
         .people-inline .ctrl * {
             line-height: 1.2; /* 可依視覺調整 */
-        }
-
-        /* 放到你的全域樣式最後面 */
-        .daterangepicker {
-            position: fixed; /* 元件本來就是固定定位，明確指定 */
-            z-index: 1000002 !important; /* 高過任何卡片/輪播 */
         }
 
 
@@ -452,10 +588,10 @@
 <section class="section" id="hotProducts" v-cloak>
     <div class="container" id="hot-app">
         <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+            <h2 class="fw-bold" style="letter-spacing:2px">
                 <i class="fa-solid fa-paw me-2"></i>精選熱門行程
             </h2>
-            <div style="width:60px; height:3px; background:#22B3C1; margin:10px auto 0; border-radius:2px;"></div>
+            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -499,10 +635,10 @@
 <section class="section" id="featured-hotels" v-cloak>
     <div class="container" id="hotels-app">
         <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+            <h2 class="fw-bold" style="letter-spacing:2px">
                 <i class="fa-solid fa-bed me-2"></i>精選住宿
             </h2>
-            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -545,10 +681,10 @@
 <section class="section" id="featured-tickets" v-cloak>
     <div class="container" id="tickets-app">
         <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+            <h2 class="fw-bold" style="letter-spacing:2px">
                 <i class="fa-solid fa-ticket me-2"></i>精選景點門票
             </h2>
-            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -591,10 +727,10 @@
 <section class="section" id="featured-transports" v-cloak>
     <div class="container" id="transports-app">  
         <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
+            <h2 class="fw-bold" style="letter-spacing:2px">
                 <i class="fa-solid fa-car-side me-2"></i>精選交通
             </h2>
-            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
         </div>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -836,7 +972,7 @@
 <section class="section" id="faqSection">
     <div class="container py-3">
         <div class="section-title mb-4">
-            <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px;color:#7ec8e3;">
+            <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px">
                 <i class="fa-solid fa-circle-question me-2"></i> 常見問題
             </h2>
             <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
@@ -874,8 +1010,16 @@
 
 
 @section Scripts {
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // ✅ 初始化時搬出 dropdown-panel（確保不被 hero 包住）
+        document.addEventListener('DOMContentLoaded', () => {
+            const panel = document.getElementById('destPanel');
+            if (panel && panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+            }
+        });
+    </script>
+
     <script>
 
         // 共用：建立一個 Vue + Swiper 幫手
@@ -1122,7 +1266,38 @@
         }
         renderSuggest(TW_DESTS);
 
-        function openDest(){ $('#destPanel').show(); }
+        function openDest() {
+              const input = document.getElementById('destinationInput');
+              const panel = document.getElementById('destPanel');
+
+              if (panel.parentElement !== document.body) {
+                document.body.appendChild(panel);
+              }
+
+              const rect = input.getBoundingClientRect();
+              const scrollTop = window.scrollY || document.documentElement.scrollTop;
+              const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
+
+              const panelHeight = panel.scrollHeight || 260;
+              const spaceBelow = window.innerHeight - rect.bottom;
+              const spaceAbove = rect.top;
+
+              panel.style.position = 'absolute';
+              panel.style.left = rect.left + scrollLeft + 'px';
+              panel.style.width = rect.width + 'px';
+              panel.style.zIndex = '2147483647';
+
+              // ✅ 自動判斷：若下方空間不足，往上展開
+              if (spaceBelow < panelHeight + 20 && spaceAbove > panelHeight) {
+                panel.style.top = (rect.top + scrollTop - panelHeight - 8) + 'px';
+              } else {
+                panel.style.top = (rect.bottom + scrollTop + 6) + 'px';
+              }
+
+              panel.style.display = 'block';
+        }
+
+
         function closeAllDropdowns(){ $('.dropdown-panel').hide(); }
 
         // 目的地外層：只有點「非 input 區域」才切換面板
@@ -1222,7 +1397,7 @@
                     icon: 'warning',
                     title: '資訊尚未填寫完整',
                     text: '請選擇「目的地」及「旅行日期」。',
-                    confirmButtonColor: '#22B3C1',
+                    confirmButtonColor: '#7ec8e3',
                     confirmButtonText: '我知道了'
                 });
                 return false;

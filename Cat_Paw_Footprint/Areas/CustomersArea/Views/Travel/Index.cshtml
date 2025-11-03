@@ -116,6 +116,20 @@
                 </div>
                 <div class="card-body">
 
+                    <!-- 🟢 新增：行程清單下拉選單 -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">🗂 我的行程清單</label>
+                        <div class="input-group">
+                            <select class="form-select" v-model="selectedProject" @@change ="onTripSelected">
+                                <option value="">➕ 新建立行程</option>
+                                <option v-for="trip in tripList" :key="trip.projectID" :value="trip.projectID">
+                                    {{ trip.projectName }}
+                                </option>
+                            </select>
+                            <button class="btn btn-outline-danger" v-if="selectedProject" @@click ="deleteTrip">🗑 刪除</button>
+                        </div>
+                    </div>
+
                     <!-- 行程名稱 & 天數設定 -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
                         <input v-model="projectName" placeholder="行程名稱" class="form-control w-50" />
@@ -165,7 +179,7 @@
 
                     <!-- 儲存方法為 saveTrip() -->
                     <button class="btn btn-success w-100 mt-3" @@click="saveTrip">
-                        💾 儲存行程
+                        {{ selectedProject ? '💾 更新行程' : '💾 儲存新行程' }}
                     </button>                    
                 </div>
             </div>
@@ -259,6 +273,10 @@
                     totalDays: 1,   // 行程天數
                     currentDay: 1,  // 目前選擇的天數
                     tripDays: [{ day: 1, items: [] }],  // 多天行程陣列
+
+                    // 🟢 新增：行程管理用變數
+                    tripList: [],          // 行程清單
+                    selectedProject: '',    // 目前選中的行程
 
                     /* 目前登入使用者資訊 */
                     currentUser: null,  
@@ -410,7 +428,55 @@
                     }
                 },
 
-                /* 儲存行程 */
+                // 🟢 新增：取得行程清單
+                async loadTripList() {
+                    if (!this.currentUser) return;
+                    const res = await fetch(`/api/trips/list?customerId=${this.currentUser.customerId}`);
+                    this.tripList = await res.json();
+                },
+
+                // 🟢 新增：當下拉選單變更時載入行程
+                async onTripSelected() {
+                    if (!this.selectedProject) {
+                        this.projectName = ''; this.totalDays = 1; this.tripDays = [{ day: 1, items: [] }];
+                        return;
+                    }
+                    const res = await fetch(`/api/trips/${this.selectedProject}`);
+                    const data = await res.json();
+                    this.projectName = data.projectName;
+                    this.totalDays = data.totalDays;
+                    this.tripDays = [];
+                    for (let d = 1; d <= data.totalDays; d++) {
+                        const items = data.details.filter(x => x.tripDate === d)
+                        .map(x => ({
+                            uid: `${x.tripType}-${x.locationID || x.hotelID || x.restaurantID}-${Date.now()}`,
+                            id: x.locationID || x.hotelID || x.restaurantID,
+                            name: x.location?.locationName || x.hotel?.hotelName || x.restaurant?.restaurantName,
+                            typeLabel: x.tripType,
+                            startTime: x.startTime,
+                            stayMinute: x.stayMinute,
+                            driveMinute: 0,
+                            lat: x.location?.locationLat || x.hotel?.hotelLat || x.restaurant?.restaurantLat,
+                            lng: x.location?.locationLng || x.hotel?.hotelLng || x.restaurant?.restaurantLng
+                        }));
+
+                        this.tripDays.push({ day: d, items });
+                    }
+                    this.drawRoute();
+                },
+
+                // 🟢 新增：刪除行程
+                async deleteTrip() {
+                    if (!confirm("確定要刪除此行程嗎？")) return;
+                    await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
+                    alert("✅ 已刪除行程");
+                    this.selectedProject = "";
+                    this.loadTripList();
+                    this.projectName = '';
+                    this.tripDays = [{ day: 1, items: [] }];
+                },
+                
+                /* 儲存行程 (舊) 
                 async saveTrip() {
                     if (!this.currentUser) {
                         alert("⚠️ 尚未登入，無法儲存行程！");
@@ -472,8 +538,39 @@
                         const err = await res.text();
                         alert(`❌ 儲存失敗：${err}`);
                     }
+                },*/
+                // 🟡 修改：儲存邏輯自動判斷新建或更新 (新)
+                async saveTrip() {
+                    if (!this.currentUser) { alert("⚠️ 尚未登入！"); return; }
+                    const payload = {
+                        ProjectID: this.selectedProject || 0,
+                        CustomerID: Number(this.currentUser.customerId),
+                        ProjectName: this.projectName || "未命名行程",
+                        TotalDays: this.totalDays,
+                        Details: this.tripDays.flatMap((d, dayIndex) =>
+                            d.items.map((x, i) => ({
+                                TripDate: dayIndex + 1,
+                                TripSequence: i + 1,
+                                StartTime: x.startTime,
+                                StayMinute: x.stayMinute,
+                                TripType: x.typeLabel,
+                                LocationID: x.typeLabel === "景點" ? x.id : null,
+                                RestaurantID: x.typeLabel === "美食" ? x.id : null,
+                                HotelID: x.typeLabel === "住宿" ? x.id : null
+                            }))
+                        )
+                    };
+                    let res;
+                    if (!this.selectedProject)
+                        res = await fetch("/api/trips/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                    else
+                        res = await fetch("/api/trips/update", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                    const msg = await res.text();
+                    alert(msg);
+                    this.loadTripList();
                 },
 
+                
                 /* 初始化地圖 */
                 initMap() {
                     console.log("🗺️ Google Map 初始化成功");
@@ -723,7 +820,10 @@
                 });
 
                 /* 初始化抓取登入者 */ 
-                this.getCurrentUser(); 
+                this.getCurrentUser();
+
+                // 🟡 修改：載入使用者後自動載入行程清單
+                this.getCurrentUser().then(() => this.loadTripList());
 
                 /* 重新啟用所有 dropdown 功能 */ 
                 const dropdownList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
