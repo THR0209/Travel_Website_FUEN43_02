@@ -6,7 +6,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.ViewModel
 	public class TripProjectViewModel
 	{
 		[Display(Name = "會員ID")]
-		public int CustomerID { get; set; }
+		public int? CustomerID { get; set; }
 
 		[Display(Name = "行程ID")]
 		public int ProjectID { get; set; }

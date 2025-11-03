@@ -22,4 +22,8 @@ public partial class CustomerTripProjects
     public DateTime? UpdateTime { get; set; }
 
     public int? TotalDays { get; set; }
+
+    // 🟢 新增：一對多關聯 — 對應 TripProjectDetails
+    public virtual ICollection<TripProjectDetails>? TripProjectDetails { get; set; }
+
 }

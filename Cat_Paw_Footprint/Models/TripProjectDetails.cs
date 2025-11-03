@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Cat_Paw_Footprint.Models;
 
@@ -35,7 +36,9 @@ public partial class TripProjectDetails
 
     public virtual Locations? Location { get; set; }
 
-    public virtual CustomerTripProjects? Project { get; set; }
+    //[ForeignKey("ProjectID")]
+    [NotMapped]
+	public virtual CustomerTripProjects? Project { get; set; }
 
     public virtual Restaurants? Restaurant { get; set; }
 
