@@ -123,10 +123,15 @@
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card contact-card shadow border-0 rounded-4 mx-auto">
-                <div class="card-header text-white fw-bold py-2"
+                <div class="card-header text-white fw-bold py-2 d-flex justify-content-between align-items-center"
                      style="background: linear-gradient(90deg,#7ec8e3 20%,#22b3c1 100%); font-size: 1.1rem;">
-                    <i class="fa-solid fa-envelope-open-text me-2"></i> 聯絡我們
+                    <div><i class="fa-solid fa-envelope-open-text me-2"></i> 聯絡我們</div>
+                    <button type="button" class="btn btn-sm btn-light text-primary rounded-pill fw-semibold"
+                            v-on:click ="autoFill">
+                        <i class="fa-solid fa-rocket me-1"></i>
+                    </button>
                 </div>
+
 
                 <div class="card-body p-3">
                     <p class="text-secondary mb-3 small">
@@ -170,72 +175,79 @@
 </div>
 
 @section Scripts { 
-    <script>
-    const { createApp } = Vue;
+<script>
+const { createApp } = Vue;
 
-    createApp({
-        data() {
-            return {
-                form: { name: '', email: '', subject: '', message: '' },
-                loading: false
-            };
-        },
-        methods: {
-            async sendForm(e) {
-                e.preventDefault(); // 阻止表單預設提交
-                console.log("🚀 sendForm triggered");
+createApp({
+    data() {
+        return {
+            form: { name: '', email: '', subject: '', message: '' },
+            loading: false
+        };
+    },
+    methods: {
+        async sendForm(e) {
+            e.preventDefault();
+            console.log("🚀 sendForm triggered");
 
-                if (!this.form.name.trim()) {
-                    window.showAlert('warning', '提醒', '請輸入您的姓名');
-                    return;
-                }
-                if (!this.form.email.trim()) {
-                    window.showAlert('warning', '提醒', '請輸入您的 Email');
-                    return;
-                }
+            if (!this.form.name.trim()) {
+                window.showAlert('warning', '提醒', '請輸入您的姓名');
+                return;
+            }
+            if (!this.form.email.trim()) {
+                window.showAlert('warning', '提醒', '請輸入您的 Email');
+                return;
+            }
 
-                const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
-                if (!emailRegex.test(this.form.email.trim())) {
-                    window.showAlert('warning', '提醒', '請輸入有效的 Email 格式，例如：catpaw@example.com');
-                    return;
-                }
+            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!emailRegex.test(this.form.email.trim())) {
+                window.showAlert('warning', '提醒', '請輸入有效的 Email 格式，例如：catpaw@example.com');
+                return;
+            }
 
-                if (!this.form.subject.trim()) {
-                    window.showAlert('warning', '提醒', '請輸入主旨');
-                    return;
-                }
-                if (!this.form.message.trim()) {
-                    window.showAlert('warning', '提醒', '請輸入您的訊息內容');
-                    return;
-                }
+            if (!this.form.subject.trim()) {
+                window.showAlert('warning', '提醒', '請輸入主旨');
+                return;
+            }
+            if (!this.form.message.trim()) {
+                window.showAlert('warning', '提醒', '請輸入您的訊息內容');
+                return;
+            }
 
-                this.loading = true;
-                try {
-                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                    const res = await axios.post('/CustomersArea/Contact/Send', this.form, {
-                        headers: { 'RequestVerificationToken': token }
-                    });
+            this.loading = true;
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const res = await axios.post('/CustomersArea/Contact/Send', this.form, {
+                    headers: { 'RequestVerificationToken': token }
+                });
 
-                    if (res.data?.status === 'success') {
-                        window.showAlert('success', '寄信成功', '您的訊息已送出，我們會盡快回覆您！');
-                        this.form = { name: '', email: '', subject: '', message: '' };
-                    } else {
-                        throw new Error(res.data?.message || '寄信失敗，請稍後再試');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    window.showAlert('error', '寄信失敗', err.message);
-                } finally {
-                    this.loading = false;
+                if (res.data?.status === 'success') {
+                    window.showAlert('success', '寄信成功', '您的訊息已送出，我們會盡快回覆您！');
+                    this.form = { name: '', email: '', subject: '', message: '' };
+                } else {
+                    throw new Error(res.data?.message || '寄信失敗，請稍後再試');
                 }
+            } catch (err) {
+                console.error(err);
+                window.showAlert('error', '寄信失敗', err.message);
+            } finally {
+                this.loading = false;
             }
         },
-        mounted() {
-            const form = document.getElementById('contactForm');
-            if (form) {
-                form.addEventListener('submit', this.sendForm);
-            }
+        autoFill() {
+            this.form.name = '喵星旅客';
+            this.form.email = 'catpaw@example.com';
+            this.form.subject = '想了解客服功能';
+            this.form.message = '您好，我想諮詢一下客服中心的使用方式～';
         }
-    }).mount('#contactApp');
-    </script>
+    },
+    mounted() {
+        const form = document.getElementById('contactForm');
+        if (form) {
+            form.addEventListener('submit', this.sendForm);
+        }
+    }
+}).mount('#contactApp');
+</script>
+
 }
