@@ -27,7 +27,6 @@
                     <th>產品圖片</th>
                     <th>產品名稱</th>
                     <th>價格</th>
-                    <th>出團時間</th>
                     <th>上架時間</th>
                     <th>狀態</th>
                     <th>人數上限</th>
@@ -107,15 +106,6 @@
                     { data: "productPrice", title: "價格", width: "8%", className: "dt-body-center" },
                     {
                         data: "startDate",
-                        title: "出團時間",
-                        width: "10%",
-                        render: function (data) {
-                            return data ? dayjs(data).format("YYYY-MM-DD A hh:mm").replace("AM", "上午").replace("PM", "下午") : "";
-                        },
-                        className: "dt-body-left"
-                    },
-                    {
-                        data: "createTime",
                         title: "上架時間",
                         width: "10%",
                         render: function (data) {
