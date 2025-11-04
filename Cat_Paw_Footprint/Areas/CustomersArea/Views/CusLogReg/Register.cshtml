@@ -48,6 +48,10 @@
                 <button type="submit" class="btn btn-outline-primary py-2 fw-semibold" :disabled="loading">
                     {{ loading ? "註冊中..." : "註冊" }}
                 </button>
+                <!-- 🟢 一鍵註冊按鈕 -->
+                <button type="button" class="btn btn-secondary py-2 fw-semibold mt-2" @@click ="quickRegister">
+                    一鍵註冊 Demo 帳號
+                </button>
             </div>
         </form>
 
@@ -117,6 +121,20 @@
                     } finally {
                         this.loading = false;
                     }
+                },
+
+                // 🟢 一鍵註冊方法
+                quickRegister() {
+                    const randomNum = Math.floor(Math.random() * 10000);
+                    this.form = {
+                        account: "jianlinwu290",
+        password: "Qazwsx@123",
+        fullName: "吳建霖",
+        email: "jianlinwu290@gmail.com",
+        phone: "0900000000",
+        address: "台北市中正區仁愛路一段 100 號"
+                    };
+                    this.register(); // 直接送出註冊
                 }
             }
         }).mount("#registerApp");
