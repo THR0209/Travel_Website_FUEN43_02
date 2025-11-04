@@ -262,7 +262,7 @@
 
                     /* 補強說明「地區與縣市動態綁定」 */
                     selectedRegion: "離島",   // 預設地區
-                    selectedDistrict: "",     // 預設不選縣市
+                    selectedDistrict: "澎湖",     // 預設縣市
                     regions: ["北部", "中部", "南部", "東部", "離島"],    // 地區清單
                     districtsByRegion: {    // 縣市對應地區
                         "北部": ["台北市", "新北市", "基隆市", "桃園市", "新竹縣", "新竹市", "宜蘭縣"],
@@ -418,7 +418,7 @@
                 async clearTrip() {
                     const current = this.tripDays[this.currentDay - 1];
                     if (current.items.length === 0) {
-                        showAlert('warning', `第 ${this.currentDay} 天目前沒有任何行程可清空`);
+                        showAlert('info', `第 ${this.currentDay} 天目前沒有任何行程可清空`);
                         return;
                     }
 
@@ -545,7 +545,7 @@
                             body: JSON.stringify(payload) });
 
                     const msg = await res.text();
-                    showAlert('warning',msg);
+                    showAlert('success',msg);
                     this.loadTripList();
                 },
                 
