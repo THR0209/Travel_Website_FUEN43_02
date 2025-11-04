@@ -61,7 +61,7 @@ namespace Cat_Paw_Footprint.Services
                         (int)r.CustomerID,
                         "優惠券即將到期",
                         $"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期，請盡快使用！",
-                        "優惠券"
+                        "優惠活動"
                     );
                 }
             }

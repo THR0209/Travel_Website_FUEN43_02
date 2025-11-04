@@ -203,15 +203,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ----------- 全部已讀按鈕事件 -----------
-    const btn = document.getElementById('markAllReadBtn');
-    if (btn) {
+    document.querySelectorAll('#markAllReadBtnNavbar, #markAllReadBtnPage').forEach(btn => {
         btn.addEventListener('click', async () => {
             try {
                 const res = await axios.post('/CustomersArea/Notifications/MarkAllAsRead');
                 if (res.data.success) {
                     window.showAlert('success', '通知中心', '全部通知已標記為已讀 🐾');
+
+                    // ✅ 更新 navbar badge + 下拉列表
                     await window.updateUnread();
                     await window.updateList();
+
+                    // ✅ 若頁面上有通知卡片，也同步變灰
+                    document.querySelectorAll('.notif-card').forEach(c => c.classList.add('is-read'));
                 } else {
                     window.showAlert('warning', '操作失敗', res.data.message || '請稍後再試');
                 }
@@ -220,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.showAlert('error', '錯誤', '伺服器連線失敗');
             }
         });
-    }
+    });
 
 
     // ----------- 熱門FAQ Accordion載入（首頁） -----------

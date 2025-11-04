@@ -24,7 +24,7 @@
                 <span id="notifTitle">全部通知</span>
             </h4>
 
-            <button id="markAllReadBtn" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm">
+            <button id="markAllReadBtnPage" class="btn btn-outline-primary btn-sm rounded-pill shadow-sm">
                 <i class="fa-solid fa-check-double me-1"></i> 全部標示為已讀
             </button>
         </div>
@@ -321,37 +321,7 @@
                 });
             });
 
-            // ------------------------------
-            // 🔹 全部標示為已讀
-            // ------------------------------
-            document.getElementById("markAllReadBtn")?.addEventListener("click", async () => {
-                const btn = document.getElementById("markAllReadBtn");
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> 標示中...`;
 
-                try {
-                    const res = await axios.post("/CustomersArea/Notifications/MarkAllAsRead");
-
-                    if (res.data.success) {
-                        document.querySelectorAll(".notif-card").forEach(c => {
-                            c.style.transition = "opacity 0.4s";
-                            c.style.opacity = "0.6";
-                            c.classList.add("is-read");
-                        });
-
-                        window.showAlert("success", "全部已讀", "所有通知已標示為已讀 🐾");
-                        if (typeof updateUnread === "function") updateUnread();
-                    } else {
-                        window.showAlert("info", "操作失敗", res.data.message || "");
-                    }
-                } catch (err) {
-                    console.error("❌ 全部標示為已讀失敗", err);
-                    window.showAlert("error", "錯誤", "操作失敗，請稍後再試");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = `<i class="fa-solid fa-check-double me-1"></i> 全部標示為已讀`;
-                }
-            });
 
 
             // ------------------------------

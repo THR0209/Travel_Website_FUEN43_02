@@ -2325,7 +2325,7 @@ input, select, textarea {
     .dropdown-menu.notif-dropdown {
         position: absolute !important;
         top: 100% !important;
-        right: 0 !important;
+        right: -300% !important;
         left: auto !important;
         transform: translateY(6px) !important;
         width: 90vw !important;
