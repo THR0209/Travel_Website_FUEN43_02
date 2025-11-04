@@ -109,14 +109,21 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			if (vm == null || string.IsNullOrWhiteSpace(vm.Subject) || string.IsNullOrWhiteSpace(vm.Description))
 				return BadRequest(new { success = false, message = "請輸入主旨與問題內容" });
 
-			var defaultStatus = await _context.TicketStatus.FirstOrDefaultAsync(s => s.StatusDesc.Contains("待處理"));
-			var defaultPriority = await _context.TicketPriority.FirstOrDefaultAsync(p => p.PriorityDesc.Contains("低"));
-			var defaultType = await _context.TicketTypes.FirstOrDefaultAsync();
+			// ✅ 檢查分類是否存在
+			var ticketType = await _context.TicketTypes
+				.FirstOrDefaultAsync(t => t.TicketTypeID == vm.TicketTypeID);
+			if (ticketType == null)
+				return BadRequest(new { success = false, message = "請選擇有效的分類" });
+
+			var defaultStatus = await _context.TicketStatus
+				.FirstOrDefaultAsync(s => s.StatusDesc.Contains("待處理"));
+			var defaultPriority = await _context.TicketPriority
+				.FirstOrDefaultAsync(p => p.PriorityDesc.Contains("低"));
 
 			if (defaultStatus == null || defaultPriority == null)
 				return StatusCode(500, new { success = false, message = "找不到預設狀態或優先度。" });
 
-			// 分配客服
+			// ✅ 分配客服（找最少工單的員工）
 			var assignedEmp = await _context.Employees
 				.Include(e => e.Role)
 				.Where(e => e.Role.RoleName == "CustomerService")
@@ -127,39 +134,44 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			if (assignedEmp == null)
 				return StatusCode(500, new { success = false, message = "找不到客服人員。" });
 
-			// 產生今日代碼
+			// 產生工單代碼
 			var today = DateTime.Now.Date;
 			var countToday = await _context.CustomerSupportTickets
 				.CountAsync(t => t.CreateTime.HasValue && t.CreateTime.Value.Date == today);
 			var newCode = $"CST{today:yyMMdd}{(countToday + 1):D4}";
 
-			var entity = new CustomerSupportTickets
+			try
 			{
-				CustomerID = customerId,
-				EmployeeID = assignedEmp.EmployeeID,
-				Subject = vm.Subject.Trim(),
-				Description = vm.Description.Trim(),
-				TicketTypeID = vm.TicketTypeID,
-				StatusID = defaultStatus.StatusID,
-				PriorityID = defaultPriority.PriorityID,
-				CreateTime = DateTime.Now,
-				UpdateTime = DateTime.Now,
-				TicketCode = newCode
-			};
+				var entity = new CustomerSupportTickets
+				{
+					CustomerID = customerId,
+					EmployeeID = assignedEmp.EmployeeID,
+					Subject = vm.Subject.Trim(),
+					Description = vm.Description.Trim(),
+					TicketTypeID = vm.TicketTypeID,
+					StatusID = defaultStatus.StatusID,
+					PriorityID = defaultPriority.PriorityID,
+					CreateTime = DateTime.Now,
+					UpdateTime = DateTime.Now,
+					TicketCode = newCode
+				};
 
-			_context.CustomerSupportTickets.Add(entity);
-			await _context.SaveChangesAsync();
+				_context.CustomerSupportTickets.Add(entity);
+				await _context.SaveChangesAsync();
 
-			return Json(new
+				return Json(new
+				{
+					success = true,
+					ticketID = entity.TicketID,
+					subject = entity.Subject,
+					statusName = defaultStatus.StatusDesc,
+					createTime = entity.CreateTime?.ToString("yyyy-MM-dd HH:mm:ss")
+				});
+			}
+			catch (Exception ex)
 			{
-				success = true,
-				ticketID = entity.TicketID,
-				subject = entity.Subject,
-				statusName = defaultStatus.StatusDesc,
-				createTime = entity.CreateTime.HasValue
-					? entity.CreateTime.Value.ToString("yyyy-MM-dd HH:mm:ss")
-					: ""
-			});
+				return StatusCode(500, new { success = false, message = $"建立工單時發生錯誤：{ex.Message}" });
+			}
 		}
 
 		// ======================= 取得聊天訊息 =======================

@@ -4,56 +4,72 @@
     ViewData["Title"] = "登入";
 }
 
-
-@* @if (Model != null)
-{
-    <div style="border: 1px solid red; padding: 10px;">
-        測試 ErrorMessage 是否有綁定成功：<strong>@Model.ErrorMessage</strong>
-    </div>
-}
-else
-{
-    <div style="border: 1px solid blue; padding: 10px;">
-        View 的 Model 是 null！
-    </div>
-} *@
 <div class="row justify-content-center">
     <div class="card" style="max-width:500px;">
         <div class="card-body">
             <h2 class="text-center mb-4">員工登入</h2>
+
             <form asp-area="Employee" asp-controller="EmployeeAuth" asp-action="Login" method="post">
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                <!-- 帳號 -->
                 <div class="form-floating mb-3">
-                    <input asp-for="Account" class="form-control" placeholder="請輸入帳號" name="Account" />
+                    <input asp-for="Account" class="form-control" placeholder="請輸入帳號" id="Account" name="Account" />
                     <label asp-for="Account">帳號</label>
                     <span asp-validation-for="Account" class="text-danger"></span>
                 </div>
 
+                <!-- 密碼 -->
                 <div class="form-floating mb-3">
-                    <input asp-for="Password" class="form-control" placeholder="請輸入密碼" type="password" name="Password" />
+                    <input asp-for="Password" class="form-control" placeholder="請輸入密碼" type="password" id="Password" name="Password" />
                     <label asp-for="Password">密碼</label>
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
+                <!-- 一鍵輸入按鈕 -->
+                <div class="d-flex justify-content-end gap-2 mb-3">
+                    <button type="button" id="fillSupport" class="btn btn-outline-info btn-sm">
+                        <i class="fa-solid fa-headset me-1"></i> 客服人員
+                    </button>
+                    <button type="button" id="fillAdmin" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-user-shield me-1"></i> Admin
+                    </button>
+                </div>
+
+                <!-- 登入按鈕 -->
                 <button type="submit" class="btn btn-outline-primary w-100">登入</button>
 
                 @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
                 {
-                    <div class="alert alert-danger mt-3"><p style="color: red;">@Model?.ErrorMessage</p></div>
+                    <div class="alert alert-danger mt-3">
+                        <p style="color: red;">@Model?.ErrorMessage</p>
+                    </div>
                 }
             </form>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
+        // 一鍵輸入功能
+        document.getElementById('fillAdmin')?.addEventListener('click', () => {
+            document.getElementById('Account').value = 'PWDSUPERADMIN';
+            document.getElementById('Password').value = 'SUPERADMIN';
+        });
+
+        document.getElementById('fillSupport')?.addEventListener('click', () => {
+            document.getElementById('Account').value = 'iwanchi02';
+            document.getElementById('Password').value = '000000';
+        });
+
+        // 若有錯誤訊息，自動聚焦帳號欄並滑動至錯誤框
         window.addEventListener('DOMContentLoaded', function () {
             const error = document.querySelector('.alert-danger');
             if (error) {
-                document.getElementById('Account')?.focus(); //自動聚焦帳號欄
-                error.scrollIntoView({ behavior: "smooth", block: "center" }); //滑到錯誤框
+                document.getElementById('Account')?.focus();
+                error.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         });
     </script>

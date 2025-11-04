@@ -41,7 +41,9 @@ https://templatemo.com/tm-580-woox-travel
 28. 平板 RWD (≤992px)
 29. 大型桌面 (≥1400px)
 30. 通知中心專屬樣式（Notifications）
-31.
+31. 登入頁面專屬樣式（Login Page）
+32.Register Page 置中樣式
+33. Auth Pages（登入 / 註冊 / 忘記密碼 共用樣式）
 ======================================================= */
 
 
@@ -104,7 +106,7 @@ header, nav, section, article, aside, footer, hgroup {
 ======================================================= */
 body {
     font-family: "Chiron GoRound TC", 'Noto Sans TC', system-ui, "Poppins", sans-serif;
-    background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+    background: linear-gradient(180deg, #f6fbff 0%, #ffffff 100%);
     background-attachment: fixed;
     color: #1f2937;
     overflow-x: hidden;
@@ -213,6 +215,41 @@ img {
     .btn-outline-secondary:hover {
         box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
     }
+.btn-outline-danger {
+    color: #fff;
+    background: linear-gradient(135deg, #ff6b6b, #ff8c8c);
+    border: 1px solid #ff6b6b;
+    border-radius: 999px; /* pill 造型 */
+    font-weight: 600;
+    box-shadow: 0 0 0.4rem rgba(255, 107, 107, 0.35);
+    transition: all 0.25s ease;
+}
+
+    .btn-outline-danger:hover {
+        background: #fff;
+        color: #ff4c4c;
+        border-color: #ff4c4c;
+        box-shadow: 0 0 0.6rem rgba(255, 107, 107, 0.45);
+    }
+
+    .btn-outline-danger:disabled,
+    .btn-outline-danger.disabled {
+        opacity: 0.6;
+        background: #ffdede;
+        border-color: #ffb6b6;
+        color: #aa3a3a;
+        cursor: not-allowed;
+    }
+#markAllReadBtn {
+    transition: all .2s ease;
+}
+
+    #markAllReadBtn:hover {
+        background-color: #22B3C1;
+        color: white;
+    }
+
+
 /* =======================================================
 📗 06. 通用卡片樣式
 ======================================================= */
@@ -1296,7 +1333,7 @@ img {
 
 /* 聊天泡泡基本樣式 */
 .chat-bubble {
-    max-width: 72%;
+    max-width: 100%;
     padding: 12px 18px;
     border-radius: 1.4em;
     box-shadow: 0 2px 8px #0002;
@@ -1306,6 +1343,9 @@ img {
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
     -ms-user-select: text !important;
+    display: inline-block;
+    overflow: hidden;
+    white-space: normal;
 }
 
     /*  客戶（自己）訊息反白樣式 */
@@ -1352,6 +1392,14 @@ img {
     .chat-bubble img {
         opacity: 0;
         transition: opacity 0.3s ease;
+        display: block;
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        object-fit: contain;
+        margin: 4px 0;
+        padding: 4px;
+        background: #fff;
     }
 
         .chat-bubble img.loaded {
@@ -1401,7 +1449,131 @@ img {
 .progress-bar {
     background: linear-gradient(90deg, #7ec8e3, #b4e1eb);
 }
+/* =======================================================
+🐾 聊天室圖片與載入動畫 RWD 調整
+======================================================= */
 
+/* 包住圖片的外層 */
+.image-wrapper {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 180px;
+    height: 160px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 4px;
+}
+
+/* 貓掌動畫與提示文字 */
+.loading-spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.9);
+    z-index: 2;
+}
+
+    .loading-spinner i {
+        font-size: 1.8rem;
+        color: #22b3c1;
+        animation: pawBeat 1.3s infinite ease-in-out;
+    }
+
+.loading-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: .25rem;
+    font-weight: 500;
+}
+@keyframes pawBeat {
+    0%,100% {
+        transform: scale(1);
+        opacity: .6;
+    }
+
+    50% {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+}
+
+/* 多張圖片排列 */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+    .image-grid img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+        transition: opacity .3s ease;
+        cursor: zoom-in;
+    }
+
+/* =======================================================
+📱 手機 (≤576px)
+======================================================= */
+@media (max-width: 576px) {
+    .image-wrapper {
+        width: 100%;
+        max-width: 220px;
+        height: auto;
+    }
+
+    .chat-bubble img {
+        width: 100%;
+        height: auto;
+        max-width: 90px;
+        object-fit: contain;
+    }
+
+    .loading-spinner i {
+        font-size: 1.4rem;
+    }
+
+    .loading-text {
+        font-size: .8rem;
+    }
+
+    .image-grid {
+        grid-template-columns: repeat(2, minmax(90px,1fr));
+        gap: 5px;
+    }
+
+        .image-grid img {
+            height: 100px;
+            object-fit: cover;
+        }
+}
+
+/* 平板與桌機微調 */
+@media (max-width: 992px) {
+    .image-wrapper {
+        width: 160px;
+        height: 140px;
+    }
+
+    .chat-bubble img {
+        max-width: 160px;
+        max-height: 140px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .image-wrapper {
+        width: 220px;
+        height: 180px;
+    }
+}
 /* ====================== 星級評價 ====================== */
 /* 星星互動樣式（若未使用 JS 控制，僅外觀） */
 .star {
@@ -1589,239 +1761,135 @@ img {
 
 /* ======================================================= 
  📘 18. FOOTER 區塊（頁尾資訊與社群連結） 
-======================================================= */ 
-/* 🔹 Footer 主體 */
-footer {
-    background: linear-gradient(135deg, #22b3c1 0%, #7ec8e3 100%);
-    box-shadow: 0 -6px 24px rgba(0,0,0,0.1);
+======================================================= */
+.cat-footer {
+    position: relative;
+    background: linear-gradient(135deg, #22b3c1, #7ec8e3);
+    color: #fff;
     border-top-left-radius: 40px;
     border-top-right-radius: 40px;
-    position: relative;
     overflow: hidden;
-    z-index: 5;
-}
-    /* 🔹 Footer 上方貓掌分隔線 */
-
-    footer::after {
-        content: "🐾🐾🐾";
-        position: absolute;
-        bottom: 10px;
-        right: 5%;
-        font-size: 3rem;
-        opacity: 0.05;
-        transform: rotate(-15deg);
-    }
-    /* 🔹 Footer 容器設定 */
-
-    footer .footer-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 20px;
-        width: min(1200px, 90vw);
-        margin: 0 auto;
-    }
-
-    /* Footer 內部間距再縮小 */
-    footer .row.g-4 {
-        row-gap: 0.75rem !important;
-    }
-
-    /* 小標題間距縮小 */
-    footer .footer-title {
-        margin-bottom: 0.3rem !important;
-        font-size: 0.95rem !important;
-    }
-
-    /* 清單間距調整 */
-    footer ul li {
-        line-height: 1.3;
-    }
-
-    /* 分隔線與底部資訊間距縮小 */
-    footer hr {
-        margin: 0.6rem 0 !important;
-    }
-
-    /* 版權列更緊湊 */
-    footer .text-secondary {
-        font-size: 0.8rem !important;
-        color: rgba(255,255,255,0.8) !important;
-    }
-
-    /* 社群連結調整尺寸 */
-    footer .d-flex.gap-3 a {
-        font-size: 0.9rem;
-    }
-/* ======================================================= 📗 Footer 品牌區塊 ======================================================= */
-
-.footer-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .75rem;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.1);
 }
 
-    .footer-brand .logo {
-        display: flex;
-        align-items: center;
-        gap: .5rem;
-        font-size: 24px;
-        font-weight: 800;
+.cat-footer-inner {
+    position: relative;
+    z-index: 2;
+}
+
+.footer-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #fff;
+    padding: 5px;
+    box-shadow: 0 4px 10px rgba(255,255,255,0.25);
+}
+
+.footer-title {
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: .75rem;
+}
+
+.footer-links a {
+    color: rgba(255,255,255,0.85);
+    transition: all 0.25s ease;
+}
+
+    .footer-links a:hover {
         color: #fff;
+        transform: translateX(5px);
     }
 
-        .footer-brand .logo i {
-            color: #fff;
-            font-size: 26px;
-        }
-
-    .footer-brand p {
-        color: rgba(255,255,255,0.9);
-        font-size: .95rem;
-        line-height: 1.8;
-        margin: 0;
-    }
-/* ======================================================= 📗 Footer 導覽連結 ======================================================= */
-
-.footer-links {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-}
-
-    .footer-links h5 {
-        font-weight: 700;
-        margin-bottom: .75rem;
-        color: #fff;
-    }
-
-    .footer-links a {
-        color: rgba(255,255,255,0.85);
-        transition: all 0.25s ease;
-    }
-
-        .footer-links a:hover {
-            color: #fff;
-            transform: translateX(4px);
-        }
-/* ======================================================= 📗 Footer 聯絡資訊 ======================================================= */
-
-.footer-contact {
-    color: rgba(255,255,255,0.9);
-}
-
-    .footer-contact h5 {
-        font-weight: 700;
-        margin-bottom: .75rem;
-        color: #fff;
-    }
-
-    .footer-contact p {
-        margin-bottom: .25rem;
-    }
-/* ======================================================= 
-📗 Footer 社群連結 
-======================================================= */
-
-.footer-social {
-    display: flex;
+.footer-social a {
+    display: inline-flex;
     align-items: center;
-    gap: .75rem;
-    margin-top: 1rem;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 1.1rem;
+    margin-right: 8px;
+    transition: all 0.3s ease;
 }
 
-    .footer-social a {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        border: 1px solid rgba(255,255,255,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all .3s ease;
+    .footer-social a:hover {
+        background: #fff;
+        color: #22b3c1;
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(255,255,255,0.25);
     }
-
-        .footer-social a:hover {
-            background-color: #fff;
-            color: var(--brand);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(255,255,255,.25);
-        }
-/* ======================================================= 
-📗 Footer 版權資訊 
-======================================================= */
 
 .footer-bottom {
-    text-align: center;
-    padding-top: 20px;
-    margin-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.25);
-    font-size: .9rem;
-    color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.15);
+    border-top: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.9rem;
 }
 
-    .footer-bottom a {
-        color: #fff;
-        font-weight: 600;
-        text-decoration: underline dotted;
-    }
-
-        .footer-bottom a:hover {
-            text-decoration: underline;
-        }
-/* ======================================================= 
-    📗 Footer 裝飾元
-======================================================= */ 
-
-/* 🐾 背景裝飾貓掌圖案 */
-footer .paw-bg {
+/* 🐾 背景貓掌裝飾 */
+.footer-paw-bg {
     position: absolute;
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(rgba(255,255,255,0.15) 40%, transparent 60%);
-    border-radius: 50%;
-    bottom: -20px;
-    right: 40px;
-    transform: rotate(20deg);
-    z-index: 0;
+    bottom: -40px;
+    right: -40px;
+    width: 180px;
+    height: 180px;
+    background: url('/front-end/assets/images/cute.png') no-repeat center/contain;
+    opacity: 0.08;
+    transform: rotate(-20deg);
+    animation: pawFloat 6s ease-in-out infinite alternate;
 }
-/* ======================================================= 
-    📗 Footer 響應式調整
-======================================================= */
 
-/* 平板以下 */
-@media (max-width: 992px) {
-    footer {
-        padding: 50px 0 25px;
-        border-top-left-radius: 30px;
-        border-top-right-radius: 30px;
+@keyframes pawFloat {
+    from {
+        transform: rotate(-20deg) translateY(0);
+    }
+
+    to {
+        transform: rotate(-15deg) translateY(-10px);
     }
 }
 
-/* 手機 */
-@media (max-width: 576px) {
-    footer {
-        padding-top: 40px;
-        padding-bottom: 20px;
-        border-top-left-radius: 24px;
-        border-top-right-radius: 24px;
+/* 📱 RWD 調整 */
+@media (max-width: 768px) {
+    .cat-footer {
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+    }
+
+    .footer-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .footer-social a {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .footer-title {
+        font-size: 0.95rem;
     }
 }
-
 /* =======================================================
 📘 19. 通知、會員中心下拉選單（Notification Dropdown）
 ======================================================= */
 .dropdown-menu.notif-dropdown {
-    position: fixed !important;
-    z-index: 99999 !important;
-    top: 80px !important;
-    right: 90px !important;
-    transform: none !important;
-    min-width: 320px;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
-    border-radius: 16px;
-    border: none;
-    overflow: hidden;
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: translateY(8px) !important;
+    width: 300px !important;
+    max-width: 400px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    background: #fff !important;
+    border: none !important;
+    z-index: 1060 !important;
 }
 
 .dropdown-menu[data-bs-popper="none"] {
@@ -2160,19 +2228,42 @@ input, select, textarea {
         }
 
 
-    /* 通知下拉改為貼齊圖示下方 */
+    .nav-item.dropdown,
+    .dropdown.notification-dropdown {
+        position: relative !important;
+    }
+    /* 讓通知下拉以 bell icon 為定位基準 */
+    .notification-dropdown {
+        position: relative !important;
+    }
+
     .dropdown-menu.notif-dropdown {
         position: absolute !important;
         top: 100% !important;
         right: 0 !important;
         left: auto !important;
         transform: translateY(6px) !important;
-        border-radius: 16px;
-        min-width: 280px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-        border: none;
-        z-index: 1060;
+        width: 90vw !important;
+        max-width: 360px !important;
+        border-radius: 16px !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
+        border: none !important;
+        background: #fff !important;
+        z-index: 1060 !important;
     }
+
+        .dropdown-menu.notif-dropdown .p-3 {
+            padding: 0.8rem 1rem !important;
+        }
+
+        .dropdown-menu.notif-dropdown #notifList {
+            max-height: 320px !important;
+        }
+
+        .dropdown-menu.notif-dropdown button#markAllReadBtn {
+            font-size: 0.8rem;
+            padding: 2px 10px;
+        }
 
     /* 會員中心下拉改為對齊按鈕 */
     .dropdown-menu.user-dropdown {
@@ -2205,7 +2296,7 @@ input, select, textarea {
 📗28. 平板 RWD (≤992px) 
 ======================================================= */
 
-@media (max-width: 992px) {
+@media (min-width: 577px) and (max-width: 992px) {
     .section-title h2 {
         font-size: 1.6rem;
     }
@@ -2225,6 +2316,25 @@ input, select, textarea {
 
     .hero-content {
         bottom: 10%;
+    }
+    .nav-item.dropdown,
+    .dropdown.notification-dropdown {
+        position: relative !important;
+    }
+
+    .dropdown-menu.notif-dropdown {
+        position: absolute !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        transform: translateY(6px) !important;
+        width: 90vw !important;
+        max-width: 360px !important;
+        border-radius: 16px !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
+        border: none !important;
+        background: #fff !important;
+        z-index: 1060 !important;
     }
 }
 /* ======================================================= 
@@ -2654,3 +2764,237 @@ input, select, textarea {
     }
 }
 
+/* =======================================================
+🐾 購物車整體卡片化 + 優惠券卡片整合 + RWD 優化
+======================================================= */
+
+/* 整體外框 */
+#cartApp .cart-card {
+    background: #ffffff;
+    border: 1px solid #dceef3;
+    border-radius: 24px;
+    padding: 2rem;
+    box-shadow: 0 6px 18px rgba(34, 179, 193, 0.15);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    #cartApp .cart-card:hover {
+        box-shadow: 0 8px 24px rgba(34, 179, 193, 0.25);
+    }
+
+    /* 標題樣式 */
+    #cartApp .cart-card h2 {
+        color: #2255aa;
+        font-weight: 700;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+        #cartApp .cart-card h2::before {
+            content: "🐾";
+            font-size: 1.2rem;
+        }
+
+/* 表格美化 */
+#cartApp table {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    #cartApp table thead {
+        background: #eaf6fb;
+        color: #2255aa;
+        font-weight: 600;
+    }
+
+    #cartApp table tbody tr:hover {
+        background-color: #f7fcff;
+        transition: background-color 0.2s;
+    }
+
+/* 底部合計卡片 */
+#cartApp footer.card {
+    border-radius: 16px;
+    border: 1px solid #dceef3 !important;
+    background: #fdfefe !important;
+    box-shadow: 0 3px 8px rgba(126, 200, 227, 0.15);
+}
+
+/* =======================================================
+🐾 優惠券選擇卡片（內嵌於購物車卡片中）
+======================================================= */
+#cartApp .coupon-card {
+    background: #ffffff;
+    border: 1px solid #dceef3;
+    border-radius: 20px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 6px 18px rgba(34, 179, 193, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+}
+
+    #cartApp .coupon-card:hover {
+        box-shadow: 0 8px 22px rgba(34, 179, 193, 0.15);
+        border-color: #7ec8e3;
+    }
+
+    /* input-group 排版 */
+    #cartApp .coupon-card .input-group {
+        background: #f9fcfd;
+        border: 1px solid #d9e7ea;
+        border-radius: 999px;
+        padding: 0.35rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        flex-wrap: nowrap;
+        align-items: center;
+        transition: all .25s ease;
+    }
+
+        #cartApp .coupon-card .input-group:hover {
+            border-color: #7ec8e3;
+            box-shadow: 0 4px 14px rgba(126, 200, 227, 0.25);
+        }
+
+    /* 左側標籤 */
+    #cartApp .coupon-card .input-group-text {
+        background: linear-gradient(135deg, #7ec8e3, #22b3c1);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 999px 0 0 999px !important;
+        min-width: 160px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* 下拉選單 */
+    #cartApp .coupon-card .form-select {
+        appearance: none;
+        border-radius: 0 999px 999px 0 !important;
+        border-left: 1px solid #e0f2f8 !important;
+        padding: 0.75rem 1.4rem !important;
+        font-size: 1rem;
+        color: #2255aa !important;
+        background-color: #fff !important;
+        font-weight: 500;
+        min-width: 180px;
+        box-shadow: none !important;
+    }
+
+        /* 間距 */
+        #cartApp .coupon-card .form-select + .btn {
+            margin-left: 0.6rem;
+        }
+
+    #cartApp .coupon-card .btn-outline-primary + .btn-outline-secondary {
+        margin-left: 0.4rem;
+    }
+
+    /* 套用/清除按鈕 */
+    #cartApp .coupon-card .btn-outline-primary,
+    #cartApp .coupon-card .btn-outline-secondary {
+        border-radius: 999px;
+        font-weight: 600;
+        padding: 0.65rem 1.3rem;
+        transition: all 0.25s ease;
+    }
+
+        #cartApp .coupon-card .btn-outline-secondary:hover {
+            background: #eaf9ff;
+            color: #1893a0;
+            border-color: #7ec8e3;
+        }
+
+    /* 刪除選取 */
+    #cartApp .coupon-card .btn-outline-danger {
+        margin-left: auto;
+    }
+
+/* =======================================================
+📱 RWD 手機響應式
+======================================================= */
+@media (max-width: 992px) {
+    #cartApp .cart-card {
+        padding: 1.5rem;
+        border-radius: 18px;
+    }
+
+    #cartApp table {
+        font-size: 0.9rem;
+    }
+
+    #cartApp footer.card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #cartApp .coupon-card {
+        flex-direction: column;
+        align-items: stretch;
+        border-radius: 16px;
+        padding: 1rem;
+        gap: 0.8rem;
+    }
+
+        #cartApp .coupon-card .input-group {
+            flex-direction: column;
+            border-radius: 16px;
+            padding: 1rem;
+            width: 100%;
+            gap: 0.6rem;
+        }
+
+        #cartApp .coupon-card .input-group-text,
+        #cartApp .coupon-card .form-select,
+        #cartApp .coupon-card .btn {
+            width: 100%;
+            border-radius: 12px !important;
+        }
+
+        #cartApp .coupon-card .btn-outline-danger {
+            width: 100%;
+        }
+
+    #cartApp .cart-card {
+        padding: 1.2rem;
+        border-radius: 16px;
+    }
+
+    #cartApp h2 {
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    #cartApp table thead {
+        display: none;
+    }
+
+    #cartApp table tbody tr {
+        display: flex;
+        flex-direction: column;
+        border-bottom: 1px solid #eef5f8;
+        margin-bottom: 0.8rem;
+        border-radius: 12px;
+        background: #fdfefe;
+        padding: 0.6rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    #cartApp table td {
+        text-align: left !important;
+        padding: 0.3rem 0.6rem;
+    }
+}

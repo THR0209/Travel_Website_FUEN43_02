@@ -12,14 +12,17 @@
 
 @section Styles {
     <style>
-        /* 統一標題風格 */
+
+        /* --------------------------
+        全域：區塊標題（section title） - 用於各區塊的主標題 h2 與下方連接小條
+        -------------------------- */
         .section-title h2 {
             font-weight: bold;
             letter-spacing: 2px;
             text-align: center;
         }
 
-        .section-title div {
+        .section-title > div {
             width: 60px;
             height: 3px;
             background: #7ec8e3;
@@ -27,42 +30,53 @@
             border-radius: 2px;
         }
 
-        /* 手風琴樣式 */
-        .accordion-button {
-            background-color: #f7fbff;
-            color: #2255aa;
-            border-radius: 12px !important;
-            transition: all .3s;
+        /* --------------------------
+        🐾 Section Card 卡片風格
+        -------------------------- */
+        .section-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            padding: 1.8rem 1.5rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+            position: relative;
+            z-index: 1;
+            transition: all 0.35s ease;
         }
 
-            .accordion-button:not(.collapsed) {
-                background-color: #e6f4ff;
-                color: #226dd3;
-                box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
+            .section-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 22px rgba(0, 0, 0, 0.10);
             }
 
-            .accordion-button:focus {
-                box-shadow: 0 0 0 0.25rem rgba(34,109,211,0.2);
-                border-color: #7ec8e3;
+        /* 卡片之間的呼吸空間 */
+        .section {
+            padding: 0.1rem 0;
+        }
+            /* 交錯柔光背景層（保持層次） */
+            .section:nth-child(even) {
+                background: linear-gradient(180deg, #f9fcff 0%, #ffffff 100%);
             }
 
-        .accordion-body {
-            background: #fff;
-            border-radius: 0 0 12px 12px;
-            color: #444;
+            .section:nth-child(odd) {
+                background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            }
+
+        /* RWD 調整 */
+        @@media (max-width: 768px) {
+            .section-card
+
+        {
+            padding: 1.4rem 1rem;
+            margin: 1.2rem 0.8rem;
+            border-radius: 16px;
         }
 
-        .accordion-item {
-            border: 1px solid #d8ebff;
         }
-
-        .accordion-button::after {
-            filter: hue-rotate(180deg);
-        }
-    </style>
-
-    <style>
-        /* ===== Banner / 搜尋列 ===== */
+        /* --------------------------
+        Hero / Banner - 大背景圖、淡入縮放效果
+        -------------------------- */
         .hero {
             position: relative;
             height: 520px;
@@ -72,6 +86,9 @@
         }
 
         #heroMedia {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             filter: brightness(0.65) saturate(1.15);
             transition: transform 0.8s ease, filter 1s ease;
         }
@@ -81,10 +98,11 @@
             filter: brightness(0.75);
         }
 
-        .hero-content {
-            display: none;
-        }
-        /* ===== Hero 飄浮貓掌動畫 ===== */
+        /* --------------------------
+            飄浮貓掌（裝飾）
+            - pointer-events: none 避免遮擋互動
+            - 使用 keyframes pawFloat 做上下移動與淡入淡出
+        -------------------------- */
         .floating-paws {
             position: absolute;
             left: 0;
@@ -93,7 +111,7 @@
             top: 0;
             overflow: hidden;
             pointer-events: none;
-            z-index: 5;
+            z-index: 10;
         }
 
             .floating-paws span {
@@ -104,7 +122,6 @@
                 filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
             }
 
-                /* 🐾 不同貓掌的起始位置與動畫時間 */
                 .floating-paws span:nth-child(1) {
                     left: 15%;
                     animation-duration: 12s;
@@ -125,8 +142,6 @@
                     animation-delay: 6s;
                     font-size: 2.6rem;
                 }
-
-        /* 🐾 飄浮動畫 */
         @@keyframes pawFloat {
             0%
 
@@ -154,8 +169,7 @@
         }
 
         }
-
-        /* 🐾 RWD 微調（手機上貓掌更小、更慢） */
+        /* 手機：貓掌縮小並延長動畫，使視覺不會搶到搜尋列 */
         @@media (max-width: 768px) {
             .floating-paws span
 
@@ -166,6 +180,10 @@
 
         }
 
+        /* --------------------------
+            搜尋列（Search wrapper）與輸入元件
+            - 包含 tabs、輸入欄、按鈕與內嵌人數控制
+        -------------------------- */
         .search-wrapper {
             position: absolute;
             left: 50%;
@@ -181,19 +199,13 @@
             pointer-events: auto;
         }
 
-            /* 滑鼠懸停：微亮浮起效果 */
-            .search-wrapper:hover {
-                transform: translateX(-50%) translateY(-3px);
-                background: rgba(255, 255, 255, 0.72);
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 0 16px rgba(126, 200, 227, 0.3);
-            }
-            /* 標題文字更醒目 */
             .search-wrapper h1 {
                 font-weight: 700;
                 text-align: center;
                 margin-bottom: 1.2rem;
                 letter-spacing: 1px;
             }
+
         .search-tabs {
             display: flex;
             justify-content: center;
@@ -216,7 +228,7 @@
             .search-tab.active {
                 background: linear-gradient(135deg, #7ec8e3, #22b3c1);
                 color: #fff;
-                box-shadow: 0 4px 10px rgba(34, 179, 193, 0.3);
+                box-shadow: 0 4px 10px rgba(34,179,193,0.3);
             }
 
         .search-box {
@@ -232,12 +244,26 @@
             border-radius: 14px;
             padding: 12px 16px;
             transition: all 0.25s ease;
+            position: relative;
         }
 
             .search-select:focus-within {
                 border-color: #7ec8e3;
             }
 
+        .search-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-weight: 600;
+            color: #222;
+        }
+
+            .search-input::placeholder {
+                color: #6b7d90;
+                font-weight: 500;
+            }
 
         .search-btn {
             background: linear-gradient(135deg, #7ec8e3, #22b3c1);
@@ -253,41 +279,23 @@
                 background: linear-gradient(135deg, #22b3c1, #7ec8e3);
                 box-shadow: 0 4px 12px rgba(34, 179, 193, 0.4);
             }
-        .search-input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-weight: 600;
-            color: #222;
-        }
 
-            .search-input::placeholder {
-                color: #6b7d90;
-                font-weight: 500;
-            }
-
-        /* 保險：避免後面區塊不小心蓋過來 */
-        .section, .container {
-            position: relative;
-            z-index: 1; /* 低於搜尋列即可 */
-        }
-            
+        /* --------------------------
+            建議面板（dropdown-panel）與建議項目
+            - 面板會被 JS 移到 body，CSS 只負責外觀
+        -------------------------- */
         .dropdown-panel {
             background: #fff;
             border-radius: 14px;
             padding: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
             display: none;
-            z-index: 2147483647 !important;
             animation: dropdownFade 0.15s ease;
-            max-height: none;
-            overflow: visible !important;
-            max-width: 100vw !important;
-            overflow: hidden;
-            height: auto !important;
+            max-width: 100vw;
+            overflow: visible;
+            height: auto;
             box-sizing: border-box;
-            z-index: 999999 !important;
+            z-index: 999999;
         }
 
             .dropdown-panel::-webkit-scrollbar {
@@ -302,8 +310,6 @@
                 .dropdown-panel::-webkit-scrollbar-thumb:hover {
                     background-color: rgba(126, 200, 227, 0.8);
                 }
-
-
         @@keyframes dropdownFade {
             from
 
@@ -334,7 +340,6 @@
             font-size: 0.95rem;
         }
 
-            /* 🐾 Hover 感覺柔和且有亮邊 */
             .suggest-item:hover {
                 background: #e6f8fc;
                 border-color: #b4e3f0;
@@ -342,8 +347,9 @@
                 transform: translateY(-2px);
             }
 
-
-        /* 旅客數：改為內嵌控制（無下拉） */
+        /* --------------------------
+         人數內嵌控制（people-inline）
+        -------------------------- */
         .people-inline {
             display: flex;
             justify-content: space-between;
@@ -361,17 +367,23 @@
                 width: 32px;
                 height: 32px;
                 line-height: 30px;
+                display: inline-flex;
                 align-items: center;
-                /* text-align: center; */
+                justify-content: center;
             }
-
-
-        /* 讓人數欄位自動撐到和其他 search-select 一樣高度 */
+        /* 讓 people 欄位高度與其他 search-select 一致 */
         .search-select .people-inline {
             height: 100%;
         }
+        /* 讓數字與按鈕內容不會撐大高度 */
+        .people-inline span,
+        .people-inline .ctrl * {
+            line-height: 1.2;
+        }
 
-        /* ===== Swiper Arrow Buttons ===== */
+        /* --------------------------
+         Swiper 導覽按鈕（小圓按鈕樣式）
+        -------------------------- */
         .swiper-btn {
             width: 38px;
             height: 38px;
@@ -398,41 +410,39 @@
             gap: 10px;
         }
 
+        /* --------------------------
+          商品標題限制（避免高度不一）
+        -------------------------- */
         .product-title {
-            display: -webkit-box; /* 建立多行彈性盒 */
-            -webkit-box-orient: vertical; /* 垂直方向排列 */
-            -webkit-line-clamp: 2; /* 限制為 2 行 */
-            overflow: hidden; /* 超出隱藏 */
-            text-overflow: ellipsis; /* 加上省略號 */
-            white-space: normal; /* 允許換行 */
-            word-break: break-word; /* 中文或長字自動斷行 */
-            min-height: 3em; /* 避免只有一行時高度不齊 */
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            word-break: break-word;
+            min-height: 3em;
         }
 
-
-
-        /* 讓數字與字不會撐大高度 */
-        .people-inline span,
-        .people-inline .ctrl * {
-            line-height: 1.2; /* 可依視覺調整 */
+        /* --------------------------
+            Section / container stacking
+            - 確保搜尋列在上層（避免被後面區塊蓋過）
+        -------------------------- */
+        .section, .container {
+            position: relative;
+            z-index: 1;
         }
 
-
-        /* 裝飾（避免擋點擊） */
-        .floating-paws {
-            pointer-events: none;
-            z-index: 10;
-        }
-    </style>
-
-    <style>
-        /* ====================== FAQ ====================== */
-        #faqSection {
+        /* --------------------------
+            FAQ（常見問題）專屬樣式
+            - 問題/答案的折疊顯示效果
+        -------------------------- */
+        /* #faqSection {
             background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
             padding: 3rem 2rem;
             border-radius: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
+        } */
 
         .faq-item {
             background: #fff;
@@ -450,10 +460,10 @@
             }
 
         .faq-question {
-            background: linear-gradient(90deg, #eaf6ff, #f9f9fd);
-            color: #2255aa;
+            background: linear-gradient(90deg, #e9f9ff 0%, #f5fbff 100%);
+            color: #208aac;
             font-weight: 600;
-            padding: 1.1rem 1.5rem;
+            padding: 0.6rem 1rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -490,30 +500,88 @@
             display: block;
             animation: fadeIn .4s ease;
         }
-
         @@keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-6px);
-            }
+            from
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        {
+            opacity: 0;
+            transform: translateY(-6px);
         }
 
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
         @@media (max-width: 768px) {
-            .faq-question {
-                font-size: 1rem;
-                padding: 1rem 1.2rem;
+            .faq-question
+
+        {
+            font-size: 1rem;
+            padding: 1rem 1.2rem;
+        }
+
+        .faq-answer {
+            font-size: 0.95rem;
+            padding: 1rem 1.2rem;
+        }
+        /* 搜尋列在小螢幕時調整欄位配置 */
+        .search-box {
+            grid-template-columns: 1fr;
+        }
+
+        }
+
+        /* 熱門產品card */
+        /* 統一產品卡樣式（修正版） */
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+            .product-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 22px rgba(0, 0, 0, 0.1);
             }
 
-            .faq-answer {
-                font-size: 0.95rem;
-                padding: 1rem 1.2rem;
-            }
+        /* 確保圖片固定高度，不撐開卡片 */
+        .product-thumb img {
+            display: block;
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
         }
+
+        /* 內容區塊撐滿剩餘空間 */
+        .product-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(180deg, #f9fcff 0%, #ffffff 100%);
+        }
+
+        /* 限制標題行數 */
+        .product-title {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
+            min-height: 4em;
+        }
+
+        .swiper-wrapper {
+            padding:10px; /* 上右下左 */
+        }
+
     </style>
 }
 
@@ -582,49 +650,54 @@
     </div>
 </section>
 
-
-
 <!-- 為你精選熱門行程 -->
 <section class="section" id="hotProducts" v-cloak>
-    <div class="container" id="hot-app">
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px">
-                <i class="fa-solid fa-paw me-2"></i>精選熱門行程
-            </h2>
-            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "trip" })" class="btn btn-outline-primary rounded-pill fw-bold">
-                查看所有行程 <i class="fa-solid fa-arrow-right ms-2"></i>
-            </a>
-            <div class="swiper-nav d-flex align-items-center gap-2">
-                <div class="swiper-btn hot-prev"><i class="fa-solid fa-chevron-left"></i></div>
-                <div class="swiper-btn hot-next"><i class="fa-solid fa-chevron-right"></i></div>
+    <div class="section-card">
+        <div class="container" id="hot-app">
+            <div class="section-title text-center mb-4">
+                <h2 class="fw-bold" style="letter-spacing:2px">
+                    <i class="fa-solid fa-paw me-2"></i>精選熱門行程
+                </h2>
+                <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
             </div>
-        </div>
 
-        <!-- Swiper -->
-        <div class="swiper hot-swiper" aria-label="熱門商品輪播">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" v-for="p in items" :key="p.productID">
-                    <article class="product-card shadow-sm">
-                        <div class="product-thumb position-relative">
-                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
-                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🔥 熱門</span>
-                        </div>
-                        <div class="product-body p-3">
-                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
-                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
-                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
-                        </div>
-                        <!-- 新增 查看詳情按鈕 -->
-                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
-                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
-                            查看詳情
-                            <i class="fa-solid fa-arrow-right ms-1"></i>
-                        </a>
-                    </article>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "trip" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                    查看所有行程 <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+                <div class="swiper-nav d-flex align-items-center gap-2">
+                    <div class="swiper-btn hot-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="swiper-btn hot-next"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+            </div>
+
+            <!-- Swiper -->
+            <div class="swiper hot-swiper" aria-label="熱門商品輪播">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                        <article class="product-card shadow-sm d-flex flex-column h-100">
+                            <div class="product-thumb position-relative">
+                                <img :src="p.cover" class="w-100" :alt="p.productName">
+                                <span class="badge bg-info position-absolute top-0 start-0 m-2">🔥 熱門</span>
+                            </div>
+
+                            <div class="product-body p-3 d-flex flex-column justify-content-between flex-grow-1">
+                                <div>
+                                    <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                                    <p class="text-muted mb-1">
+                                        <i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}
+                                    </p>
+                                    <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                                </div>
+
+                                <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                                   class="btn btn-outline-primary w-100 rounded-pill fw-bold mt-2">
+                                    查看詳情
+                                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
                 </div>
             </div>
         </div>
@@ -633,44 +706,46 @@
 
 <!-- 精選住宿 -->
 <section class="section" id="featured-hotels" v-cloak>
-    <div class="container" id="hotels-app">
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px">
-                <i class="fa-solid fa-bed me-2"></i>精選住宿
-            </h2>
-            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "hotel" })" class="btn btn-outline-primary rounded-pill fw-bold">
-                查看所有住宿 <i class="fa-solid fa-arrow-right ms-2"></i>
-            </a>
-            <div class="swiper-nav d-flex align-items-center gap-2">
-                <div class="swiper-btn hotel-prev"><i class="fa-solid fa-chevron-left"></i></div>
-                <div class="swiper-btn hotel-next"><i class="fa-solid fa-chevron-right"></i></div>
+    <div class="section-card">
+        <div class="container" id="hotels-app">
+            <div class="section-title text-center mb-4">
+                <h2 class="fw-bold" style="letter-spacing:2px">
+                    <i class="fa-solid fa-bed me-2"></i>精選住宿
+                </h2>
+                <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
             </div>
-        </div>
 
-        <div class="swiper hotels-swiper" aria-label="精選住宿">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" v-for="p in items" :key="p.productID">
-                    <article class="product-card shadow-sm">
-                        <div class="product-thumb position-relative">
-                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
-                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🏨 精選</span>
-                        </div>
-                        <div class="product-body p-3">
-                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
-                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
-                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
-                        </div>
-                        <!-- 新增 查看詳情按鈕 -->
-                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
-                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
-                            查看詳情
-                            <i class="fa-solid fa-arrow-right ms-1"></i>
-                        </a>
-                    </article>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "hotel" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                    查看所有住宿 <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+                <div class="swiper-nav d-flex align-items-center gap-2">
+                    <div class="swiper-btn hotel-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="swiper-btn hotel-next"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+            </div>
+
+            <div class="swiper hotels-swiper" aria-label="精選住宿">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                        <article class="product-card shadow-sm">
+                            <div class="product-thumb position-relative">
+                                <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                                <span class="badge bg-info position-absolute top-0 start-0 m-2">🏨 精選</span>
+                            </div>
+                            <div class="product-body p-3">
+                                <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                                <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                                <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                            </div>
+                            <!-- 新增 查看詳情按鈕 -->
+                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                查看詳情
+                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            </a>
+                        </article>
+                    </div>
                 </div>
             </div>
         </div>
@@ -679,44 +754,46 @@
 
 <!-- 精選景點門票 -->
 <section class="section" id="featured-tickets" v-cloak>
-    <div class="container" id="tickets-app">
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px">
-                <i class="fa-solid fa-ticket me-2"></i>精選景點門票
-            </h2>
-            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "ticket" })" class="btn btn-outline-primary rounded-pill fw-bold">
-                查看所有門票 <i class="fa-solid fa-arrow-right ms-2"></i>
-            </a>
-            <div class="swiper-nav d-flex align-items-center gap-2">
-                <div class="swiper-btn ticket-prev"><i class="fa-solid fa-chevron-left"></i></div>
-                <div class="swiper-btn ticket-next"><i class="fa-solid fa-chevron-right"></i></div>
+    <div class="section-card">
+        <div class="container" id="tickets-app">
+            <div class="section-title text-center mb-4">
+                <h2 class="fw-bold" style="letter-spacing:2px">
+                    <i class="fa-solid fa-ticket me-2"></i>精選景點門票
+                </h2>
+                <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
             </div>
-        </div>
 
-        <div class="swiper tickets-swiper" aria-label="精選景點門票">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" v-for="p in items" :key="p.productID">
-                    <article class="product-card shadow-sm">
-                        <div class="product-thumb position-relative">
-                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
-                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🎟️ 熱賣</span>
-                        </div>
-                        <div class="product-body p-3">
-                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
-                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
-                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
-                            <!-- 新增 查看詳情按鈕 -->
-                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
-                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
-                                查看詳情
-                                <i class="fa-solid fa-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </article>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "ticket" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                    查看所有門票 <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+                <div class="swiper-nav d-flex align-items-center gap-2">
+                    <div class="swiper-btn ticket-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="swiper-btn ticket-next"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+            </div>
+
+            <div class="swiper tickets-swiper" aria-label="精選景點門票">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                        <article class="product-card shadow-sm">
+                            <div class="product-thumb position-relative">
+                                <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                                <span class="badge bg-info position-absolute top-0 start-0 m-2">🎟️ 熱賣</span>
+                            </div>
+                            <div class="product-body p-3">
+                                <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                                <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                                <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                                <!-- 新增 查看詳情按鈕 -->
+                                <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                                   class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                    查看詳情
+                                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
                 </div>
             </div>
         </div>
@@ -725,175 +802,132 @@
 
 <!-- 精選交通 -->
 <section class="section" id="featured-transports" v-cloak>
-    <div class="container" id="transports-app">  
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px">
-                <i class="fa-solid fa-car-side me-2"></i>精選交通
-            </h2>
-            <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
-        </div>
+    <div class="section-card">
+        <div class="container" id="transports-app">
+            <div class="section-title text-center mb-4">
+                <h2 class="fw-bold" style="letter-spacing:2px">
+                    <i class="fa-solid fa-car-side me-2"></i>精選交通
+                </h2>
+                <div style="width:60px;height:3px;background:#7ec8e3;margin:10px auto 0;border-radius:2px;"></div>
+            </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "car" })" class="btn btn-outline-primary rounded-pill fw-bold">
-                查看所有交通 <i class="fa-solid fa-arrow-right ms-2"></i>
-            </a>
-            <div class="swiper-nav d-flex align-items-center gap-2">
-                <div class="swiper-btn transport-prev"><i class="fa-solid fa-chevron-left"></i></div>
-                <div class="swiper-btn transport-next"><i class="fa-solid fa-chevron-right"></i></div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="@Url.Action("Browse", "Products", new { area = "CustomersArea", type = "car" })" class="btn btn-outline-primary rounded-pill fw-bold">
+                    查看所有交通 <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+                <div class="swiper-nav d-flex align-items-center gap-2">
+                    <div class="swiper-btn transport-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="swiper-btn transport-next"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+            </div>
+
+            <div class="swiper transports-swiper" aria-label="精選交通">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="p in items" :key="p.productID">
+                        <article class="product-card shadow-sm">
+                            <div class="product-thumb position-relative">
+                                <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
+                                <span class="badge bg-info position-absolute top-0 start-0 m-2">🚗 熱門</span>
+                            </div>
+                            <div class="product-body p-3">
+                                <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
+                                <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                                <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+                                <!-- 新增 查看詳情按鈕 -->
+                                <a :href="'/CustomersArea/Products/Details/' + p.productID"
+                                   class="btn btn-outline-primary w-100 rounded-pill fw-bold">
+                                    查看詳情
+                                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="swiper transports-swiper" aria-label="精選交通">
-            <div class="swiper-wrapper">
-                <div class="swiper-slide" v-for="p in items" :key="p.productID">
-                    <article class="product-card shadow-sm">
-                        <div class="product-thumb position-relative">
-                            <img :src="p.cover" class="w-100 rounded-top" :alt="p.productName">
-                            <span class="badge bg-info position-absolute top-0 start-0 m-2">🚗 熱門</span>
-                        </div>
-                        <div class="product-body p-3">
-                            <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
-                            <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
-                            <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
+
+<!-- 最新優惠活動 -->
+<section class="section" id="deals" v-cloak>
+    <div class="section-card">
+        <div class="container" id="promotion-app">
+            <div class="section-title text-center mb-4">
+                <h2 class="fw-bold" style="letter-spacing:2px">
+                    <i class="fa-solid fa-bullhorn me-2"></i>最新優惠活動
+                </h2>
+                <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a href="/CustomersArea/Promotions/Index"
+                   class="btn btn-outline-primary rounded-pill fw-bold">
+                    查看所有優惠 <i class="fa-solid fa-arrow-right ms-2"></i>
+                </a>
+                <div class="swiper-nav d-flex align-items-center gap-2">
+                    <div class="swiper-btn promotion-prev"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="swiper-btn promotion-next"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+            </div>
+
+            <!-- ✅ 用 items.length 判斷 -->
+            <div v-if="items.length > 0">
+                <div class="swiper promotions-swiper" aria-label="最新優惠活動">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide" v-for="p in items" :key="p.promoID">
                             <!-- 新增 查看詳情按鈕 -->
-                            <a :href="'/CustomersArea/Products/Details/' + p.productID"
-                               class="btn btn-outline-primary w-100 rounded-pill fw-bold">
-                                查看詳情
-                                <i class="fa-solid fa-arrow-right ms-1"></i>
+                            <a :href="'/CustomersArea/Promotions/Details/' + p.promoID">
+                                <article class="product-card shadow-sm">
+                                    <div class="product-thumb position-relative">
+                                        <img :src="p.imageUrl" class="w-100 rounded-top" :alt="p.promoName">
+                                        <span class="badge bg-warning position-absolute top-0 start-0 m-2">🔥 限時</span>
+                                    </div>
+                                    <div class="product-body p-3">
+                                        <h5 class="fw-bold mb-1 product-title">{{ p.promoName }}</h5>
+                                        <p class="text-muted small mb-1">
+                                            <i class="fa-regular fa-calendar me-1"></i>
+                                            {{ formatDate(p.startTime) }} - {{ formatDate(p.endTime) }}
+                                        </p>
+                                        <p class="small text-muted fw-bold text-primary">{{ p.promoDesc }}</p>
+                                        <span class="btn btn-outline-primary w-100 rounded-pill fw-bold">查看詳情 <i class="fa-solid fa-arrow-right ms-1"></i></span>
+                                    </div>
+                                </article>
                             </a>
                         </div>
-                    </article>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>  
-
-
-<!-- 最新優惠活動 -->
-@*
-<section class="section" id="deals" v-cloak>
-    <div class="container" id="promotion-app">
-        <div class="section-title d-flex justify-content-between align-items-center">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
-                <i class="menu-icon tf-icons fa-solid fa-bullhorn"></i>
-                最新優惠活動
-            </h2>
-            <a class="link-primary" asp-controller="Promotions" asp-action="Index">全部優惠</a>
-        </div>
-
-      <!-- 載入中 -->
-        <div v-if="isLoading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2 mb-0 text-muted">載入中...</p>
-        </div> 
-
-        <!-- 有資料 -->
-        <div v-if="promotions.length > 0" class="row g-3 g-md-4">
-            <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-4">
-                <article class="product-card h-100 shadow-sm rounded">
-                    <div class="product-thumb position-relative">
-                        <img :src="p.imageUrl" :alt="p.title" class="w-100 rounded-top">
-                    </div>
-                    <div class="product-body p-3">
-                        <h5 class="product-title mb-1">{{ p.promoName }}</h5>
-                        <p class="product-meta text-muted small mb-1">{{ formatDate(p.startTime) }}</p>
-                        <div class="price fw-bold text-primary">NT$ {{ p.price }} 起</div>
-
-                        <!-- 新增 查看詳情按鈕 -->
-                        <a :href="'/CustomersArea/Products/Details/' + p.productID"
-                           class="btn btn-outline-primary w-100 rounded-pill fw-bold">
-                            查看詳情
-                            <i class="fa-solid fa-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </article>
-            </div>
-        </div>
-
-        <!-- 無資料 -->
-        <div v-else class="text-center text-muted py-5">
-            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
-            <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
-        </div>
-    </div>
-</section>  *@
-
-<!-- 最新優惠活動 -->
-<section class="section" id="deals" v-cloak>
-    <div class="container" id="promotion-app">
-        <div class="section-title text-center mb-4">
-            <h2 class="fw-bold" style="letter-spacing:2px;color:#22B3C1;">
-                <i class="fa-solid fa-bullhorn me-2"></i>最新優惠活動
-            </h2>
-            <div style="width:60px;height:3px;background:#22B3C1;margin:10px auto 0;border-radius:2px;"></div>
-        </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <a href="/CustomersArea/Promotions/Index"
-               class="btn btn-outline-primary rounded-pill fw-bold">
-                查看所有優惠 <i class="fa-solid fa-arrow-right ms-2"></i>
-            </a>
-            <div class="swiper-nav d-flex align-items-center gap-2">
-                <div class="swiper-btn promotion-prev"><i class="fa-solid fa-chevron-left"></i></div>
-                <div class="swiper-btn promotion-next"><i class="fa-solid fa-chevron-right"></i></div>
-            </div>
-        </div>
-
-        <!-- ✅ 用 items.length 判斷 -->
-        <div v-if="items.length > 0">
-            <div class="swiper promotions-swiper" aria-label="最新優惠活動">
-                <div class="swiper-wrapper">
-                    <div class="swiper-slide" v-for="p in items" :key="p.promoID">
-                        <!-- 新增 查看詳情按鈕 -->
-                        <a :href="'/CustomersArea/Promotions/Details/' + p.promoID">
-                            <article class="product-card shadow-sm">
-                                <div class="product-thumb position-relative">
-                                    <img :src="p.imageUrl" class="w-100 rounded-top" :alt="p.promoName">
-                                    <span class="badge bg-warning position-absolute top-0 start-0 m-2">🔥 限時</span>
-                                </div>
-                                <div class="product-body p-3">
-                                    <h5 class="fw-bold mb-1 product-title">{{ p.promoName }}</h5>
-                                    <p class="text-muted small mb-1">
-                                        <i class="fa-regular fa-calendar me-1"></i>
-                                        {{ formatDate(p.startTime) }} - {{ formatDate(p.endTime) }}
-                                    </p>
-                                    <p class="small text-muted fw-bold text-primary">{{ p.promoDesc }}</p>
-                                </div>
-                            </article>
-                            <span class="btn btn-outline-primary w-100 rounded-pill fw-bold">查看詳情 <i class="fa-solid fa-arrow-right ms-1"></i></span>
-                        </a>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 無資料提示 -->
-        <div v-else class="text-center text-muted py-5">
-            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
-            <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
+            <!-- 無資料提示 -->
+            <div v-else class="text-center text-muted py-5">
+                <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+                <p class="mt-2 mb-0">目前沒有進行中的優惠活動</p>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- ====================== 常見問題（ API 熱門資料） ====================== -->
 <section class="section" id="faqSection">
-    <div class="container py-3">
-        <div class="section-title mb-4">
-            <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px">
-                <i class="fa-solid fa-circle-question me-2"></i> 常見問題
-            </h2>
-            <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
-        </div>
+    <div class="section-card">
+        <div class="container py-3">
+            <div class="section-title mb-4">
+                <h2 class="fw-bold text-center mb-2" style="letter-spacing:2px">
+                    <i class="fa-solid fa-circle-question me-2"></i> 常見問題
+                </h2>
+                <div style="width:60px; height:3px; background:#7ec8e3; margin:10px auto 0; border-radius:2px;"></div>
+            </div>
 
-        <div id="faqList"></div>
+            <div id="faqList"></div>
 
-        <div class="mt-4 text-center">
-            <a href="/CustomersArea/FrontFAQs/Index"
-               class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold"
-               style="letter-spacing:1px;">
-                <i class="fa-solid fa-list-ul me-2"></i>查看更多常見問題
-            </a>
+            <div class="mt-4 text-center">
+                <a href="/CustomersArea/FrontFAQs/Index"
+                   class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold"
+                   style="letter-spacing:1px;">
+                    <i class="fa-solid fa-list-ul me-2"></i>查看更多常見問題
+                </a>
+            </div>
         </div>
     </div>
 </section>
@@ -902,7 +936,7 @@
 <!-- Newsletter / CTA -->
 <section class="section">
     <div class="container">
-        <div class="newsletter d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3">
+        <div class="newsletter d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3 mb-5">
             <div>
                 <h3 class="mb-1">訂閱最新旅遊優惠</h3>
                 <p class="mb-0">第一時間取得折扣碼、熱門活動與旅遊靈感。</p>
@@ -967,75 +1001,6 @@
         mountFeatured('#tickets-app',   '/CustomersArea/Products/GetFeaturedTickets',   '.tickets-swiper',   '.ticket-prev',   '.ticket-next');
         mountFeatured('#transports-app','/CustomersArea/Products/GetFeaturedTransports','.transports-swiper','.transport-prev','.transport-next');
         mountFeatured('#promotion-app','/CustomersArea/Promotions/GetLatestPromotions','.promotions-swiper','.promotion-prev','.promotion-next');
-
-
-
-        /* ====================== Vue 熱門行程載入 ====================== */
-        // const hotApp = Vue.createApp({
-        //     data() {
-        //         return { products: [] };
-        //     },
-        //     mounted() {
-        //         axios.get('/CustomersArea/Products/GetHotProducts')
-        //             .then(res => { this.products = res.data; })
-        //             .then(() => {
-        //                 this.$nextTick(() => {
-        //                     new Swiper('.swiper', {
-        //                         slidesPerView: 1.3,
-        //                         spaceBetween: 16,
-        //                         navigation: {
-        //                             nextEl: '.swiper-next',
-        //                             prevEl: '.swiper-prev',
-        //                         },
-        //                         breakpoints: {
-        //                             576: { slidesPerView: 2 },
-        //                             768: { slidesPerView: 3 },
-        //                             992: { slidesPerView: 4 }
-        //                         }
-        //                     });
-        //                 });
-        //             })
-        //             .catch(err => console.error('熱門商品載入失敗', err));
-        //     }
-        // });
-        // hotApp.mount('#hot-app');
-
-
-        /* ====================== Vue 精選住宿載入 ====================== */
-
-
-
-        
-        /* ====================== Vue 精選景點載入 ====================== */
-
-
-
-
-        /* ====================== Vue 熱門租車載入 ====================== */
-
-
-
-
-        /* ====================== Vue 優惠活動載入 ====================== */
-        // const app = Vue.createApp({
-        //     data() {
-        //         return { promotions: [], isLoading: true }
-        //     },
-        //     mounted() {
-        //         axios.get('/CustomersArea/Promotions/GetLatestPromotions')
-        //             .then(res => { this.promotions = res.data })
-        //             .catch(err => console.error('載入失敗：', err))
-        //             .finally(() => { this.isLoading = false })
-        //     },
-        //     methods: {
-        //         formatDate(date) {
-        //             const d = new Date(date);
-        //             return d.toLocaleDateString('zh-TW');
-        //         }
-        //     }
-        // });
-        // app.mount('#promotion-app');
-
 
         // ====================== FAQ 熱門資料載入 ======================
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1157,7 +1122,7 @@
         // 建議清單
         const TW_DESTS = [
           "台北","新北","基隆","桃園","新竹","苗栗","台中","彰化","雲林","南投","嘉義","台南","高雄","屏東",
-          "宜蘭","花蓮","台東","澎湖","金門","連江（馬祖）","綠島","小琉球","蘭嶼"
+          "宜蘭","花蓮","台東","澎湖","金門","馬祖","綠島","小琉球","蘭嶼"
         ];
 
         function renderSuggest(list){

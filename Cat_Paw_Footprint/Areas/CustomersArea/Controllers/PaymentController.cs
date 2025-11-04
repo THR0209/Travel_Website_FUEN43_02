@@ -2,6 +2,7 @@
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Cat_Paw_Footprint.Services;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -94,6 +95,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				await _levelSvc.RecalculateAndUpdateAsync(cid);
 
 				// ✅ 單筆訂單：付款成功通知
+				await _notifTrigger.NotifyOrderCreatedAsync(cid, o.OrderID);
 				await _notifTrigger.NotifyPaymentSuccessAsync(cid, o.OrderID);
 
 
@@ -131,6 +133,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				});
 			}
 			await _db.SaveChangesAsync();
+
+			// ✅ 逐筆通知訂單成立與付款成功
+			var newOrders = await _db.CustomerOrders
+			.Where(o => o.CustomerID == cid && o.CreateTime == now)
+				.ToListAsync();
+
 
 			// ✅ 通知訂單成立 + 付款成功
 			foreach (var it in _db.CustomerOrders
@@ -247,6 +255,16 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 </td></tr></table>";
 
 			await _sender.SendAsync(email, "【匯款資訊】貓爪足跡", html);
+
+			// 同時發送站內通知
+			await _notifTrigger.SendCustomAsync(
+				cid,
+				"訂單成立通知",
+				"您選擇了匯款付款，請於三日內完成匯款以保留名額 🐾",
+				"系統公告"
+			);
+
+
 			return Ok(new { ok = true });
 		}
 		private string CashierUrl => _opt.IsStage
@@ -464,6 +482,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					await _db.SaveChangesAsync();
 
 					// 這次不是購物車結帳，通常不動優惠券與購物車
+					// ★ 通知訂單成立 & 付款成功
+					await _notifTrigger.NotifyOrderCreatedAsync(customerId, o.OrderID);
+					await _notifTrigger.NotifyPaymentSuccessAsync(customerId, o.OrderID);
+
 					await _levelSvc.RecalculateAndUpdateAsync(customerId);
 				}
 				return Content("1|OK");
@@ -578,6 +600,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					o.OrderStatusID = 1;
 					o.UpdateTime = now;
 					await _db.SaveChangesAsync();
+
+					// ★ 通知訂單成立 & 付款成功
+					await _notifTrigger.NotifyOrderCreatedAsync(customerId, o.OrderID);
+					await _notifTrigger.NotifyPaymentSuccessAsync(customerId, o.OrderID);
+
 					await _levelSvc.RecalculateAndUpdateAsync(customerId);
 				}
 				return Redirect("/CustomersArea/Orders");

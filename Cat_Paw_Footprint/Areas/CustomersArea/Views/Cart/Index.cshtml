@@ -2,107 +2,119 @@
     ViewData["Title"] = "購物車";
 }
 <div class="container py-4" id="cartApp" v-cloak>
-    <h2 class="mb-3">購物車</h2>
+    <div class="cart-card shadow-sm">
+            <h2 class="mb-3">購物車</h2>
 
-    <div class="mb-3 d-flex gap-2">
-        <button class="btn btn-outline-secondary" v-on:click="reload">重新整理</button>
-        <button class="btn btn-outline-primary" v-on:click="addDemo">加一個範例商品</button>
-    </div>
-
-    <div v-if="items.length===0" class="alert alert-info">購物車是空的</div>
-
-    <div v-else class="table-responsive">
-        <table class="table align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th style="width:36px"><input type="checkbox" v-model="checkAll" v-on:change="toggleAll"></th>
-                    <th>商品</th>
-                    <th class="text-end">單價</th>
-                    <th class="text-center">數量</th>
-                    <th class="text-end">小計</th>
-                    <th style="width:100px"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="it in items" :key="it.productId">
-                    <td><input type="checkbox" v-model="selected" :value="it.productId"></td>
-                    <td class="d-flex align-items-center gap-2">
-                        <img :src="it.imageUrl" alt="" style="width:60px;height:60px;object-fit:contain;background:#f8f9fa" />
-                        <div>{{ it.productName }}</div>
-                    </td>
-                    <td class="text-end">NT$ {{ it.price.toLocaleString() }}</td>
-                    <td class="text-center">
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" v-on:click="dec(it)">−</button>
-                            <input type="number" class="form-control form-control-sm w-auto text-center"
-                                   v-model.number="it.qty" min="1" v-on:change="update(it)">
-                            <button class="btn btn-outline-secondary" v-on:click="inc(it)">＋</button>
-                        </div>
-                    </td>
-                    <td class="text-end">NT$ {{ (it.price * it.qty).toLocaleString() }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" v-on:click="remove(it.productId)">移除</button>
-                    </td>
-                </tr>
-            </tbody>
-
-            <tfoot>
-                <tr>
-                    <th colspan="3" class="text-end">總計</th>
-                    <th class="text-end">NT$ {{ total.toLocaleString() }}</th>
-                    <th></th>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-
-    <div class="d-flex flex-wrap gap-2 align-items-center my-3">
-        <div class="input-group w-auto">
-            <span class="input-group-text">我的優惠券</span>
-            <select class="form-select" v-model="selectedCouponCode" v-on:change ="onCouponChange">
-                <option value="__PLEASE__" disabled>請選擇優惠券</option>
-                <option value="__NONE__">無</option>
-                <option v-for="c in coupons" :key="c.couponId" :value="c.code">
-                    {{ couponLabel(c) }}
-                </option>
-            </select>
-            <button class="btn btn-outline-primary" v-on:click="applySelectedCoupon" :disabled="!selectedCouponCode ||selectedCouponCode==='__PLEASE__'|| selectedCouponCode==='__NONE__'">套用</button>
-            <button class="btn btn-outline-secondary" v-on:click="clearCoupon">清除</button>
+        <div class="mb-3 d-flex gap-2">
+            <button class="btn btn-outline-secondary" v-on:click="reload">重新整理</button>
+            <button class="btn btn-outline-primary" v-on:click="addDemo">加一個範例商品</button>
         </div>
 
-        <button class="btn btn-outline-danger ms-auto" :disabled="selected.length===0" v-on:click="batchRemove">刪除選取</button>
-        <span class="text-success ms-2" v-if="discountHint">{{ discountHint }}</span>
-    </div>
+        <div v-if="items.length===0" class="alert alert-info text-center">購物車是空的</div>
 
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
+        <div v-else class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:36px"><input type="checkbox" v-model="checkAll" v-on:change="toggleAll"></th>
+                        <th>商品</th>
+                        <th class="text-end">單價</th>
+                        <th class="text-center">數量</th>
+                        <th class="text-end">小計</th>
+                        <th style="width:100px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="it in items" :key="it.productId">
+                        <td><input type="checkbox" v-model="selected" :value="it.productId"></td>
+                        <td class="d-flex align-items-center gap-2">
+                            <img :src="it.imageUrl" alt="" style="width:60px;height:60px;object-fit:contain;background:#f8f9fa" />
+                            <div>{{ it.productName }}</div>
+                        </td>
+                        <td class="text-end">NT$ {{ it.price.toLocaleString() }}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" v-on:click="dec(it)">−</button>
+                                <input type="text" class="form-control form-control-sm w-auto text-center"
+                                       v-model.number="it.qty" min="1" v-on:change="update(it)">
+                                <button class="btn btn-outline-secondary" v-on:click="inc(it)">＋</button>
+                            </div>
+                        </td>
+                        <td class="text-end">NT$ {{ (it.price * it.qty).toLocaleString() }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" v-on:click="remove(it.productId)">移除</button>
+                        </td>
+                    </tr>
+                </tbody>
 
-        <!-- 只把勾選的商品送去模擬付款 -->
-        <form id="payCreditForm" method="post" action="/CustomersArea/Payment/CheckoutCredit" v-on:submit.prevent="beforePaySubmit">
-            <!-- 一定要在 form 裡面產生真正的 input，template 有時被瀏覽器忽略 -->
-            <div style="display:none">
-                <input v-for="pid in selected" :key="'sel-'+pid" type="hidden" name="productIds" :value="pid" />
-            </div>
-            <div class="d-flex gap-2">
-                <!-- submit 沒問題；但禁用條件要確認有勾選 -->
-                <button type="submit" class="btn btn-primary" :disabled="items.length===0 || selected.length===0">信用卡付款</button>
-                <button type="button" class="btn btn-outline-primary" :disabled="items.length===0 || selected.length===0" v-on:click="payByTransfer">轉帳匯款</button>
-            </div>
-        </form>
-    </div>
-
-    <footer class="card shadow-sm sticky-bottom p-3 bg-white border">
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="fs-6 text-muted" v-if="discount>0">
-                折扣：−NT$ {{ discount.toLocaleString() }}
-            </div>
-            <div class="fs-5">
-                合計：<strong>NT$ {{ finalTotal.toLocaleString() }}</strong>
-            </div>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">總計</th>
+                        <th class="text-end">NT$ {{ total.toLocaleString() }}</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
-    </footer>
 
+        <div class="coupon-card mb-3">
+            <div class="input-group w-auto">
+                <span class="input-group-text">我的優惠券</span>
+                <select class="form-select" v-model="selectedCouponCode" v-on:change="onCouponChange">
+                    <option value="__PLEASE__" disabled>請選擇優惠券</option>
+                    <option value="__NONE__">無</option>
+                    <option v-for="c in coupons" :key="c.couponId" :value="c.code">
+                        {{ couponLabel(c) }}
+                    </option>
+                </select>
+                <button class="btn btn-outline-primary"
+                        v-on:click="applySelectedCoupon"
+                        :disabled="!selectedCouponCode || selectedCouponCode==='__PLEASE__' || selectedCouponCode==='__NONE__'">
+                    套用
+                </button>
+                <button class="btn btn-outline-secondary" v-on:click="clearCoupon">清除</button>
+            </div>
+
+            <button class="btn btn-outline-danger"
+                    :disabled="selected.length===0"
+                    v-on:click="batchRemove">
+                刪除選取
+            </button>
+
+            <span class="text-success" v-if="discountHint">{{ discountHint }}</span>
+        </div>
+
+
+        <div class="d-flex gap-2 mb-3">
+            <button class="btn btn-outline-secondary" v-on:click="clearCart" :disabled="items.length===0">清空</button>
+
+            <!-- 只把勾選的商品送去模擬付款 -->
+            <form id="payCreditForm" method="post" action="/CustomersArea/Payment/CheckoutCredit" v-on:submit.prevent="beforePaySubmit">
+                <!-- 一定要在 form 裡面產生真正的 input，template 有時被瀏覽器忽略 -->
+                <div style="display:none">
+                    <input v-for="pid in selected" :key="'sel-'+pid" type="hidden" name="productIds" :value="pid" />
+                </div>
+                <div class="d-flex gap-2">
+                    <!-- submit 沒問題；但禁用條件要確認有勾選 -->
+                    <button type="submit" class="btn btn-primary" :disabled="items.length===0 || selected.length===0">信用卡付款</button>
+                    <button type="button" class="btn btn-outline-primary" :disabled="items.length===0 || selected.length===0" v-on:click="payByTransfer">轉帳匯款</button>
+                </div>
+            </form>
+        </div>
+
+        <footer class="card shadow-sm sticky-bottom p-3 bg-white border">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="fs-6 text-muted" v-if="discount>0">
+                    折扣：−NT$ {{ discount.toLocaleString() }}
+                </div>
+                <div class="fs-5">
+                    合計：<strong>NT$ {{ finalTotal.toLocaleString() }}</strong>
+                </div>
+            </div>
+        </footer>
+    </div>
 </div>
+
 <script>console.log('Scripts section loaded ✅');</script>
 @section Scripts {
     <style>
