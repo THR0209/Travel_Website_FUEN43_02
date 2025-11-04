@@ -15,9 +15,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		public string? RestaurantAddr { get; set; }
 
 		[Display(Name = "緯度")]
+		[DisplayFormat(DataFormatString = "{0:0.######}", ApplyFormatInEditMode = true)]
 		public decimal? RestaurantLat { get; set; }
 
 		[Display(Name = "經度")]
+		[DisplayFormat(DataFormatString = "{0:0.######}", ApplyFormatInEditMode = true)]
 		public decimal? RestaurantLng { get; set; }
 
 		[Display(Name = "美食介紹")]
