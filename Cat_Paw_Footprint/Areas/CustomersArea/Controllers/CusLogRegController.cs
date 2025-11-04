@@ -172,7 +172,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					fullName = customer.CustomerProfile.CustomerName,
 					phone = customer.CustomerProfile.Phone,
 					address = customer.CustomerProfile.Address,
-					idNumber = customer.CustomerProfile.IDNumber
+					idNumber = customer.CustomerProfile.IDNumber,
+					email = customer.CustomerProfile.Email
 				}
 			});
 		}
@@ -262,6 +263,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			{
 				return BadRequest(new { success = false, error = updatedCustomer.ErrorMessage });
 			}
+
+			await HttpContext.SignOutAsync("CustomerAuth");
 			return Ok(new { success = true, message = updatedCustomer.Message });
 		}
 

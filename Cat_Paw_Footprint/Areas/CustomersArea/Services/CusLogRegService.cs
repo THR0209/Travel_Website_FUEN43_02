@@ -198,11 +198,29 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 							ErrorMessage = "資料錯誤，請聯絡客服人員"
 						};
 					}
-					customer.FullName = model.FullName;
+				if (!string.IsNullOrWhiteSpace(model.Email))
+				{
+					bool emailExists = await _context.CustomerProfiles
+						.AnyAsync(p => p.Email == model.Email && p.CustomerID != model.CustomerId);
+
+					if (emailExists)
+					{
+						return new CusLogRegDto
+						{
+							ErrorMessage = "此信箱已被其他會員使用"
+						};
+					}
+
+					customer.CustomerProfile.Email = model.Email;
+				}
+
+				customer.FullName = model.FullName;
 					customer.CustomerProfile.CustomerName = model.FullName;
 					customer.CustomerProfile.Phone = model.Phone;
 					customer.CustomerProfile.Address = model.Address;
 					customer.CustomerProfile.IDNumber = model.IDNumber;
+
+				
 
 				//_context.Customers.Update(customer); // 不需要這行，EF Core 會自動追蹤變更
 				//以下更新identity user的電話
@@ -210,7 +228,17 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 					if (user != null)
 					{
 						user.PhoneNumber = model.Phone;
-						var result = await _userManager.UpdateAsync(user);
+
+					// 🔵 同步更新信箱與帳號（Identity登入若是信箱制）
+					if (!string.IsNullOrWhiteSpace(model.Email))
+					{
+						user.Email = model.Email;
+						user.NormalizedEmail = model.Email.ToUpper();
+
+
+					}
+
+					var result = await _userManager.UpdateAsync(user);
 						if (!result.Succeeded)
 						{
 						throw new Exception(string.Join(";", result.Errors.Select(e => e.Description)));

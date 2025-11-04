@@ -30,6 +30,10 @@
             <label class="form-label">身分證號</label>
             <input type="text" class="form-control" v-model="form.IDNumber" maxlength="10" placeholder="例如 A123456789">
         </div>
+        <div class="mb-3">
+            <label class="form-label">信箱</label>
+            <input type="email" class="form-control" v-model="form.email" placeholder="例如 example@mail.com">
+        </div>
 
         <button type="submit" class="btn btn-primary w-100" :disabled="saving">
             {{ saving ? "儲存中..." : "儲存修改" }}
@@ -54,7 +58,7 @@
               saving: false,
               message: "",
               messageColor: "#555",
-              form: { fullName: "", phone: "", address: "", IDNumber: "" }
+              form: { fullName: "", phone: "", address: "", IDNumber: "", email: "" }
             };
           },
           async mounted() {
@@ -66,6 +70,7 @@
                 this.form.phone = d.phone || "";
                 this.form.address = d.address || "";
                 this.form.IDNumber = d.idNumber || "";
+                this.form.email = d.email || "";
               } else {
                 this.message = res.data?.error || "載入資料失敗";
                 this.messageColor = "red";
