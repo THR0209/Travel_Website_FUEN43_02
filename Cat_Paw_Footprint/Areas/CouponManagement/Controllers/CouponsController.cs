@@ -1,6 +1,7 @@
 ﻿using Cat_Paw_Footprint.Areas.CouponManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -17,11 +18,13 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 	public class CouponsController : Controller
 	{
 		private readonly webtravel2Context _context;
+        private readonly INotificationTriggerService _notifTrigger;
 
-		public CouponsController(webtravel2Context context)
+        public CouponsController(webtravel2Context context, INotificationTriggerService notifTrigger)
 		{
 			_context = context;
-		}
+            _notifTrigger = notifTrigger;
+        }
 
 		// GET: CouponManagement/Coupons
 		public async Task<IActionResult> Index()
@@ -274,13 +277,34 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
 
                 if (!alreadyHas)
                 {
+                    DateTime usedTime = DateTime.Now;
+
+                    // 🔹 若優惠券有設定 ValidDays，就用「領取時間 + ValidDays」為 ExpireTime
+                    // 🔹 否則退回用主表的 EndDate
+                    DateTime? expireTime = null;
+
+                    // ✅ 有 ValidDays 則以領取時間 + ValidDays 為到期日
+                    if (coupon.ValidDays.HasValue && coupon.ValidDays.Value > 0)
+                    {
+                        expireTime = usedTime.AddDays(coupon.ValidDays.Value);
+                    }
+                    // ✅ 沒有 ValidDays 就看 EndDate 是否有值
+                    else if (coupon.EndDate != default(DateTime))
+                    {
+                        expireTime = coupon.EndDate;
+                    }
+
                     _context.CustomerCouponsRecords.Add(new CustomerCouponsRecords
                     {
                         CustomerID = member.CustomerID,
                         CouponID = coupon.CouponID,
                         IsUsed = false,
-                        UsedTime = DateTime.Now
+                        UsedTime = usedTime,
+                        ExpireTime = expireTime
                     });
+
+                    // ✅ 發送通知（含 SignalR + Email）
+                    await _notifTrigger.NotifyCouponIssuedAsync(member.CustomerID, coupon.CouponID);
                     count++;
                 }
             }
@@ -288,6 +312,8 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Message"] = $"已成功發放 {count} 張優惠券給對應會員。";
+
+
             return RedirectToAction(nameof(Index));
         }
 
