@@ -23,6 +23,7 @@
             </div>
 
             <button type="submit" class="btn btn-outline-primary w-100 py-2 fw-semibold">登入</button>
+            <button type="button" class="btn btn-secondary w-100 mt-2 fw-semibold" @@click ="quickLogin">一鍵登入</button>
         </form>
 
         <div v-if="errors.length" class="alert alert-danger mt-3">
@@ -81,7 +82,13 @@
                             this.errors.push("伺服器錯誤，請稍後再試。");
                         }
                     }
-                }
+                    },
+        quickLogin() {
+          // 直接預設一組 demo 帳號密碼
+          this.account = "jianlinwu290";
+          this.password = "Qazwsx@123";
+          this.submitLogin(); // 自動送出
+        }
             }
         });
         app.mount("#app");
