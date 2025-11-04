@@ -61,9 +61,10 @@ namespace Cat_Paw_Footprint.Services
         /// <summary>
         /// 非同步發放指定類型的優惠券（例如新註冊、會員升級）
         /// </summary>
-        public async Task GrantCouponsForTypeAsync(int customerId, string targetType)
+        public async Task<List<int>> GrantCouponsForTypeAsync(int customerId, string targetType)
         {
             var now = DateTime.Now;
+            var issuedCouponIds = new List<int>();
 
             var coupons = await _context.Coupons
                 .Where(c => c.IsActive)
@@ -78,24 +79,28 @@ namespace Cat_Paw_Footprint.Services
 
                 if (!alreadyHas)
                 {
-                    // 🔹 有設定 ValidDays → 用今天 + ValidDays 計算過期日
-                    //    否則就沿用原本的 EndDate。
                     DateTime? expireTime = cpn.ValidDays.HasValue
-                    ? now.AddDays(cpn.ValidDays.Value)
-                    : cpn.EndDate;
+                        ? now.AddDays(cpn.ValidDays.Value)
+                        : cpn.EndDate;
 
-                    await _context.CustomerCouponsRecords.AddAsync(new CustomerCouponsRecords
+                    var record = new CustomerCouponsRecords
                     {
                         CustomerID = customerId,
                         CouponID = cpn.CouponID,
                         IsUsed = false,
-                        ExpireTime = expireTime   // ✅ 使用有效期欄位
-                    });
+                        ExpireTime = expireTime
+                    };
+
+                    await _context.CustomerCouponsRecords.AddAsync(record);
+                    issuedCouponIds.Add(cpn.CouponID); // ✅ 記錄實際發放的優惠券 ID
                 }
             }
 
             await _context.SaveChangesAsync();
+
+            return issuedCouponIds;
         }
+
 
 
     }

@@ -16,5 +16,7 @@
 		Task SendCustomAsync(int customerId, string title, string message, string type);
 		//客服工單完成通知
 		Task NotifyTicketCompletedAsync(int ticketId);
-	}
+        // 優惠券發放通知
+        Task NotifyCouponIssuedAsync(int customerId, int couponId);
+    }
 }

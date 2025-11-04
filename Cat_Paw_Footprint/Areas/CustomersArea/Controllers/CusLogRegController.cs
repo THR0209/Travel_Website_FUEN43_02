@@ -1,9 +1,11 @@
 using Cat_Paw_Footprint.Areas.CustomersArea.Services;
 using Cat_Paw_Footprint.Areas.CustomersArea.ViewModel;
 using Cat_Paw_Footprint.Data;
+using Cat_Paw_Footprint.Models;
 using Cat_Paw_Footprint.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,13 +20,17 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		private readonly ApplicationDbContext _context;
 		private readonly ICusLogRegService _svc;//處理客戶個資與登入邏輯
         private readonly MemberLevelService _memberLevelService;
+        private readonly INotificationTriggerService _notifTrigger;
+        private readonly IEmailSender _emailSender;
 
         public CusLogRegController(ApplicationDbContext context, ICusLogRegService svc,
-        MemberLevelService memberLevelService)
+        MemberLevelService memberLevelService, INotificationTriggerService notifTrigger, IEmailSender emailSender)
 		{
 			_context = context;
 			_svc = svc;
             _memberLevelService = memberLevelService;
+            _notifTrigger = notifTrigger;
+			_emailSender = emailSender;
         }
 		//客戶首頁
 		[HttpGet]
@@ -129,19 +135,33 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			{
 				return BadRequest(new { success = false, error = result });
 			}
-			//如果註冊成功 發放新客戶優惠券
-			// ✅ 發放新客戶優惠券
+
+			//如果註冊成功 發放新會員優惠券
 			var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Account == account);
             try
             {
                 if (customer != null)
-                    await _memberLevelService.GrantCouponsForTypeAsync(customer.CustomerID, "Register");
+				{
+                    // 發放新會員優惠券 取得實際發放的優惠券 ID 清單
+                    var issuedCouponIds = await _memberLevelService.GrantCouponsForTypeAsync(customer.CustomerID, "Register");
+                    // 沒有發到券就不用通知
+                    if (issuedCouponIds != null && issuedCouponIds.Count > 0)
+                    {
+                        foreach (var couponId in issuedCouponIds)
+                        {			//通知
+                            await _notifTrigger.NotifyCouponIssuedAsync(customer.CustomerID, couponId);
+                        }
+
+                        Console.WriteLine($"發放 {issuedCouponIds.Count} 張優惠券");
+                    }
+                }
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"發放優惠券時發生錯誤: {ex.Message}");
             }
-
+		
 
 
             return Ok(new { success = true, message = "註冊成功", redirectUrl = "/CustomersArea/CusLogReg/Login" });
