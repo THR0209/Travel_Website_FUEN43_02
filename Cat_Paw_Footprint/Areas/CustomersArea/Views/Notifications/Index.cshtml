@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
+@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
 @{
     ViewData["Title"] = "通知中心";
 }
@@ -210,14 +210,21 @@
                             type === "客服回覆" ||
                             type === "客服訊息" ||
                             type === "客服服務已完成"
-                        ) {
+                        ) 
+                        {
                             const match = message.match(/#\s*(\d+)/);
                             if (match && match[1]) {
                                 const ticketId = match[1];
                                 window.location.href = `/CustomersArea/CustomerService/Index?ticketId=${ticketId}`;
                                 return;
-                            }
                         }
+                        }
+                        // ✅ 若為優惠活動或優惠券通知 → 導向優惠券頁面
+                        if (type === "優惠活動" || type === "優惠券通知" || message.includes("優惠券")) {
+                            window.location.href = "/CustomersArea/Coupons/Index";
+                            return;
+                        }
+                        
                         if (type === "訂單通知" || type === "系統公告") {
                             const match = message.match(/#\s*(\d+)/);
                             if (match && match[1]) {

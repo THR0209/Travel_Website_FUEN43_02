@@ -1,8 +1,12 @@
 ﻿using Cat_Paw_Footprint.Areas.Notification.Services;
+//using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Hubs;
+using Cat_Paw_Footprint.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace Cat_Paw_Footprint.Services
 {
@@ -11,16 +15,18 @@ namespace Cat_Paw_Footprint.Services
 		private readonly INotificationService _notifSvc;
 		private readonly webtravel2Context _db;
 		private readonly IHubContext<NotificationHub> _hub;
+        private readonly IEmailSender _emailSender;
 
-		public NotificationTriggerService(
+        public NotificationTriggerService(
 			INotificationService notifSvc,
 			webtravel2Context db,
-			IHubContext<NotificationHub> hub)
+			IHubContext<NotificationHub> hub, IEmailSender emailSender)
 		{
 			_notifSvc = notifSvc;
 			_db = db;
 			_hub = hub;
-		}
+            _emailSender = emailSender;
+        }
 
 		// 🔹 訂單建立
 		public async Task NotifyOrderCreatedAsync(int customerId, int orderId)
@@ -78,9 +84,42 @@ namespace Cat_Paw_Footprint.Services
 				}
 			}
 		}
+        public async Task NotifyCouponIssuedAsync(int customerId, int couponId)
+        {
+            var coupon = await _db.Coupons.FindAsync(couponId);
+            var customer = await _db.Customers.FindAsync(customerId);
+            if (coupon == null || customer == null) return;
 
-		// 🆕 🔹 客服工單完成通知
-		public async Task NotifyTicketCompletedAsync(int ticketId)
+            string title = "您獲得了一張新的優惠券！";
+            string message = $"優惠券「{coupon.CouponName}」已發放至您的帳戶，可使用至 {coupon.EndDate:yyyy/MM/dd}";
+            await SendCustomAsync(customerId, title, message, "優惠活動");
+
+
+            // ✅ 寄出 Email 通知
+            string htmlMessage = $@"
+			<h2>{title}</h2>
+			<p>{message}</p>
+			<p style='color:gray;font-size:12px;'>此信件由系統自動發送，請勿直接回覆。</p>";
+
+            var customerEmail = await _db.CustomerProfile
+			.Where(p => p.CustomerID == customerId)
+			.Select(p => p.Email)
+			.FirstOrDefaultAsync();
+
+            if (!string.IsNullOrWhiteSpace(customerEmail))
+            {
+                await _emailSender.SendEmailAsync(customerEmail, "貓爪足跡｜新的優惠券通知", htmlMessage);
+            }
+            else
+            {
+                Console.WriteLine($"找不到客戶 {customerId} 的 Email，跳過寄信。");
+            }
+        }
+
+
+
+        // 🆕 🔹 客服工單完成通知
+        public async Task NotifyTicketCompletedAsync(int ticketId)
 		{
 			var ticket = await _db.CustomerSupportTickets
 				.Include(t => t.Customer)
@@ -113,11 +152,14 @@ namespace Cat_Paw_Footprint.Services
 		}
 		public async Task SendCustomAsync(int customerId, string title, string message, string type)
 		{
-			if (customerId <= 0) return;
-
+            //Console.WriteLine($"[SendCustomAsync] customerId={customerId}, title={title}");
+			if (customerId <= 0) { Console.WriteLine("[SendCustomAsync] 無效的 customerId"); return; }
+			
 			await _notifSvc.AddNotificationAsync(customerId, title, message, type);
-			await _hub.Clients.User(customerId.ToString())
-				.SendAsync("ReceiveNotification", title, message, type);
+            //Console.WriteLine("[SendCustomAsync] 已呼叫 AddNotificationAsync");
+            await _hub.Clients.User(customerId.ToString()).SendAsync("ReceiveNotification", title, message, type);          
 		}
+
+
 	}
 }

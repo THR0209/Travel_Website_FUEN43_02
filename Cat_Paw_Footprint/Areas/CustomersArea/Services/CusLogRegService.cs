@@ -14,10 +14,11 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 		private readonly RoleManager<IdentityRole> _roleManager;// 如果要加角色
 		private readonly ApplicationDbContext _context;// EF Core
 		private readonly ICusLogRegRepository _repo;// 注入 Repository
-		private readonly IEmailSender _emailSender;
+        private readonly IEmailSender _emailSender;
 
 
-		public CusLogRegService(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context, ICusLogRegRepository repo, IEmailSender emailSender)
+
+        public CusLogRegService(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context, ICusLogRegRepository repo, IEmailSender emailSender)
 		{
 			_userManager = userManager;
 			_roleManager = roleManager;
@@ -25,7 +26,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Services
 			_repo = repo;
 			_emailSender = emailSender;
 
-		}
+        }
 
 		public async Task<CusLogRegDto?> LoginAsync(string account, string password, string ip)// 客戶登入
 		{
