@@ -17,7 +17,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		private readonly webtravel2Context _context;    // 資料庫 Context
 		private readonly IConfiguration _config;    // appsettings.json 設定檔
 
-		//	建構子：注入資料庫 Context
+		/* 建構子：注入資料庫 Context */
 		public TravelController(webtravel2Context context, IConfiguration config)
 		{
 			// 把設定注入
@@ -217,24 +217,19 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				await _context.SaveChangesAsync();
 
 				// 回傳結果給前端
-				return Ok(new
-				{
-					message = "✅ 行程已成功儲存！",
-					projectId = project.ProjectID,
-					count = details.Count
-				});
+				return Ok("行程已成功儲存！");
 			}
 			catch (Exception ex)
 			{
 				if (ex.InnerException != null)
-					return StatusCode(500,"🔍 Inner Exception: " + ex.InnerException.Message);
+					return StatusCode(500,"Inner Exception: " + ex.InnerException.Message);
 
 				// 若有錯誤，回傳 500 錯誤碼與訊息
-				return StatusCode(500, $"❌ 儲存失敗: {ex.Message}");
+				return StatusCode(500, $"儲存失敗: {ex.Message}");
 			}
 		}
 
-		// 取得行程清單
+		/* 取得行程清單 */
 		[HttpGet("/api/trips/list")]
 		[Authorize(AuthenticationSchemes = "CustomerAuth")]
 		public async Task<IActionResult> GetTripList(int customerId)
@@ -253,127 +248,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			return Json(trips);
 		}
-
-		/*// 取得單筆行程明細 (舊)
-		[HttpGet("/api/trips/{projectId}")]
-		[Authorize(AuthenticationSchemes = "CustomerAuth")]
-		public async Task<IActionResult> GetTripById(int projectId)
-		{
-			try {
-				var project = await _context.CustomerTripProjects
-				.Where(p => p.ProjectID == projectId)
-				.Include(p => p.TripProjectDetails) // 加入 Include，確保資料載入完整
-				.Select(p => new TripProjectViewModel
-				{
-					ProjectID = p.ProjectID,
-					ProjectName = p.ProjectName,
-					TotalDays = p.TotalDays,
-					CustomerID = p.CustomerID,
-					Details = p.TripProjectDetails
-						.OrderBy(d => d.TripDate)
-						.ThenBy(d => d.TripSequence)
-						.Select(d => new TripProjectViewModel
-						{
-							TripDate = d.TripDate,
-							TripSequence = d.TripSequence,
-							StartTime = d.StartTime.HasValue ? d.StartTime.Value.ToString(@"hh\\:mm") : "",
-							StayMinute = d.StayMinute,
-							TripType = d.TripType,
-							HotelID = d.HotelID,
-							LocationID = d.LocationID,
-							RestaurantID = d.RestaurantID,
-							Notes = d.Notes,
-							Hotel = d.Hotel,
-							Location = d.Location,
-							Restaurant = d.Restaurant
-						}).ToList()
-				})
-				.FirstOrDefaultAsync();
-
-				if (project == null)
-					return NotFound("行程不存在");
-
-				// 使用自訂的 JsonSerializerOptions 回傳 JSON，確保屬性名稱為 camelCase
-				return new JsonResult(project, new JsonSerializerOptions
-				{
-					PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-				});
-
-			} catch (Exception ex)
-			{
-				return StatusCode(500, $"❌ 發生錯誤：{ex.Message}\n{ex.StackTrace}");
-			}
-
-			
-		}
-*/
-		/*
-		// === 取得單筆行程明細 ===(舊2)
+		
+		/* 取得單筆行程明細 */
 		[HttpGet("/api/trips/{projectId}")]
 		[Authorize(AuthenticationSchemes = "CustomerAuth")]
 		public async Task<IActionResult> GetTripById(int projectId)
 		{
 			try
 			{
-				// 先查詢主表
-				var project = await _context.CustomerTripProjects
-					.Where(p => p.ProjectID == projectId)
-					.Include(p => p.TripProjectDetails) // 確保載入明細
-					.ThenInclude(d => d.Location)       // 加入關聯（避免 lazy load 錯誤）
-					.Include(p => p.TripProjectDetails)
-					.ThenInclude(d => d.Hotel)
-					.Include(p => p.TripProjectDetails)
-					.ThenInclude(d => d.Restaurant)
-					.Select(p => new TripProjectViewModel
-					{
-						ProjectID = p.ProjectID,
-						ProjectName = p.ProjectName,
-						TotalDays = p.TotalDays,
-						CustomerID = p.CustomerID,
-						Details = p.TripProjectDetails
-							.OrderBy(d => d.TripDate)
-							.ThenBy(d => d.TripSequence)
-							.Select(d => new TripProjectViewModel
-							{
-								TripDate = d.TripDate,
-								TripSequence = d.TripSequence,
-								StartTime = d.StartTime.HasValue ? d.StartTime.Value.ToString(@"hh\\:mm") : "",
-								StayMinute = d.StayMinute,
-								TripType = d.TripType,
-								HotelID = d.HotelID,
-								LocationID = d.LocationID,
-								RestaurantID = d.RestaurantID,
-								Notes = d.Notes,
-								Hotel = d.Hotel,
-								Location = d.Location,
-								Restaurant = d.Restaurant
-							}).ToList()
-					})
-					.FirstOrDefaultAsync();
-
-				if (project == null)
-					return NotFound("❌ 行程不存在");
-
-				// ✅ CamelCase 輸出（前端大小寫一致）
-				return new JsonResult(project, new JsonSerializerOptions
-				{
-					PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-				});
-			}
-			catch (Exception ex)
-			{
-				// ⚠️ 把錯誤直接輸出到 Response 中方便你看
-				return StatusCode(500, $"❌ 錯誤訊息：{ex.Message}\n📂 來源：{ex.Source}\n🔍 堆疊：{ex.StackTrace}");
-			}
-		}*/
-		// === 取得單筆行程明細 ===
-		[HttpGet("/api/trips/{projectId}")]
-		[Authorize(AuthenticationSchemes = "CustomerAuth")]
-		public async Task<IActionResult> GetTripById(int projectId)
-		{
-			try
-			{
-				// 1️⃣ 先查詢主表與相關關聯資料
+				// 先查詢主表與相關關聯資料
 				var project = await _context.CustomerTripProjects
 					.Where(p => p.ProjectID == projectId)
 					.Include(p => p.TripProjectDetails)
@@ -385,9 +268,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					.FirstOrDefaultAsync();
 
 				if (project == null)
-					return NotFound("❌ 找不到行程資料");
+					return NotFound("找不到行程資料");
 
-				// 2️⃣ 將明細資料轉為可安全輸出的 ViewModel
+				// 將明細資料轉為可安全輸出的 ViewModel
 				var details = project.TripProjectDetails
 					.OrderBy(d => d.TripDate)
 					.ThenBy(d => d.TripSequence)
@@ -395,7 +278,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					{
 						TripDate = d.TripDate,
 						TripSequence = d.TripSequence,
-						// ✅ 安全轉換 TimeSpan → 字串
+						// 安全轉換 TimeSpan → 字串
 						StartTime = d.StartTime.HasValue
 							? d.StartTime.Value.ToString(@"hh\:mm")  // 注意「單斜線」格式
 							: "",
@@ -410,7 +293,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 						Restaurant = d.Restaurant
 					}).ToList();
 
-				// 3️⃣ 組合主檔 + 明細一起輸出
+				// 組合主檔 + 明細一起輸出
 				var result = new TripProjectViewModel
 				{
 					ProjectID = project.ProjectID,
@@ -420,7 +303,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					Details = details
 				};
 
-				// ✅ CamelCase 輸出（Vue 可直接接）
+				// CamelCase 輸出（Vue 可直接接）
 				return new JsonResult(result, new JsonSerializerOptions
 				{
 					PropertyNamingPolicy = JsonNamingPolicy.CamelCase
@@ -428,18 +311,17 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 			catch (FormatException fex)
 			{
-				// 🔍 若特定欄位格式錯誤（TimeSpan 轉換失敗等）
-				return StatusCode(500, $"❌ 時間格式錯誤：{fex.Message}\n🔍 堆疊：{fex.StackTrace}");
+				// 若特定欄位格式錯誤（TimeSpan 轉換失敗等）
+				return StatusCode(500, $"時間格式錯誤：{fex.Message}\n🔍 堆疊：{fex.StackTrace}");
 			}
 			catch (Exception ex)
 			{
-				// ⚠️ 其他例外情況
-				return StatusCode(500, $"❌ 錯誤訊息：{ex.Message}\n📂 來源：{ex.Source}\n🔍 堆疊：{ex.StackTrace}");
+				// 其他例外情況
+				return StatusCode(500, $"錯誤訊息：{ex.Message}\n📂 來源：{ex.Source}\n🔍 堆疊：{ex.StackTrace}");
 			}
 		}
 
-
-		// 刪除行程
+		/* 刪除行程 */
 		[HttpDelete("/api/trips/{projectId}")]
 		[Authorize(AuthenticationSchemes = "CustomerAuth")]
 		public async Task<IActionResult> DeleteTrip(int projectId)
@@ -455,10 +337,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_context.CustomerTripProjects.Remove(project);
 			await _context.SaveChangesAsync();
 
-			return Ok("✅ 行程已刪除");
+			return Ok("行程已刪除");
 		}
 
-		// 更新（覆寫）行程
+		/* 更新（覆寫）行程 */
 		[HttpPut("/api/trips/update")]
 		[Authorize(AuthenticationSchemes = "CustomerAuth")]
 		public async Task<IActionResult> UpdateTrip([FromBody] TripProjectViewModel data)
@@ -500,7 +382,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			_context.TripProjectDetails.AddRange(details);
 			await _context.SaveChangesAsync();
 
-			return Ok("✅ 行程已更新");
+			return Ok("行程已更新");
 		}
 	}
 }

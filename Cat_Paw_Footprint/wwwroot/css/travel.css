@@ -12,16 +12,16 @@
     border-bottom: 1px solid #ddd;
     box-shadow: 0 1px 5px rgba(0,0,0,0.05); /* 加上淡陰影，讓區塊有浮起的感覺 */
 }
-/* 按鈕外觀 */
-.top-buttons button {
-    border-radius: 50px; /* 按鈕變圓角膠囊形 */
-    padding: 8px 20px; /* 內距，讓按鈕更大 */
-    transition: 0.2s; /* 設定滑鼠滑過的動畫時間 */
-}
-/* 滑鼠滑過按鈕時的效果 */
-.top-buttons button:hover {
-    transform: scale(1.05); /* 微微放大 5% */
-}
+    /* 按鈕外觀 */
+    .top-buttons button {
+        border-radius: 50px; /* 按鈕變圓角膠囊形 */
+        padding: 8px 20px; /* 內距，讓按鈕更大 */
+        transition: 0.2s; /* 設定滑鼠滑過的動畫時間 */
+    }
+        /* 滑鼠滑過按鈕時的效果 */
+        .top-buttons button:hover {
+            transform: scale(1.05); /* 微微放大 5% */
+        }
 
 /* 卡片外觀設定 (景點、美食、住宿卡片) */
 .card {
@@ -29,13 +29,25 @@
     border-radius: 12px; /* 四角圓弧化 */
     overflow: hidden; /* 超出邊界的內容隱藏 (如圖片圓角一致) */
     transition: transform 0.3s; /* 滑過卡片放大動畫 */
+    height: 30%;
 }
-/* 滑鼠滑過卡片時的動畫效果 */
-.card:hover {
-    transform: scale(1.03); /* 微微放大 3% */
+    /* 滑鼠滑過卡片時的動畫效果 */
+    .card:hover {
+        transform: scale(1.03); /* 微微放大 3% */
+    }
+/* 專屬排行程卡覆寫樣式 */
+.trip-card {
+    height: auto !important; /* 覆蓋全域 .card 高度限制 */
 }
 
 /*輪播圖片設定 (carousel)*/
+/* =統一輪播區域高度 */
+.carousel,
+.carousel-inner,
+.carousel-item {
+    width: 100%;
+    height: 180px; /* 統一圖片容器高度 */
+}
 .carousel-item img {
     object-fit: cover; /* 讓圖片保持比例裁切，填滿容器 */
     width: 100%; /* 寬度填滿父容器 */
@@ -52,9 +64,11 @@ input.form-control {
 .modal-content {
     border-radius: 15px; /* 整體圓角 */
 }
+
 .modal-header {
     border-bottom: none; /* 去掉標題下方的分隔線，讓視覺更乾淨 */
 }
+
 .modal-body {
     font-size: 1rem; /* 一般字體大小 */
     line-height: 1.6; /* 行距稍大，提升可讀性 */
@@ -65,50 +79,62 @@ input.form-control {
     /* 讓此元素成為定位基準，方便 ::before 和 ::after（貓爪）依據這個框來定位,而不會亂飄到頁面其他地方 */
     position: relative;
     /* 讓 .pic 容器可以像文字一樣橫向排列，但仍保有區塊元素可設定寬高的特性，適合讓多張圖片排成一行顯示 */
-    display: inline-block;
+    display: block;
+    width: 100%;
+    height: 180px; /* 這行確保圖片容器有固定高度 */
+    overflow: hidden; /* 防止貓爪跑出邊界 */
+    background-color: #fff; /* 沒有圖片時底色乾淨 */
 }
-/* 圖片基本樣式 */
-.pic img {
-    display: block; /* 移除圖片底下的空白縫隙 */
-    width: 100%; /* 寬度自適應 */
-    height: 180px; /* 固定高度 */
-    object-fit: cover; /* 圖片比例裁切填滿 */
-    border-radius: 10px; /* 圖片邊角圓滑 */
-}
+    /* 圖片基本樣式 */
+    .pic img {
+        display: block; /* 移除圖片底下的空白縫隙 */
+        width: 100%; /* 寬度自適應 */
+        height: 180px; /* 高度自適應 */
+        object-fit: cover; /* 圖片比例裁切填滿 */
+        border-radius: 10px; /* 圖片邊角圓滑 */
+    }
+        /* 預設圖片（noimage.png）覆寫樣式 — 保持完整比例顯示 */
+        .pic img[src*="noimage"] {
+            object-fit: cover ; /* 顯示完整圖，不裁切 */
+            padding: 0 !important;
+            background-color: #fff; /* 保持白底 */
+            border-radius: 10px;
+        }
 
 /* 🐾 左上角貓爪標記 */
 .pic::before {
     content: ""; /* 建立一個虛擬元素 */
     position: absolute; /* 絕對定位在圖片上方 */
-    top: 0px; /* 距離圖片頂端 0 */
-    left: 0px; /* 距離圖片左側 0 */
+    top: 8px; /* 距離圖片頂端 8 */
+    left: 8px; /* 距離圖片左側 8 */
     width: 30px; /* 貓爪圖片大小 */
     height: 30px;
     background-image: url('../images/logo.png'); /* 使用 logo.png 作為貓爪圖 */
     background-size: contain; /* 圖片等比例縮放完整顯示 */
     background-repeat: no-repeat; /* 不重複顯示圖片 */
     transform: rotate(135deg); /* 旋轉 135 度，營造「左上角貼」的感覺 */
+    pointer-events: none; /* 🟢 防止遮住 + 按鈕 */
 }
-/* 🐾 右下角貓爪標記 */
-.pic::after {
-    content: ""; /* 建立一個虛擬元素 */
-    position: absolute; /* 絕對定位在圖片上方 */
-    bottom: 0px; /* 距離圖片底端 0 */
-    right: 0px; /* 距離圖片右側 0 */
-    width: 30px; /* 貓爪圖片大小 */
-    height: 30px;
-    background-image: url('../images/logo.png'); /* 使用 logo.png 作為貓爪圖 */
-    background-size: contain; /* 圖片等比例縮放完整顯示 */
-    background-repeat: no-repeat; /* 不重複顯示圖片 */
-    transform: rotate(315deg); /* 旋轉 315 度，營造「右下角貼」的感覺 */
-}
-/* 🐾 滑鼠滑過圖片時，貓爪特效 */
-.pic:hover::before,
-.pic:hover::after {
-    transform: scale(1.2) rotate(25deg); /* 放大並旋轉一點，顯示互動效果 */
-    transition: 0.3s; /* 動畫時間 0.3 秒 */
-    filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.5)); /* 加上橘色陰影光暈 */
-}
+    /* 🐾 右下角貓爪標記 */
+    .pic::after {
+        content: ""; /* 建立一個虛擬元素 */
+        position: absolute; /* 絕對定位在圖片上方 */
+        bottom: 8px; /* 距離圖片底端 8 */
+        right: 8px; /* 距離圖片右側 8 */
+        width: 30px; /* 貓爪圖片大小 */
+        height: 30px;
+        background-image: url('../images/logo.png'); /* 使用 logo.png 作為貓爪圖 */
+        background-size: contain; /* 圖片等比例縮放完整顯示 */
+        background-repeat: no-repeat; /* 不重複顯示圖片 */
+        transform: rotate(315deg); /* 旋轉 315 度，營造「右下角貼」的感覺 */
+        pointer-events: none; /* 🟢 防止遮住 + 按鈕 */
+    }
+    /* 🐾 滑鼠滑過圖片時，貓爪特效 */
+    .pic:hover::before,
+    .pic:hover::after {
+        transform: scale(1.2) rotate(25deg); /* 放大並旋轉一點，顯示互動效果 */        
+        filter: drop-shadow(0 0 5px rgba(255, 166, 0, 0.5)); /* 加上橘色陰影光暈 */
+    }
 
 /* 行程拖曳圖示 (拖曳排序功能) */
 .drag-handle {
@@ -116,8 +142,7 @@ input.form-control {
     cursor: grab; /* 顯示可抓取游標 */
     font-size: 20px; /* 放大一些 */
 }
-/* 滑鼠滑過拖曳圖示時顏色加深 */
-.drag-handle:hover {
-    color: #000; /* 變成純黑色，提示可操作 */
-}
-
+    /* 滑鼠滑過拖曳圖示時顏色加深 */
+    .drag-handle:hover {
+        color: #000; /* 變成純黑色，提示可操作 */
+    }
