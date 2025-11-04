@@ -56,7 +56,9 @@ window.updateList = async function () {
         // === 通知清單動態生成 ===
         list.innerHTML = data.map(n => `
             <div class="notif-item border px-3 py-2 ${n.isRead ? 'opacity-50' : ''}" 
-                 data-id="${n.notificationID}" style="cursor:pointer;">
+                 data-id="${n.notificationID}" 
+                 data-type="${n.type}" 
+                 style="cursor:pointer;">
                 <div class="fw-bold text-truncate">${n.title}</div>
                 <div class="small text-muted text-truncate">${n.message}</div>
                 <div class="text-end small text-secondary">${dayjs(n.createdAt).format('MM/DD HH:mm')}</div>
@@ -70,6 +72,7 @@ window.updateList = async function () {
                 const id = this.dataset.id;
                 const title = this.querySelector('.fw-bold')?.textContent || "";
                 const msg = this.querySelector('.small.text-muted')?.textContent || "";
+                const type = this.dataset.type || "";
 
                 try {
                     // ✅ 標記已讀
@@ -92,6 +95,13 @@ window.updateList = async function () {
                             return;
                         }
                     }
+                    
+                    // ✅ 優惠券導向
+                    if (type === "優惠活動" || title.includes("優惠活動") || msg.includes("優惠券")) {
+                        window.location.href = "/CustomersArea/Coupons/Index";
+                        return;
+                    }
+
 
 
                 } catch (err) {
