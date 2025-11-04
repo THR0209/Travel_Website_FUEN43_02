@@ -11,6 +11,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/front-end/assets/js/webFront.js"></script>
+
 
     <style>
         body {
@@ -22,34 +25,30 @@
             justify-content: center;
         }
 
-        .
-        
-        {
+        .card {
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
             border: none;
             border-radius: 1rem;
         }
 
-        .btn-join {
-            color: #7ec8e3;
-            border: 1px solid #7ec8e3;
-            background: transparent;
-            border-radius: 999px;
-            transition: all 0.25s ease;
-        }
-
-            .btn-join:hover {
-                background: #7ec8e3;
-                color: #fff;
-                box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
+            .btn-join {
+                color: #7ec8e3;
+                border: 1px solid #7ec8e3;
+                background: transparent;
+                border-radius: 999px;
+                transition: all 0.25s ease;
             }
+
+                .btn-join:hover {
+                    background: #7ec8e3;
+                    color: #fff;
+                    box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
+                }
     </style>
 </head>
 
 <body>
-    <div class="
-         
-         p-4" style="width: 360px;">
+    <div class=" p-4" style="width: 360px;">
         <h4 class="text-center mb-3">🐾 訪客加入聊天室</h4>
 
         <form id="joinForm">
@@ -90,23 +89,21 @@
                 const res = await axios.post("/api/TalkMessageApi/JoinAsGuest", dto);
                 const msg = res.data.message || "未知回應";
 
-                // 顯示結果
-                alert("✅ " + msg);
-
-                // ✅ 判斷回傳結果，只有成功或回訪時才導向聊天室
+                // ✅ 使用 SweetAlert2 框框
                 if (msg === "成功加入群組" || msg === "歡迎回來") {
+                    window.showAlert("success", msg, "即將進入聊天室");
                     localStorage.setItem("CatPaw_GroupCode", groupCode);
                     localStorage.setItem("CatPaw_TemporaryName", temporaryName);
-                    window.location.href = "/CustomersArea/guest-chat.html";
-                    return;
+
+                    setTimeout(() => {
+                        window.location.href = "/CustomersArea/guest-chat.html";
+                    }, 1800);
                 } else {
-                    // ❌ 群組不存在或其他錯誤，不跳轉
-                    console.warn("加入失敗，停留在原頁。");
-                    return;
+                    window.showAlert("warning", "加入失敗", msg);
                 }
 
             } catch (err) {
-                alert("❌ 加入失敗：" + err.message);
+                window.showAlert("error", "伺服器錯誤", err.message);
             }
         });
     </script>

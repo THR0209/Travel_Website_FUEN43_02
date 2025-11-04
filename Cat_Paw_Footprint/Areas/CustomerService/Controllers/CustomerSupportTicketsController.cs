@@ -20,13 +20,15 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 		private readonly ICustomerSupportTicketsService _service;
 		private readonly webtravel2Context _context;
 		private readonly INotificationTriggerService _notifTrigger;
+		private readonly IHubContext<TicketChatHub> _hubContext;
 
 		public CustomerSupportTicketsController(ICustomerSupportTicketsService service, webtravel2Context context,
-	INotificationTriggerService notifTrigger)
+	INotificationTriggerService notifTrigger, IHubContext<TicketChatHub> hubContext)
 		{
 			_service = service;
 			_context = context;
 			_notifTrigger = notifTrigger;
+			_hubContext = hubContext;
 		}
 
 		/// <summary>
@@ -227,12 +229,29 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 			var completedStatus = await _context.TicketStatus
 				.FirstOrDefaultAsync(s => s.StatusDesc.Contains("已完成"));
 
+			// ✅ 取得最新狀態文字（不論是哪個狀態）
+			var newStatus = await _context.TicketStatus
+				.Where(s => s.StatusID == vm.StatusID)
+				.Select(s => s.StatusDesc)
+				.FirstOrDefaultAsync();
+
+			if (!string.IsNullOrEmpty(newStatus))
+			{
+				// ✅ 推播即時狀態更新給該工單聊天室群組
+				await _hubContext.Clients.Group($"ticket-{vm.TicketID}")
+					.SendAsync("TicketStatusChanged", vm.TicketID, newStatus);
+
+				Console.WriteLine($"📢 已推播工單狀態更新：#{vm.TicketID} → {newStatus}");
+			}
+
+			// ✅ 若為「已完成」，觸發通知中心訊息
 			if (completedStatus != null && vm.StatusID == completedStatus.StatusID)
 			{
 				await _notifTrigger.NotifyTicketCompletedAsync(ticket.TicketID);
 			}
 
 			return Json(new { success = true });
+
 		}
 
 

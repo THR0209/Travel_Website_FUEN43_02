@@ -14,6 +14,17 @@
         string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "CustomersArea", StringComparison.OrdinalIgnoreCase);
+
+    
+    string customerName = "";
+    string customerLevelName = "";
+
+    if (isCustomerLoggedIn)
+    {
+        var claims = customerAuth.Principal.Claims;
+        customerName = claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "";
+        customerLevelName = claims.FirstOrDefault(c => c.Type == "LevelName")?.Value ?? "";
+    }
 }
 
 <!DOCTYPE html>
@@ -115,27 +126,32 @@
                         <ul class="nav align-items-center mb-0 w-100">
                             @if (isCustomerLoggedIn)
                             {
-                                <li class="nav-item ms-auto me-1">
+                                @* <li class="nav-item ms-auto me-1">
                                     <a href="#" class="nav-link">
                                        <span class="link-text"><i class="fa-solid fa-calendar-check me-1"></i>每日簽到</span>
                                     </a>
-                                </li>
-                                <li class="nav-item me-1 dropdown">
-                                    <a href="#" class="nav-link dropdown-toggle position-relative" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="link-text"><i class="fa-solid fa-bell"></i>通知</span>
+                                </li> *@
+                                <li class="nav-item me-1 dropdown notification-dropdown position-relative">
+                                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="link-text"><i class="fa-solid fa-bell"></i> 通知</span>
                                         <span id="notifBadge"
                                               class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                               style="display:none; font-size:0.7rem;">
                                         </span>
                                     </a>
-                                    <div class="dropdown-menu dropdown-menu-end shadow p-0 notif-dropdown"
-                                         data-bs-popper="none">
-                                        <div class="p-3 border-bottom fw-bold">最新通知</div>
-                                        <div id="notifList" class="overflow-auto" style="max-height:400px; max-width:320px;">
-                                            <div class="text-center text-muted py-3">載入中...</div>
+                                    <div class="dropdown-menu shadow p-0 notif-dropdown" data-bs-popper="none">
+                                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
+                                            <span>最新通知</span>
+                                            <button id="markAllReadBtn"
+                                                    class="btn btn-sm btn-outline-primary rounded-pill px-3 py-0"
+                                                    style="font-size:0.8rem;">
+                                                全部已讀
+                                            </button>
                                         </div>
-                                        <div class="p-2 text-center border-top"
-                                             style="cursor:pointer"
+                                        <div id="notifList" class="overflow-auto" style="max-height:400px; max-width:320px;">
+                                            <div class="text-center text-muted py-3">目前沒有通知</div>
+                                        </div>
+                                        <div class="p-2 text-center border-top" style="cursor:pointer"
                                              onclick="window.location.href='/CustomersArea/Notifications/Index'">
                                             <span class="text-decoration-none small text-primary">查看所有通知</span>
                                         </div>
@@ -148,7 +164,21 @@
                                 </li>
                                 <li class="nav-item dropdown">
                                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                                        <span class="link-text"><i class="fa-solid fa-user me-1"></i>會員中心</span>
+                                        <span class="link-text">
+                                            <i class="fa-solid fa-user me-1"></i>
+                                            @if (isCustomerLoggedIn)
+                                            {
+                                                @customerName
+                                                @if (!string.IsNullOrEmpty(customerLevelName))
+                                                {
+                                                    <span class="badge bg-primary ms-1">@customerLevelName</span>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                @:會員中心
+                                            }
+                                        </span>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end mt-2 shadow user-dropdown">
                                         <li>
@@ -215,51 +245,65 @@
     </div>
 
     <!-- Footer -->
-    <footer class="pt-5 pb-4">
-        <div class="container">
-            <div class="row g-4">
+    <footer class="cat-footer">
+        <div class="cat-footer-inner container py-5">
+            <div class="row gy-4">
+                <!-- 品牌 -->
                 <div class="col-12 col-md-4">
-                    <a class="brand-logo mb-2" asp-controller="Home" asp-action="Index">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M8.8 9.5c.9 0 1.7.6 1.9 1.5.2-.9 1-1.5 1.9-1.5 1.1 0 2 .9 2 2 0 2.4-3.9 4.5-3.9 4.5S6.8 13.9 6.8 11.5c0-1.1.9-2 2-2Z" fill="#fff" />
-                        </svg>
-                        <span>貓爪足跡</span>
-                    </a>
-                </div>
-                <div class="col-6 col-md-2">
-                    <div class="footer-title">探索</div>
-                    <ul class="list-unstyled small d-grid gap-2">
-                        <li><a href="#">本週熱門</a></li>
-                        <li><a href="#">在地體驗</a></li>
-                        <li><a href="#">交通票券</a></li>
-                        <li><a href="#">更多主題</a></li>
-                    </ul>
-                </div>
-                <div class="col-6 col-md-2">
-                    <div class="footer-title">支援</div>
-                    <ul class="list-unstyled small d-grid gap-2">
-                        <li><a href="#">常見問題</a></li>
-                        <li><a href="#">訂單查詢</a></li>
-                        <li><a href="#">退款政策</a></li>
-                        <li><a href="#">聯絡我們</a></li>
-                    </ul>
-                </div>
-                <div class="col-12 col-md-4">
-                    <div class="footer-title">追蹤我們</div>
-                    <div class="d-flex gap-3">
-                        <a href="#">Facebook</a>
-                        <a href="#">Instagram</a>
-                        <a href="#">YouTube</a>
+                    <div class="footer-brand">
+                        <img src="~/images/logo.png" alt="logo" class="footer-logo">
+                        <h4 class="mt-2 fw-bold text-white">貓爪足跡</h4>
+                        <p class="small text-light">
+                            帶著毛孩一起出遊吧！探索最可愛、最溫暖的旅程體驗。
+                        </p>
                     </div>
                 </div>
-            </div>
-            <hr class="my-4 border-secondary" />
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 small text-secondary">
-                <div> © 2025, made by FUEN43 Group 2.</div>
-                <div class="d-flex gap-3"><a href="#">服務條款</a><a href="#">隱私權</a></div>
+
+                <!-- 導覽連結 -->
+                <div class="col-6 col-md-2">
+                    <h6 class="footer-title">探索</h6>
+                    <ul class="footer-links list-unstyled small">
+                        <li><a href="#">熱門行程</a></li>
+                        <li><a href="#">住宿推薦</a></li>
+                        <li><a href="#">交通票券</a></li>
+                        <li><a href="#">主題企劃</a></li>
+                    </ul>
+                </div>
+
+                <!-- 幫助中心 -->
+                <div class="col-6 col-md-2">
+                    <h6 class="footer-title">幫助中心</h6>
+                    <ul class="footer-links list-unstyled small">
+                        <li><a href="/CustomersArea/FAQs/Index">常見問題</a></li>
+                        <li><a href="/CustomersArea/Contact/Index">聯絡我們</a></li>
+                        <li><a href="#">訂單查詢</a></li>
+                        <li><a href="#">退款政策</a></li>
+                    </ul>
+                </div>
+
+                <!-- 聯絡 / 社群 -->
+                <div class="col-12 col-md-4">
+                    <h6 class="footer-title">追蹤我們</h6>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <p class="small mt-3 text-light">
+                        客服信箱：<a href="mailto:service@catpaw.com.tw" class="text-white">service@catpaw.com.tw</a>
+                    </p>
+                </div>
             </div>
         </div>
+
+        <div class="footer-bottom text-center text-light py-3 small">
+            <div>© 2025 貓爪足跡 | 由 FUEN43 Group 2 製作 🐾</div>
+        </div>
+
+        <!-- 背景裝飾 -->
+        <div class="footer-paw-bg"></div>
     </footer>
+
 
     <!-- Back to top -->
     <div class="back-to-top" id="backToTop">

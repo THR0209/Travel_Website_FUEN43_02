@@ -4,7 +4,7 @@
 // ===================================================
 
 // ----------- 統一彈窗函式（全域通用） -----------
-window.showAlert = function (type, title, text, timer = 2000) {
+window.showAlert = function (type, title, text, timer = 1000) {
     Swal.fire({
         icon: type,
         title: `🐾 ${title}`,
@@ -63,8 +63,7 @@ window.updateList = async function () {
             </div>
         `).join('');
 
-
-        // === 🔹 綁定通知點擊事件（含客服評價提醒導向） ===
+        // === 🔹 綁定通知點擊事件（客服 + 訂單 + 優惠活動導向） ===
         document.querySelectorAll('.notif-item').forEach(item => {
             item.addEventListener('click', async function () {
                 const id = this.dataset.id;
@@ -77,7 +76,7 @@ window.updateList = async function () {
                     this.classList.add('opacity-50');
                     await window.updateUnread();
 
-                    // ✅ 檢查是否為「客服相關通知」
+                    // ✅ 客服通知導向
                     if (
                         title.includes('客服服務已完成') ||
                         title.includes('客服評價提醒') ||
@@ -86,13 +85,32 @@ window.updateList = async function () {
                     ) {
                         const match = msg.match(/#\s*(\d+)/);
                         if (match && match[1]) {
-                            const ticketId = match[1];
-                            // 直接導向客服中心，帶上 ticketId 參數
-                            window.location.href = `/CustomersArea/CustomerService/Index?ticketId=${ticketId}`;
+                            window.location.href = `/CustomersArea/CustomerService/Index?ticketId=${match[1]}`;
                             return;
                         }
                     }
 
+                    // ✅ 訂單通知導向
+                    if (
+                        title.includes('訂單成立通知') ||
+                        title.includes('付款成功通知') ||
+                        title.includes('訂單狀態') ||
+                        title.includes('系統公告')
+                    ) {
+                        const match = msg.match(/#\s*(\d+)/);
+                        if (match && match[1]) {
+                            window.location.href = `/CustomersArea/Orders?orderId=${match[1]}`;
+                        } else {
+                            window.location.href = `/CustomersArea/Orders`;
+                        }
+                        return;
+                    }
+
+                    // ✅ 其他通知導向通知中心
+                    if (title.includes('優惠') || title.includes('公告') || title.includes('提醒')) {
+                        window.location.href = `/CustomersArea/Notifications/Index`;
+                        return;
+                    }
 
                 } catch (err) {
                     console.error("❌ 標記通知為已讀失敗", err);
@@ -100,11 +118,13 @@ window.updateList = async function () {
                 }
             });
         });
+
     } catch (e) {
         console.error("載入通知清單失敗", e);
         window.showAlert('warning', '載入失敗', '通知清單載入失敗');
     }
-}; // ✅ ← 補上這個收尾大括號
+};
+
 
 
 // ----------- 全域函式：桌面推播通知 -----------
@@ -157,6 +177,27 @@ document.addEventListener('DOMContentLoaded', function () {
             a11y: { enabled: true }
         });
     }
+
+    // ----------- 全部已讀按鈕事件 -----------
+    const btn = document.getElementById('markAllReadBtn');
+    if (btn) {
+        btn.addEventListener('click', async () => {
+            try {
+                const res = await axios.post('/CustomersArea/Notifications/MarkAllAsRead');
+                if (res.data.success) {
+                    window.showAlert('success', '通知中心', '全部通知已標記為已讀 🐾');
+                    await window.updateUnread();
+                    await window.updateList();
+                } else {
+                    window.showAlert('warning', '操作失敗', res.data.message || '請稍後再試');
+                }
+            } catch (err) {
+                console.error('❌ 全部已讀錯誤:', err);
+                window.showAlert('error', '錯誤', '伺服器連線失敗');
+            }
+        });
+    }
+
 
     // ----------- 熱門FAQ Accordion載入（首頁） -----------
     $.getJSON('/CustomersArea/FrontFAQs/api/hot', function (faqs) {
@@ -222,9 +263,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // ----------- 支援一般錨點平滑滾動 -----------
     $('.nav-link[href^="#"]').on('click', function (e) {
         const target = $(this).attr('href');
-        if ($(target).length) {
+
+        // 🚫 忽略 href="#" 或空值，避免 jQuery 選擇器錯誤
+        if (!target || target === "#") return;
+
+        const $target = $(target);
+        if ($target.length) {
             e.preventDefault();
-            $('html, body').animate({ scrollTop: $(target).offset().top - 60 }, 500);
+            $('html, body').animate({ scrollTop: $target.offset().top - 60 }, 500);
         }
     });
 
@@ -243,6 +289,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // ✅ 設定接收事件
     connection.on("ReceiveNotification", (title, message, type) => {
         console.log("📨 收到通知:", { title, message, type });
+
+        const path = window.location.pathname.toLowerCase();
+
+        // 🚫 若目前在客服中心或通知中心，略過彈窗與桌面通知
+        const isInSilentPage =
+            path.includes("/customersarea/customerservice") ||
+            path.includes("/customersarea/notifications");
+
+        if (isInSilentPage) {
+            console.log("🚫 使用者目前在客服中心或通知中心，略過通知提示。");
+            // ✅ 仍保持未讀同步（但不顯示彈窗）
+            window.updateUnread();
+            return;
+        }
+
         window.showAlert('info', title, message, 4000);
         window.updateUnread();
         window.updateList();

@@ -1,0 +1,139 @@
+﻿@model Cat_Paw_Footprint.Models.SemiSelfProducts
+@{
+    ViewData["Title"] = "編輯半自助產品";
+}
+
+@section Styles {
+    <!-- CKEditor -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/css/myckeditor.css" rel="stylesheet" />
+}
+
+<a asp-action="Index" class="btn btn-outline-primary float-end">返回上頁</a>
+<h1 class="ms-3">更新行程內容（半自助 / 自助）</h1>
+<hr />
+
+<form asp-action="Edit" enctype="multipart/form-data">
+    <input type="hidden" asp-for="ProductID" />
+
+    <div class="row">
+        <!-- Left -->
+        <div class="col-md-4">
+            <div class="card p-3 ms-3 h-100">
+                <label class="mb-1">產品封面照：</label>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group mb-3">
+                    @if (!string.IsNullOrEmpty(Model?.ProductImageUrl))
+                    {
+                        <img src="@Model.ProductImageUrl" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="封面照" />
+                    }
+                    else
+                    {
+                        <img src="@Url.Content("~/images/NoImage.png")" style="width:320px;height:240px;" class="mb-2" id="previewImage" title="尚無內容" />
+                    }
+                    <input type="file" name="UploadImage" id="uploadImage" class="form-control" accept="image/*" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ProductName" class="control-label mb-1">產品名稱：</label>
+                    <input asp-for="ProductName" class="form-control" />
+                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="RegionID" class="control-label mb-1">出團地區：</label>
+                    <select asp-for="RegionID" class="form-select" asp-items="ViewBag.RegionID">
+                        <option value="">請選擇地區</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ProductPrice" class="control-label mb-1">產品價格：</label>
+                    <input asp-for="ProductPrice" class="form-control" />
+                    <span asp-validation-for="ProductPrice" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="StartDate" class="control-label mb-1">上架時間：</label>
+                    <input asp-for="StartDate" class="form-control" />
+                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="EndTime" class="control-label mb-1">下架時間：</label>
+                    <input asp-for="EndTime" class="form-control" />
+                    <span asp-validation-for="EndTime" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="MaxPeople" class="control-label mb-1">人數上限：</label>
+                    <input asp-for="MaxPeople" class="form-control" />
+                    <span asp-validation-for="MaxPeople" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right -->
+        <div class="col-md-8">
+            <div class="card p-3 ms-3 d-flex flex-column h-100">
+                <div class="form-group mb-3">
+                    <label asp-for="ProductDesc" class="control-label mb-1">產品描述：</label>
+                    <textarea asp-for="ProductDesc" class="form-control" id="editor3"></textarea>
+                    <span asp-validation-for="ProductDesc" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Notes" class="control-label mb-1">注意事項：</label>
+                    <textarea asp-for="Notes" class="form-control" id="editor4"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="d-flex justify-content-end align-items-center mt-3">
+        <div class="form-check form-switch me-5">
+            <input class="form-check-input" type="checkbox" name="IsActive" value="true" @(Model?.IsActive ?? false ? "checked" : "") />
+            <input type="hidden" name="IsActive" value="false" />
+            <label class="form-check-label">上架</label>
+        </div>
+        <input type="submit" value="更新資料" class="btn btn-outline-primary" />
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <!-- CKEditor -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+    <script>
+        // ClassicEditor.create(document.querySelector('#editor'), { language: 'zh' });
+        // ClassicEditor.create(document.querySelector('#editor2'), { language: 'zh' });
+
+        // 預覽上傳圖片
+        function previewImage(inputFile) {
+            if (inputFile.files && inputFile.files[0]) {
+                var allowType = "image.*";
+                if (inputFile.files[0].type.match(allowType)) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.querySelector('#previewImage').setAttribute('src', e.target.result);
+                    };
+                    reader.readAsDataURL(inputFile.files[0]);
+                } else {
+                    alert("不支援上傳的檔案格式!");
+                    inputFile.value = "";
+                    document.querySelector('#previewImage').setAttribute('src', "/images/NoImage.png");
+                }
+            }
+        }
+        document.getElementById('uploadImage').addEventListener('change', function(){ previewImage(this); });
+    </script>
+}

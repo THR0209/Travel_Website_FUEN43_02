@@ -16,8 +16,15 @@
         <!-- 我的工單欄位 -->
         <div class="equal-col">
             <div class="support-card p-3 mb-3">
-                <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-paw"></i> 我的客服紀錄</h5>
-
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-primary mb-0">
+                        <i class="fa-solid fa-paw"></i> 我的客服紀錄
+                    </h5>
+                    <button class="btn btn-outline-primary rounded-pill shadow-sm px-3"
+                            v-on:click="openNewTicketModal">
+                        <i class="fa-solid fa-plus me-1"></i> 建立新工單
+                    </button>
+                </div>
                 <!-- ✅ 工單載入中提示 -->
                 <div v-if="isLoadingTickets" class="text-center py-5">
                     <div class="spinner-border text-primary mb-3" role="status"></div>
@@ -80,10 +87,6 @@
                 <div v-else class="text-center py-5 opacity-75">
                     <img src="/front-end/assets/images/cutservice.png" style="width:200px" class="d-block mx-auto">
                     <p class="mt-3 text-muted">目前尚無工單 🐾</p>
-                    <button class="btn btn-outline-primary mt-3 px-4 rounded-pill shadow-sm"
-                            v-on:click="openNewTicketModal">
-                        <i class="fa-solid fa-plus me-1"></i> 建立新工單
-                    </button>
                 </div>
             </div>
         </div>
@@ -92,8 +95,8 @@
         <div class="equal-col">
             <div class="support-card p-4 mb-3 text-center">
                 <i class="fa-solid fa-circle-question fa-3x text-primary mb-3"></i>
-                <h5 class="fw-bold text-primary">常見問題</h5>
-                <p class="text-muted">查看常見問題以獲得即時解答</p>
+                <h5 class="fw-bold text-primary mb-3">常見問題</h5>
+                <p class="text-muted mb-3">查看常見問題以獲得即時解答</p>
                 <a href="/CustomersArea/FrontFAQs/Index" class="btn btn-outline-primary px-4 rounded-pill shadow-sm">
                     <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> 前往常見問題
                 </a>
@@ -125,7 +128,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- ✅ 新增：工單資訊列（固定在標題下方） -->
+                <!-- ✅ 工單資訊列（固定在標題下方） -->
                 <div class="ticket-info-bar text-dark px-4 py-2"
                      style="background:#ecf9fc; border-bottom:1px solid #d4edf3;">
                     <b>客服人員：</b>{{ selectedTicket?.employeeName || '尚未指派' }}
@@ -186,25 +189,43 @@
                             <div v-if="msg.messageContent">{{ msg.messageContent }}</div>
 
                             <!-- ✅ 單張圖片：與文字同一排 -->
-                            <div v-else-if="imageListFrom(msg.attachmentURL).length === 1" class="d-inline-block ms-2 align-middle">
+                            <div v-else-if="imageListFrom(msg.attachmentURL).length === 1"
+                                 class="d-inline-block ms-2 align-middle position-relative image-wrapper">
+                                <div v-if="!imageLoaded[msg.messageID]" class="loading-spinner text-center">
+                                    <div>
+                                        <i class="fa-solid fa-paw fa-beat text-info fs-3"></i>
+                                        <div class="loading-text mt-1 text-secondary small">圖片載入中...</div>
+                                    </div>
+                                </div>
+
                                 <img :src="imageListFrom(msg.attachmentURL)[0]"
                                      loading="lazy"
                                      class="rounded shadow-sm"
-                                     style="max-width: 180px; max-height: 160px; object-fit: cover; cursor: zoom-in; transition: opacity 0.3s ease; opacity: 0;"
-                                     v-on:load="$event.target.style.opacity = 1"
+                                     style="max-width: 180px; max-height: 160px; object-fit: cover; cursor: zoom-in; transition: opacity 0.3s ease;"
+                                     :style="{ opacity: imageLoaded[msg.messageID] ? 1 : 0 }"
+                                     v-on:load ="imageLoaded[msg.messageID] = true"
                                      v-on:click="openImagePreview(imageListFrom(msg.attachmentURL)[0])" />
                             </div>
 
                             <!-- ✅ 多張圖片才使用 2×2 佈局 -->
                             <div v-else-if="imageListFrom(msg.attachmentURL).length > 1" class="image-grid mt-2">
-                                <img v-for="(u, idx) in imageListFrom(msg.attachmentURL)"
-                                     :key="idx"
-                                     :src="u"
-                                     alt="image"
-                                     loading="lazy"
-                                     v-on:load="$event.target.style.opacity = 1"
-                                     v-on:click="openImagePreview(u)"
-                                     style="opacity: 0; transition: opacity 0.3s ease;" />
+                                <div v-for="(u, idx) in imageListFrom(msg.attachmentURL)"
+                                     :key="msg.messageID + '-' + idx"
+                                     class="position-relative image-wrapper">
+                                    <div v-if="!imageLoaded[msg.messageID + '-' + idx]" class="loading-spinner text-center">
+                                        <div>
+                                            <i class="fa-solid fa-paw fa-beat text-info fs-3"></i>
+                                            <div class="loading-text mt-1 text-secondary small">圖片載入中...</div>
+                                        </div>
+                                    </div>
+                                    <img :src="u"
+                                         :style="{ opacity: imageLoaded[msg.messageID + '-' + idx] ? 1 : 0 }"
+                                         v-on:load="imageLoaded[msg.messageID + '-' + idx] = true"
+                                         v-on:click="openImagePreview(u)"
+                                         alt="image"
+                                         class="rounded shadow-sm"
+                                         style="width:100%; height:100%; object-fit:cover; transition: opacity 0.3s ease;" />
+                                </div>
                             </div>
 
                         </div>
@@ -414,6 +435,7 @@
                 const isUploading = ref(false);
                 const isDragOver = ref(false);
                 const hoveredIndex = ref(null);
+                const imageLoaded = Vue.reactive({});
 
                 let dragCounter = 0;
                 let imagePreviewModal;
@@ -531,7 +553,9 @@
                         const res = await axios.post('/CustomersArea/CustomerService/CreateTicket', payload);
                         if (res.data.success) {
                             showAlert('success', '建立成功', '已成功建立工單');
-                            newTicketModal.hide();
+                            const modal = getModal('newTicketModal');
+                            if (modal) modal.hide();
+
                             await loadTickets();
                         } else {
                             showAlert('error', '建立失敗', res.data.message || '發生未知錯誤');
@@ -579,6 +603,26 @@
                             });
 
                             setTimeout(scrollToBottom, 150);
+                        }
+                    });
+                   // ✅ 新增：監聽工單狀態變更事件
+                    connection.on("TicketStatusChanged", (ticketId, newStatus) => {
+                        console.log("📢 工單狀態變更通知:", ticketId, newStatus);
+
+                        // 更新工單清單上的狀態
+                        const t = tickets.value.find(x => x.ticketID === ticketId);
+                        if (t) t.statusName = newStatus;
+
+                        // 若目前聊天室正在開啟該工單
+                        if (selectedTicket.value?.ticketID === ticketId) {
+                            selectedTicket.value.statusName = newStatus;
+
+                            // 若變為「已完成」，顯示評價表單
+                            if (newStatus === '已完成') {
+                                hasFeedback.value = false;
+                                feedback.value = { rating: 0, comment: '', createTime: '' };
+                                showAlert('info', '客服通知', '此工單已完成，可進行評價 🐾');
+                            }
                         }
                     });
 
@@ -1029,7 +1073,7 @@
                 return {
                   tickets, selectedTicket, messages, newMessage, showAll,
                   feedback, hasFeedback, fileInput, ticketTypes, newTicket,
-                  openChat, sendMessage, triggerFile, handleFiles,
+                  openChat, sendMessage, triggerFile, handleFiles,imageLoaded,
                   formatTime, openNewTicketModal, submitNewTicket,
                   openImagePreview, previewImageUrl,submitFeedback,
                   imageList, currentImageIndex, prevImage, nextImage,

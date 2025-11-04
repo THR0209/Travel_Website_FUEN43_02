@@ -49,15 +49,15 @@
                     <input type="hidden" name="sort" value="@Model?.Sort" />
 
                     <div class="mb-3">
-                        <label class="form-label">目的地 / 關鍵字</label>
+                        <label class="form-label">關鍵字</label>
                         <input class="form-control" name="Destination" value="@Model?.Input?.Destination" placeholder="輸入關鍵字..." />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">出發地</label>
+                        <label class="form-label">想遊玩的地區</label>
                         <div class="d-flex flex-wrap gap-2">
                             @{
-                                var locations = new[] { "台北", "新北市", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "嘉義", "台南", "高雄", "屏東", "花蓮", "台東", "宜蘭", "雲林", "基隆" };
+                                var locations = new[] { "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "嘉義", "台南", "高雄", "屏東", "花蓮", "台東", "宜蘭", "雲林", "基隆", "澎湖", "金門", "馬祖", "蘭嶼", "蘭嶼", "小琉球" };
                                 var selected = Model?.Input?.Departures ?? new List<string>();
                             }
                             @foreach (var loc in locations)
