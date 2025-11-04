@@ -10,13 +10,11 @@
             grid-template-columns: 300px 1fr;
             gap: 20px
         }
+
         @@media (max-width:992px) {
-            .search-layout
-
-        {
-            grid-template-columns: 1fr
-        }
-
+            .search-layout {
+                grid-template-columns: 1fr
+            }
         }
 
         .filter-card {
@@ -49,15 +47,15 @@
                     <input type="hidden" name="sort" value="@Model?.Sort" />
 
                     <div class="mb-3">
-                        <label class="form-label">目的地 / 關鍵字</label>
+                        <label class="form-label">關鍵字</label>
                         <input class="form-control" name="Destination" value="@Model?.Input?.Destination" placeholder="輸入關鍵字..." />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">出發地</label>
+                        <label class="form-label">想遊玩的地區</label>
                         <div class="d-flex flex-wrap gap-2">
                             @{
-                                var locations = new[] { "台北", "新北市", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "嘉義", "台南", "高雄", "屏東", "花蓮", "台東", "宜蘭", "雲林", "基隆" };
+                                var locations = new[] { "台北", "新北", "桃園", "新竹", "苗栗", "台中", "彰化", "南投", "嘉義", "台南", "高雄", "屏東", "花蓮", "台東", "宜蘭", "雲林", "基隆", "澎湖", "金門", "馬祖", "蘭嶼", "蘭嶼", "小琉球" };
                                 var selected = Model?.Input?.Departures ?? new List<string>();
                             }
                             @foreach (var loc in locations)
@@ -75,7 +73,6 @@
                         </div>
                     </div>
 
-
                     <div class="mb-3">
                         <label class="form-label">價格區間</label>
                         <div class="d-flex gap-2">
@@ -85,13 +82,13 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">套用篩選</button>
+                        <button type="submit" class="btn btn-primary">套用價格篩選</button>
                     </div>
                 </form>
             </div>
         </aside>
 
-        <!-- 右側：條件列 + 結果 -->
+        <!-- 右側：條件列 + 結果（AJAX 會覆蓋這個 wrapper 裡的內容） -->
         <section id="result-wrapper">
             @await Html.PartialAsync("_BrowseResultsWrapper", Model)
         </section>
@@ -102,8 +99,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         (() => {
-          const wrapper   = document.getElementById('result-wrapper');
+          const wrapper    = document.getElementById('result-wrapper');
           const filterForm = document.getElementById('filterForm');
+
+          // 小工具：debounce
+          function debounce(fn, delay=200){
+            let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), delay); };
+          }
 
           function buildUrlFromForm(f){
             return f.action + (f.action.includes('?') ? '&' : '?')
@@ -118,40 +120,98 @@
             fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' } })
               .then(r => r.text())
               .then(html => {
-                wrapper.innerHTML = html;
-                window.history.replaceState({}, '', url);
-                bindEvents();
+                wrapper.innerHTML = html;                 // 只換右側內容
+                window.history.replaceState({}, '', url); // 更新網址
+                bindEvents();                             // 重新綁定（清除鈕／排序下拉等在右側）
               });
           }
 
+          // ✅ 每次載入/重載後，都要重新綁定清除鈕；另外左側 checkbox 永遠存在於頁面上，也一併（只會綁一次）
           function bindEvents(){
-            // 綁清除
+            // 右側 header 的「清除篩選條件」按鈕（在 wrapper 內，每次要重綁）
             const clearBtn = wrapper.querySelector('#clearFiltersBtn');
-            clearBtn?.addEventListener('click', clearFilters);
+            if (clearBtn && !clearBtn._bound){
+              clearBtn._bound = true;
+              clearBtn.addEventListener('click', () => {
+                // 重設整個左側表單（包含勾選的出發地）
+                filterForm.reset();
+                ajaxLoad(filterForm);
+                Swal.fire({ icon:'success', title:'已清除篩選條件', timer:1200, showConfirmButton:false });
+              });
+            }
+
+            // 左側「出發地」checkbox（在外層，只需綁一次；加上防重複保護）
+            document.querySelectorAll('.departure-checkbox').forEach(chk => {
+              if (chk._bound) return;
+              chk._bound = true;
+              chk.addEventListener('change', debounce(() => ajaxLoad(filterForm), 200));
+            });
           }
 
-          // ✅ 清除篩選
-          function clearFilters(){
-            filterForm.reset();
-            ajaxLoad(filterForm);
-            Swal.fire({icon:'success',title:'已清除篩選條件',timer:1200,showConfirmButton:false});
-          }
-
-          // ✅ 即時勾選「出發地」→ 篩選
-          document.querySelectorAll('.departure-checkbox').forEach(chk => {
-            chk.addEventListener('change', () => ajaxLoad(filterForm));
-          });
-
-          // 左側篩選表單送出
-          filterForm?.addEventListener('submit', e => {
+          // 左側篩選表單：AJAX 送出
+          filterForm?.addEventListener('submit', function(e){
             e.preventDefault();
             ajaxLoad(filterForm);
           });
 
-          // 初始
+          // 代理：右側內容中的點擊（分頁／加入購物車／排序連結等）
+          wrapper?.addEventListener('click', function(e){
+            // 加入購物車
+            const cartBtn = e.target.closest('.add-to-cart-btn');
+            if (cartBtn){
+              e.preventDefault();
+              const fd = new FormData();
+              fd.append('productId', cartBtn.dataset.productId);
+              fd.append('qty', 1);
+
+              fetch('/CustomersArea/Cart/add', { method:'POST', body: fd })
+                .then(r => r.json())
+                .then(data => {
+                  if (data.ok){
+                    Swal.fire({ icon:'success', title:'已加入購物車', showConfirmButton:false, timer:1500 });
+                    if (typeof updateCartCount === 'function') updateCartCount(data.count);
+                  }else{
+                    Swal.fire({ icon:'error', title:'加入失敗', text: data.error || '發生未知錯誤' });
+                  }
+                })
+                .catch(() => Swal.fire({ icon:'error', title:'發生錯誤', text:'請先登入會員！' }));
+              return;
+            }
+
+            // 分頁/排序連結改 AJAX
+            const a = e.target.closest('a'); if(!a) return;
+            const url = new URL(a.href, location.origin);
+            const ajaxable =
+              a.dataset.ajax === "1" ||
+              a.classList.contains('ajax-link') ||
+              url.searchParams.has('page') ||
+              url.searchParams.has('sort');
+
+            if (url.origin === location.origin && ajaxable){
+              e.preventDefault();
+              ajaxLoad(a.href);
+            }
+          });
+
+          // 代理：排序下拉（右側 wrapper 內）
+          wrapper?.addEventListener('change', function(e){
+            const sel = e.target.closest('#sortSelect');
+            if (!sel) return;
+
+            // 同步左側隱藏欄位，避免之後再篩選/分頁時跳回舊值
+            const hiddenSort = filterForm?.querySelector('input[name="sort"]');
+            if (hiddenSort) hiddenSort.value = sel.value;
+
+            const sortForm = wrapper.querySelector('form#sortForm');
+            if (sortForm) {
+              const url = sortForm.action + (sortForm.action.includes('?') ? '&' : '?')
+                        + new URLSearchParams(new FormData(sortForm)).toString();
+              ajaxLoad(url);
+            }
+          });
+
+          // ✅ 首次綁定
           bindEvents();
         })();
     </script>
 }
-
-
