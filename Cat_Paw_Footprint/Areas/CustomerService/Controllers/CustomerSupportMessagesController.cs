@@ -80,6 +80,7 @@ namespace Cat_Paw_Footprint.Areas.CustomerService.Controllers
 				// 發送通知給客戶（如果有 CustomerID）
 				var ticket = await _db.CustomerSupportTickets.FirstOrDefaultAsync(t => t.TicketID == vm.TicketID);
 				if (ticket?.CustomerID != null)
+
 					await _notifTrigger.NotifyCustomerServiceReplyAsync(ticket.CustomerID.Value, ticket.TicketID);
 
 				return Ok(result);

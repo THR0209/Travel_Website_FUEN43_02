@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
+@model IEnumerable<Cat_Paw_Footprint.Areas.CustomersArea.ViewModel.NotificationViewModel>
 @{
     ViewData["Title"] = "通知中心";
 }
@@ -225,6 +225,17 @@
                             return;
                         }
                         
+                        if (type === "訂單通知" || type === "系統公告") {
+                            const match = message.match(/#\s*(\d+)/);
+                            if (match && match[1]) {
+                                const orderId = match[1];
+                                window.location.href = `/CustomersArea/Orders?orderId=${orderId}`;
+                            } else {
+                                window.location.href = `/CustomersArea/Orders`;
+                            }
+                            return;
+                        }
+        
                     } catch (err) {
                         console.error("❌ 標記通知為已讀失敗", err);
                         window.showAlert('error', '錯誤', '無法標記通知為已讀');

@@ -31,7 +31,7 @@ namespace Cat_Paw_Footprint.Services
 		// 🔹 訂單建立
 		public async Task NotifyOrderCreatedAsync(int customerId, int orderId)
 		{
-			await SendAsync(customerId, "訂單成立通知", $"您的訂單 #{orderId} 已成立並完成付款，感謝您的購買！", "訂單通知");
+			await SendAsync(customerId, "訂單成立通知", $"您的訂單 #{orderId} 已成立並完成付款，感謝您的購買！", "系統公告");
 		}
 
 		// 🔹 付款成功
@@ -41,7 +41,7 @@ namespace Cat_Paw_Footprint.Services
 				customerId,
 				"付款成功通知",
 				$"您的訂單 #{orderId} 已成功付款，我們將為您準備旅程的詳細資訊，敬請期待！ 🐾",
-				"訂單通知"
+				"系統公告"
 			);
 		}
 
@@ -79,7 +79,7 @@ namespace Cat_Paw_Footprint.Services
 						r.CustomerID,
 						"優惠券即將到期",
 						$"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期。",
-						"優惠券"
+						"優惠活動"
 					);
 				}
 			}

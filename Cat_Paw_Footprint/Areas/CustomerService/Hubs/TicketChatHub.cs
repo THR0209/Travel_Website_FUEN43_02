@@ -38,4 +38,22 @@ public class TicketChatHub : Hub
 		// 針對指定工單群組廣播訊息，前端需監聽 ReceiveMessage 事件
 		await Clients.Group($"ticket-{ticketId}").SendAsync("ReceiveMessage", message);
 	}
+
+	// --------------------------------------------------------
+	// 通知客戶端工單狀態變更事件
+	// --------------------------------------------------------
+
+	/// <summary>
+	/// 當工單狀態變更（例如「處理中」→「已完成」）時通知客戶端。
+	/// 前端需監聽 TicketStatusChanged 事件。
+	/// </summary>
+	/// <param name="ticketId">工單 ID</param>
+	/// <param name="newStatus">新狀態名稱（如：已完成 / 處理中）</param>
+	public async Task NotifyTicketStatusChanged(int ticketId, string newStatus)
+	{
+		await Clients.Group($"ticket-{ticketId}")
+			.SendAsync("TicketStatusChanged", ticketId, newStatus);
+
+		Console.WriteLine($"📢 工單 #{ticketId} 狀態已更新為：{newStatus}");
+	}
 }

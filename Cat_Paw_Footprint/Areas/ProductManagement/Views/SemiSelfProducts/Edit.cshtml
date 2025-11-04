@@ -6,6 +6,7 @@
 @section Styles {
     <!-- CKEditor -->
     <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/css/myckeditor.css" rel="stylesheet" />
 }
 
 <a asp-action="Index" class="btn btn-outline-primary float-end">返回上頁</a>
@@ -78,13 +79,13 @@
             <div class="card p-3 ms-3 d-flex flex-column h-100">
                 <div class="form-group mb-3">
                     <label asp-for="ProductDesc" class="control-label mb-1">產品描述：</label>
-                    <textarea asp-for="ProductDesc" class="form-control" id="editor"></textarea>
+                    <textarea asp-for="ProductDesc" class="form-control" id="editor3"></textarea>
                     <span asp-validation-for="ProductDesc" class="text-danger"></span>
                 </div>
 
                 <div class="form-group mb-3">
                     <label asp-for="Notes" class="control-label mb-1">注意事項：</label>
-                    <textarea asp-for="Notes" class="form-control" id="editor2"></textarea>
+                    <textarea asp-for="Notes" class="form-control" id="editor4"></textarea>
                     <span asp-validation-for="Notes" class="text-danger"></span>
                 </div>
             </div>
@@ -107,11 +108,14 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <!-- CKEditor -->
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
     <script>
-        ClassicEditor.create(document.querySelector('#editor'), { language: 'zh' });
-        ClassicEditor.create(document.querySelector('#editor2'), { language: 'zh' });
+        // ClassicEditor.create(document.querySelector('#editor'), { language: 'zh' });
+        // ClassicEditor.create(document.querySelector('#editor2'), { language: 'zh' });
 
         // 預覽上傳圖片
         function previewImage(inputFile) {
