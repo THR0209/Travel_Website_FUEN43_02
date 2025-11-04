@@ -413,46 +413,7 @@
                     this.tripDays[this.currentDay - 1].items.splice(index, 1);
                     this.drawRoute();
                 },
-
-                /* 清空當天行程 (舊) */
-                // clearTrip() {
-                //      const current = this.tripDays[this.currentDay - 1];
-                //      /* 沒行程 */
-                //     if (current.items.length === 0) {
-                //         showAlert('warning',`第 ${this.currentDay} 天目前沒有任何行程可清空`);
-                //         return;
-                //     }
-                     
-                //     /* 有行程 
-                //        使用 SweetAlert2 取代 confirm()*/                    
-                //     Swal.fire({
-                //         icon: 'question',
-                //         title: '確定要清空嗎？',
-                //         text: `清空後，「第 ${this.currentDay} 天」的所有行程將被刪除。`,
-                //         showCancelButton: true,
-                //         confirmButtonColor: '#d33',
-                //         cancelButtonColor: '#3085d6',
-                //         confirmButtonText: '🗑 清空',
-                //         cancelButtonText: '取消'
-                //     }).then((result) => {
-                //         if (result.isConfirmed) {
-                //             使用者按下清空 → 執行動作
-                //             current.items = [];
-                //             this.updateMapMarkers();
-
-                //             /* 🟢 新增：地圖同步清空 */
-                //             if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
-                //             if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
-                //             this.markers.forEach(m => m.setMap(null));
-                //             this.markers = [];
-
-
-                //             showAlert('error', '第 ${this.currentDay} 天的行程已全部刪除');
-                //             顯示完成提示
-                //             showAlert('success', '已清空！', `第 ${this.currentDay} 天的行程已全部刪除`);
-                //         }
-                //     });
-                // },
+                
                 /* 清空當天行程 (新) */
                 async clearTrip() {
                     const current = this.tripDays[this.currentDay - 1];
@@ -462,7 +423,7 @@
                     }
 
                     const result = await showConfirm({
-                        title: `確定要清空嗎`,
+                        title: `確定要清空嗎？`,
                         text: `清空後，「第 ${this.currentDay} 天」的所有行程將被清空。`,
                         confirmText: `🗑 清空`
                     });
@@ -477,7 +438,6 @@
                         showAlert('success', '已清空！', `第 ${this.currentDay} 天的行程已全部清空`);
                     }
                 },
-
 
                 /* 取得行程清單 */ 
                 async loadTripList() {
@@ -515,18 +475,7 @@
                     }
                     this.drawRoute();
                 },
-
-                /* 刪除行程 (舊)  
-                async deleteTrip() {
-                    if (!confirm("確定要刪除此行程嗎？")) return;
-                    await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
-                    alert("✅ 已刪除行程");
-                    this.selectedProject = "";
-                    this.loadTripList();
-                    this.projectName = '';
-                    this.tripDays = [{ day: 1, items: [] }];
-                },*/
-
+                
                 /* 刪除行程 (新) */
                 async deleteTrip() {                   
                     if (!this.selectedProject) {
@@ -534,30 +483,20 @@
                         return;
                     }
 
-                    /* 確認刪除 */
-                    Swal.fire({
-                        icon: 'question',
-                        title: '確定要刪除此行程嗎？',
-                        text: '此操作無法復原，行程資料將永久刪除。',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: '🗑 刪除',
-                        cancelButtonText: '取消'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
+                    /* 確認刪除 */       
+                    const result = await showConfirm({
+                        title: `確定要刪除此行程嗎？`,
+                        text: `此操作無法復原，行程資料將永久刪除。`,
+                        confirmText: `🗑 刪除`
+                    });
+
+                    if (result.isConfirmed) {
                             try {
                                 // 呼叫後端刪除 API
                                 await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
 
                                 // 顯示成功提示
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '刪除成功！',
-                                    text: '該行程已從清單中移除。',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
+                                showAlert('success', '刪除成功！', `該行程已從清單中移除`);
 
                                 // 重設畫面狀態
                                 this.selectedProject = "";
@@ -566,14 +505,9 @@
                                 this.tripDays = [{ day: 1, items: [] }];
                             } catch (error) {
                                 // 錯誤處理
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '刪除失敗',
-                                    text: '請確認伺服器連線或稍後再試。'
-                                });
+                                showAlert('error', '刪除失敗！', `請確認伺服器連線或稍後再試。`);
                             }
                         }
-                    });
                 },
 
                 /* 儲存邏輯自動判斷新建或更新 */
