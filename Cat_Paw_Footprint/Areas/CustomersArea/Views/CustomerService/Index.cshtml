@@ -372,6 +372,14 @@
             <div class="modal-content">
                 <div class="modal-header text-white" style="background: linear-gradient(90deg, rgb(126, 200, 227) 60%, rgb(180, 225, 235) 100%);">
                     <h5 class="modal-title"><i class="fa-solid fa-plus me-2"></i> 建立新工單</h5>
+
+                    <!-- 一鍵輸入按鈕（在最右側，關閉鍵左邊） -->
+                    <button class="btn btn-sm btn-light text-primary rounded-pill me-2"
+                            v-on:click="autoFillNewTicket"
+                            title="一鍵輸入">
+                        <i class="fa-solid fa-rocket"></i>
+                    </button>
+
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -1070,11 +1078,16 @@
                   return out;
                 }
 
+                function autoFillNewTicket() {
+                  newTicket.value.subject = '詢問訂單付款';
+                  newTicket.value.description = '匯款資訊尚未收到，請重寄一封，謝謝!';
+                }
+
                 return {
                   tickets, selectedTicket, messages, newMessage, showAll,
                   feedback, hasFeedback, fileInput, ticketTypes, newTicket,
                   openChat, sendMessage, triggerFile, handleFiles,imageLoaded,
-                  formatTime, openNewTicketModal, submitNewTicket,
+                  formatTime, openNewTicketModal, submitNewTicket,autoFillNewTicket,
                   openImagePreview, previewImageUrl,submitFeedback,
                   imageList, currentImageIndex, prevImage, nextImage,
                   isLoadingMessages, uploadProgress, isUploading, isDragOver,
