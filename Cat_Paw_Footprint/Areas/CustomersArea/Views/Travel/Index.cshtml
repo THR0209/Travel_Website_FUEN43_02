@@ -10,12 +10,12 @@
     ViewData["Title"] = "自由行專區";
 }
 
-<div id="app">
+<div id="app" class="container-fluid + px-5">
     <div class="row">
 
         <!-- 上方：篩選與按鈕 -->
         <div class="top-buttons sticky-top bg-white shadow-sm py-3 z-3">
-            <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <!-- 搜尋框 -->
                 <input type="text" v-model="keyword" placeholder="搜尋名稱或地區"
@@ -29,7 +29,7 @@
 
                 <!-- 縣市篩選 -->
                 <select class="form-select w-25" v-model="selectedDistrict">
-                    <option value="">🏞️ 全部縣市</option>
+                    <option value="">🏞️ 全部地區</option>
                     <option v-for="district in availableDistricts" :key="district" :value="district">{{ district }}</option>
                 </select>
 
@@ -53,14 +53,17 @@
             </div>
         </div>
 
-        <!-- 左側：動態卡片區 -->
+        <!-- 左側：動態卡片區 -->        
         <div class="col-md-8">
-            <div class="row">
-                <div v-for="(item, index) in filteredItems" :key="index" class="col-md-3 mb-4">
-                    <div class="card position-relative">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+
+                <!-- 卡片開始 -->
+                <div v-for="(item, index) in filteredItems" :key="index" class="col">
+                    <div class="card h-100 position-relative" style="z-index:1;">
 
                         <!-- 右上角＋鍵 -->
                         <button class="btn btn-sm btn-success position-absolute top-0 end-0 m-2"
+                                style="z-index: 10;"
                                 @@click.stop="addToTrip(item)">
                             ＋
                         </button>
@@ -74,11 +77,12 @@
                                 <div class="carousel-inner">
 
                                     <!-- 沒有圖片 -> 顯示預設圖片 -->
-                                    <div v-if="!item.pictureUrl || item.pictureUrl.length===0">
+                                    <div v-if="!item.pictureUrl || item.pictureUrl.length===0"
+                                         class="carousel-item active">
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100" alt="圖片" />
+                                            <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100 noimage" alt="圖片" />
                                         </div>
                                     </div>
 
@@ -102,13 +106,13 @@
                     </div>
                 </div>
             </div>
-        </div>
-
+        </div>     
+        
         <!-- 右側：排行程 + 地圖 -->
         <div class="col-md-4">
 
             <!-- 排行程區塊，支援多天與時間推算 -->
-            <div class="card mb-3">
+            <div class="card mb-3 trip-card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <span>排行程</span>
                     <!-- 清空按鈕 -->
@@ -116,7 +120,7 @@
                 </div>
                 <div class="card-body">
 
-                    <!-- 🟢 新增：行程清單下拉選單 -->
+                    <!-- 行程清單下拉選單 -->
                     <div class="mb-3">
                         <label class="form-label small text-muted">🗂 我的行程清單</label>
                         <div class="input-group">
@@ -230,7 +234,7 @@
         const { createApp } = Vue;
         let app; // 全域變數：讓 initMap() 能呼叫 Vue 方法
 
-        // 全域 callback（Google 會自動呼叫這個）
+        /* 全域 callback（Google 會自動呼叫這個） */ 
         window.initMap = function () {
             console.log("✅ Google Map script loaded, calling Vue method...");
             if (app && app._instance && app._instance.proxy) {
@@ -239,10 +243,10 @@
         };
 
         app = createApp({
-            // 註冊子元件
+            /* 註冊子元件 */
             components: { draggable: window.vuedraggable }, // CDN 模式需使用 window.vuedraggable
 
-            // 變動的資料
+            /* 變動的資料 */
             data() {
                 return {
                     buttons: [
@@ -274,7 +278,7 @@
                     currentDay: 1,  // 目前選擇的天數
                     tripDays: [{ day: 1, items: [] }],  // 多天行程陣列
 
-                    // 🟢 新增：行程管理用變數
+                    /* 行程管理用變數 */
                     tripList: [],          // 行程清單
                     selectedProject: '',    // 目前選中的行程
 
@@ -290,7 +294,7 @@
                 }
             },
 
-            // 計算屬性
+            /* 計算屬性 */
             computed: {
                 /* 根據地區動態顯示對應縣市 */
                 availableDistricts() {
@@ -320,7 +324,7 @@
                 }
             },
 
-            // 方法(事件處理)
+            /* 方法(事件處理) */ 
             methods: {
                 /* 取得目前登入者資訊 */
                 async getCurrentUser() {
@@ -388,25 +392,20 @@
 
                 /* 加入行程（支援多天） */
                 addToTrip(item) {
-                    const day = this.tripDays[this.currentDay - 1];
-                    const exists = day.items.some(x => x.id === item.id && x.type === this.currentType);
-                    if (!exists) {
-                        day.items.push({
-                            uid: `${this.currentType}-${item.id}-${Date.now()}`,
-                            id: item.id,
-                            name: item.name,
-                            type: this.currentType,
-                            typeLabel: this.buttons.find(b => b.type === this.currentType).label,
-                            lat: item.lat,
-                            lng: item.lng,
-                            startTime: '',
-                            stayMinute: 0,
-                            driveMinute: 0
-                        });
-                        this.drawRoute();
-                    } else {
-                        alert(`❗「${item.name}」已在第 ${this.currentDay} 天行程中！`);
-                    }
+                const day = this.tripDays[this.currentDay - 1];                   
+                    day.items.push({
+                        uid: `${this.currentType}-${item.id}-${Date.now()}`,
+                        id: item.id,
+                        name: item.name,
+                        type: this.currentType,
+                        typeLabel: this.buttons.find(b => b.type === this.currentType).label,
+                        lat: item.lat,
+                        lng: item.lng,
+                        startTime: '',
+                        stayMinute: 0,
+                        driveMinute: 0
+                    });
+                    this.drawRoute();                    
                 },
 
                 /* 刪除單一行程 */
@@ -418,24 +417,58 @@
                 /* 清空當天行程 */
                 clearTrip() {
                      const current = this.tripDays[this.currentDay - 1];
+                     /* 沒行程 */
                     if (current.items.length === 0) {
-                        alert(`第 ${this.currentDay} 天目前沒有任何行程可清空`);
+                        showAlert('warning',`第 ${this.currentDay} 天目前沒有任何行程可清空`);
                         return;
                     }
-                    if (confirm(`確定要清空「第 ${this.currentDay} 天」的所有行程嗎？`)) {
-                        current.items = [];
-                        this.updateMapMarkers();
-                    }
+
+                    /* 有行程 
+                       使用 SweetAlert2 取代 confirm()
+                    */
+                    Swal.fire({
+                        icon: 'question',
+                        title: '確定要清空嗎？',
+                        text: `清空後，「第 ${this.currentDay} 天」的所有行程將被刪除。`,
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: '🗑 清空',
+                        cancelButtonText: '取消'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // 使用者按下清空 → 執行動作
+                            current.items = [];
+                            this.updateMapMarkers();
+
+                            /* 🟢 新增：地圖同步清空 */
+                            if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
+                            if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
+                            this.markers.forEach(m => m.setMap(null));
+                            this.markers = [];
+
+
+                            // showAlert('error', '第 ${this.currentDay} 天的行程已全部刪除');
+                            // 顯示完成提示
+                            Swal.fire({
+                                icon: 'success',
+                                title: '已清空！',
+                                text: `第 ${this.currentDay} 天的行程已全部刪除`,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+                    });
                 },
 
-                // 🟢 新增：取得行程清單
+                /* 取得行程清單 */ 
                 async loadTripList() {
                     if (!this.currentUser) return;
                     const res = await fetch(`/api/trips/list?customerId=${this.currentUser.customerId}`);
                     this.tripList = await res.json();
                 },
 
-                // 🟢 新增：當下拉選單變更時載入行程
+                /* 當下拉選單變更時載入行程 */ 
                 async onTripSelected() {
                     if (!this.selectedProject) {
                         this.projectName = ''; this.totalDays = 1; this.tripDays = [{ day: 1, items: [] }];
@@ -465,7 +498,7 @@
                     this.drawRoute();
                 },
 
-                // 🟢 新增：刪除行程
+                /* 刪除行程 (舊)  
                 async deleteTrip() {
                     if (!confirm("確定要刪除此行程嗎？")) return;
                     await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
@@ -474,74 +507,73 @@
                     this.loadTripList();
                     this.projectName = '';
                     this.tripDays = [{ day: 1, items: [] }];
-                },
-                
-                /* 儲存行程 (舊) 
-                async saveTrip() {
-                    if (!this.currentUser) {
-                        alert("⚠️ 尚未登入，無法儲存行程！");
+                },*/
+
+                /* 刪除行程 (新) */
+                async deleteTrip() {
+                    /*
+                    🟢 若未選擇任何行程 (舊)
+                    if (!this.selectedProject) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '未選擇行程',
+                            text: '請先選擇要刪除的行程。',
+                            confirmButtonText: '知道了'
+                        });
+                        return;
+                    }*/
+
+                    // 顯示 SweetAlert2 確認提示
+                    if (!this.selectedProject) {
+                        showAlert('warning', "未選擇行程", "請先選擇要刪除的行程。");
                         return;
                     }
 
-                    const payload = {
-                        CustomerID: Number(this.currentUser.customerId), // 登入者ID
-                        ProjectName: this.projectName || "未命名行程",
-                        TotalDays: this.totalDays,
-                        Details: this.tripDays.flatMap((d, dayIndex) =>
-                            d.items.map((x, i) => {
-                                // 根據類型決定哪個 ID 欄位要填
-                                let LocationID = null;
-                                let RestaurantID = null;
-                                let HotelID = null;
+                    /* 確認刪除 */
+                    Swal.fire({
+                        icon: 'question',
+                        title: '確定要刪除此行程嗎？',
+                        text: '此操作無法復原，行程資料將永久刪除。',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: '🗑 刪除',
+                        cancelButtonText: '取消'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                // 呼叫後端刪除 API
+                                await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
 
-                                switch (x.typeLabel) {
-                                    case "景點":
-                                        LocationID = x.id;
-                                        break;
-                                    case "美食":
-                                        RestaurantID = x.id;
-                                        break;
-                                    case "住宿":
-                                        HotelID = x.id;
-                                        break;
-                                }
+                                // 顯示成功提示
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: '刪除成功！',
+                                    text: '該行程已從清單中移除。',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
 
-                                return {
-                                    TripDate: dayIndex + 1,  // 第幾天 (整數)
-                                    TripSequence: i + 1,
-                                    StartTime: x.startTime,
-                                    StayMinute: x.stayMinute,
-                                    TripType: x.typeLabel,
-                                    LocationID,
-                                    RestaurantID,
-                                    HotelID
-                                };
-                            })
-                        )
-
-                    };
-
-                    // 這一行 — 讓你能在 Console 看送出的內容
-                    console.log("🚀 送出行程資料：", payload);
-
-                    // 啟用 Fetch 呼叫後端 API
-                    const res = await fetch('/api/trips/save', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                                // 重設畫面狀態
+                                this.selectedProject = "";
+                                this.loadTripList();
+                                this.projectName = '';
+                                this.tripDays = [{ day: 1, items: [] }];
+                            } catch (error) {
+                                // 錯誤處理
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: '刪除失敗',
+                                    text: '請確認伺服器連線或稍後再試。'
+                                });
+                            }
+                        }
                     });
+                },
 
-                    if (res.ok) {
-                        const result = await res.json();
-                        alert(result.message);
-                    } else {
-                        const err = await res.text();
-                        alert(`❌ 儲存失敗：${err}`);
-                    }
-                },*/
-                // 🟡 修改：儲存邏輯自動判斷新建或更新 (新)
+                /* 儲存邏輯自動判斷新建或更新 */
                 async saveTrip() {
-                    if (!this.currentUser) { alert("⚠️ 尚未登入！"); return; }
+                    if (!this.currentUser) { showAlert('warning',"尚未登入！"); return; }
                     const payload = {
                         ProjectID: this.selectedProject || 0,
                         CustomerID: Number(this.currentUser.customerId),
@@ -562,14 +594,18 @@
                     };
                     let res;
                     if (!this.selectedProject)
-                        res = await fetch("/api/trips/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                        res = await fetch("/api/trips/save", { 
+                            method: "POST", headers: { "Content-Type": "application/json" }, 
+                            body: JSON.stringify(payload) });
                     else
-                        res = await fetch("/api/trips/update", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                        res = await fetch("/api/trips/update", { 
+                            method: "PUT", headers: { "Content-Type": "application/json" }, 
+                            body: JSON.stringify(payload) });
+
                     const msg = await res.text();
-                    alert(msg);
+                    showAlert('warning',msg);
                     this.loadTripList();
                 },
-
                 
                 /* 初始化地圖 */
                 initMap() {
@@ -597,7 +633,7 @@
                     const invalid = tripList.filter(x => isNaN(x.lat) || isNaN(x.lng));
                     if (invalid.length > 0) {
                         console.warn("⚠️ 缺少座標：", invalid);
-                        alert("有地點缺少經緯度，無法顯示地圖！");
+                        showAlert('warning',"有地點缺少經緯度，無法顯示地圖！");
                         return;
                     }
 
@@ -712,7 +748,7 @@
 
                         } else {
                             console.warn("❌ Google Maps 路線規劃失敗:", status);
-                            alert("無法規劃路線，請檢查座標或嘗試重新整理");
+                            showAlert('warning',"無法規劃路線，請檢查座標或嘗試重新整理");
                         }
                     });
                 },
@@ -791,7 +827,7 @@
                 },
             },
 
-            // 監聽器
+            /* 監聽器 */ 
             watch: {
                 // 動態調整 tripDays 陣列長度
                 totalDays(newVal) {
@@ -811,7 +847,7 @@
                 }
             },
 
-            // 元件載入時
+            /* 元件載入時 */
             mounted() {
                 /* 預設載入 */ 
                 this.fetchData().then(() => {
@@ -822,7 +858,7 @@
                 /* 初始化抓取登入者 */ 
                 this.getCurrentUser();
 
-                // 🟡 修改：載入使用者後自動載入行程清單
+                /* 載入使用者後自動載入行程清單 */
                 this.getCurrentUser().then(() => this.loadTripList());
 
                 /* 重新啟用所有 dropdown 功能 */ 
@@ -840,7 +876,7 @@
 
         });
 
-        // 全域註冊 draggable
+        /* 全域註冊 draggable */
         app.component('draggable', vuedraggable); 
         app.mount("#app");
     </script>

@@ -19,6 +19,30 @@ window.showAlert = function (type, title, text, timer = 1000) {
     });
 };
 
+// ----------- 🆕 全域 SweetAlert2「確認對話框」函式 -----------
+window.showConfirm = async function (options = {}) {
+    const {
+        icon = 'question',
+        title = '確定要執行此操作嗎？',
+        text = '此操作無法復原，是否繼續？',
+        confirmText = '確定',
+        cancelText = '取消',
+        confirmColor = '#d33',
+        cancelColor = '#3085d6'
+    } = options;
+
+    return await Swal.fire({
+        icon,
+        title,
+        text,
+        showCancelButton: true,
+        confirmButtonColor: confirmColor,
+        cancelButtonColor: cancelColor,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText
+    });
+};
+
 // ----------- 全域函式：更新未讀通知數 -----------
 window.updateUnread = async function () {
     try {
