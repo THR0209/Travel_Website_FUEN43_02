@@ -72,7 +72,7 @@
                         <div @@click="openModal(item)">                        
 
                             <!-- Bootstrap 輪播 -->
-                            <div :id="'carousel-'+item.id" class="carousel slide"
+                            <div :id="'carousel-'+item.id" class="carousel slide card-carousel"
                                  data-bs-ride="carousel" data-bs-interval="3000">
                                 <div class="carousel-inner">
 
@@ -92,7 +92,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img :src="pic || '/images/noimage.png'" alt="圖片">
+                                            <img :src="pic || '~/images/noimage.png'" alt="圖片">
                                         </div>
                                     </div>
 
@@ -201,7 +201,7 @@
     </div>
 
     <!-- 詳細內容 Modal（點圖片顯示詳情）-->
-    <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div id="detailModal" class="modal fade" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
@@ -209,8 +209,55 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>                    
-                    <p class="mt-3">{{ modalData.desc }}</p>
+                    <!-- 輪播區域 -->
+                    <div>
+                        <!-- Modal 內的輪播 -->
+                        <div v-if="modalData" :id="'carousel-modal-'+modalData.id"
+                             class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+
+                                <!-- 沒有圖片 → 顯示預設圖 -->
+                                <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
+                                     class="carousel-item active">
+                                    <div class="pic">
+                                        <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                    </div>
+                                </div>
+
+                                <!-- 有圖片 → 顯示輪播 -->
+                                <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
+                                     class="carousel-item" :class="{ 'active': i === 0 }">
+                                    <div class="pic">
+                                        <img :src="pic || '~/images/noimage.png'" class="d-block w-100" alt="圖片" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 左右箭頭 -->
+                            <button class="carousel-control-prev" type="button"
+                                    :data-bs-target="'#carousel-modal-'+modalData.id"
+                                    data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button"
+                                    :data-bs-target="'#carousel-modal-'+modalData.id"
+                                    data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+
+                    </div>
+                    <!-- 地圖區域 -->
+                    <div>
+                    </div>
+                    <!-- 詳細地址 -->
+                    <div>
+                        <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
+                    </div>
+                    <!-- 文字介紹區 -->
+                    <div>
+                        <p class="mt-3">{{ modalData.desc }}</p>
+                    </div>     
                 </div>
             </div>
         </div>
@@ -220,6 +267,9 @@
 
 @section Scripts{    
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
+
+    @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
+
 
     <!-- 支援拖曳排序 -->
     <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -371,6 +421,24 @@
                         views: x.views,
                         pictureUrl: x.pictureUrl || []
                     }));
+
+                    // ⚡ 等 Vue 渲染完卡片後再初始化所有 carousel
+                    this.$nextTick(() => {
+                        document.querySelectorAll('.card-carousel').forEach(c => {
+                            
+                            // 🧹 先清除舊的 Carousel 實例（防止秒數跑掉）
+                            const existing = bootstrap.Carousel.getInstance(c);
+                            if (existing) existing.dispose();
+
+                            // ✅ 再重新初始化新的一個
+                            new bootstrap.Carousel(c, {
+                                interval: 3000,
+                                ride: 'carousel',
+                                pause: false,
+                                wrap: true
+                            });
+                        });
+                    });
                 },
 
                 /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）*/
@@ -386,8 +454,39 @@
                 /* Modal 顯示詳細資料 */
                 openModal(item) {
                     this.modalData = item;
+
+                    // 顯示 Modal
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
                     modal.show();
+
+                    // Modal 顯示後初始化輪播（先清除舊的）
+                    this.$nextTick(() => {
+                      const carouselId = `carousel-modal-${item.id}`;
+                      const carouselEl = document.getElementById(carouselId);
+
+                      // if (carouselEl) {
+                      //   Bootstrap 5 輪播初始化
+                      //   const carousel = new bootstrap.Carousel.(carouselEl, {
+                      //     interval: 3000, 自動切換時間 (毫秒)
+                      //     ride: 'carousel', 自動播放
+                      //     pause: false,      滑鼠移上去不暫停
+                      //     wrap: true  ✅ 確保能循環並正確切換
+                      //   });
+                      //   carousel.cycle(); 啟動輪播
+                      // }
+                          if (carouselEl) {
+                          const existing = bootstrap.Carousel.getInstance(carouselEl);
+                          if (existing) existing.dispose(); // 🔹 確保使用新設定
+
+                          // Modal 專用輪播設定
+                          new bootstrap.Carousel(carouselEl, {
+                            interval: 3000, // 每 n 秒切換一次
+                            ride: 'carousel', // 自動播放
+                            pause: true, // 滑鼠移上暫停
+                            wrap: true // 可循環播放
+                          });
+                        }
+                    });
                 },
                 
                 /* 加入行程（支援多天） */
