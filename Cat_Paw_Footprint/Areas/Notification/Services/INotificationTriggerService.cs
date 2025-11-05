@@ -12,11 +12,13 @@
 		Task NotifyCouponExpiringAsync(int daysBefore = 3);
 		//客服回覆通知
 		Task NotifyCustomerServiceReplyAsync(int customerId, int ticketId);
-		//共用內部函式
-		Task SendCustomAsync(int customerId, string title, string message, string type);
 		//客服工單完成通知
 		Task NotifyTicketCompletedAsync(int ticketId);
         // 優惠券發放通知
         Task NotifyCouponIssuedAsync(int customerId, int couponId);
-    }
+		// 訂單取消通知
+		Task NotifyOrderCanceledAsync(int customerId, int orderId);
+		//共用內部函式
+		Task SendCustomAsync(int customerId, string title, string message, string type);
+	}
 }

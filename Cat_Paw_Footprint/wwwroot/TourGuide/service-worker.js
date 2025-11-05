@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "tourguide-cache-v1";
+﻿const CACHE_NAME = "tourguide-cache-v2";
 const ASSETS = [
     "/TourGuide/login.html",
     "/TourGuide/group-list.html",

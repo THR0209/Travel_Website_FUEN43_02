@@ -2,7 +2,6 @@
 //using Cat_Paw_Footprint.Areas.Order.Services;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Hubs;
-using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +40,22 @@ namespace Cat_Paw_Footprint.Services
 				customerId,
 				"付款成功通知",
 				$"您的訂單 #{orderId} 已成功付款，我們將為您準備旅程的詳細資訊，敬請期待！ 🐾",
+				"系統公告"
+			);
+		}
+
+		// 🔹 訂單取消通知
+		public async Task NotifyOrderCanceledAsync(int customerId, int orderId)
+		{
+			var order = await _db.CustomerOrders.FindAsync(orderId);
+			string orderCode = order?.CreateTime != null
+				? $"ORD-{order.CreateTime:yyyyMMdd}-{order.OrderID}"
+				: $"#{orderId}";
+
+			await SendAsync(
+				customerId,
+				"訂單取消通知",
+				$"您的訂單 #{orderId} 已提交取消申請，我們的客服人員將儘快處理。",
 				"系統公告"
 			);
 		}
@@ -144,6 +159,8 @@ namespace Cat_Paw_Footprint.Services
 				"客服評價提醒"
 			);
 		}
+
+
 
 		// ------------------------
 		// 🧩 共用內部函式

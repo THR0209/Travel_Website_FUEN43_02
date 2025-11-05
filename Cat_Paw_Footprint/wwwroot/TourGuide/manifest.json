@@ -1,11 +1,11 @@
 {
   "name": "貓爪足跡-導遊",
-  "short_name": "導遊專用",
+  "short_name": "貓爪導遊",
   "start_url": "/TourGuide/login.html",
   "scope": "/TourGuide/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "theme_color": "#ff8c42",
   "description": "貓爪足跡導遊端，提供團體對話、定位與照片分享功能。",
   "icons": [
     {

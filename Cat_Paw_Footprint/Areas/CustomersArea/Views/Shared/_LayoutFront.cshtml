@@ -14,16 +14,25 @@
         string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Home", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(ViewContext.RouteData.Values["action"]?.ToString(), "Index", StringComparison.OrdinalIgnoreCase) &&
         string.Equals(ViewContext.RouteData.Values["area"]?.ToString(), "CustomersArea", StringComparison.OrdinalIgnoreCase);
-
+    string levelClass = "badge-iron"; // default
     
     string customerName = "";
     string customerLevelName = "";
+
 
     if (isCustomerLoggedIn)
     {
         var claims = customerAuth.Principal.Claims;
         customerName = claims.FirstOrDefault(c => c.Type == "FullName")?.Value ?? "";
         customerLevelName = claims.FirstOrDefault(c => c.Type == "LevelName")?.Value ?? "";
+        levelClass = customerLevelName switch
+        {
+            "Iron" => "badge-iron",
+            "Bronze" => "badge-bronze",
+            "Silver" => "badge-silver",
+            "Gold" => "badge-gold",
+            _ => "badge-iron"
+        };
     }
 }
 
@@ -50,6 +59,27 @@
     <link rel="stylesheet" href="~/front-end/assets/css/animate.css" />
     <link rel="stylesheet" href="https://unpkg.com/swiper@7/swiper-bundle.min.css" />
     @RenderSection("Styles", required: false)
+
+    <style>
+        .badge-iron {
+            background-color: #6c757d !important; /* 灰 */
+        }
+
+        .badge-bronze {
+            background-color: #cd7f32 !important; /* 銅色 */
+        }
+
+        .badge-silver {
+            background-color: #c0c0c0 !important; /* 銀色 */
+            color: black !important;
+        }
+
+        .badge-gold {
+            background-color: #ffd700 !important; /* 金色 */
+            color: black !important;
+        }
+
+    </style>
 </head>
 <body>
     <!-- ***** Preloader Start ***** -->
@@ -171,7 +201,8 @@
                                                 @customerName
                                                 @if (!string.IsNullOrEmpty(customerLevelName))
                                                 {
-                                                    <span class="badge bg-primary ms-1">@customerLevelName</span>
+                                                    
+                                                    <span class="badge @levelClass ms-1">@customerLevelName</span>
                                                 }
                                             }
                                             else

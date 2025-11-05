@@ -176,7 +176,6 @@ namespace Cat_Paw_Footprint
 			builder.Services.AddScoped<ICusLogRegService, CusLogRegService>();
 			builder.Services.AddScoped<ITGAllRepository, TGAllRepository>();
 			builder.Services.AddScoped<ITGAllService, TGAllService>();
-			builder.Services.AddSignalR();
 			builder.Services.AddScoped<ITalkMessageRepository, TalkMessageRepository>();
 			builder.Services.AddScoped<ITalkMessageService, TalkMessageService>();
 			builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
