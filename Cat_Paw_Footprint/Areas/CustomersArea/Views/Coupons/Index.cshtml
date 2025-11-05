@@ -41,7 +41,8 @@
                         <h4 class="fw-bold text-success mb-2">
                             {{c.couponName}}
                         </h4>
-                        <p class="mb-1 text-secondary">訂購金額須滿 TWD {{ c.minimumAmount || 0 }}</p>
+                        @* <p class="mb-1 text-secondary">訂購金額須滿 TWD {{ c.minimumAmount || 0 }}</p> *@
+                        <p class="mb-1 text-secondary">{{c.rule}}</p>
                         <p class="mb-1">{{ c.desc }}</p>
                         <small class="text-muted">有效期限：{{ formatDate(c.endDate) }}</small>
                     </div>

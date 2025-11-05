@@ -46,7 +46,8 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.ViewModel
 
         [DisplayName("滿額門檻")]
         public decimal? MinimumAmount { get; set; }      // 滿額門檻
-
+       
+        [DiscountValueRange]
         [DisplayName("折扣上限")]
         public decimal? MaximumDiscount { get; set; }    // 折扣上限
 
@@ -57,11 +58,35 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.ViewModel
 
         [Display(Name = "發放對象")]
         public string? TargetType { get; set; }
+        [Display(Name = "發放對象")]
+        public string? AutoGrantType { get; set; }
 
         [Display(Name = "使用期限（天）")]
         public int? ValidDays { get; set; }
 
         public bool IsDeleted { get; set; }
+
+        public string Rule
+        {
+            get
+            {
+                if (MinimumAmount.HasValue)
+                {
+                    if (DiscountType == 2)
+                        return $"訂購金額須滿 {MinimumAmount.Value} 折 {DiscountValue.ToString("0")} 元";
+                    else if (DiscountType == 1)
+                        return $"訂購金額須滿 {MinimumAmount.Value} 打 {(DiscountValue*10).ToString("0.#")} 折";
+                }
+                
+                // 沒有滿額限制時
+                if (DiscountType == 2)
+                    return $"折 {DiscountValue.ToString("0")} 元";
+                else if (DiscountType == 1)
+                    return $"打 {DiscountValue.ToString("0.#")} 折";
+
+                return "";
+            }
+        }
 
         public ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 
