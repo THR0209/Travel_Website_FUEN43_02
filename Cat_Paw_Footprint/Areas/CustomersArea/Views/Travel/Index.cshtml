@@ -209,51 +209,59 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- 輪播區域 -->
-                    <div>
-                        <!-- Modal 內的輪播 -->
-                        <div v-if="modalData" :id="'carousel-modal-'+modalData.id"
-                             class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">
-                            <div class="carousel-inner">
+                    <div class="row">
+                        <!-- 左側 - 輪播區域 -->
+                        <div class="col-md-6">
+                            <!-- Modal 內的輪播 -->
+                            <div v-if="modalData" :id="'carousel-modal-'+modalData.id"
+                                 class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">
+                                <div class="carousel-inner">
 
-                                <!-- 沒有圖片 → 顯示預設圖 -->
-                                <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
-                                     class="carousel-item active">
-                                    <div class="pic">
-                                        <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                    <!-- 沒有圖片 → 顯示預設圖 -->
+                                    <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
+                                         class="carousel-item active">
+                                        <div class="pic">
+                                            <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                        </div>
+                                    </div>
+
+                                    <!-- 有圖片 → 顯示輪播 -->
+                                    <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
+                                         class="carousel-item" :class="{ 'active': i === 0 }">
+                                        <div class="pic">
+                                            <img :src="pic || '~/images/NoImage.png'" class="d-block w-100" alt="圖片" />
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- 有圖片 → 顯示輪播 -->
-                                <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
-                                     class="carousel-item" :class="{ 'active': i === 0 }">
-                                    <div class="pic">
-                                        <img :src="pic || '~/images/NoImage.png'" class="d-block w-100" alt="圖片" />
-                                    </div>
-                                </div>
+                                <!-- 左右箭頭 -->
+                                <button class="carousel-control-prev" type="button"
+                                        :data-bs-target="'#carousel-modal-'+modalData.id"
+                                        data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button"
+                                        :data-bs-target="'#carousel-modal-'+modalData.id"
+                                        data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
                             </div>
 
-                            <!-- 左右箭頭 -->
-                            <button class="carousel-control-prev" type="button"
-                                    :data-bs-target="'#carousel-modal-'+modalData.id"
-                                    data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button"
-                                    :data-bs-target="'#carousel-modal-'+modalData.id"
-                                    data-bs-slide="next">
-                                <span class="carousel-control-next-icon"></span>
-                            </button>
                         </div>
 
+                        <!-- 右側 - 地圖區域 -->
+                        <div class="col-md-6">
+                            <div id="detailMap" style="width:100%; height:300px; border-radius:10px; border:1px solid #ccc;"></div>
+                        </div>
                     </div>
-                    <!-- 地圖區域 -->
-                    <div>
-                    </div>
+                    <!-- 分隔線 -->
+                    <hr class="my-3" />
+
                     <!-- 詳細地址 -->
                     <div>
                         <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
                     </div>
+
                     <!-- 文字介紹區 -->
                     <div>
                         <p class="mt-3">{{ modalData.desc }}</p>
@@ -462,6 +470,8 @@
 
                     // Modal 顯示後初始化輪播（先清除舊的）
                     this.$nextTick(() => {
+
+                         // 初始化輪播
                         const carouselId = `carousel-modal-${item.id}`;
                         const carouselEl = document.getElementById(carouselId);                      
                         if (carouselEl) {
@@ -476,7 +486,24 @@
                             wrap: true // 可循環播放
                             });
                         }
+
+                        // 初始化小地圖（Modal 右邊）
+                        if (typeof google !== "undefined" && item.lat && item.lng) {
+                            const mapEl = document.getElementById("detailMap");
+                            const loc = { lat: Number(item.lat), lng: Number(item.lng) };
+                            const map = new google.maps.Map(mapEl, {
+                                center: loc,
+                                zoom: 14
+                            });
+                            new google.maps.Marker({
+                                position: loc,
+                                map,
+                                title: item.name
+                            });
+                        }
+
                     });
+
                 },
                
                 /* 加入行程（支援多天） */

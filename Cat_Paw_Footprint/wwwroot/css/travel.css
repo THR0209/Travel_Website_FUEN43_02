@@ -213,3 +213,12 @@ input.form-control {
         transform: scale(1);
     }
 }
+
+.modal-body .row {
+    align-items: center;
+}
+
+#detailMap {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
