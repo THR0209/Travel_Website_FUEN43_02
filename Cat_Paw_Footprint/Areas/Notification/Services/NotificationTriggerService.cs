@@ -102,27 +102,26 @@ namespace Cat_Paw_Footprint.Services
             await SendCustomAsync(customerId, title, message, "優惠活動");
 
 
-            // ✅ 寄出 Email 通知
-            string htmlMessage = $@"
-			<h2>{title}</h2>
-			<p>{message}</p>
-			<p style='color:gray;font-size:12px;'>此信件由系統自動發送，請勿直接回覆。</p>";
+   //         // ✅ 寄出 Email 通知
+   //         string htmlMessage = $@"
+			//<h2>{title}</h2>
+			//<p>{message}</p>
+			//<p style='color:gray;font-size:12px;'>此信件由系統自動發送，請勿直接回覆。</p>";
 
-            var customerEmail = await _db.CustomerProfile
-			.Where(p => p.CustomerID == customerId)
-			.Select(p => p.Email)
-			.FirstOrDefaultAsync();
+   //         var customerEmail = await _db.CustomerProfile
+			//.Where(p => p.CustomerID == customerId)
+			//.Select(p => p.Email)
+			//.FirstOrDefaultAsync();
 
-            if (!string.IsNullOrWhiteSpace(customerEmail))
-            {
-                await _emailSender.SendEmailAsync(customerEmail, "貓爪足跡｜新的優惠券通知", htmlMessage);
-            }
-            else
-            {
-                Console.WriteLine($"找不到客戶 {customerId} 的 Email，跳過寄信。");
-            }
+   //         if (!string.IsNullOrWhiteSpace(customerEmail))
+   //         {
+   //             await _emailSender.SendEmailAsync(customerEmail, "貓爪足跡｜新的優惠券通知", htmlMessage);
+   //         }
+   //         else
+   //         {
+   //             Console.WriteLine($"找不到客戶 {customerId} 的 Email，跳過寄信。");
+   //         }
         }
-
 
 
         // 🆕 🔹 客服工單完成通知

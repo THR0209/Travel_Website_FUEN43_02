@@ -250,8 +250,8 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.Controllers
                     targets = targets.Where(c => c.Status == true);
                     break;
                 case "Register":
-                    // 可改成註冊 30 天內會員
-                    targets = targets.Where(c => c.CreateDate >= now.AddDays(-30));
+                    // 可改成註冊3天內會員
+                    targets = targets.Where(c => c.CreateDate >= now.AddDays(-3));
                     break;
                 case "Level_Bronze":
                     targets = targets.Where(c => c.Level == 1);
