@@ -197,6 +197,7 @@
                     const id = card.dataset.id;
                     const type = card.dataset.type;
                     const message = card.querySelector(".notif-message")?.textContent || "";
+                    const title = card.querySelector(".notif-title")?.textContent || "";
 
                     try {
                         await axios.post("/CustomersArea/Notifications/MarkAsRead", { id });
@@ -209,7 +210,9 @@
                             type === "客服評價提醒" ||
                             type === "客服回覆" ||
                             type === "客服訊息" ||
-                            type === "客服服務已完成"
+                            type === "客服服務已完成"||
+                            title.includes("訂單取消通知")||
+                            message.includes("取消申請")
                         ) 
                         {
                             const match = message.match(/#\s*(\d+)/);
