@@ -82,7 +82,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100 noimage" alt="圖片" />
+                                            <img src="/images/NoImage.png" class="d-block w-100 noimage" alt="圖片" />
                                         </div>
                                     </div>
 
@@ -92,7 +92,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img :src="pic || '~/images/noimage.png'" alt="圖片">
+                                            <img :src="pic || '/images/NoImage.png'" alt="圖片">
                                         </div>
                                     </div>
 
@@ -220,7 +220,7 @@
                                 <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
                                      class="carousel-item active">
                                     <div class="pic">
-                                        <img src="@Url.Content("~/images/noimage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                        <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
                                     </div>
                                 </div>
 
@@ -228,7 +228,7 @@
                                 <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
                                      class="carousel-item" :class="{ 'active': i === 0 }">
                                     <div class="pic">
-                                        <img :src="pic || '~/images/noimage.png'" class="d-block w-100" alt="圖片" />
+                                        <img :src="pic || '~/images/NoImage.png'" class="d-block w-100" alt="圖片" />
                                     </div>
                                 </div>
                             </div>
@@ -340,7 +340,8 @@
                     directionsService: null,    // 路線服務
                     directionsRenderer: null,   // 路線繪製器
                     travelInfo: null, // 距離與時間資訊
-                    markers: [] // 多點標記陣列
+                    markers: [], // 多點標記陣列
+                                        
                 }
             },
 
@@ -398,6 +399,16 @@
                     await this.fetchData();
                 },
 
+                /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）*/
+                toggleSort() {
+                    this.sortDesc = !this.sortDesc; // 切換狀態
+                    if (this.sortDesc) {
+                        this.items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                    } else {
+                        this.items.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+                    }
+                },
+
                 /* 取得資料 (Ajax 呼叫 Controller API) */
                 async fetchData() {
                     const res = await fetch(`/api/${this.currentType}`, {
@@ -422,7 +433,7 @@
                         pictureUrl: x.pictureUrl || []
                     }));
 
-                    // ⚡ 等 Vue 渲染完卡片後再初始化所有 carousel
+                    // 等 Vue 渲染完卡片後再初始化所有 carousel
                     this.$nextTick(() => {
                         document.querySelectorAll('.card-carousel').forEach(c => {
                             
@@ -441,16 +452,6 @@
                     });
                 },
 
-                /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）*/
-                toggleSort() {
-                    this.sortDesc = !this.sortDesc; // 切換狀態
-                    if (this.sortDesc) {
-                        this.items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                    } else {
-                        this.items.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-                    }
-                },
-
                 /* Modal 顯示詳細資料 */
                 openModal(item) {
                     this.modalData = item;
@@ -461,34 +462,23 @@
 
                     // Modal 顯示後初始化輪播（先清除舊的）
                     this.$nextTick(() => {
-                      const carouselId = `carousel-modal-${item.id}`;
-                      const carouselEl = document.getElementById(carouselId);
+                        const carouselId = `carousel-modal-${item.id}`;
+                        const carouselEl = document.getElementById(carouselId);                      
+                        if (carouselEl) {
+                            const existing = bootstrap.Carousel.getInstance(carouselEl);
+                            if (existing) existing.dispose(); // 🔹 確保使用新設定
 
-                      // if (carouselEl) {
-                      //   Bootstrap 5 輪播初始化
-                      //   const carousel = new bootstrap.Carousel.(carouselEl, {
-                      //     interval: 3000, 自動切換時間 (毫秒)
-                      //     ride: 'carousel', 自動播放
-                      //     pause: false,      滑鼠移上去不暫停
-                      //     wrap: true  ✅ 確保能循環並正確切換
-                      //   });
-                      //   carousel.cycle(); 啟動輪播
-                      // }
-                          if (carouselEl) {
-                          const existing = bootstrap.Carousel.getInstance(carouselEl);
-                          if (existing) existing.dispose(); // 🔹 確保使用新設定
-
-                          // Modal 專用輪播設定
-                          new bootstrap.Carousel(carouselEl, {
+                            // Modal 專用輪播設定
+                            new bootstrap.Carousel(carouselEl, {
                             interval: 3000, // 每 n 秒切換一次
                             ride: 'carousel', // 自動播放
                             pause: true, // 滑鼠移上暫停
                             wrap: true // 可循環播放
-                          });
+                            });
                         }
                     });
                 },
-                
+               
                 /* 加入行程（支援多天） */
                 async addToTrip(item) {
                     // 先檢查經緯度是否合法
