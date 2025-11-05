@@ -49,23 +49,27 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                 .Select(r => new { r.CouponID, r.IsUsed })
                 .ToList();
 
-            // 用 ID 去撈優惠券資料
+            // 用 ID 去撈優惠券資料，只撈「啟用中」且「時間有效」的
+            var now = DateTime.Now;
+
             var coupons = (from r in couponIds
                            join c in _context.Coupons
                            on r.CouponID equals c.CouponID
+                           where c.IsActive == true                              // ✅ 必須是啟用中
+                                 && (c.StartDate == null || c.StartDate <= now)   // ✅ 已開始
+                                 && (c.EndDate == null || c.EndDate >= now)       // ✅ 未結束
                            select new
                            {
                                CouponID = c.CouponID,
+                               CouponName = c.CouponName,
                                Desc = c.CouponDesc,
-                               DiscountValue = c.DiscountValue,
                                DiscountType = c.DiscountType,
+                               DiscountValue = c.DiscountValue,
+                               MinimumAmount = c.MinimumAmount,
                                StartDate = c.StartDate,
                                EndDate = c.EndDate,
                                IsUsed = r.IsUsed,
-                               IsExpired = c.EndDate < DateTime.Now,
-                               CouponName = c.CouponName,
-                               MinimumAmount = c.MinimumAmount,
-                               
+                               IsExpired = c.EndDate < now
                            }).ToList();
 
 
