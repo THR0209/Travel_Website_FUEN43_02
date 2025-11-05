@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -143,6 +144,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 		{
 			if (ModelState.IsValid)
 			{
+				// ✅ 將 CKEditor HTML 解碼（避免 &lt;p&gt;）
+				model.HotelDesc = HttpUtility.HtmlDecode(model.HotelDesc);
+
 				var hotel = new Hotels
 				{
 					HotelName = model.HotelName,
@@ -287,6 +291,9 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 					.FirstOrDefaultAsync(h => h.HotelID == id);
 
 				if (hotel == null) return NotFound();
+
+				// ✅ 將 CKEditor HTML 解碼（避免 &lt;p&gt;）
+				model.HotelDesc = HttpUtility.HtmlDecode(model.HotelDesc);
 
 				// ---- 更新主表資料 ----
 				hotel.HotelName = model.HotelName;

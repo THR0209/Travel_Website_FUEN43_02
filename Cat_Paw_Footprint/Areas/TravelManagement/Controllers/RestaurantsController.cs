@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -142,7 +143,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var restaurants = new Restaurants
+				// ✅ 將 CKEditor HTML 解碼（避免 &lt;p&gt;）
+				model.RestaurantDesc = HttpUtility.HtmlDecode(model.RestaurantDesc);
+
+				var restaurants = new Restaurants
                 {
                     RestaurantName = model.RestaurantName,
                     RestaurantAddr = model.RestaurantAddr,
@@ -285,8 +289,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
                 if (restaurants == null) return NotFound();
 
+				// ✅ 將 CKEditor HTML 解碼（避免 &lt;p&gt;）
+				model.RestaurantDesc = HttpUtility.HtmlDecode(model.RestaurantDesc);
+
 				// ---- 更新主表資料 ----
-                restaurants.RestaurantName = model.RestaurantName;
+				restaurants.RestaurantName = model.RestaurantName;
                 restaurants.RestaurantAddr = model.RestaurantAddr;
                 restaurants.RestaurantLat = model.RestaurantLat;
                 restaurants.RestaurantLng = model.RestaurantLng;
