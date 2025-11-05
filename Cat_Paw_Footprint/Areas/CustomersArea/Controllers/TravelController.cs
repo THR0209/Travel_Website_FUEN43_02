@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+//using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 {
@@ -384,5 +384,134 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			return Ok("行程已更新");
 		}
+
+		[HttpPost("/api/views/increase")]
+		[AllowAnonymous] // ✅ 不需登入即可記錄瀏覽數
+		public async Task<IActionResult> IncreaseView(string type, int id)
+		{
+			try
+			{
+				switch (type.ToLower())
+				{
+					case "locations":
+						var loc = await _context.Locations.FindAsync(id);
+						if (loc == null) return NotFound("找不到景點資料");
+						loc.Views = (loc.Views ?? 0) + 1; // ✏️ 累加瀏覽數
+						break;
+
+					case "restaurants":
+						var res = await _context.Restaurants.FindAsync(id);
+						if (res == null) return NotFound("找不到美食資料");
+						res.Views = (res.Views ?? 0) + 1;
+						break;
+
+					case "hotels":
+						var hotel = await _context.Hotels.FindAsync(id);
+						if (hotel == null) return NotFound("找不到住宿資料");
+						hotel.Views = (hotel.Views ?? 0) + 1;
+						break;
+
+					default:
+						return BadRequest("❌ 類型參數錯誤（需為 locations / restaurants / hotels）");
+				}
+
+				// 儲存異動
+				await _context.SaveChangesAsync();
+
+				return Ok("✅ 瀏覽次數已更新");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"❌ 更新失敗：{ex.Message}");
+			}
+		}
+
+		/* ============================================================
+   🟡 更新星星評分 Rating
+   ------------------------------------------------------------
+   說明：
+   - 當使用者在前端點擊星星時呼叫此 API
+   - 採「單筆平均法」：(舊分數 + 新分數) / 2
+   - 因資料庫欄位為 numeric(2,1)，EF Core 對應 decimal 型別
+   - 所以要使用 decimal 計算，避免 double 混用錯誤
+   ============================================================ */
+		[HttpPost("/api/rating/update")]
+		[Authorize(AuthenticationSchemes = "CustomerAuth")] // ✅ 需登入會員才能評分
+		public async Task<IActionResult> UpdateRating(string type, int id, double score)
+		{
+			try
+			{
+				switch (type.ToLower())
+				{
+					// ------------------------------------------------------------
+					// 🏞️ 景點 (Locations)
+					// ------------------------------------------------------------
+					case "locations":
+						{
+							var loc = await _context.Locations.FindAsync(id);
+							if (loc == null) return NotFound("找不到景點資料");
+
+							decimal newScore = Convert.ToDecimal(score); // ✅ double → decimal
+
+							if (loc.Rating.HasValue)
+								loc.Rating = System.Math.Round(((loc.Rating.Value + newScore) / 2), 1);
+							else
+								loc.Rating = System.Math.Round(newScore, 1);
+							break;
+						}
+
+					// ------------------------------------------------------------
+					// 🍜 美食 (Restaurants)
+					// ------------------------------------------------------------
+					case "restaurants":
+						{
+							var res = await _context.Restaurants.FindAsync(id);
+							if (res == null) return NotFound("找不到美食資料");
+
+							decimal newScore = Convert.ToDecimal(score); // ✅ double → decimal
+
+							if (res.Rating.HasValue)
+								res.Rating = System.Math.Round(((res.Rating.Value + newScore) / 2), 1);
+							else
+								res.Rating = System.Math.Round(newScore, 1);
+							break;
+						}
+
+					// ------------------------------------------------------------
+					// 🏨 住宿 (Hotels)
+					// ------------------------------------------------------------
+					case "hotels":
+						{
+							var hotel = await _context.Hotels.FindAsync(id);
+							if (hotel == null) return NotFound("找不到住宿資料");
+
+							decimal newScore = Convert.ToDecimal(score); // ✅ double → decimal
+
+							if (hotel.Rating.HasValue)
+								hotel.Rating = System.Math.Round(((hotel.Rating.Value + newScore) / 2), 1);
+							else
+								hotel.Rating = System.Math.Round(newScore, 1);
+							break;
+						}
+
+					// ------------------------------------------------------------
+					// ❌ 類型錯誤
+					// ------------------------------------------------------------
+					default:
+						return BadRequest("❌ 類型參數錯誤（需為 locations / restaurants / hotels）");
+				}
+
+				// ✅ 儲存更新
+				await _context.SaveChangesAsync();
+				return Ok("⭐ 評分已更新！");
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"❌ 更新評分失敗：{ex.Message}");
+			}
+		}
+
+
+
 	}
 }
