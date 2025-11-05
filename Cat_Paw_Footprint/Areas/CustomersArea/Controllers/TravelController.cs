@@ -161,16 +161,16 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 			catch (Exception ex)
 			{
-				return BadRequest($"❌ 無法解析 JSON 資料: {ex.Message}");
+				return BadRequest($"無法解析 JSON 資料: {ex.Message}");
 			}
 
 			// 更清楚的錯誤提示（逐層檢查）
 			if (data == null)
-				return BadRequest("❌ 未收到資料");
+				return BadRequest("未收到資料");
 			if (data.Details == null)
-				return BadRequest("❌ 明細資料為空");
+				return BadRequest("明細資料為空");
 			if (!data.Details.Any())
-				return BadRequest("❌ 行程明細無內容");
+				return BadRequest("行程明細無內容");
 
 			try
 			{

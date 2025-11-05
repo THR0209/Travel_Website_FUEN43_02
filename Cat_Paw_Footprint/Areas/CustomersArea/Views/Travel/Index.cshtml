@@ -396,17 +396,23 @@
                     return this.selectedRegion
                         ? this.districtsByRegion[this.selectedRegion]
                         : Object.values(this.districtsByRegion).flat();
-                },
+                },                
 
-                /* 綜合搜尋過濾 */
+                /* 綜合搜尋過濾 (支援多關鍵字) */
                 filteredItems() {
-                    const key = this.keyword.toLowerCase();
+                    const keys = this.keyword.toLowerCase().trim().split(/\s+/); // 以空白分割多關鍵字
+
                     return this.items.filter(x => {
-                        const matchKeyword =
-                            !this.keyword ||
-                            (x.name && x.name.toLowerCase().includes(key)) ||
-                            (x.regionName && x.regionName.toLowerCase().includes(key)) ||
-                            (x.districtName && x.districtName.toLowerCase().includes(key));
+                        // 🔹 將所有可能比對的欄位轉小寫
+                        const text = [
+                            x.name,
+                            x.addr,
+                            x.regionName,
+                            x.districtName
+                        ].join(" ").toLowerCase();
+
+                        // 🔹 每個關鍵字都必須出現在文字中
+                        const matchKeyword = !this.keyword || keys.every(k => text.includes(k));
 
                         const matchRegion =
                             !this.selectedRegion || x.regionName === this.selectedRegion;
@@ -570,7 +576,6 @@
                         showAlert('error', '無法更新評分');
                     }
                 },
-
 
                 /* 加入行程（支援多天） */
                 async addToTrip(item) {

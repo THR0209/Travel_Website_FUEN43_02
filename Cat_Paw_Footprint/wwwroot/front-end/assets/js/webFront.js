@@ -77,8 +77,8 @@ window.showConfirm = async function (options = {}) {
         imageUrl,                // ✅ 顯示自訂圖片
         imageWidth: 80,          // ✅ 可以調整圖片大小
         imageHeight: 80,
-        title: `🐾 ${title} 🐾`,  
-        text,
+        title: `🐾 ${title} `,  
+        html: `${text} 🐾`,
         showCancelButton: true,
         confirmButtonText: confirmText,
         cancelButtonText: cancelText,
