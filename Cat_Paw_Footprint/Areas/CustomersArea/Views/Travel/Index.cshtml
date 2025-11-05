@@ -10,7 +10,7 @@
     ViewData["Title"] = "自由行專區";
 }
 
-<div id="app" class="container-fluid + px-5">
+<div id="app" class="container-fluid px-5">
     <div class="row">
 
         <!-- 上方：篩選與按鈕 -->
@@ -82,7 +82,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img src="/images/NoImage.png" class="d-block w-100 noimage" alt="圖片" />
+                                            <img src="~/images/noimage.png" class="d-block w-100 noimage" alt="圖片" />
                                         </div>
                                     </div>
 
@@ -92,7 +92,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img :src="pic || '/images/NoImage.png'" alt="圖片">
+                                            <img :src="pic || '~/images/noimage.png'" alt="圖片">
                                         </div>
                                     </div>
 
@@ -100,7 +100,18 @@
                             </div>
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ item.name }}</h5>
-                                <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p>
+                                @* <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p> *@
+                                <!-- 🆕 評分區域 (可點擊星星評分) -->
+                                <div class="rating mb-1">
+                                    <i v-for="n in 5" :key="n"
+                                       class="bi"
+                                       :class="n <= (item.userRating || 0) ? 'bi-star-fill text-warning' : 'bi-star text-muted'"
+                                       @@click.stop ="rateItem(item, n)">
+                                    </i>
+                                </div>
+
+                                <!-- 🆕 顯示平均分與瀏覽次數 -->
+                                <p>⭐ {{ item.rating.toFixed(1) }}　👁️ {{ item.views }}</p>
                             </div>
                         </div>
                     </div>
@@ -247,6 +258,22 @@
                                 </button>
                             </div>
 
+                             <!-- Model 內的 星星評論區 -->
+                            @*<div class="card-body text-center">
+                                <h5 class="card-title">{{ modalData.name }}</h5>
+
+                                <!-- 點擊星星評分 -->
+                                <div class="rating mb-1">
+                                    <i v-for="n in 5" :key="n"
+                                       class="bi"
+                                       :class="n <= (modalData.userRating || 0) ? 'bi-star-fill text-warning' : 'bi-star text-muted'"
+                                       @@click.stop="rateItem(modalData, n)">
+                                    </i>
+                                </div>
+
+                                <!-- 平均分與瀏覽次數 -->
+                                <p>⭐ {{ modalData.rating.toFixed(1) }}　👁️ {{ modalData.views }}</p>
+                            </div> *@
                         </div>
 
                         <!-- 右側 - 地圖區域 -->
@@ -256,7 +283,6 @@
                     </div>
                     <!-- 分隔線 -->
                     <hr class="my-3" />
-
                     <!-- 詳細地址 -->
                     <div>
                         <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
@@ -275,9 +301,6 @@
 
 @section Scripts{    
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
-
-    @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
-
 
     <!-- 支援拖曳排序 -->
     <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -462,7 +485,8 @@
 
                 /* Modal 顯示詳細資料 */
                 openModal(item) {
-                    this.modalData = item;
+                    this.modalData = item;  // 設定 Modal 資料
+                    this.increaseViewCount(item);   // 🆕 點開 Modal 時增加瀏覽次數
 
                     // 顯示 Modal
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
@@ -505,6 +529,35 @@
                     });
 
                 },
+
+                // 🆕【增加瀏覽次數】當使用者點開卡片（openModal）時觸發
+                increaseViewCount(item) {
+                    fetch(`/api/views/increase?type=${this.currentType}&id=${item.id}`, { method: "POST" })
+                        .then(() => {
+                            item.views++;
+                            console.log(`👁️ 已累加 ${item.name} 的瀏覽次數`);
+                        })
+                        .catch(err => console.warn("❌ 無法更新瀏覽數", err));
+                },
+
+                // 🆕【評分功能】點擊星星時觸發
+                async rateItem(item, userScore) {
+                    const newRating = ((item.rating || 0) + userScore) / 2;
+                    item.rating = parseFloat(newRating.toFixed(1));
+                    item.userRating = userScore;
+
+                    try {
+                        const res = await fetch(`/api/rating/update?type=${this.currentType}&id=${item.id}&score=${item.rating}`, {
+                            method: "POST"
+                        });
+                        const msg = await res.text();
+                        showAlert('success', msg);
+                    } catch (err) {
+                        console.error("❌ 更新評分錯誤", err);
+                        showAlert('error', '無法更新評分');
+                    }
+                },
+
                
                 /* 加入行程（支援多天） */
                 async addToTrip(item) {
