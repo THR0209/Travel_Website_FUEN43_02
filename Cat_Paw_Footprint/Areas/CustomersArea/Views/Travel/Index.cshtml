@@ -82,7 +82,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img src="~/images/noimage.png" class="d-block w-100 noimage" alt="圖片" />
+                                            <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="圖片" />
                                         </div>
                                     </div>
 
@@ -92,15 +92,19 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img :src="pic || '~/images/noimage.png'" alt="圖片">
+                                            <img :src="pic || '@Url.Content("~/images/NoImage.png")'"
+                                                 v-on:error ="e => e.target.src='@Url.Content("~/images/NoImage.png")'"
+                                                 class="d-block w-100"
+                                                 alt="圖片" />
                                         </div>
                                     </div>
 
                                 </div>
                             </div>
+
+                            <!-- 平均分與瀏覽次數 -->
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ item.name }}</h5>
-                                @* <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p> *@
                                 <!-- 🆕 評分區域 (可點擊星星評分) -->
                                 <div class="rating mb-1">
                                     <i v-for="n in 5" :key="n"
@@ -226,13 +230,15 @@
                             <!-- Modal 內的輪播 -->
                             <div v-if="modalData" :id="'carousel-modal-'+modalData.id"
                                  class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">
+
+                                 <!-- 圖片區 -->
                                 <div class="carousel-inner">
 
                                     <!-- 沒有圖片 → 顯示預設圖 -->
                                     <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
                                          class="carousel-item active">
                                         <div class="pic">
-                                            <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                            <img src="@Url.Content("/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
                                         </div>
                                     </div>
 
@@ -240,17 +246,22 @@
                                     <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
                                          class="carousel-item" :class="{ 'active': i === 0 }">
                                         <div class="pic">
-                                            <img :src="pic || '~/images/NoImage.png'" class="d-block w-100" alt="圖片" />
+                                            <img :src="pic || '@Url.Content("~/images/NoImage.png")'"
+                                                 v-on:error="e => e.target.src='@Url.Content("~/images/NoImage.png")'"
+                                                 class="d-block w-100"
+                                                 alt="圖片" />
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- 左右箭頭 -->
+                                <!-- 左箭頭 -->
                                 <button class="carousel-control-prev" type="button"
                                         :data-bs-target="'#carousel-modal-'+modalData.id"
                                         data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon"></span>
                                 </button>
+
+                                <!-- 右箭頭 -->
                                 <button class="carousel-control-next" type="button"
                                         :data-bs-target="'#carousel-modal-'+modalData.id"
                                         data-bs-slide="next">
@@ -274,6 +285,12 @@
                                 <!-- 平均分與瀏覽次數 -->
                                 <p>⭐ {{ modalData.rating.toFixed(1) }}　👁️ {{ modalData.views }}</p>
                             </div> *@
+
+                            <!-- 詳細地址 -->
+                            <div>
+                                <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
+                            </div>
+
                         </div>
 
                         <!-- 右側 - 地圖區域 -->
@@ -281,17 +298,17 @@
                             <div id="detailMap" style="width:100%; height:300px; border-radius:10px; border:1px solid #ccc;"></div>
                         </div>
                     </div>
+
                     <!-- 分隔線 -->
                     <hr class="my-3" />
-                    <!-- 詳細地址 -->
-                    <div>
-                        <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
-                    </div>
+
+                    
 
                     <!-- 文字介紹區 -->
                     <div>
                         <p class="mt-3">{{ modalData.desc }}</p>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -530,7 +547,7 @@
 
                 },
 
-                // 🆕【增加瀏覽次數】當使用者點開卡片（openModal）時觸發
+                //【增加瀏覽次數】當使用者點開卡片（openModal）時觸發
                 increaseViewCount(item) {
                     fetch(`/api/views/increase?type=${this.currentType}&id=${item.id}`, { method: "POST" })
                         .then(() => {
@@ -540,7 +557,7 @@
                         .catch(err => console.warn("❌ 無法更新瀏覽數", err));
                 },
 
-                // 🆕【評分功能】點擊星星時觸發
+                //【評分功能】點擊星星時觸發
                 async rateItem(item, userScore) {
                     const newRating = ((item.rating || 0) + userScore) / 2;
                     item.rating = parseFloat(newRating.toFixed(1));
