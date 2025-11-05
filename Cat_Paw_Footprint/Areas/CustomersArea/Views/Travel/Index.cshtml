@@ -262,7 +262,7 @@
 
                     /* 補強說明「地區與縣市動態綁定」 */
                     selectedRegion: "離島",   // 預設地區
-                    selectedDistrict: "",     // 預設不選縣市
+                    selectedDistrict: "澎湖",     // 預設縣市
                     regions: ["北部", "中部", "南部", "東部", "離島"],    // 地區清單
                     districtsByRegion: {    // 縣市對應地區
                         "北部": ["台北市", "新北市", "基隆市", "桃園市", "新竹縣", "新竹市", "宜蘭縣"],
@@ -413,52 +413,30 @@
                     this.tripDays[this.currentDay - 1].items.splice(index, 1);
                     this.drawRoute();
                 },
-
-                /* 清空當天行程 */
-                clearTrip() {
-                     const current = this.tripDays[this.currentDay - 1];
-                     /* 沒行程 */
+                
+                /* 清空當天行程 (新) */
+                async clearTrip() {
+                    const current = this.tripDays[this.currentDay - 1];
                     if (current.items.length === 0) {
-                        showAlert('warning',`第 ${this.currentDay} 天目前沒有任何行程可清空`);
+                        showAlert('info', `第 ${this.currentDay} 天目前沒有任何行程可清空`);
                         return;
                     }
 
-                    /* 有行程 
-                       使用 SweetAlert2 取代 confirm()
-                    */
-                    Swal.fire({
-                        icon: 'question',
-                        title: '確定要清空嗎？',
-                        text: `清空後，「第 ${this.currentDay} 天」的所有行程將被刪除。`,
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: '🗑 清空',
-                        cancelButtonText: '取消'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // 使用者按下清空 → 執行動作
-                            current.items = [];
-                            this.updateMapMarkers();
-
-                            /* 🟢 新增：地圖同步清空 */
-                            if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
-                            if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
-                            this.markers.forEach(m => m.setMap(null));
-                            this.markers = [];
-
-
-                            // showAlert('error', '第 ${this.currentDay} 天的行程已全部刪除');
-                            // 顯示完成提示
-                            Swal.fire({
-                                icon: 'success',
-                                title: '已清空！',
-                                text: `第 ${this.currentDay} 天的行程已全部刪除`,
-                                timer: 1500,
-                                showConfirmButton: false
-                            });
-                        }
+                    const result = await showConfirm({
+                        title: `確定要清空嗎？`,
+                        text: `清空後，「第 ${this.currentDay} 天」的所有行程將被清空。`,
+                        confirmText: `🗑 清空`
                     });
+
+                    if (result.isConfirmed) {
+                        current.items = [];
+                        this.updateMapMarkers();
+                        if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
+                        if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
+                        this.markers.forEach(m => m.setMap(null));
+                        this.markers = [];
+                        showAlert('success', '已清空！', `第 ${this.currentDay} 天的行程已全部清空`);
+                    }
                 },
 
                 /* 取得行程清單 */ 
@@ -497,62 +475,28 @@
                     }
                     this.drawRoute();
                 },
-
-                /* 刪除行程 (舊)  
-                async deleteTrip() {
-                    if (!confirm("確定要刪除此行程嗎？")) return;
-                    await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
-                    alert("✅ 已刪除行程");
-                    this.selectedProject = "";
-                    this.loadTripList();
-                    this.projectName = '';
-                    this.tripDays = [{ day: 1, items: [] }];
-                },*/
-
+                
                 /* 刪除行程 (新) */
-                async deleteTrip() {
-                    /*
-                    🟢 若未選擇任何行程 (舊)
-                    if (!this.selectedProject) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: '未選擇行程',
-                            text: '請先選擇要刪除的行程。',
-                            confirmButtonText: '知道了'
-                        });
-                        return;
-                    }*/
-
-                    // 顯示 SweetAlert2 確認提示
+                async deleteTrip() {                   
                     if (!this.selectedProject) {
                         showAlert('warning', "未選擇行程", "請先選擇要刪除的行程。");
                         return;
                     }
 
-                    /* 確認刪除 */
-                    Swal.fire({
-                        icon: 'question',
-                        title: '確定要刪除此行程嗎？',
-                        text: '此操作無法復原，行程資料將永久刪除。',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: '🗑 刪除',
-                        cancelButtonText: '取消'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) {
+                    /* 確認刪除 */       
+                    const result = await showConfirm({
+                        title: `確定要刪除此行程嗎？`,
+                        text: `此操作無法復原，行程資料將永久刪除。`,
+                        confirmText: `🗑 刪除`
+                    });
+
+                    if (result.isConfirmed) {
                             try {
                                 // 呼叫後端刪除 API
                                 await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
 
                                 // 顯示成功提示
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: '刪除成功！',
-                                    text: '該行程已從清單中移除。',
-                                    timer: 1500,
-                                    showConfirmButton: false
-                                });
+                                showAlert('success', '刪除成功！', `該行程已從清單中移除`);
 
                                 // 重設畫面狀態
                                 this.selectedProject = "";
@@ -561,19 +505,17 @@
                                 this.tripDays = [{ day: 1, items: [] }];
                             } catch (error) {
                                 // 錯誤處理
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '刪除失敗',
-                                    text: '請確認伺服器連線或稍後再試。'
-                                });
+                                showAlert('error', '刪除失敗！', `請確認伺服器連線或稍後再試。`);
                             }
                         }
-                    });
                 },
 
                 /* 儲存邏輯自動判斷新建或更新 */
                 async saveTrip() {
-                    if (!this.currentUser) { showAlert('warning',"尚未登入！"); return; }
+                    if (!this.currentUser) { 
+                        showAlert('warning',"尚未登入！"); 
+                        return; 
+                    }
                     const payload = {
                         ProjectID: this.selectedProject || 0,
                         CustomerID: Number(this.currentUser.customerId),
@@ -603,7 +545,7 @@
                             body: JSON.stringify(payload) });
 
                     const msg = await res.text();
-                    showAlert('warning',msg);
+                    showAlert('success',msg);
                     this.loadTripList();
                 },
                 

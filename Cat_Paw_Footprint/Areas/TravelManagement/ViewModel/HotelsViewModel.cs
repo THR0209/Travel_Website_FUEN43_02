@@ -16,9 +16,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.ViewModel
 		public string? HotelAddr { get; set; }
 
 		[Display(Name = "緯度")]
+		[DisplayFormat(DataFormatString = "{0:0.######}", ApplyFormatInEditMode = true)]
 		public decimal? HotelLat { get; set; }
 
 		[Display(Name = "經度")]
+		[DisplayFormat(DataFormatString = "{0:0.######}", ApplyFormatInEditMode = true)]
 		public decimal? HotelLng { get; set; }
 
 		[Display(Name = "住宿介紹")]

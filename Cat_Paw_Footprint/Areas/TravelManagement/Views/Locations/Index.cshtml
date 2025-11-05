@@ -4,6 +4,10 @@
     ViewData["Title"] = "景點總覽";
 }
 
+@section Styles {
+    <link href="~/css/admin-table.css" rel="stylesheet" />
+}
+
 <div class="mt-2" id="cr-loc" style="display:none;">
     <a asp-action="Create" class="btn btn-outline-primary">
         <i class="fa-solid fa-square-plus"></i>新增資料
@@ -17,6 +21,7 @@
             </span>
             <div style="width:60px; height:3px; background:#22b3C1; margin:10px auto 0; border-radius:2px; opacity:.85;"></div>
         </div>
+        <!-- 🧭 DataTable 表格 -->
         <table id="example" class="display table table-striped" style="table-layout:fixed;">
             <thead>
                 <tr>
@@ -38,7 +43,11 @@
                     <tr class="text-center">
                         <td>@item.LocationName</td>
                         <td>@item.LocationAddr</td>
-                        <td>@item.LocationDesc</td>
+                        <td>
+                            <div class="desc-limit" data-full="@item.LocationDesc">
+                                @item.LocationDesc
+                            </div>
+                        </td>
                         <td>@item.LocationPrice</td>
                         <td>@item.Rating</td>
                         <td>@item.Views</td>

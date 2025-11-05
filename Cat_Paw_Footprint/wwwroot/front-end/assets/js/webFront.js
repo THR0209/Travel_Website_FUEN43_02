@@ -6,42 +6,49 @@
 // ----------- 統一彈窗函式（全域通用） -----------
 window.showAlert = function (type, title, text, timer = 1000) {
     Swal.fire({
-        icon: type,
-        title: `🐾 ${title}`,
-        text,
-        timer,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        toast: false,
-        position: "center",
-        background: "#fff",
-        customClass: { popup: 'shadow-sm rounded-3' }
+        icon: type,                 // success / error / warning / info / question
+        title: `🐾 ${title}`,      // 標題前加上貓爪符號
+        text,                      // 顯示內容文字
+        timer,                    // 自動關閉時間（毫秒）
+        showConfirmButton: false,    // 不顯示確認鍵
+        timerProgressBar: true,     // 進度條
+        toast: false,   // 置中模式
+        position: "center",  // 彈窗置中
+        background: "#fff", // 白色背景
+        customClass: { popup: 'shadow-sm rounded-3' }   // 圓角+陰影
     });
 };
 
-// ----------- 🆕 全域 SweetAlert2「確認對話框」函式 -----------
+// ----------- 🆕 全域 SweetAlert2「確認對話框（需使用者按下確認或取消）」 -----------
 window.showConfirm = async function (options = {}) {
     const {
-        icon = 'question',
-        title = '確定要執行此操作嗎？',
-        text = '此操作無法復原，是否繼續？',
-        confirmText = '確定',
-        cancelText = '取消',
-        confirmColor = '#d33',
-        cancelColor = '#3085d6'
-    } = options;
+        imageUrl = '/images/Logo.png',                       // 預設圖示
+        title = `確定要執行此操作嗎？`,        // 與 showAlert 一樣加上貓爪符號
+        text = '此操作無法復原，是否繼續？',       // 提示文字
+        confirmText = '確定',                     // 確認按鈕文字
+        cancelText = '取消',                      // 取消按鈕文字
+        confirmColor = '#d33',                    // 確認按鈕顏色（紅色）
+        cancelColor = '#3085d6'                   // 取消按鈕顏色（藍色）        
+    } = options;   
 
     return await Swal.fire({
-        icon,
-        title,
+        imageUrl,                // ✅ 顯示自訂圖片
+        imageWidth: 80,          // ✅ 可以調整圖片大小
+        imageHeight: 80,
+        title: `🐾 ${title}`,  
         text,
         showCancelButton: true,
+        confirmButtonText: confirmText,
+        cancelButtonText: cancelText,
         confirmButtonColor: confirmColor,
         cancelButtonColor: cancelColor,
-        confirmButtonText: confirmText,
-        cancelButtonText: cancelText
+        background: "#fff",                      // ✅ 與 showAlert 一樣的白底
+        position: "center",                      // ✅ 同樣置中顯示
+        timerProgressBar: true,
+        customClass: { popup: 'shadow-sm rounded-3' } // ✅ 加上陰影與圓角
     });
 };
+
 
 // ----------- 全域函式：更新未讀通知數 -----------
 window.updateUnread = async function () {

@@ -1,0 +1,47 @@
+﻿/* ===============================
+   📘 Admin 後台共用 DataTable 樣式
+   =============================== */
+
+/* 🧱 統一列高度 */
+#example.dataTable tbody tr {
+    height: 100px !important;
+    vertical-align: middle !important;
+}
+
+/* 📏 限制每格高度、超出隱藏 */
+#example.dataTable tbody td {
+    max-height: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle !important;
+}
+
+/* ✅ 新：景點介紹限制兩行文字 */
+.desc-limit {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 1.4em;
+    max-height: 2.8em;
+}
+
+/* ✨ 列 hover 效果 */
+#example.dataTable tbody tr:hover {
+    background-color: #fff9e6;
+    transition: background-color 0.2s ease-in-out;
+}
+
+/* ✅ 「上架」「下架」按鈕樣式統一 */
+.table .btn-success {
+    background-color: #00c37d;
+    border-color: #00c37d;
+}
+
+.table .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+

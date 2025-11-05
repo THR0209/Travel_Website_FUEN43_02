@@ -1,12 +1,12 @@
 @model IEnumerable<Cat_Paw_Footprint.Areas.TravelManagement.ViewModel.RestaurantsViewModel>
 
-
-
 @{
     ViewData["Title"] = "美食總覽";
 }
 
-
+@section Styles {
+    <link href="~/css/admin-table.css" rel="stylesheet" />
+}
 
 <div class="mt-2" id="cr-res" style="display:none;">
     <a asp-action="Create" class="btn btn-outline-primary">
@@ -39,7 +39,9 @@
                 <tr class="text-center">
                     <td>@Html.DisplayFor(modelItem => item.RestaurantName)</td>
                     <td class="text-start">@Html.DisplayFor(modelItem => item.RestaurantAddr)</td>
-                    <td class="text-start">@Html.DisplayFor(modelItem => item.RestaurantDesc)</td>
+                    <td class="text-start">
+                        <div class="desc-limit" data-full="@item.RestaurantDesc">@item.RestaurantDesc</div>
+                    </td>
                     <td>@Html.DisplayFor(modelItem => item.Rating)</td>
                     <td>@Html.DisplayFor(modelItem => item.Views)</td>
                         <td>
