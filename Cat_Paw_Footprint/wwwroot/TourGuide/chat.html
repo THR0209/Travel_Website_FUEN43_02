@@ -180,6 +180,17 @@
                 box-shadow: 0 0 0.4rem rgba(255, 140, 66, 0.35);
                 transform: translateY(-2px);
             }
+        .send-icon-btn {
+            background: transparent;
+            border-radius: 50%;
+            padding: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+            .send-icon-btn:disabled {
+                opacity: 0.4;
+            }
 
         @media (max-width: 768px) {
             header {
@@ -216,7 +227,7 @@
             <div class="muted">{{ guideName || guideAccount }}</div>
 
             <button @click="backToGroupList" class="btn-return">
-                返回清單
+                返回
             </button>
         </header>
 
@@ -243,10 +254,10 @@
 
                     <button @click="setLocation" class="plain-btn">📍</button>
                     <button @click="$refs.photoInput.click()" class="plain-btn">📷</button>
-                    <button @click="sendText"
-                            :disabled="!text"
-                            class="chat-send">
-                        送出
+                    <button @click="sendText" :disabled="!text" class="send-icon-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
+                            <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
+                        </svg>
                     </button>
                     <span class="err" v-if="errText">{{ errText }}</span>
                 </div>

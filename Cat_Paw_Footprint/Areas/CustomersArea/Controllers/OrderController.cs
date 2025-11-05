@@ -2,6 +2,7 @@
 using Cat_Paw_Footprint.Areas.CustomerService.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
+using Cat_Paw_Footprint.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 	{
 		private readonly webtravel2Context _db;
         private readonly ICustomerSupportTicketsService _ticketSvc;
-        public OrdersController(webtravel2Context db, ICustomerSupportTicketsService ticketSvc)
+		private readonly INotificationTriggerService _notifTrigger;
+		public OrdersController(webtravel2Context db, ICustomerSupportTicketsService ticketSvc, INotificationTriggerService notifTrigger)
         {
             _db = db;
             _ticketSvc = ticketSvc;
-        }
+            _notifTrigger = notifTrigger;
+		}
         private int CurrentCustomerId =>
         int.TryParse(User.FindFirst("CustomerId")?.Value, out var id) ? id : 0;
         [AllowAnonymous]
@@ -124,7 +127,10 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                     TicketCode = $"T{DateTime.Now:yyyyMMddHH}"
                 });
 
-                return Ok(new { ok = true });
+				// 發通知給客戶
+				await _notifTrigger.NotifyOrderCanceledAsync(cid, o.OrderID);
+
+				return Ok(new { ok = true });
             }
 
             catch (Exception ex)
