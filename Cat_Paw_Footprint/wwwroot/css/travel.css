@@ -241,3 +241,21 @@ input.form-control {
     border: 1px solid #ccc;
     padding: 4px;
 }
+
+/* 🚌 鍵盤按鈕設計 */
+.num-pad .pad-btn {
+    background-color: #f8f9fa;
+    border: 1px solid #ccc;
+    margin: 4px;
+    width: 70px;
+    height: 45px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+    .num-pad .pad-btn:hover {
+        background-color: #198754;
+        color: white;
+        transform: scale(1.05);
+    }
