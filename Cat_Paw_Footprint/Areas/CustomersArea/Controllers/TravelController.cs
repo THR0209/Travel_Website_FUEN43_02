@@ -222,7 +222,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			catch (Exception ex)
 			{
 				if (ex.InnerException != null)
-					return StatusCode(500,"Inner Exception: " + ex.InnerException.Message);
+					return StatusCode(500, "Inner Exception: " + ex.InnerException.Message);
 
 				// 若有錯誤，回傳 500 錯誤碼與訊息
 				return StatusCode(500, $"儲存失敗: {ex.Message}");
@@ -248,7 +248,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			return Json(trips);
 		}
-		
+
 		/* 取得單筆行程明細 */
 		[HttpGet("/api/trips/{projectId}")]
 		[Authorize(AuthenticationSchemes = "CustomerAuth")]

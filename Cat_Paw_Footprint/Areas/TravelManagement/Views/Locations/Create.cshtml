@@ -3,6 +3,20 @@
 @{
     ViewData["Title"] = "Create";
 }
+
+@section Styles{
+    <!-- CKEditor 套件 -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/js/myckeditor.js" rel="stylesheet" />
+
+    <style>
+        /* CKEditor 內文區高度設定 */
+        .ck-editor__editable_inline {
+            min-height: 250px; /* 調高或調低這個值即可 */
+        }
+    </style>
+}
+
 <div class="container mt-4">
     <div class="card shadow p-4">
         <h2 class="mb-3">新增景點</h2>
@@ -46,7 +60,7 @@
                     <!-- 介紹放左下 -->
                     <div class="mb-3">
                         <label asp-for="LocationDesc" class="control-label"></label>
-                        <textarea asp-for="LocationDesc" class="form-control" rows="6"></textarea>
+                        <textarea asp-for="LocationDesc" class="form-control" id="editor"></textarea>
                         <span asp-validation-for="LocationDesc" class="text-danger"></span>
                     </div>
                 </div>                
@@ -117,6 +131,11 @@
     @* 載入 Google Maps API 並帶入後端傳來的金鑰 *@
     <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&libraries=places"></script>
 
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+
     <script>
         let selected = [];
 
@@ -155,8 +174,8 @@
             $(`#hidden-${id}`).remove();
         });
 
-         // 限制檔案大小 (2MB)
-        const MAX_SIZE = 2 * 1024 * 1024;
+         // 限制檔案大小 (1MB)
+        const MAX_SIZE = 1 * 1024 * 1024;
 
         function previewImages(event) {
             let files = event.target.files;
@@ -177,7 +196,7 @@
 
                 // 檢查檔案大小
                 if (file.size > MAX_SIZE) {
-                    alert(`${file.name} 超過 2MB，已跳過`);
+                    alert(`${file.name} 超過 1MB，已跳過`);
                     return;
                 }
 

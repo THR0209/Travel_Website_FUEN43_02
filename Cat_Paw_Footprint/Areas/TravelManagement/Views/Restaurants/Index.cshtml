@@ -40,7 +40,9 @@
                     <td>@Html.DisplayFor(modelItem => item.RestaurantName)</td>
                     <td class="text-start">@Html.DisplayFor(modelItem => item.RestaurantAddr)</td>
                     <td class="text-start">
-                        <div class="desc-limit" data-full="@item.RestaurantDesc">@item.RestaurantDesc</div>
+                        <div class="desc-limit" data-full="@item.RestaurantDesc">
+                            @Html.Raw(item.RestaurantDesc)
+                        </div>
                     </td>
                     <td>@Html.DisplayFor(modelItem => item.Rating)</td>
                     <td>@Html.DisplayFor(modelItem => item.Views)</td>

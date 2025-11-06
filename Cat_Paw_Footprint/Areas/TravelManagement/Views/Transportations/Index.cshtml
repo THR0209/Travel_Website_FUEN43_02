@@ -38,7 +38,11 @@
                 {
                     <tr class="text-center">
                         <td>@Html.DisplayFor(modelItem => item.TransportName)</td>
-                        <td class="text-start">@Html.DisplayFor(modelItem => item.TransportDesc)</td>
+                        <td class="text-start">
+                            <div class="desc-limit" data-full="@item.TransportDesc">
+                                @Html.Raw(item.TransportDesc)
+                            </div>
+                        </td>
                         <td>@Html.DisplayFor(modelItem => item.TransportPrice)</td>
                         <td>@Html.DisplayFor(modelItem => item.Rating)</td>
                         <td>@Html.DisplayFor(modelItem => item.Views)</td>

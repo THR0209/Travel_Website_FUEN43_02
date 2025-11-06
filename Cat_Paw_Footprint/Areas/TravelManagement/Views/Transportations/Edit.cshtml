@@ -4,6 +4,19 @@
     ViewData["Title"] = "Edit";
 }
 
+@section Styles {
+    <!-- CKEditor 套件 -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/js/myckeditor.js" rel="stylesheet" />
+
+    <style>
+        /* CKEditor 內文區高度設定 */
+        .ck-editor__editable_inline {
+            min-height: 250px; /* 調高或調低這個值即可 */
+        }
+    </style>
+}
+
 <div class="container mt-4">
     <div class="card shadow p-4">
         <h2 class="mb-3">修改</h2>
@@ -41,7 +54,7 @@
 
                     <div class="mb-3">
                         <label asp-for="TransportDesc" class="control-label"></label>
-                        <textarea asp-for="TransportDesc" class="form-control" rows="4"></textarea>
+                        <textarea asp-for="TransportDesc" class="form-control" id="editor"></textarea>
                         <span asp-validation-for="TransportDesc" class="text-danger"></span>
                     </div>
                 </dvi>
@@ -136,6 +149,12 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+
     <script>
         //圖片
         // 存放暫存的檔案 (用來過濾哪些要送到後端)

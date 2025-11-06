@@ -1,6 +1,6 @@
-﻿@section Styles {    
+﻿@section Styles {
     @* 引用CSS樣式庫 *@
-    <link href="~/css/travel.css" rel="stylesheet" />   
+    <link href="~/css/travel.css" rel="stylesheet" />
 
     @* 引用bootstrap的icon *@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
@@ -22,7 +22,7 @@
                        class="form-control w-25" />
 
                 <!-- 地區篩選 -->
-                <select class="form-select w-25" v-model="selectedRegion" @@change ="selectedDistrict=''">
+                <select class="form-select w-25" v-model="selectedRegion" v-on:change="selectedDistrict=''">
                     <option value="">🌎 全部地區</option>
                     <option v-for="region in regions" :key="region" :value="region">{{ region }}</option>
                 </select>
@@ -38,7 +38,7 @@
                     <button v-for="btn in buttons" :key="btn.type"
                             class="btn rounded-pill"
                             :class="{'btn-warning': currentType===btn.type, 'btn-outline-secondary': currentType!==btn.type}"
-                            @@click ="changeType(btn.type)">
+                            v-on:click="changeType(btn.type)">
                         {{ btn.label }}
                     </button>
                 </div>
@@ -46,14 +46,14 @@
                 <!-- ⭐ 單鍵排序切換 -->
                 <button class="btn"
                         :class="sortDesc ? 'btn-warning' : 'btn-outline-primary'"
-                        @@click ="toggleSort">
+                        v-on:click="toggleSort">
                     ⭐ 排序：{{ sortDesc ? '高→低' : '低→高' }}
                 </button>
 
             </div>
         </div>
 
-        <!-- 左側：動態卡片區 -->        
+        <!-- 左側：動態卡片區 -->
         <div class="col-md-8">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
 
@@ -64,12 +64,12 @@
                         <!-- 右上角＋鍵 -->
                         <button class="btn btn-sm btn-success position-absolute top-0 end-0 m-2"
                                 style="z-index: 10;"
-                                @@click.stop="addToTrip(item)">
+                                v-on:click.stop="addToTrip(item)">
                             ＋
                         </button>
 
                         <!-- 點擊開啟 Modal-->
-                        <div @@click="openModal(item)">                        
+                        <div v-on:click="openModal(item)">
 
                             <!-- Bootstrap 輪播 -->
                             <div :id="'carousel-'+item.id" class="carousel slide card-carousel"
@@ -82,7 +82,7 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img src="~/images/noimage.png" class="d-block w-100 noimage" alt="圖片" />
+                                            <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="圖片" />
                                         </div>
                                     </div>
 
@@ -92,33 +92,37 @@
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img :src="pic || '~/images/noimage.png'" alt="圖片">
+                                            <img :src="pic || '@Url.Content("~/images/NoImage.png")'"
+                                                 v-on:error ="e => e.target.src='@Url.Content("~/images/NoImage.png")'"
+                                                 class="d-block w-100"
+                                                 alt="圖片" />
                                         </div>
                                     </div>
 
                                 </div>
                             </div>
+
+                            <!-- 平均分與瀏覽次數 -->
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ item.name }}</h5>
-                                @* <p>⭐ {{ item.rating }}　👁️ {{ item.views }}</p> *@
                                 <!-- 🆕 評分區域 (可點擊星星評分) -->
                                 <div class="rating mb-1">
                                     <i v-for="n in 5" :key="n"
                                        class="bi"
                                        :class="n <= (item.userRating || 0) ? 'bi-star-fill text-warning' : 'bi-star text-muted'"
-                                       @@click.stop ="rateItem(item, n)">
+                                       v-on:click.stop="rateItem(item, n)">
                                     </i>
                                 </div>
 
                                 <!-- 🆕 顯示平均分與瀏覽次數 -->
-                                <p>⭐ {{ item.rating.toFixed(1) }}　👁️ {{ item.views }}</p>
+                                <p>⭐ {{ (item.rating ?? 0).toFixed(1) }}　👁️ {{ item.views }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>     
-        
+        </div>
+
         <!-- 右側：排行程 + 地圖 -->
         <div class="col-md-4">
 
@@ -127,7 +131,7 @@
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <span>排行程</span>
                     <!-- 清空按鈕 -->
-                    <button class="btn btn-sm btn-danger" @@click="clearTrip">清空</button>
+                    <button class="btn btn-sm btn-danger" v-on:click="clearTrip">清空</button>
                 </div>
                 <div class="card-body">
 
@@ -135,13 +139,13 @@
                     <div class="mb-3">
                         <label class="form-label small text-muted">🗂 我的行程清單</label>
                         <div class="input-group">
-                            <select class="form-select" v-model="selectedProject" @@change ="onTripSelected">
+                            <select class="form-select" v-model="selectedProject" v-on:change="onTripSelected">
                                 <option value="">➕ 新建立行程</option>
                                 <option v-for="trip in tripList" :key="trip.projectID" :value="trip.projectID">
                                     {{ trip.projectName }}
                                 </option>
                             </select>
-                            <button class="btn btn-outline-danger" v-if="selectedProject" @@click ="deleteTrip">🗑 刪除</button>
+                            <button class="btn btn-outline-danger" v-if="selectedProject" v-on:click="deleteTrip">🗑 刪除</button>
                         </div>
                     </div>
 
@@ -155,12 +159,12 @@
                     </div>
 
                     <!-- 多天行程陣列 tripDays -->
-                    <draggable v-model="tripDays[currentDay-1].items" item-key="uid" handle=".drag-handle" @@end="updateSequence">
+                    <draggable v-model="tripDays[currentDay-1].items" item-key="uid" handle=".drag-handle" v-on:end="updateSequence">
                         <template #item="{ element, index }">
                             <div class="border rounded p-2 mb-2 bg-light">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span><i class="bi bi-list drag-handle me-2"></i>{{ index+1 }}. {{ element.name }}</span>
-                                    <button class="btn btn-sm btn-outline-danger" @@click="removeItem(index)">✖</button>
+                                    <button class="btn btn-sm btn-outline-danger" v-on:click="removeItem(index)">✖</button>
                                 </div>
 
                                 <!-- 時間欄位 -->
@@ -170,14 +174,14 @@
                                         <label class="form-label mb-0 small">開始</label>
                                         <input type="time" v-model="element.startTime"
                                                class="form-control form-control-sm"
-                                               @@change="onTimeChange(currentDay-1, index)" />
+                                               v-on:change="onTimeChange(currentDay-1, index)" />
                                     </div>
                                     <!-- 停留時間 -->
                                     <div>
                                         <label class="form-label mb-0 small">停留(分)</label>
                                         <input type="number" min="0" v-model.number="element.stayMinute"
                                                class="form-control form-control-sm"
-                                               @@change="onTimeChange(currentDay-1, index)" />
+                                               v-on:change="onTimeChange(currentDay-1, index)" />
                                     </div>
                                     <!-- 路程時間 -->
                                     <div>
@@ -193,9 +197,9 @@
                     </div>
 
                     <!-- 儲存方法為 saveTrip() -->
-                    <button class="btn btn-success w-100 mt-3" @@click="saveTrip">
+                    <button class="btn btn-success w-100 mt-3" v-on:click="saveTrip">
                         {{ selectedProject ? '💾 更新行程' : '💾 儲存新行程' }}
-                    </button>                    
+                    </button>
                 </div>
             </div>
 
@@ -226,13 +230,15 @@
                             <!-- Modal 內的輪播 -->
                             <div v-if="modalData" :id="'carousel-modal-'+modalData.id"
                                  class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">
+
+                                 <!-- 圖片區 -->
                                 <div class="carousel-inner">
 
                                     <!-- 沒有圖片 → 顯示預設圖 -->
                                     <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
                                          class="carousel-item active">
                                         <div class="pic">
-                                            <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                            <img src="@Url.Content("/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
                                         </div>
                                     </div>
 
@@ -240,17 +246,22 @@
                                     <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
                                          class="carousel-item" :class="{ 'active': i === 0 }">
                                         <div class="pic">
-                                            <img :src="pic || '~/images/NoImage.png'" class="d-block w-100" alt="圖片" />
+                                            <img :src="pic || '@Url.Content("~/images/NoImage.png")'"
+                                                 v-on:error="e => e.target.src='@Url.Content("~/images/NoImage.png")'"
+                                                 class="d-block w-100"
+                                                 alt="圖片" />
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- 左右箭頭 -->
+                                <!-- 左箭頭 -->
                                 <button class="carousel-control-prev" type="button"
                                         :data-bs-target="'#carousel-modal-'+modalData.id"
                                         data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon"></span>
                                 </button>
+
+                                <!-- 右箭頭 -->
                                 <button class="carousel-control-next" type="button"
                                         :data-bs-target="'#carousel-modal-'+modalData.id"
                                         data-bs-slide="next">
@@ -258,7 +269,7 @@
                                 </button>
                             </div>
 
-                             <!-- Model 內的 星星評論區 -->
+                            <!-- Model 內的 星星評論區 -->
                             @*<div class="card-body text-center">
                                 <h5 class="card-title">{{ modalData.name }}</h5>
 
@@ -274,6 +285,12 @@
                                 <!-- 平均分與瀏覽次數 -->
                                 <p>⭐ {{ modalData.rating.toFixed(1) }}　👁️ {{ modalData.views }}</p>
                             </div> *@
+
+                            <!-- 詳細地址 -->
+                            <div>
+                                <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
+                            </div>
+
                         </div>
 
                         <!-- 右側 - 地圖區域 -->
@@ -281,17 +298,13 @@
                             <div id="detailMap" style="width:100%; height:300px; border-radius:10px; border:1px solid #ccc;"></div>
                         </div>
                     </div>
+
                     <!-- 分隔線 -->
-                    <hr class="my-3" />
-                    <!-- 詳細地址 -->
-                    <div>
-                        <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
-                    </div>
+                    <hr class="my-3" />                    
 
                     <!-- 文字介紹區 -->
-                    <div>
-                        <p class="mt-3">{{ modalData.desc }}</p>
-                    </div>     
+                    <div class="mt-3 ck-content" v-html="modalData.desc"></div>    
+
                 </div>
             </div>
         </div>
@@ -299,7 +312,7 @@
 
 </div>
 
-@section Scripts{    
+@section Scripts {
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
 
     <!-- 支援拖曳排序 -->
@@ -315,7 +328,7 @@
         const { createApp } = Vue;
         let app; // 全域變數：讓 initMap() 能呼叫 Vue 方法
 
-        /* 全域 callback（Google 會自動呼叫這個） */ 
+        /* 全域 callback（Google 會自動呼叫這個） */
         window.initMap = function () {
             console.log("✅ Google Map script loaded, calling Vue method...");
             if (app && app._instance && app._instance.proxy) {
@@ -364,15 +377,15 @@
                     selectedProject: '',    // 目前選中的行程
 
                     /* 目前登入使用者資訊 */
-                    currentUser: null,  
+                    currentUser: null,
 
-                    /* 新增地圖相關變數 */ 
+                    /* 新增地圖相關變數 */
                     map: null,  // 地圖物件
                     directionsService: null,    // 路線服務
                     directionsRenderer: null,   // 路線繪製器
                     travelInfo: null, // 距離與時間資訊
                     markers: [], // 多點標記陣列
-                                        
+
                 }
             },
 
@@ -406,13 +419,13 @@
                 }
             },
 
-            /* 方法(事件處理) */ 
+            /* 方法(事件處理) */
             methods: {
                 /* 取得目前登入者資訊 */
                 async getCurrentUser() {
                     try {
                         const res = await fetch('/api/currentUser', {
-                        credentials: 'include'   
+                        credentials: 'include'
                         });
                         if (!res.ok) throw new Error('尚未登入');
                         const data = await res.json();
@@ -453,7 +466,7 @@
                     this.items = json.map(x => ({
                         id: x.hotelID || x.locationID || x.restaurantID,
                         name: x.hotelName || x.locationName || x.restaurantName,
-                        addr: x.hotelAddr || x.locationAddr || x.restaurantAddr,     
+                        addr: x.hotelAddr || x.locationAddr || x.restaurantAddr,
                         desc: x.hotelDesc || x.locationDesc || x.restaurantDesc,
                         lat: Number(x.hotelLat || x.locationLat || x.restaurantLat),
                         lng: Number(x.hotelLng || x.locationLng || x.restaurantLng),
@@ -467,7 +480,7 @@
                     // 等 Vue 渲染完卡片後再初始化所有 carousel
                     this.$nextTick(() => {
                         document.querySelectorAll('.card-carousel').forEach(c => {
-                            
+
                             // 🧹 先清除舊的 Carousel 實例（防止秒數跑掉）
                             const existing = bootstrap.Carousel.getInstance(c);
                             if (existing) existing.dispose();
@@ -497,7 +510,7 @@
 
                          // 初始化輪播
                         const carouselId = `carousel-modal-${item.id}`;
-                        const carouselEl = document.getElementById(carouselId);                      
+                        const carouselEl = document.getElementById(carouselId);
                         if (carouselEl) {
                             const existing = bootstrap.Carousel.getInstance(carouselEl);
                             if (existing) existing.dispose(); // 🔹 確保使用新設定
@@ -530,7 +543,7 @@
 
                 },
 
-                // 🆕【增加瀏覽次數】當使用者點開卡片（openModal）時觸發
+                //【增加瀏覽次數】當使用者點開卡片（openModal）時觸發
                 increaseViewCount(item) {
                     fetch(`/api/views/increase?type=${this.currentType}&id=${item.id}`, { method: "POST" })
                         .then(() => {
@@ -540,7 +553,7 @@
                         .catch(err => console.warn("❌ 無法更新瀏覽數", err));
                 },
 
-                // 🆕【評分功能】點擊星星時觸發
+                //【評分功能】點擊星星時觸發
                 async rateItem(item, userScore) {
                     const newRating = ((item.rating || 0) + userScore) / 2;
                     item.rating = parseFloat(newRating.toFixed(1));
@@ -558,7 +571,7 @@
                     }
                 },
 
-               
+
                 /* 加入行程（支援多天） */
                 async addToTrip(item) {
                     // 先檢查經緯度是否合法
@@ -628,7 +641,7 @@
                     this.tripDays[this.currentDay - 1].items.splice(index, 1);
                     this.drawRoute();
                 },
-                
+
                 /* 清空當天行程 (新) */
                 async clearTrip() {
                     const current = this.tripDays[this.currentDay - 1];
@@ -667,14 +680,14 @@
                     }
                 },
 
-                /* 取得行程清單 */ 
+                /* 取得行程清單 */
                 async loadTripList() {
                     if (!this.currentUser) return;
                     const res = await fetch(`/api/trips/list?customerId=${this.currentUser.customerId}`);
                     this.tripList = await res.json();
                 },
 
-                /* 當下拉選單變更時載入行程 */ 
+                /* 當下拉選單變更時載入行程 */
                 async onTripSelected() {
                     if (!this.selectedProject) {
                         this.projectName = ''; this.totalDays = 1; this.tripDays = [{ day: 1, items: [] }];
@@ -703,15 +716,15 @@
                     }
                     this.drawRoute();
                 },
-                
+
                 /* 刪除行程 (新) */
-                async deleteTrip() {                   
+                async deleteTrip() {
                     if (!this.selectedProject) {
                         showAlert('warning', "未選擇行程", "請先選擇要刪除的行程。");
                         return;
                     }
 
-                    /* 確認刪除 */       
+                    /* 確認刪除 */
                     const result = await showConfirm({
                         title: `確定要刪除此行程嗎？`,
                         text: `此操作無法復原，行程資料將永久刪除。`,
@@ -757,9 +770,9 @@
 
                 /* 儲存邏輯自動判斷新建或更新 */
                 async saveTrip() {
-                    if (!this.currentUser) { 
-                        showAlert('warning',"尚未登入！"); 
-                        return; 
+                    if (!this.currentUser) {
+                        showAlert('warning',"尚未登入！");
+                        return;
                     }
                     const payload = {
                         ProjectID: this.selectedProject || 0,
@@ -781,25 +794,25 @@
                     };
                     let res;
                     if (!this.selectedProject)
-                        res = await fetch("/api/trips/save", { 
-                            method: "POST", headers: { "Content-Type": "application/json" }, 
+                        res = await fetch("/api/trips/save", {
+                            method: "POST", headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(payload) });
                     else
-                        res = await fetch("/api/trips/update", { 
-                            method: "PUT", headers: { "Content-Type": "application/json" }, 
+                        res = await fetch("/api/trips/update", {
+                            method: "PUT", headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(payload) });
 
                     const msg = await res.text();
                     showAlert('success',msg);
                     this.loadTripList();
                 },
-                
+
                 /* 初始化地圖 */
                 initMap() {
                     console.log("🗺️ Google Map 初始化成功");
                 this.map = new google.maps.Map(document.getElementById("map"), {
                     center: { lat: 23.5, lng: 121 },    // 台灣中心點
-                    zoom: 7,    
+                    zoom: 7,
                 });
 
                 this.directionsService = new google.maps.DirectionsService();
@@ -875,7 +888,7 @@
                         stopover: true
                     }));
 
-                    /* 起點 */ 
+                    /* 起點 */
                     const origin = {
                         lat: tripList[0].lat,
                         lng: tripList[0].lng
@@ -1004,9 +1017,9 @@
                     if (firstTimedItem) {
                         const index = items.indexOf(firstTimedItem);
                         this.onTimeChange(this.currentDay - 1, index);
-                    }                    
+                    }
                 },
-                
+
                 /* 拖曳完成事件（可選，顯示目前排序） */
                 onDragEnd() {
                     console.log("🔁 已重新排序：", this.tripList.map(x => x.name).join(" → "));
@@ -1015,7 +1028,7 @@
                 },
             },
 
-            /* 監聽器 */ 
+            /* 監聽器 */
             watch: {
                 // 動態調整 tripDays 陣列長度
                 totalDays(newVal) {
@@ -1037,19 +1050,19 @@
 
             /* 元件載入時 */
             mounted() {
-                /* 預設載入 */ 
+                /* 預設載入 */
                 this.fetchData().then(() => {
                     // 資料載入後，保持離島預設狀態
                     this.selectedRegion = "離島";
                 });
 
-                /* 初始化抓取登入者 */ 
+                /* 初始化抓取登入者 */
                 this.getCurrentUser();
 
                 /* 載入使用者後自動載入行程清單 */
                 this.getCurrentUser().then(() => this.loadTripList());
 
-                /* 重新啟用所有 dropdown 功能 */ 
+                /* 重新啟用所有 dropdown 功能 */
                 const dropdownList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
                 dropdownList.forEach((dropdownToggleEl) => {
                     new bootstrap.Dropdown(dropdownToggleEl);
@@ -1065,7 +1078,7 @@
         });
 
         /* 全域註冊 draggable */
-        app.component('draggable', vuedraggable); 
+        app.component('draggable', vuedraggable);
         app.mount("#app");
     </script>
 }

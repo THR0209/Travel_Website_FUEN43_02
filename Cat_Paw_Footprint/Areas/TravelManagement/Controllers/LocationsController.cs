@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 {
@@ -146,7 +147,10 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var location = new Locations
+				// ✅ 把 CKEditor 的 HTML 轉回原始格式（避免 &lt;h2&gt;）
+				model.LocationDesc = HttpUtility.HtmlDecode(model.LocationDesc);
+
+				var location = new Locations
                 { 
                     LocationName = model.LocationName,
                     LocationAddr = model.LocationAddr,
@@ -291,8 +295,11 @@ namespace Cat_Paw_Footprint.Areas.TravelManagement.Controllers
 
 				if (locations == null) return NotFound();
 
+				// ✅ 將 CKEditor HTML 解碼（避免 &lt;p&gt;）
+				model.LocationDesc = HttpUtility.HtmlDecode(model.LocationDesc);
+
 				// ---- 更新主表資料 ----
-                locations.LocationName = model.LocationName;
+				locations.LocationName = model.LocationName;
                 locations.LocationAddr = model.LocationAddr;
                 locations.LocationLat = model.LocationLat;
                 locations.LocationLng = model.LocationLng;

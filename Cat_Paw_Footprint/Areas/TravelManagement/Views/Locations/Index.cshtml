@@ -45,7 +45,7 @@
                         <td>@item.LocationAddr</td>
                         <td>
                             <div class="desc-limit" data-full="@item.LocationDesc">
-                                @item.LocationDesc
+                                @Html.Raw(item.LocationDesc)
                             </div>
                         </td>
                         <td>@item.LocationPrice</td>

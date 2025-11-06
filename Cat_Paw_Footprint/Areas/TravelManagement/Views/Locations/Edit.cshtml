@@ -4,6 +4,19 @@
     ViewData["Title"] = "Edit";
 }
 
+@section Styles {
+    <!-- CKEditor 套件 -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/js/myckeditor.js" rel="stylesheet" />
+
+    <style>
+        /* CKEditor 內文區高度設定 */
+        .ck-editor__editable_inline {
+            min-height: 250px; /* 調高或調低這個值即可 */
+        }
+    </style>
+}
+
 <div class="container mt-4">
     <div class="card shadow p-4">
         <h2 class="mb-3">修改</h2>
@@ -56,7 +69,7 @@
 
                     <div class="mb-3">
                         <label asp-for="LocationDesc" class="control-label"></label>
-                        <textarea asp-for="LocationDesc" class="form-control" rows="4"></textarea>
+                        <textarea asp-for="LocationDesc" class="form-control" id="editor"></textarea>
                         <span asp-validation-for="LocationDesc" class="text-danger"></span>
                     </div>
                 </dvi>
@@ -163,6 +176,11 @@
 
     @* 載入 Google Maps API 並帶入後端傳來的金鑰 *@
     <script src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapsApiKey&libraries=places"></script>
+
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
 
     <script>
         /* 自動將地址轉換為經緯度 */

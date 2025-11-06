@@ -51,7 +51,7 @@ window.showAlert = function (type, title, text, timer = 1000) {
     Swal.fire({
         icon: type,                 // success / error / warning / info / question
         title: `🐾 ${title}`,      // 標題前加上貓爪符號
-        text,                      // 顯示內容文字
+        text,         // 顯示內容文字
         timer,                    // 自動關閉時間（毫秒）
         showConfirmButton: false,    // 不顯示確認鍵
         timerProgressBar: true,     // 進度條
@@ -77,7 +77,7 @@ window.showConfirm = async function (options = {}) {
         imageUrl,                // ✅ 顯示自訂圖片
         imageWidth: 80,          // ✅ 可以調整圖片大小
         imageHeight: 80,
-        title: `🐾 ${title}`,  
+        title: `🐾 ${title} 🐾`,  
         text,
         showCancelButton: true,
         confirmButtonText: confirmText,
