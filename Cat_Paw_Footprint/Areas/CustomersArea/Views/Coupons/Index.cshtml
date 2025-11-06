@@ -37,14 +37,12 @@
 
         <!-- 可使用 -->
         <template v-if="tab === 'usable' && coupons.usable.length">
-            <div v-for="c in coupons.usable" :key="c.couponId" class="col-md-6">
-                <div class="card border-success shadow-sm h-100">
-                    <div class="card-body">
-                        <h4 class="fw-bold text-success mb-2">
-                            {{c.couponName}}
-                        </h4>
+            <div v-for="c in coupons.usable" :key="c.couponId" class="col-md-6 col-lg-4">
+                <div class="coupon-card usable">
+                    <div class="coupon-body">
+                        <h5 class="fw-bold mb-2 text-brand">{{ c.couponName }}</h5>
                         @* <p class="mb-1 text-secondary">訂購金額須滿 TWD {{ c.minimumAmount || 0 }}</p> *@
-                        <p class="mb-1 text-secondary">{{c.rule}}</p>
+                        <p class="mb-1 text-secondary">{{ c.rule }}</p>
                         <p class="mb-1">{{ c.desc }}</p>
                         <small class="text-muted">有效期限：{{ formatDate(c.endDate) }}</small>
                     </div>
@@ -52,7 +50,6 @@
                 </div>
             </div>
         </template>
-
         <!-- 已使用 -->
         <template v-if="tab === 'used' && coupons.used.length">
             <div v-for="c in coupons.used" :key="c.couponId" class="col-md-6 col-lg-4">
