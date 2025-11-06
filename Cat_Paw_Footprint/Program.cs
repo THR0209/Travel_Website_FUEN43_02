@@ -35,12 +35,20 @@ namespace Cat_Paw_Footprint
 			var builder = WebApplication.CreateBuilder(args);
 
 			/* 加入 secrets.json（使用者祕密設定）
-			   這樣 _config["GoogleMaps:ApiKey"] 就能正確讀到
+			   這樣 _config["GoogleMaps:ApiKey"] / _config["PTX:AppID"] 都能正確讀到
 			*/
 			builder.Configuration
 				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-				.AddUserSecrets<Program>(optional: true)
+				.AddUserSecrets<Program>() // 🔐 從 secrets.json 載入私密金鑰
 				.AddEnvironmentVariables();
+
+			//#region Services 註冊區
+			builder.Services.AddHttpClient();  // 讓 HttpClient 可以被注入使用
+			builder.Services.AddScoped<TdxService>(); // 註冊 TDX API 服務
+
+			// ✅ 🔍 測試是否能成功讀取 secrets
+			Console.WriteLine("✅ Google API Key: " + builder.Configuration["GoogleMaps:ApiKey"]);
+			Console.WriteLine("✅ PTX AppID: " + builder.Configuration["PTX:AppID"]);
 
 			// 1️⃣ 取得 Google Cloud SQL 連線字串
 			var credential = GoogleCredential.FromFile(@"C:\GoogleCloudSql\Keys\web-travel-ap.json");
@@ -194,7 +202,7 @@ namespace Cat_Paw_Footprint
 
 			builder.Services.AddControllersWithViews();
 			builder.Services.AddRazorPages();
-			builder.Services.AddSignalR();
+			builder.Services.AddSignalR();			
 
 			builder.Services.Configure<ECPayOptions>(builder.Configuration.GetSection("ECPay"));
 
