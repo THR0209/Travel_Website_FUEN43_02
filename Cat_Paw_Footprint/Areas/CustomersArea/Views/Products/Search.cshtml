@@ -123,6 +123,10 @@
           function bindEvents(){
             const clearBtn = wrapper.querySelector('#clearFiltersBtn');
             clearBtn?.addEventListener('click', () => {
+              // 1) 清空文字欄位：關鍵字
+              const dest = filterForm.querySelector('input[name="Destination"]');
+              if (dest) { dest.value = ''; dest.removeAttribute('value'); }
+
               filterForm.reset();
               ajaxLoad(filterForm);
               Swal.fire({icon:'success',title:'已清除篩選條件',timer:1200,showConfirmButton:false});

@@ -907,6 +907,12 @@
                             <div class="product-thumb position-relative">
                                 <img :src="p.cover" class="w-100" :alt="p.productName">
                                 <span class="badge bg-info position-absolute top-0 start-0 m-2">🔥 熱門</span>
+
+                                <!-- ❤️ 收藏（Vue 綁定語法） -->
+                                <button type="button" class="fav-float"
+                                        :data-product-id="p.productID" aria-pressed="false" title="加入收藏">
+                                    <i class="fa-solid fa-heart"></i>
+                                </button>
                             </div>
 
                             <div class="product-body p-3 d-flex flex-column justify-content-between flex-grow-1">
@@ -1210,6 +1216,8 @@
                     slidesPerView: 1.2,
                     spaceBetween: 20,
                     navigation: { prevEl, nextEl },
+                    preventClicks: false,            // ★ 允許 slide 內 click
+                    touchStartPreventDefault: false, // ★ 允許原生事件
                     breakpoints: {
                       576:{ slidesPerView:2 },
                       768:{ slidesPerView:3 },

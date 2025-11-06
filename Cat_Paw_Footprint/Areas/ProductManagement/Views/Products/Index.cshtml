@@ -68,6 +68,8 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+
     <script>
         // 自動顯示所有 Toast
         document.addEventListener("DOMContentLoaded", function () {
@@ -78,6 +80,18 @@
                 return t;
             });
         });
+
+        dayjs.extend(window.dayjs_plugin_utc);
+
+        // 安全轉換：若不是 ISO UTC 仍 fallback
+        function toTaipeiTime(isoUtc) {
+          if (!isoUtc) return "";
+          const d = dayjs.utc(isoUtc);
+          if (!d.isValid()) return dayjs(isoUtc).format("YYYY-MM-DD A HH:mm")
+            .replace("AM", "上午").replace("PM", "下午");
+          return d.local().format("YYYY-MM-DD A HH:mm")
+            .replace("AM", "上午").replace("PM", "下午");
+        }
 
         $(document).ready(function () {
             $('#test').DataTable({ 
@@ -116,14 +130,13 @@
                         },
                         className: "dt-body-left"
                     },
+                    // 上架時間：改抓 releaseDateUtc，并轉台北時間
                     {
-                        data: "analyses[0].releaseDate",
-                        title: "上架時間",
-                        width: "10%",
-                        render: function (data) {
-                            return data ? dayjs(data).format("YYYY-MM-DD A hh:mm").replace("AM", "上午").replace("PM", "下午") : "";
-                        },
-                        className: "dt-body-left"
+                      data: "releaseDateUtc",
+                      title: "上架時間",
+                      width: "10%",
+                      render: function (data) { return toTaipeiTime(data); },
+                      className: "dt-body-left"
                     },
                     { data: "isActive", title: "狀態", width: "5%", render: statusRender, className: "dt-center" },
                     { data: "maxPeople", title: "人數上限", width: "9%", className: "dt-body-center" },

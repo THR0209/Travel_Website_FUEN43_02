@@ -75,6 +75,10 @@
                 <article class="product-card">
                     <div class="product-thumb">
                         <img src="@p.CoverImageUrl" alt="@p.Name" />
+                        <button type="button" class="fav-float"
+                                data-product-id="@p.ProductID" aria-pressed="false" title="加入收藏">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
                     </div>
                     <div class="product-body">
                         <div class="title">@p.Name</div>
@@ -92,6 +96,13 @@
                             <a asp-area="CustomersArea" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductID"
                                class="btn btn-sm btn-outline-secondary">查看詳情</a>
                             <button type="button" class="btn btn-sm btn-primary add-to-cart-btn" data-product-id="@p.ProductID">加入購物車</button>
+                            <!-- ❤️ 收藏 -->
+                            <button type="button" class="fav-btn btn-sm"
+                                    data-product-id="@p.ProductID" aria-pressed="false" title="加入收藏">
+                                <i class="fa-solid fa-heart"></i>
+                                <span class="d-none d-sm-inline">收藏</span>
+                                <span class="fav-count d-none d-md-inline"></span>
+                            </button>
                         </div>
                     </div>
                 </article>

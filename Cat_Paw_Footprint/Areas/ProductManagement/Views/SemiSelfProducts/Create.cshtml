@@ -56,11 +56,22 @@
                     <span asp-validation-for="EndTime" class="text-danger"></span>
                 </div>
 
-                <div class="form-group mb-3">
+                @* <div class="form-group mb-3">
                     <label asp-for="MaxPeople" class="control-label mb-1">人數上限：</label>
                     <input asp-for="MaxPeople" class="form-control" />
                     <span asp-validation-for="MaxPeople" class="text-danger"></span>
+                </div> *@
+
+                <!-- 關鍵字 -->
+                <div class="form-group mb-3">
+                    <label class="control-label">選擇關鍵字</label>
+                    <select id="keywordSelect" class="form-select" asp-items="ViewBag.KeywordID">
+                        <option value="">請選擇</option>
+                    </select>
+                    <ul id="selectedKeywords" class="mt-2"></ul>
+                    <div id="keywordHiddenInputs"></div>
                 </div>
+
             </div>
         </div>
 
@@ -124,5 +135,32 @@
             }
         }
         document.getElementById('UploadImage').addEventListener('change', function(){ previewImage(this); });
+    </script>
+
+    <script>
+        
+        // 關鍵字選擇(多選)
+        let selected = [];
+        $("#keywordSelect").change(function () {
+            let val = $(this).val();
+            let text = $("#keywordSelect option:selected").text();
+            if (val && !selected.includes(val)) {
+                selected.push(val);
+                $("#selectedKeywords").append(
+                    `<span class="badge bg-primary me-2 p-2 d-inline-flex align-items-center" data-id="${val}">
+                        ${text}
+                        <button type="button" class="btn-close btn-close-white ms-2 remove-keyword" data-id="${val}" style="font-size:0.6rem;"></button>
+                    </span>`
+                );
+                $("#keywordHiddenInputs").append(`<input type="hidden" name="KeywordID" value="${val}" id="hidden-${val}" />`);
+            }
+        });
+        $(document).on("click", ".remove-keyword", function () {
+            let id = $(this).data("id").toString();
+            selected = selected.filter(x => x !== id);
+            $(this).closest("span").remove();
+            $(`#hidden-${id}`).remove();
+        });
+
     </script>
 }

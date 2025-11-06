@@ -121,7 +121,7 @@
             </button>
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav ms-auto mb-2 me-5 mb-lg-0 justify-content-between">
-                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#hotProducts"><span class="link-text">跟團行程</span></a></li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#hotProducts" id="navTripLink"><span class="link-text">跟團行程</span></a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-tickets"><span class="link-text">景點門票</span></a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-hotels"><span class="link-text">住宿</span></a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-transports"><span class="link-text">交通</span></a></li>
@@ -235,6 +235,11 @@
                                         <li>
                                             <a class="dropdown-item" asp-area="CustomersArea" asp-controller="Coupons" asp-action="Index">
                                                 <i class="fa-solid fa-ticket me-2"></i> 我的優惠券
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="CustomersArea" asp-controller="Favorites" asp-action="List">
+                                                <i class="fa-solid fa-heart me-2"></i> 我的收藏
                                             </a>
                                         </li>
                                         <li>
@@ -394,6 +399,57 @@
                 .catch(error => console.error('Error fetching cart count:', error));
         });
     </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tripLink = document.getElementById("navTripLink");
+            if (!tripLink) return;
+
+            tripLink.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                // 如果不在首頁 → 直接跳 Browse
+                if (!window.isHomePage) {
+                    window.location.href = "/CustomersArea/Products/Browse?type=trip";
+                }
+                // 如果現在在首頁 → 手動觸發首頁搜尋 Tab = trip
+                else {
+                    // ✅ 若首頁搜尋列已載入，切換成「套裝行程」Tab
+                    document.querySelector('.search-tab[data-type="trip"]')?.click();
+
+                    // ✅ 平滑滾動到搜尋欄
+                    const wrapper = document.querySelector(".search-wrapper");
+                    if (wrapper) {
+                        window.scrollTo({
+                            top: wrapper.offsetTop - 80,
+                            behavior: "smooth"
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        const favToast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true
+        });
+
+        function showFavResult(isFav, count){
+          favToast.fire({
+            icon: isFav ? 'success' : 'info',
+            title: isFav ? '已加入收藏' : '已取消收藏',
+            html: (typeof count === 'number')
+              ? `<span style="font-size:.9rem;">目前此商品被收藏 <b>${count}</b> 次</span>`
+              : ''
+          });
+        }
+    </script>
+
 
     @RenderSection("Scripts", required: false)
 </body>

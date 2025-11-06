@@ -46,6 +46,7 @@ https://templatemo.com/tm-580-woox-travel
 33. Auth Pages（登入 / 註冊 / 忘記密碼 共用樣式）
 34. 購物車整體卡片化 + 優惠券卡片整合 + RWD 優化
 35. 聯絡我們樣式整合
+36. 加入收藏的按鈕樣式
 ======================================================= */
 
 
@@ -3602,4 +3603,74 @@ input, select, textarea {
         font-size: 0.9rem;
         white-space: nowrap;
     }
+}
+
+
+/*=======================================================
+📗 36. 加入收藏專屬樣式（Favorites）
+======================================================= */
+
+/* 🐾 收藏愛心按鈕：主題風格 */
+.fav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border: 1px solid #cfeff2;
+    background: #fff;
+    color: #22B3C1;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 999px;
+    transition: all .2s ease;
+    box-shadow: 0 4px 12px rgba(34,179,193,0.08);
+}
+
+    .fav-btn:hover {
+        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(34,179,193,0.22);
+    }
+
+    /* 已收藏狀態 */
+    .fav-btn.is-fav {
+        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        color: #fff;
+        border-color: transparent;
+    }
+
+/* 卡片右上角圓形收藏鈕（可覆蓋用在圖片上角） */
+.fav-float {
+    position: absolute;
+    right: .5rem;
+    top: .5rem;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,.95);
+    color: #22B3C1;
+    border: 1px solid #d8f2f6;
+    transition: all .2s;
+    z-index: 5;
+}
+
+    .fav-float:hover, .fav-float.is-fav {
+        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        color: #fff;
+        border-color: transparent;
+    }
+
+/* 小數字徽章（收藏數量，可選） */
+.fav-count {
+    font-size: .85rem;
+    color: #6b7d90;
+}
+
+.fav-btn.is-fav .fav-count {
+    color: #fff;
+    opacity: .85;
 }

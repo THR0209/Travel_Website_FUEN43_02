@@ -79,93 +79,114 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 			return View(model);
 		}
 
-		// =========================
-		// Create
-		// =========================
+		// GET: ProductManagement/SemiSelfProducts/Create
 		public IActionResult Create()
 		{
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName");
+			ViewData["KeywordID"] = new SelectList(_context.Keywords.OrderBy(k => k.KeywordID), "KeywordID", "Keyword");
 			return View();
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(SemiSelfProducts model, IFormFile? UploadImage)
+		public async Task<IActionResult> Create(SemiSelfProducts model, IFormFile? UploadImage, List<int>? KeywordID)
 		{
 			if (!ModelState.IsValid)
 			{
 				ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", model.RegionID);
+				ViewData["KeywordID"] = new SelectList(_context.Keywords, "KeywordID", "Keyword");
 				return View(model);
 			}
 
-			// 封面照上傳（與 Products 同邏輯：以 URL 儲存）
 			if (UploadImage != null && UploadImage.Length > 0)
-			{
-				// 如果專案尚未加入 ImgBBHelper，請改為你的上傳實作或先移除此段
 				model.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(UploadImage);
-			}
 
+			model.ProductCode = await GenerateProductCodeAsync();
 			model.CreateTime = DateTime.Now;
 			model.UpdateTime = DateTime.Now;
 
 			_context.Add(model);
 			await _context.SaveChangesAsync();
 
+			// 🔹關鍵字關聯寫入 Semi_Keywords
+			if (KeywordID != null && KeywordID.Any())
+			{
+				foreach (var kid in KeywordID)
+				{
+					_context.Semi_Keywords.Add(new Semi_Keywords
+					{
+						ProductID = model.ProductID,
+						KeywordID = kid
+					});
+				}
+				await _context.SaveChangesAsync();
+			}
+
 			TempData["SuccessMessage"] = "新增成功！";
 			return RedirectToAction(nameof(Index));
 		}
 
-		// =========================
-		// Edit
-		// =========================
+
+		// GET: ProductManagement/SemiSelfProducts/Edit/5
 		public async Task<IActionResult> Edit(int? id)
 		{
 			if (id == null) return NotFound();
 
-			var entity = await _context.SemiSelfProducts.FindAsync(id);
+			var entity = await _context.SemiSelfProducts
+				//.Include(p => p.SemiKeywords)
+				//.ThenInclude(sk => sk.Keyword)
+				.FirstOrDefaultAsync(p => p.ProductID == id);
 			if (entity == null) return NotFound();
 
 			ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", entity.RegionID);
+			//ViewData["KeywordID"] = new SelectList(_context.Keywords, "KeywordID", "Keyword");
+
+			//ViewBag.SelectedKeywordIDs = entity.SemiKeywords.Select(sk => sk.KeywordID).ToList();
+			//ViewBag.SelectedKeywordNames = entity.SemiKeywords.Select(sk => sk.Keyword.Keyword).ToList();
+
 			return View(entity);
 		}
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(int id, SemiSelfProducts model, IFormFile? UploadImage)
+		public async Task<IActionResult> Edit(int id, SemiSelfProducts model, IFormFile? UploadImage, List<int>? KeywordID)
 		{
 			if (id != model.ProductID) return NotFound();
 
-			if (!ModelState.IsValid)
-			{
-				ViewData["RegionID"] = new SelectList(_context.Regions, "RegionID", "RegionName", model.RegionID);
-				return View(model);
-			}
-
-			var entity = await _context.SemiSelfProducts.FirstOrDefaultAsync(x => x.ProductID == id);
+			var entity = await _context.SemiSelfProducts
+				.Include(p => p.SemiKeywords)
+				.FirstOrDefaultAsync(p => p.ProductID == id);
 			if (entity == null) return NotFound();
 
-			// 更新允許編輯的欄位
+			if (UploadImage != null && UploadImage.Length > 0)
+				entity.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(UploadImage);
+
 			entity.ProductName = model.ProductName;
 			entity.RegionID = model.RegionID;
 			entity.ProductDesc = model.ProductDesc;
 			entity.ProductPrice = model.ProductPrice;
-			entity.ProductType = model.ProductType;
 			entity.StartDate = model.StartDate;
 			entity.EndTime = model.EndTime;
 			entity.IsActive = model.IsActive;
-			entity.Views = model.Views;
-			entity.Notes = model.Notes;
 			entity.MaxPeople = model.MaxPeople;
-			entity.ProductCode = model.ProductCode;  // 若由觸發器產生可忽略
+			entity.Notes = model.Notes;
 			entity.UpdateTime = DateTime.Now;
 
-			if (UploadImage != null && UploadImage.Length > 0)
-			{
-				entity.ProductImageUrl = await ImgBBHelper.UploadSingleImageAsync(UploadImage);
-			}
+			// 🔹重建關鍵字關聯
+			//_context.Semi_Keywords.RemoveRange(entity.SemiKeywords);
+			//if (KeywordID != null && KeywordID.Any())
+			//{
+			//	foreach (var kid in KeywordID)
+			//	{
+			//		_context.Semi_Keywords.Add(new Semi_Keywords
+			//		{
+			//			ProductID = entity.ProductID,
+			//			KeywordID = kid
+			//		});
+			//	}
+			//}
 
 			await _context.SaveChangesAsync();
-
 			TempData["SuccessMessage"] = "修改成功！";
 			return RedirectToAction(nameof(Index));
 		}
@@ -217,6 +238,30 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 		private bool SemiSelfProductsExists(int id)
 		{
 			return _context.SemiSelfProducts.Any(e => e.ProductID == id);
+		}
+
+		private async Task<string> GenerateProductCodeAsync()
+		{
+			var now = await GetDatabaseNowAsync(); // ← 用資料庫時間
+			var today = now.Date;
+
+			// 計算今天已有幾筆
+			var dailyCount = await _context.Products
+				.CountAsync(p => EF.Functions.DateDiffDay(p.CreateTime, today) == 0);
+
+			var serial = (dailyCount + 1).ToString("D4"); // 四位數補 0
+			return $"SSP{now:yyMMdd}{serial}";
+		}
+
+		private async Task<DateTime> GetDatabaseNowAsync()
+		{
+			// 直接從 DB 取 GETDATE()
+			var conn = _context.Database.GetDbConnection();
+			await conn.OpenAsync();
+			using var cmd = conn.CreateCommand();
+			cmd.CommandText = "SELECT GETDATE()";
+			var result = await cmd.ExecuteScalarAsync();
+			return Convert.ToDateTime(result);
 		}
 	}
 }
