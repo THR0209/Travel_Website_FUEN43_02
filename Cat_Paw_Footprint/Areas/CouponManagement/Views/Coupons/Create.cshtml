@@ -10,6 +10,9 @@
             <div class="card shadow-sm rounded-3">
                 <div class="card-header bg-primary text-white fw-bold">
                     <i class="fa-solid fa-ticket me-2"></i> 新增優惠券
+                    <button type="button" class="btn btn-outline-success" id="btnFillExample" title="一鍵填入範例">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
                 </div>
                 <div class="card-body">
                     <form asp-action="Create">
@@ -136,4 +139,36 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.getElementById("btnFillExample").addEventListener("click", function () {
+            document.getElementById("CouponName").value = "聖誕節優惠";
+            document.getElementById("DiscountCode").value = "Chrismas2025";
+            document.getElementById("CouponDesc").value = "聖誕節優惠活動，滿千折百。";
+
+            // 折扣方式 → 固定金額折扣
+            document.getElementById("DiscountType").value = "2";
+
+            document.getElementById("DiscountValue").value = "100";
+            document.getElementById("MinimumAmount").value = "1000";
+
+            // 折扣上限留空
+            document.getElementById("MaximumDiscount").value = "";
+
+            // 可選：清空日期
+            document.getElementById("StartDate").value = "2025-12-25";
+            document.getElementById("EndDate").value = "2025-12-31";
+
+            // TargetType & 自動發放時機 不強制設定
+            // document.getElementById("TargetType").value = "All";
+            // document.getElementById("AutoGrantType").value = "";
+
+            // 預設可用天數留空
+            document.getElementById("ValidDays").value = "";
+
+            // 啟用
+            document.getElementById("IsActive").checked = true;
+        });
+    </script>
+
 }
