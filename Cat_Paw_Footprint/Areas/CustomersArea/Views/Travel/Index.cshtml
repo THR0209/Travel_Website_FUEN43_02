@@ -389,8 +389,8 @@
                             </div>
                         </div>
 
-                        <!-- 🆕 即時篩選清單 -->
-                        <ul class="list-group" v-if="filteredRoutes.length > 0">
+                        <!-- 🆕 即時篩選清單（只在 showBusList 為 true 時顯示） -->
+                        <ul class="list-group" v-if="showBusList && filteredRoutes.length > 0">
                             <li v-for="route in filteredRoutes"
                                 :key="route.RouteUID"
                                 class="list-group-item list-group-item-action text-start"
@@ -399,6 +399,7 @@
                                 <div class="small text-muted">{{ route.DepartureStopNameZh }} ⇔ {{ route.DestinationStopNameZh }}</div>
                             </li>
                         </ul>
+
 
                         <div v-else class="text-center text-muted py-3">
                             請輸入公車號碼或名稱開始搜尋
@@ -547,6 +548,8 @@
                     busDirection: 0,           // 去程/返程
                     autoUpdateTimer: null,     // 定時刷新 ETA
                     busTab: "eta",             // 當前子頁面
+                    showBusList: true,   // 🆕 控制是否顯示路線清單
+
 
                 }
             },
@@ -1292,24 +1295,71 @@
                 resetBusSearch() {
                     this.busKeyword = "";
                     this.filteredRoutes = this.busRoutes.slice(0, 30);
+                    this.selectedRoute = null;  // 🧩 清空選擇的公車
+                    this.busStops = [];         // 🧩 清空 ETA
+                    this.showBusList = true;    // 🧩 顯示清單回來
                 },
 
                 /* 🟢 點選路線後查詢 ETA */
                 async selectBusRoute(route) {
                     this.selectedRoute = route;
-                    const city = route.City || "Taipei";
+                    this.showBusList = false;  // 🆕 隱藏路線清單
+
+                    // 🧩 中英城市對照表
+                    const cityMap = {
+                        "台北市": "Taipei",
+                        "新北市": "NewTaipei",
+                        "桃園市": "Taoyuan",
+                        "基隆市": "Keelung",
+                        "新竹市": "Hsinchu",
+                        "新竹縣": "HsinchuCounty",
+                        "苗栗縣": "MiaoliCounty",
+                        "台中市": "Taichung",
+                        "彰化縣": "ChanghuaCounty",
+                        "南投縣": "NantouCounty",
+                        "雲林縣": "YunlinCounty",
+                        "嘉義市": "Chiayi",
+                        "嘉義縣": "ChiayiCounty",
+                        "台南市": "Tainan",
+                        "高雄市": "Kaohsiung",
+                        "屏東縣": "PingtungCounty",
+                        "宜蘭縣": "YilanCounty",
+                        "花蓮縣": "HualienCounty",
+                        "台東縣": "TaitungCounty",
+                        "澎湖縣": "PenghuCounty",
+                        "金門縣": "KinmenCounty",
+                        "連江縣": "LienchiangCounty"
+                    };
+
+                    // 🧩 確保 route.City 是英文代碼
+                    const cityZh = route.City || "台北市";
+                    const city = cityMap[cityZh] || cityZh;
                     const name = route.RouteName.Zh_tw;
+                    
                     try {
                         const res = await fetch(`/api/bus/eta?city=${city}&route=${encodeURIComponent(name)}`);
                         const json = await res.json();
-                        this.busStops = json.sort((a,b)=>a.StopSequence-b.StopSequence);
+
+                        // 🧩 防呆：檢查是否為陣列
+                        if (!Array.isArray(json)) {
+                            console.warn("🚫 ETA 回傳資料格式錯誤：", json);
+                            showAlert('warning', '目前查無即時資料', '請稍後再試');
+                            return;
+                        }
+
+                        // ✅ 只有在資料是陣列時才執行排序
+                        this.busStops = json.sort((a, b) => a.StopSequence - b.StopSequence);
                         this.busDirection = 0;
-                        showAlert('success',`已載入 ${this.busStops.length} 筆站牌資料`);
+
+                        showAlert('success', `已載入 ${this.busStops.length} 筆站牌資料`);
+
+                        // 🕒 每 60 秒自動更新
                         clearInterval(this.autoUpdateTimer);
-                        this.autoUpdateTimer = setInterval(() => this.selectBusRoute(route), 20000);
+                        this.autoUpdateTimer = setInterval(() => this.selectBusRoute(route), 60000);
+
                     } catch (err) {
                         console.error("❌ ETA 讀取錯誤", err);
-                        showAlert('error','無法取得即時資料');
+                        showAlert('error', '無法取得即時資料');
                     }
                 },
 
@@ -1363,6 +1413,7 @@
                 // 公車關鍵字變化時過濾
                 busKeyword(newVal) {
                   this.filterBusRoutes(); // 任何輸入變化都觸發過濾
+                  this.showBusList = true;  // 🆕 一輸入就回到清單模式
                 }
             },
 

@@ -44,11 +44,7 @@ namespace Cat_Paw_Footprint
 
 			//#region Services 註冊區
 			builder.Services.AddHttpClient();  // 讓 HttpClient 可以被注入使用
-			builder.Services.AddScoped<TdxService>(); // 註冊 TDX API 服務
-
-			// ✅ 🔍 測試是否能成功讀取 secrets
-			Console.WriteLine("✅ Google API Key: " + builder.Configuration["GoogleMaps:ApiKey"]);
-			Console.WriteLine("✅ PTX AppID: " + builder.Configuration["PTX:AppID"]);
+			builder.Services.AddScoped<TdxService>(); // 註冊 TDX API 服務			
 
 			// 1️⃣ 取得 Google Cloud SQL 連線字串
 			var credential = GoogleCredential.FromFile(@"C:\GoogleCloudSql\Keys\web-travel-ap.json");
