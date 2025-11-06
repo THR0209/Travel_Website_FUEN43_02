@@ -238,6 +238,42 @@
         .row-pending {
             background-color: #fff4f4 !important;
         }
+        /* ===================== 🐾 圖片載入中效果 ===================== */
+        .chat-image-wrapper {
+            position: relative;
+            min-height: 100px; /* 預留空間避免跳動 */
+        }
+
+        .image-loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #7ec8e3;
+            font-size: 1.8rem;
+            opacity: 0.85;
+            animation: pulsePaw 1.3s infinite;
+        }
+
+        @@keyframes pulsePaw {
+            0%
+
+        {
+            opacity: 0.5;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        50% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        100% {
+            opacity: 0.5;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        }
     </style>
 }
 
@@ -718,7 +754,7 @@
 
             const contentHtml = msg.messageContent ? `<div>${escapeHtml(msg.messageContent)}</div>` : '';
             let attachHtml = '';
-
+            // ==================== 附件處理 ====================
             if (msg.attachmentURL) {
                 let urls = [];
 
@@ -733,16 +769,24 @@
                 const pdfUrls = urls.filter(u => /\.pdf$/i.test(u));
                 const otherUrls = urls.filter(u => !/\.(png|jpe?g|gif|webp|pdf)$/i.test(u));
 
-                // ✅ 兩張圖片一排
+                // 圖片載入中效果
                 if (imageUrls.length > 0) {
                     attachHtml += `<div class="chat-image-group">`;
                     for (const u of imageUrls) {
-                        attachHtml += `<img src="${u}" class="chat-image" alt="img">`;
+                        attachHtml += `
+                            <div class="chat-image-wrapper position-relative">
+                                <div class="image-loading-spinner">
+                                    <i class="fa-solid fa-paw fa-bounce text-info"></i>
+                                </div>
+                                <img src="${u}" class="chat-image d-none" alt="img"
+                                    onload="this.classList.remove('d-none'); this.previousElementSibling.remove();"
+                                    onerror="this.previousElementSibling.remove(); this.classList.remove('d-none');">
+                            </div>`;
                     }
                     attachHtml += `</div>`;
                 }
              }
-
+           // ==================== 組合 HTML ====================
             const html = `
             <div class="chat-message-row ${alignClass}" data-tempid="${msg.tempId || ''}">
                 <div class="chat-meta mb-1">${badge}${displayName}${time}${pending}${failed}</div>
@@ -750,6 +794,7 @@
             </div>`;
             $('#chatBox').append(html);
 
+            // ==================== 點擊預覽 ====================
             $('.chat-image').off('click').on('click', function () {
             const url = $(this).attr('src');
             imageList = $('#chatBox img.chat-image').map((_, el) => $(el).attr('src')).get();
