@@ -41,35 +41,42 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                 return Json(new { message = "無法解析會員識別碼。" });
             }
 
-
-          
-            // 先抓出會員的所有優惠券 ID
-            var couponIds = _context.CustomerCouponsRecords
+            // 2️⃣ 先抓出會員的所有優惠券 ID 與使用紀錄
+            var customerCoupons = _context.CustomerCouponsRecords
                 .Where(r => r.CustomerID == customerId)
-                .Select(r => new { r.CouponID, r.IsUsed })
+                .Select(r => new { r.CouponID, r.IsUsed, r.ExpireTime })
                 .ToList();
 
-            // 用 ID 去撈優惠券資料
-            var coupons = (from r in couponIds
-                           join c in _context.Coupons
-                           on r.CouponID equals c.CouponID
+            var now = DateTime.Now;
+
+            // 3️⃣ 撈出優惠券資料並組合資訊
+            var coupons = (from r in customerCoupons
+                           join c in _context.Coupons on r.CouponID equals c.CouponID
+                           where c.IsActive == true
                            select new
                            {
                                CouponID = c.CouponID,
-                               Desc = c.CouponDesc,
-                               DiscountValue = c.DiscountValue,
-                               DiscountType = c.DiscountType,
-                               StartDate = c.StartDate,
-                               EndDate = c.EndDate,
-                               IsUsed = r.IsUsed,
-                               IsExpired = c.EndDate < DateTime.Now,
                                CouponName = c.CouponName,
+                               Desc = c.CouponDesc,
+                               DiscountType = c.DiscountType,
+                               DiscountValue = c.DiscountValue,
                                MinimumAmount = c.MinimumAmount,
-                               
+                               StartDate = c.StartDate,
+                               EndDate = r.ExpireTime, // ✅ 改成會員個別有效期限
+                               IsUsed = r.IsUsed,
+                               IsExpired = r.ExpireTime < now, // ✅ 改成依據個人 ExpireTime 判斷
+                               Rule = c.MinimumAmount != null
+                                   ? (c.DiscountType == 1
+                                       ? $"訂購金額須滿 TWD {c.MinimumAmount:N0} 打 {(c.DiscountValue * 10):0.##} 折"
+                                           + (c.MaximumDiscount != null ? $"，最高折抵 {c.MaximumDiscount:N0} 元" : "")
+                                       : $"訂購金額須滿 TWD {c.MinimumAmount:N0} 折 {c.DiscountValue:N0} 元")
+                                   : (c.DiscountType == 1
+                                       ? $"打 {(c.DiscountValue * 10):0.##} 折"
+                                           + (c.MaximumDiscount != null ? $"，最高折抵 {c.MaximumDiscount:N0} 元" : "")
+                                       : $"折 {c.DiscountValue:N0} 元")
                            }).ToList();
 
-
-            // 3️⃣ 分類回傳（避免 null 問題）
+            // 4️⃣ 分類回傳
             var usable = coupons.Where(c => !(bool)c.IsUsed && !c.IsExpired).ToList();
             var used = coupons.Where(c => (bool)c.IsUsed).ToList();
             var expired = coupons.Where(c => !(bool)c.IsUsed && c.IsExpired).ToList();

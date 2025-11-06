@@ -77,6 +77,20 @@
                             </select>
                             <span asp-validation-for="TargetType" class="text-danger"></span>
                         </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="AutoGrantType">自動發放時機</label>
+                            <select asp-for="AutoGrantType" class="form-select">
+                                <option value="">(不自動發放)</option>
+                                <option value="Register">新會員註冊</option>
+                                <option value="LevelUp">會員升級</option>
+                                <option value="Birthday">會員生日</option>
+                                <option value="Festival">節慶活動</option>
+                            </select>
+                            <small class="form-text text-muted">
+                                若不設定，系統不會自動發放此優惠券。
+                            </small>
+                        </div>
+                        
 
                         <div class="form-group mb-3">
                             <label asp-for="ValidDays" class="form-label"></label>

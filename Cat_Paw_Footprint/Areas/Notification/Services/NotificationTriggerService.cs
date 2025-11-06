@@ -72,65 +72,71 @@ namespace Cat_Paw_Footprint.Services
 			await SendAsync(customerId, "每日簽到提醒", "別忘了每日簽到領取爪爪幣！", "系統提醒");
 		}
 
-		// 🔹 優惠券即將到期
-		public async Task NotifyCouponExpiringAsync(int daysBefore = 3)
-		{
-			var now = DateTime.Now;
-			var soon = now.AddDays(daysBefore);
+        // 🔹 優惠券即將到期
+        public async Task NotifyCouponExpiringAsync(int daysBefore = 3)
+        {
+            var now = DateTime.Now;
+            var soon = now.AddDays(daysBefore);
 
-			var expiring = await _db.CustomerCouponsRecords
-				.Include(r => r.Coupon)
-				.Where(r => r.Coupon != null &&
-							r.Coupon.EndDate != null &&
-							r.Coupon.EndDate < soon &&
-							(r.IsUsed == false || r.IsUsed == null))
-				.ToListAsync();
+            var expiring = await _db.CustomerCouponsRecords
+			 .Include(r => r.Coupon)
+			 .Where(r => r.ExpireTime != null &&r.ExpireTime < soon &&
+             (r.IsUsed == false || r.IsUsed == null))
+			 .ToListAsync();
 
-			foreach (var r in expiring)
-			{
-				if (r.CustomerID > 0)
-				{
-					await SendAsync(
-						r.CustomerID,
-						"優惠券即將到期",
-						$"您的優惠券「{r.Coupon.CouponDesc}」將於 {r.Coupon.EndDate:MM/dd} 到期。",
-						"優惠活動"
-					);
-				}
-			}
-		}
+            foreach (var r in expiring)
+            {
+                if (r.CustomerID <= 0) continue;
+
+                await SendAsync(
+                    r.CustomerID,
+                    "優惠券即將到期",
+                    $"您的優惠券「{r.Coupon.CouponName}」將於 {r.ExpireTime:MM/dd} 到期，別忘了使用喔！",
+                    "優惠活動"
+                );
+            }
+        }
+
         public async Task NotifyCouponIssuedAsync(int customerId, int couponId)
         {
             var coupon = await _db.Coupons.FindAsync(couponId);
             var customer = await _db.Customers.FindAsync(customerId);
+			DateTime expireTime;
             if (coupon == null || customer == null) return;
+			if(coupon.ValidDays != null && coupon.ValidDays > 0)
+			{
+				expireTime = DateTime.Now.AddDays(coupon.ValidDays.Value);
+			}
+			else
+			{
+				expireTime = coupon.EndDate;
+            }
 
-            string title = "您獲得了一張新的優惠券！";
-            string message = $"優惠券「{coupon.CouponName}」已發放至您的帳戶，可使用至 {coupon.EndDate:yyyy/MM/dd}";
+			string title = "您獲得了一張新的優惠券！";
+            string message = $"優惠券「{coupon.CouponName}」已發放至您的帳戶，可使用至 {expireTime:yyyy/MM/dd}";
             await SendCustomAsync(customerId, title, message, "優惠活動");
 
 
-            // ✅ 寄出 Email 通知
-            string htmlMessage = $@"
+			//         // ✅ 寄出 Email 通知
+			string htmlMessage = $@"
 			<h2>{title}</h2>
 			<p>{message}</p>
 			<p style='color:gray;font-size:12px;'>此信件由系統自動發送，請勿直接回覆。</p>";
 
-            var customerEmail = await _db.CustomerProfile
+			var customerEmail = await _db.CustomerProfile
 			.Where(p => p.CustomerID == customerId)
 			.Select(p => p.Email)
 			.FirstOrDefaultAsync();
 
-            if (!string.IsNullOrWhiteSpace(customerEmail))
-            {
-                await _emailSender.SendEmailAsync(customerEmail, "貓爪足跡｜新的優惠券通知", htmlMessage);
-            }
-            else
-            {
-                Console.WriteLine($"找不到客戶 {customerId} 的 Email，跳過寄信。");
-            }
-        }
-
+			if (!string.IsNullOrWhiteSpace(customerEmail))
+			{
+				await _emailSender.SendEmailAsync(customerEmail, "貓爪足跡｜新的優惠券通知", htmlMessage);
+			}
+			else
+			{
+				Console.WriteLine($"找不到客戶 {customerId} 的 Email，跳過寄信。");
+			}
+		}
 
 
         // 🆕 🔹 客服工單完成通知

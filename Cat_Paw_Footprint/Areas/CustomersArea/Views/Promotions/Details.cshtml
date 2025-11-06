@@ -15,12 +15,12 @@
                     <i class="fa-regular fa-calendar me-1"></i>
                     {{ formatDate(promotion.startTime) }} ~ {{ formatDate(promotion.endTime) }}
                 </p>
-                <p class="mb-3">{{ promotion.promoDesc }}</p>
+                <p class="mb-3 badge bg-warning text-dark">{{ promotion.promoDesc }}</p>
 
-                <div class="d-flex align-items-center gap-2 mt-3">
+                @* <div class="d-flex align-items-center gap-2 mt-3">
                     <span class="badge bg-info text-dark">折扣類型：{{ discountTypeText(promotion.discountType) }}</span>
                     <span class="badge bg-warning text-dark">折扣值：{{ promotion.discountValue }}</span>
-                </div>
+                </div> *@
 
                 <div class="mt-4">
                     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">

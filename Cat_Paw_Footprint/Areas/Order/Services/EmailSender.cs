@@ -15,20 +15,77 @@ namespace Cat_Paw_Footprint.Areas.Order.Services
 
         public async Task SendAsync(string to, string subject, string htmlBody)
         {
-            var msg = new MimeMessage();
-            msg.From.Add(new MailboxAddress(_opt.DisplayName, _opt.From));
-            msg.To.Add(MailboxAddress.Parse(to));
-            msg.Subject = subject;
-            msg.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+            //var msg = new MimeMessage();
+            //msg.From.Add(new MailboxAddress(_opt.DisplayName, _opt.From));
+            //msg.To.Add(MailboxAddress.Parse(to));
+            //msg.Subject = subject;
+            //msg.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(_opt.Host, _opt.Port,
-                _opt.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
-            if (!string.IsNullOrWhiteSpace(_opt.User))
-                await client.AuthenticateAsync(_opt.User, _opt.Pass);
+            //using var client = new SmtpClient();
+            //await client.ConnectAsync(_opt.Host, _opt.Port,
+            //    _opt.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+            //if (!string.IsNullOrWhiteSpace(_opt.User))
+            //    await client.AuthenticateAsync(_opt.User, _opt.Pass);
 
-            await client.SendAsync(msg);
-            await client.DisconnectAsync(true);
+            //await client.SendAsync(msg);
+            //await client.DisconnectAsync(true);
+            // 嘗試使用 Primary
+            try
+            {
+                _opt.UsePrimary(); // 從設定套用 Primary 資料
+
+                var msg = new MimeMessage();
+                msg.From.Add(new MailboxAddress(_opt.DisplayName, _opt.From));
+                msg.To.Add(MailboxAddress.Parse(to));
+                msg.Subject = subject;
+                msg.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+
+                using var client = new SmtpClient();
+                await client.ConnectAsync(_opt.Host, _opt.Port,
+                    _opt.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+
+                if (!string.IsNullOrWhiteSpace(_opt.User))
+                    await client.AuthenticateAsync(_opt.User, _opt.Pass);
+
+                await client.SendAsync(msg);
+                await client.DisconnectAsync(true);
+
+                Console.WriteLine($"✅ 郵件寄出成功（主帳號：{_opt.User}）");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ 主帳號寄信失敗：{ex.Message}");
+
+                // 改用 Secondary 再試一次
+                try
+                {
+                    _opt.UseSecondary();
+
+                    var msg = new MimeMessage();
+                    msg.From.Add(new MailboxAddress(_opt.DisplayName, _opt.From));
+                    msg.To.Add(MailboxAddress.Parse(to));
+                    msg.Subject = subject;
+                    msg.Body = new BodyBuilder { HtmlBody = htmlBody }.ToMessageBody();
+
+                    using var client = new SmtpClient();
+                    await client.ConnectAsync(_opt.Host, _opt.Port,
+                        _opt.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+
+                    if (!string.IsNullOrWhiteSpace(_opt.User))
+                        await client.AuthenticateAsync(_opt.User, _opt.Pass);
+
+                    await client.SendAsync(msg);
+                    await client.DisconnectAsync(true);
+
+                    Console.WriteLine($"✅ 郵件寄出成功（備援帳號：{_opt.User}）");
+                }
+                catch (Exception ex2)
+                {
+                    Console.WriteLine($"❌ 備援帳號也寄信失敗：{ex2.Message}");
+                    throw new Exception("所有 SMTP 帳號皆無法寄信。");
+                }
+            }
+
         }
         
         public static (string Subject, string Html) BuildForOrder(CustomerOrders o)
@@ -46,7 +103,7 @@ namespace Cat_Paw_Footprint.Areas.Order.Services
             // 共用頁首 / 頁尾
             string Header(string title) => $@"{title}親愛的 {customer} 您好：";
 
-        const string Footer = "如有任何問題，歡迎回信與我們聯繫。貓爪足跡 敬上";
+            const string Footer = "如有任何問題，歡迎回信與我們聯繫。貓爪足跡 敬上";
 
             // 依狀態分流
             string subject;

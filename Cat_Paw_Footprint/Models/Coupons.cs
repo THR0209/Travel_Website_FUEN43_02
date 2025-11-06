@@ -45,5 +45,7 @@ public partial class Coupons
 
     public int? ValidDays { get; set; } // 有效天數（領取後）
 
+    public string? AutoGrantType { get; set; }
+
     public virtual ICollection<CouponPics> CouponPics { get; set; } = new List<CouponPics>();
 }
