@@ -61,6 +61,13 @@
 
                 </div>                
 
+                <!-- API專區 -->
+                <div>
+                    <!-- 公車查詢 -->
+                    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#busModal">
+                        🚍 公車查詢
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -322,6 +329,74 @@
         </div>
     </div>
 
+    <!-- 公車查詢 Modal -->
+    <!-- 公車查詢 Modal -->
+    <div class="modal fade" id="busModal" tabindex="-1" aria-labelledby="busModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="busModalLabel">🚍 公車即時查詢</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 查詢欄 -->
+                    <div class="input-group mb-3">
+                        <input v-model="busRoute" class="form-control" placeholder="輸入公車號碼 (例：307)" />
+                        <select v-model="busCity" class="form-select w-25">
+                            <option value="Taipei">台北市</option>
+                            <option value="NewTaipei">新北市</option>
+                            <option value="Taichung">台中市</option>
+                            <option value="Tainan">台南市</option>
+                            <option value="Kaohsiung">高雄市</option>
+                        </select>
+                        <button class="btn btn-primary" v-on:click="fetchBusETA">查詢</button>
+                    </div>
+
+                    <!-- 去返程切換 -->
+                    <div v-if="busStops.length > 0" class="text-center mb-3">
+                        <div class="btn-group">
+                            <button class="btn"
+                                    :class="direction === 0 ? 'btn-success' : 'btn-outline-success'"
+                                    v-on:click="direction = 0">
+                                🚏 去程
+                            </button>
+                            <button class="btn"
+                                    :class="direction === 1 ? 'btn-success' : 'btn-outline-success'"
+                                    v-on:click="direction = 1">
+                                🔙 返程
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 結果列表 -->
+                    <ul class="list-group">
+                        <li v-for="stop in filteredStops"
+                            :key="stop.StopUID + '-' + stop.Direction"
+                            class="list-group-item d-flex justify-content-between align-items-center">
+
+                            <!-- 站名 -->
+                            <div>
+                                <strong>{{ stop.StopName.Zh_tw }}</strong>
+                                <span class="text-muted small ms-1">({{ stop.StopID }})</span>
+                            </div>
+
+                            <!-- ETA 狀態 -->
+                            <span class="badge px-3 py-2 fs-6"
+                                  :class="getEtaClass(stop)">
+                                {{ formatETA(stop) }}
+                            </span>
+                        </li>
+                    </ul>
+
+                    <div v-if="filteredStops.length === 0" class="text-center text-muted py-3">
+                        無資料，請確認路線與城市是否正確
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
 @section Scripts {
@@ -402,7 +477,15 @@
                     sortActive: false,   // ⭐ 是否啟用評分排序
                     viewActive: false,   // 👁️ 是否啟用瀏覽排序
                     sortDesc: true,      // ⭐ 排序方向（true=高→低）
-                    viewDesc: true       // 👁️ 排序方向（true=高→低）
+                    viewDesc: true,       // 👁️ 排序方向（true=高→低）
+
+                    /* 公車查詢相關 */
+                    busCity: "Taipei",  // 預設城市
+                    busRoute: "",    // 公車路線號碼
+                    busStops: [],   // 公車站牌資料
+                    direction: 0, // 去程(0) / 返程(1)
+                    autoUpdateTimer: null, // 定時刷新計時器
+
 
                 }
             },
@@ -440,7 +523,13 @@
 
                         return matchKeyword && matchRegion && matchDistrict;
                     });
+                },
+
+                /* 公車去返程過濾 */
+                filteredStops() {
+                    return this.busStops.filter(s => s.Direction === this.direction);
                 }
+
             },
 
             /* 方法(事件處理) */
@@ -524,7 +613,6 @@
                         });
                     });
                 },
-
 
                 /* 取得資料 (Ajax 呼叫 Controller API) */
                 async fetchData() {
@@ -1098,6 +1186,70 @@
                     // 重新觸發 Vue 更新畫面（防止 index 顯示未更新）
                     this.tripList = [...this.tripList];
                 },
+
+                /*==============  API  ===================*/
+                /* 取得公車即時資訊（PTX API） */                
+                async fetchBusETA() {
+                  if (!this.busRoute || !this.busCity) {
+                    showAlert('warning', '請輸入公車號碼與城市');
+                    return;
+                  }
+
+                    try {
+                        const res = await fetch(`/api/bus/eta?city=${this.busCity}&route=${this.busRoute}`);
+                        const text = await res.text(); // 🟡 先用 text() 接收，不直接 json()
+
+                        if (!res.ok) {
+                        console.error("❌ 查詢失敗:", text);
+                        showAlert('error', '伺服器錯誤，請稍後再試');
+                        return;
+                        }
+
+                        // 🟢 嘗試轉成 JSON
+                        let data;
+                        try {
+                        data = JSON.parse(text);
+                        } catch (err) {
+                        console.warn("⚠️ 回傳不是 JSON：", text);
+                        showAlert('error', '回傳格式錯誤');
+                        return;
+                        }
+
+                        // ✅ 正常資料
+                        this.busStops = data.sort((a, b) => a.StopSequence - b.StopSequence);
+                        this.direction = 0; // 預設顯示去程
+                        showAlert('success', `已載入 ${this.busStops.length} 筆站牌資料`);
+
+                        // 🕒 自動更新 ETA（每 20 秒）
+                        clearInterval(this.autoUpdateTimer);
+                        this.autoUpdateTimer = setInterval(() => {
+                            this.fetchBusETA();
+                        }, 20000);
+
+                    } catch (err) {
+                        console.error("❌ 查詢錯誤:", err);
+                        showAlert('error', '無法取得公車資訊');
+                    }
+
+                },
+                getEtaClass(stop) {
+                    if (stop.EstimateTime == null) return "bg-secondary";
+                    if (stop.EstimateTime <= 60) return "bg-danger text-white"; // 即將進站
+                    if (stop.EstimateTime <= 180) return "bg-warning text-dark"; // 三分鐘內
+                    return "bg-info text-dark"; // 其他狀態
+                },
+
+                formatETA(stop) {
+                    if (stop.StopStatus === 1) return "尚未發車";
+                    if (stop.StopStatus === 2) return "交管不停靠";
+                    if (stop.StopStatus === 3) return "末班已過";
+                    if (stop.StopStatus === 4) return "今日未營運";
+                    if (stop.EstimateTime == null) return "尚未發車";
+                    const min = Math.round(stop.EstimateTime / 60);
+                    return min <= 0 ? "進站中" : `${min} 分`;
+                }
+
+
             },
 
             /* 監聽器 */
@@ -1144,7 +1296,16 @@
                 window.initMap = this.initMap;
                 if (typeof google !== "undefined") {
                     this.initMap();
-                }
+                };
+
+                // ✅ 公車 Modal 關閉時自動清除更新計時器
+                document.getElementById('busModal').addEventListener('hidden.bs.modal', () => {
+                    if (this.autoUpdateTimer) {
+                        clearInterval(this.autoUpdateTimer);
+                        this.autoUpdateTimer = null;
+                        console.log("🛑 已停止公車自動更新");
+                    }
+                });
             },
 
         });
