@@ -42,8 +42,11 @@ https://templatemo.com/tm-580-woox-travel
 29. 大型桌面 (≥1400px)
 30. 通知中心專屬樣式（Notifications）
 31. 登入頁面專屬樣式（Login Page）
-32.Register Page 置中樣式
+32. Register Page 置中樣式
 33. Auth Pages（登入 / 註冊 / 忘記密碼 共用樣式）
+34. 購物車整體卡片化 + 優惠券卡片整合 + RWD 優化
+35. 聯絡我們樣式整合
+36. 加入收藏的按鈕樣式
 ======================================================= */
 
 
@@ -93,7 +96,7 @@ header, nav, section, article, aside, footer, hgroup {
 ======================================================= */
 :root {
     --brand: #7ec8e3; /* 主品牌色 */
-    --brand-dark: #1893a0; /* 深色品牌色 */
+    --brand-dark: #24afbd; /* 深色品牌色 */
     --brand-50: #e6f7f9; /* 淺背景色 */
     --text: #1f2937; /* 主文字色 */
     --muted: #6b7280; /* 次要文字 */
@@ -117,15 +120,16 @@ a {
     text-decoration: none;
     transition: color .25s ease;
 }
-    a:hover {
-    color: var(--brand);
-}
 
-    h1, h2, h3, h4, h5, h6 {
-        margin: 0;
-        color: #2a2a2a;
-        font-weight: 700;
+    a:hover {
+        color: var(--brand);
     }
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    color: #2a2a2a;
+    font-weight: 700;
+}
 
 p {
     font-size: 15px;
@@ -212,9 +216,11 @@ img {
     border-radius: 999px;
     transition: all 0.25s ease;
 }
+
     .btn-outline-secondary:hover {
         box-shadow: 0 0 0.4rem rgba(102, 188, 217, 0.35);
     }
+
 .btn-outline-danger {
     color: #fff;
     background: linear-gradient(135deg, #ff6b6b, #ff8c8c);
@@ -240,6 +246,7 @@ img {
         color: #aa3a3a;
         cursor: not-allowed;
     }
+
 #markAllReadBtn {
     transition: all .2s ease;
 }
@@ -286,6 +293,7 @@ img {
     backdrop-filter: blur(12px) saturate(180%);
     transition: all .3s ease;
 }
+
     .site-header.scrolled {
         box-shadow: 0 4px 18px rgba(0,0,0,0.08);
     }
@@ -827,7 +835,7 @@ img {
     scroll-behavior: smooth;
     padding: 1rem 0.5rem;
 }
-/* =======================================================
+    /* =======================================================
 🔹 熱門常見問題滾輪（灰色 + 短條 + RWD 自動隱藏）
 ======================================================= */
     .faq-popular-carousel::-webkit-scrollbar {
@@ -1005,7 +1013,59 @@ img {
     max-width: 1200px;
     margin: 0 auto;
 }
+/* 🐾 浮動貓掌動畫 */
+.floating-paws {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
 
+    .floating-paws span {
+        position: absolute;
+        font-size: 1.6rem;
+        animation: floatPaw 12s linear infinite;
+    }
+
+        .floating-paws span:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-paws span:nth-child(2) {
+            left: 30%;
+            animation-delay: 3s;
+        }
+
+        .floating-paws span:nth-child(3) {
+            left: 60%;
+            animation-delay: 6s;
+        }
+
+        .floating-paws span:nth-child(4) {
+            left: 80%;
+            animation-delay: 9s;
+        }
+
+@keyframes floatPaw {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
 /* ====================== 卡片樣式 ====================== */
 /* 共用卡片樣式 (支援卡片與工單卡片) */
 .support-card, .ticket-card {
@@ -1491,6 +1551,7 @@ img {
     margin-top: .25rem;
     font-weight: 500;
 }
+
 @keyframes pawBeat {
     0%,100% {
         transform: scale(1);
@@ -1881,7 +1942,7 @@ img {
     position: absolute !important;
     top: 100% !important;
     right: 0 !important;
-    left: auto !important;
+    left: 0 !important;
     transform: translateY(8px) !important;
     width: 300px !important;
     max-width: 400px !important;
@@ -1925,6 +1986,9 @@ img {
         color: #7ec8e3;
     }
 
+.dropdown-item.active, .dropdown-item:active {
+    background-color: #24afbd;
+}
 /* =======================================================
 📘 20. 回到頂端按鈕 Back-to-top
 ======================================================= */
@@ -2067,18 +2131,19 @@ img {
     }
 }
 
-    .footer-bottom {
-        font-size: 0.8rem;
-    }
+.footer-bottom {
+    font-size: 0.8rem;
+}
 
-    .faq-hero {
-        border-radius: 0 0 40px 40px;
-    }
+.faq-hero {
+    border-radius: 0 0 40px 40px;
+}
 
-    .faq-search-box {
-        height: 55px;
-        font-size: 1rem;
-    }
+.faq-search-box {
+    height: 55px;
+    font-size: 1rem;
+}
+
 }
 
 /* =======================================================
@@ -2112,7 +2177,7 @@ html, body {
 
 /* =======================================================
 📗 25. 表單與輸入欄統一風格 
-======================================================= */ 
+======================================================= */
 input, select, textarea {
     border: 1px solid #d9e7ea;
     border-radius: 8px;
@@ -2131,7 +2196,7 @@ input, select, textarea {
 
 /* =======================================================
 📗 26. 動畫與過渡特效補強 
-======================================================= */ 
+======================================================= */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -2241,9 +2306,8 @@ input, select, textarea {
         position: absolute !important;
         top: 100% !important;
         right: 0 !important;
-        left: auto !important;
+        left: 0 !important;
         transform: translateY(6px) !important;
-        width: 90vw !important;
         max-width: 360px !important;
         border-radius: 16px !important;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
@@ -2270,7 +2334,7 @@ input, select, textarea {
         position: absolute !important;
         top: 100% !important;
         right: 0 !important;
-        left: auto !important;
+        left: 0 !important;
         transform: translateY(6px) !important;
         border-radius: 16px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
@@ -2317,6 +2381,7 @@ input, select, textarea {
     .hero-content {
         bottom: 10%;
     }
+
     .nav-item.dropdown,
     .dropdown.notification-dropdown {
         position: relative !important;
@@ -2589,6 +2654,78 @@ input, select, textarea {
         width: 100%;
         font-size: 14px;
     }
+    /* 主容器縮小內距，避免左右太擠 */
+    .notif-wrapper {
+        padding: 1.2rem 1rem;
+        border-radius: 18px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    /* 🔸 左側分類改為橫向滑動列 */
+    .notif-sidebar {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.6rem;
+        overflow-x: auto;
+        background: transparent;
+        box-shadow: none;
+        padding: 0.5rem 0.3rem;
+        border-radius: 0;
+        margin-bottom: 1rem;
+    }
+
+    /* 🔸 每個分類按鈕變為小卡片 */
+    .notif-category {
+        display: flex;
+        flex-direction: row;
+        gap: 0.6rem;
+        width: max-content;
+    }
+
+        .notif-category li {
+            flex: 0 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.25s ease;
+        }
+
+            .notif-category li.active {
+                background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+                box-shadow: 0 6px 12px rgba(34, 179, 193, 0.25);
+                color: #fff;
+            }
+
+    /* 🔸 通知內容縮小邊距 */
+    .notif-content {
+        padding: 1rem 1.2rem;
+        border-radius: 16px;
+        min-height: auto;
+    }
+
+    /* 🔸 卡片間距縮小 */
+    .notif-card {
+        padding: 1rem 1rem;
+        margin-bottom: 0.8rem;
+    }
+
+    /* 🔸 標題與時間字型略縮小 */
+    .notif-title {
+        font-size: 0.95rem;
+    }
+
+    .notif-message {
+        font-size: 0.9rem;
+    }
+
+    .notif-time {
+        font-size: 0.8rem;
+    }
 }
 
 /*=======================================================
@@ -2765,7 +2902,7 @@ input, select, textarea {
 }
 
 /* =======================================================
-🐾 購物車整體卡片化 + 優惠券卡片整合 + RWD 優化
+📗 34.購物車整體卡片化 + 優惠券卡片整合 + RWD 優化
 ======================================================= */
 
 /* 整體外框 */
@@ -2825,7 +2962,7 @@ input, select, textarea {
 }
 
 /* =======================================================
-🐾 優惠券選擇卡片（內嵌於購物車卡片中）
+📗 35.優惠券選擇卡片（內嵌於購物車卡片中）
 ======================================================= */
 #cartApp .coupon-card {
     background: #ffffff;
@@ -2919,9 +3056,7 @@ input, select, textarea {
         margin-left: auto;
     }
 
-/* =======================================================
-📱 RWD 手機響應式
-======================================================= */
+/* RWD */
 @media (max-width: 992px) {
     #cartApp .cart-card {
         padding: 1.5rem;
@@ -2997,4 +3132,545 @@ input, select, textarea {
         text-align: left !important;
         padding: 0.3rem 0.6rem;
     }
+}
+
+/* =======================================================
+📗 35. 聯絡我們樣式整合
+======================================================= */
+
+/* ✨ 小卡樣式 */
+.contact-card {
+    background: #ffffffee;
+    backdrop-filter: blur(8px);
+    max-width: 550px;
+    transition: transform .3s ease, box-shadow .3s ease;
+    animation: fadeInUp .6s ease;
+}
+
+    .contact-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 輸入樣式 */
+.form-control {
+    font-size: 0.9rem;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+
+    .form-control:focus {
+        border-color: #7ec8e3;
+        box-shadow: 0 0 0 .15rem rgba(126,200,227,0.3);
+    }
+
+/* 按鈕樣式 */
+.btn-send {
+    background: linear-gradient(90deg,#7ec8e3 0%,#22b3c1 100%);
+    color: white;
+    border: none;
+    transition: all .3s ease;
+    font-size: 0.9rem;
+}
+
+    .btn-send:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(34,179,193,0.25);
+    }
+
+/* =======================================================
+📘 個人資料修改頁面樣式（Profile Edit）
+======================================================= */
+.profile-edit-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    padding: 2rem 1rem;
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 520px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    padding: 2rem 2.2rem;
+    animation: fadeInUp .6s ease forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+    /* 🐾 背景貓掌裝飾 */
+    .profile-card::after {
+        content: "🐾";
+        position: absolute;
+        font-size: 6rem;
+        color: rgba(126, 200, 227, 0.08);
+        right: 8%;
+        bottom: 5%;
+        transform: rotate(-15deg);
+        pointer-events: none;
+    }
+
+    .profile-card h3 {
+        letter-spacing: 1px;
+        color: #2255aa;
+    }
+
+    /* 輸入框設計一致 */
+    .profile-card .form-control {
+        border-radius: 12px;
+        border: 1px solid #d9e7ea;
+        transition: all 0.25s ease;
+    }
+
+        .profile-card .form-control:focus {
+            border-color: #7ec8e3;
+            box-shadow: 0 0 0 0.15rem rgba(126,200,227,0.25);
+        }
+
+    .profile-card .btn-primary {
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+/* 手機版微調 */
+@media (max-width: 576px) {
+    .profile-card {
+        padding: 1.6rem 1.4rem;
+        border-radius: 18px;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+        .profile-card h3 {
+            font-size: 1.3rem;
+        }
+}
+
+/* =======================================================
+📘 重設密碼頁面樣式（Reset Password）
+======================================================= */
+.reset-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    padding: 2rem 1rem;
+}
+
+.reset-card {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    padding: 2rem 2.2rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+    /* 🐾 背景裝飾 */
+    .reset-card::after {
+        content: "🐾";
+        position: absolute;
+        font-size: 6rem;
+        color: rgba(126, 200, 227, 0.08);
+        right: 10%;
+        bottom: 8%;
+        transform: rotate(-10deg);
+        pointer-events: none;
+    }
+
+    .reset-card h3 {
+        letter-spacing: 1px;
+        color: #2255aa;
+    }
+
+    .reset-card .form-control {
+        border-radius: 12px;
+        border: 1px solid #d9e7ea;
+        transition: all 0.25s ease;
+    }
+
+        .reset-card .form-control:focus {
+            border-color: #7ec8e3;
+            box-shadow: 0 0 0 0.15rem rgba(126,200,227,0.25);
+        }
+
+    .reset-card .btn-primary {
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+/* 手機調整 */
+@media (max-width: 576px) {
+    .reset-card {
+        padding: 1.6rem 1.4rem;
+        border-radius: 18px;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+        .reset-card h3 {
+            font-size: 1.3rem;
+        }
+}
+
+/* =======================================================
+📘 修改密碼頁面樣式（Change Password）
+======================================================= */
+.pwd-edit-wrapper {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(180deg, #e8f6ff 0%, #fefefe 100%);
+    padding: 2rem 1rem;
+}
+
+.pwd-card {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+    padding: 2rem 2.2rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+    /* 🐾 背景裝飾 */
+    .pwd-card::after {
+        content: "🐾";
+        position: absolute;
+        font-size: 6rem;
+        color: rgba(126, 200, 227, 0.08);
+        right: 8%;
+        bottom: 6%;
+        transform: rotate(-10deg);
+        pointer-events: none;
+    }
+
+    .pwd-card h3 {
+        letter-spacing: 1px;
+        color: #2255aa;
+    }
+
+    .pwd-card .form-control {
+        border-radius: 12px;
+        border: 1px solid #d9e7ea;
+        transition: all 0.25s ease;
+    }
+
+        .pwd-card .form-control:focus {
+            border-color: #7ec8e3;
+            box-shadow: 0 0 0 0.15rem rgba(126,200,227,0.25);
+        }
+
+    .pwd-card .btn-primary {
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+/* 手機適配 */
+@media (max-width: 576px) {
+    .pwd-card {
+        padding: 1.6rem 1.4rem;
+        border-radius: 18px;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    }
+
+        .pwd-card h3 {
+            font-size: 1.3rem;
+        }
+}
+
+/* =======================================================
+🎟 我的優惠券樣式（Coupons）
+======================================================= */
+.coupon-wrapper {
+    background: linear-gradient(180deg, #f4fbff 0%, #ffffff 100%);
+    border-radius: 24px;
+}
+
+/* Tabs */
+.coupon-tabs .nav-link {
+    border-radius: 999px;
+    padding: 0.5rem 1.2rem;
+    margin: 0 0.3rem;
+    color: #22b3c1;
+    border: 1px solid #22b3c1;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+    .coupon-tabs .nav-link:hover {
+        background: #e9f8fb;
+    }
+
+    .coupon-tabs .nav-link.active {
+        background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 10px rgba(34, 179, 193, 0.3);
+    }
+
+/* Coupon Cards */
+.coupon-card {
+    position: relative;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+    .coupon-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    }
+
+.coupon-body {
+    padding: 1.5rem;
+}
+
+/* 狀態色彩 */
+.coupon-card.usable {
+    border-left: 6px solid #22b3c1;
+}
+
+.coupon-card.used {
+    border-left: 6px solid #888;
+    opacity: 0.85;
+}
+
+.coupon-card.expired {
+    border-left: 6px solid #dc3545;
+    opacity: 0.75;
+}
+
+/* 小標籤 */
+.coupon-ribbon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+    border-bottom-left-radius: 12px;
+    font-size: 0.85rem;
+}
+
+    .coupon-ribbon.gray {
+        background: #aaa;
+    }
+
+    .coupon-ribbon.danger {
+        background: #dc3545;
+    }
+
+/* 品牌文字色 */
+.text-brand {
+    color: #22b3c1 !important;
+}
+
+/* RWD */
+@media (max-width: 576px) {
+    .coupon-card {
+        border-radius: 14px;
+    }
+
+    .coupon-body {
+        padding: 1.2rem;
+    }
+
+    .coupon-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 0.4rem 1rem;
+    }
+}
+
+/* =======================================================
+📘 我的訂單頁面樣式（Orders）
+======================================================= */
+#orderApp h2 {
+    text-align: center;
+    font-weight: 700;
+    color: #7ec8e3;
+    letter-spacing: 1px;
+    margin-bottom: 1.8rem;
+}
+
+#orderApp .table-responsive {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    padding: 1.2rem;
+}
+
+#orderApp .table thead {
+    background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+#orderApp .table th {
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: #7ec8e3;
+}
+
+#orderApp .table tbody tr {
+    transition: all 0.25s ease;
+}
+
+    #orderApp .table tbody tr:hover {
+        background-color: rgba(126, 200, 227, 0.08);
+        transform: scale(1.005);
+    }
+
+#orderApp .badge {
+    border-radius: 999px;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    font-weight: 600;
+}
+
+#orderApp .btn {
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+#orderApp .btn-primary {
+    background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+    border: none;
+}
+
+    #orderApp .btn-primary:hover {
+        box-shadow: 0 4px 10px rgba(34,179,193,0.3);
+        transform: translateY(-2px);
+    }
+
+#orderApp .btn-outline-primary:hover {
+    background: #22b3c1;
+    color: #fff;
+    border-color: #22b3c1;
+}
+
+#orderApp .btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+}
+
+/* 表格手機可滑動 */
+@media (max-width: 768px) {
+    #orderApp .table-responsive {
+        padding: 0.8rem;
+        border-radius: 14px;
+    }
+
+    #orderApp h2 {
+        font-size: 1.4rem;
+    }
+
+    #orderApp .table th,
+    #orderApp .table td {
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+}
+
+
+/*=======================================================
+📗 36. 加入收藏專屬樣式（Favorites）
+======================================================= */
+
+/* 🐾 收藏愛心按鈕：主題風格 */
+.fav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    border: 1px solid #cfeff2;
+    background: #fff;
+    color: #22B3C1;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 999px;
+    transition: all .2s ease;
+    box-shadow: 0 4px 12px rgba(34,179,193,0.08);
+}
+
+    .fav-btn:hover {
+        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(34,179,193,0.22);
+    }
+
+    /* 已收藏狀態 */
+    .fav-btn.is-fav {
+        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        color: #fff;
+        border-color: transparent;
+    }
+
+/* 卡片右上角圓形收藏鈕（可覆蓋用在圖片上角） */
+.fav-float {
+    position: absolute;
+    right: .5rem;
+    top: .5rem;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,.95);
+    color: #22B3C1;
+    border: 1px solid #d8f2f6;
+    transition: all .2s;
+    z-index: 5;
+}
+
+    .fav-float:hover, .fav-float.is-fav {
+        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        color: #fff;
+        border-color: transparent;
+    }
+
+/* 小數字徽章（收藏數量，可選） */
+.fav-count {
+    font-size: .85rem;
+    color: #6b7d90;
+}
+
+.fav-btn.is-fav .fav-count {
+    color: #fff;
+    opacity: .85;
 }

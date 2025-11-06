@@ -1,0 +1,251 @@
+﻿@model Cat_Paw_Footprint.Areas.CustomersArea.Controllers.FavoritesListVM
+@{
+    ViewData["Title"] = "我的收藏";
+}
+
+@section Styles {
+    <style>
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+            .toolbar .sort {
+                width: 220px;
+            }
+
+        .product-card {
+            border: 1px solid #eef3f8;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            height: 100%;
+            transition: box-shadow .2s ease;
+        }
+
+            .product-card:hover {
+                box-shadow: 0 8px 20px rgba(0,0,0,.08);
+            }
+
+        .product-thumb {
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            position: relative;
+        }
+
+            .product-thumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+        .product-body {
+            padding: 12px 12px 14px;
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+
+        .meta {
+            color: #6b7d90;
+            font-size: .92rem;
+        }
+
+        .price {
+            color: #0c6;
+            font-weight: 800;
+            font-size: 1.05rem;
+            margin-top: 6px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            border: 1px dashed #d7eef6;
+            border-radius: 14px;
+            background: #fbfeff;
+        }
+
+        /* 直接沿用你前面提供的收藏按鈕樣式 */
+        .fav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            border: 1px solid #cfeff2;
+            background: #fff;
+            color: #22B3C1;
+            font-weight: 700;
+            padding: 8px 12px;
+            border-radius: 999px;
+            transition: all .2s ease;
+            box-shadow: 0 4px 12px rgba(34,179,193,.08);
+        }
+
+            .fav-btn:hover {
+                background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+                color: #fff;
+                border-color: transparent;
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(34,179,193,.22);
+            }
+
+            .fav-btn.is-fav {
+                background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+                color: #fff;
+                border-color: transparent;
+            }
+
+        .fav-float {
+            position: absolute;
+            right: .5rem;
+            top: .5rem;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,.95);
+            color: #22B3C1;
+            border: 1px solid #d8f2f6;
+            transition: all .2s;
+            z-index: 5;
+        }
+
+            .fav-float:hover, .fav-float.is-fav {
+                background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+                color: #fff;
+                border-color: transparent;
+            }
+
+        .fav-count {
+            font-size: .85rem;
+            color: #6b7d90;
+        }
+
+        .fav-btn.is-fav .fav-count {
+            color: #fff;
+            opacity: .85;
+        }
+    </style>
+}
+
+<div class="container py-3">
+    <h2 class="fw-bold mb-3"><i class="fa-solid fa-heart me-2 text-danger"></i>我的收藏</h2>
+
+    <div class="toolbar">
+        <div class="text-muted small">
+            共 <b>@Model.TotalCount</b> 項收藏
+        </div>
+        <form method="get" class="d-flex gap-2 align-items-center" id="sortForm">
+            <input type="hidden" name="page" value="@Model.Page" />
+            <select name="sort" class="form-select sort" id="sortSelect">
+                <option value="recent" selected="@(Model.Sort == "recent" ? "selected" : null)">最近收藏</option>
+                <option value="price_asc" selected="@(Model.Sort == "price_asc" ? "selected" : null)">價格：低 → 高</option>
+                <option value="price_desc" selected="@(Model.Sort == "price_desc" ? "selected" : null)">價格：高 → 低</option>
+                <option value="name" selected="@(Model.Sort == "name" ? "selected" : null)">名稱</option>
+            </select>
+        </form>
+    </div>
+
+    @if (Model.Items?.Any() == true)
+    {
+        <div class="row g-3 g-md-4">
+            @foreach (var p in Model.Items)
+            {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <article class="product-card">
+                        <div class="product-thumb">
+                            <img src="@p.CoverImageUrl" alt="@p.Name" />
+                            <!-- ❤️ 浮動收藏按鈕 -->
+                            <button type="button" class="fav-float"
+                                    data-product-id="@p.ProductID" aria-pressed="true" title="取消收藏">
+                                <i class="fa-solid fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="product-body">
+                            <div class="title">@p.Name</div>
+                            <div class="meta mb-1">
+                                <i class="fa-solid fa-location-dot me-1"></i>@p.RegionName
+                            </div>
+                            <div class="price">NT$ @p.MinPrice.ToString("N0") 起</div>
+
+                            <div class="mt-2 d-flex gap-2">
+                                <a asp-area="CustomersArea" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductID"
+                                   class="btn btn-sm btn-outline-secondary">查看詳情</a>
+
+                                <!-- ❤️ 底部收藏按鈕（與 Search/Browse 一致） -->
+                                <button type="button" class="fav-btn btn-sm is-fav"
+                                        data-product-id="@p.ProductID" aria-pressed="true" title="取消收藏">
+                                    <i class="fa-solid fa-heart"></i>
+                                    <span class="d-none d-sm-inline">已收藏</span>
+                                    <span class="fav-count d-none d-md-inline"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @{
+                        int current = Model.Page;
+                        int total = Model.TotalPages;
+                        int prev = current - 1;
+                        int next = current + 1;
+                    }
+                    <li class="page-item @(current == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("List", new { page = 1, sort = Model.Sort })">第一頁</a>
+                    </li>
+                    <li class="page-item @(current == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("List", new { page = (prev < 1 ? 1 : prev), sort = Model.Sort })">上一頁</a>
+                    </li>
+                    @for (int i = Math.Max(1, current - 2); i <= Math.Min(total, current + 2); i++)
+                    {
+                        <li class="page-item @(i == current ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("List", new { page = i, sort = Model.Sort })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(current == total ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("List", new { page = (next > total ? total : next), sort = Model.Sort })">下一頁</a>
+                    </li>
+                    <li class="page-item @(current == total ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("List", new { page = total, sort = Model.Sort })">最後一頁</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="empty">
+            <div class="mb-2" style="font-size:1.15rem; font-weight:700;">目前尚未收藏任何商品</div>
+            <div class="text-muted mb-3">去逛逛熱門行程或搜尋喜歡的旅遊產品吧！</div>
+            <a asp-area="CustomersArea" asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill">回首頁探索</a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // 與全站通用的收藏 JS 相容：
+        // 這個頁面初始時，所有收藏鈕都標記 is-fav；點擊後如果取消，會即時變更樣式，若需要可選擇在數量為 0 時從 DOM 中移除卡片。
+        document.addEventListener('change', function(e){}, true);
+
+        // 排序變更自動送出
+        document.getElementById('sortSelect')?.addEventListener('change', function(){
+            document.getElementById('sortForm').submit();
+        });
+    </script>
+}

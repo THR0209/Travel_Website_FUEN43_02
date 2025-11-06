@@ -31,6 +31,7 @@ public partial class Customers
 
 	public virtual ICollection<CustomerLoginHistory> CustomerLoginHistory { get; set; } = new List<CustomerLoginHistory>();
     public virtual ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
+	public virtual ICollection<Favorites> Favorites { get; set; } = new List<Favorites>();
 
 	public virtual CustomerProfile? CustomerProfile { get; set; }
 

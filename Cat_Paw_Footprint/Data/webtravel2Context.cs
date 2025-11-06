@@ -60,8 +60,9 @@ public partial class webtravel2Context : DbContext
     public virtual DbSet<Employees> Employees { get; set; }
 
     public virtual DbSet<FAQCategorys> FAQCategorys { get; set; }
+	public virtual DbSet<Favorites> Favorites { get; set; }
 
-    public virtual DbSet<FAQs> FAQs { get; set; }
+	public virtual DbSet<FAQs> FAQs { get; set; }
 
     public virtual DbSet<HotelKeywords> HotelKeywords { get; set; }
 
@@ -420,7 +421,50 @@ public partial class webtravel2Context : DbContext
                 .HasConstraintName("FK__Employees__RoleI__29221CFB");
         });
 
-        modelBuilder.Entity<FAQCategorys>(entity =>
+		modelBuilder.Entity<Favorites>(entity =>
+		{
+			entity.HasKey(e => e.FavoriteID);
+
+			entity.Property(e => e.FavoriteID)
+				  .ValueGeneratedOnAdd();
+
+			entity.Property(e => e.CustomerID)
+				  .IsRequired();
+
+			entity.Property(e => e.ProductID)
+				  .IsRequired(false);
+
+			//entity.Property(e => e.SemiProductID)
+			//	  .IsRequired(false);
+
+			entity.Property(e => e.CreatedAt)
+				  .HasColumnType("datetime")
+				  .HasDefaultValueSql("GETDATE()");
+
+			// ✅ 外鍵：Customer
+			entity.HasOne(e => e.Customer)
+				  .WithMany(c => c.Favorites)
+				  .HasForeignKey(e => e.CustomerID)
+				  .OnDelete(DeleteBehavior.Cascade)
+				  .HasConstraintName("FK_Favorites_Customers");
+
+			// ✅ 外鍵：Products
+			entity.HasOne(e => e.Product)
+				  .WithMany()
+				  .HasForeignKey(e => e.ProductID)
+				  .OnDelete(DeleteBehavior.Cascade)
+				  .HasConstraintName("FK_Favorites_Products");
+
+			// ✅ 外鍵：SemiSelfProducts
+			//entity.HasOne(e => e.SemiProduct)
+			//	  .WithMany()
+			//	  .HasForeignKey(e => e.SemiProductID)
+			//	  .OnDelete(DeleteBehavior.Cascade)
+			//	  .HasConstraintName("FK_Favorites_SemiSelfProducts");
+		});
+
+
+		modelBuilder.Entity<FAQCategorys>(entity =>
         {
             entity.HasKey(e => e.CategoryID).HasName("PK__FAQCateg__19093A2BAD7796F5");
 
@@ -852,7 +896,12 @@ public partial class webtravel2Context : DbContext
 
 		modelBuilder.Entity<Semi_Keywords>(entity =>
 		{
+			entity.ToTable("Semi_Keywords");
 			entity.HasKey(e => e.ProductKeywordID);
+
+			entity.Property(e => e.ProductKeywordID).HasColumnName("ProductKeywordID");
+			entity.Property(e => e.ProductID).HasColumnName("ProductID");
+			entity.Property(e => e.KeywordID).HasColumnName("KeywordID");
 
 			entity.HasOne(d => d.Keyword).WithMany()
 				.HasForeignKey(d => d.KeywordID)

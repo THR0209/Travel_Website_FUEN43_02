@@ -231,17 +231,25 @@ function setupScrollHandlers() {
             heroMedia.style.transform = `translateZ(0) scale(${1.1 + clamp / 2800}) translateY(${clamp * 0.06}px)`;
         }
     }
-
     function onScroll() {
         lastY = window.scrollY || window.pageYOffset;
         if (!ticking) {
-            window.requestAnimationFrame(() => { updateOnScroll(lastY); ticking = false; });
+            window.requestAnimationFrame(() => {
+                updateOnScroll(lastY);
+                ticking = false;
+            });
             ticking = true;
         }
     }
-
     window.addEventListener('scroll', onScroll, { passive: true });
     updateOnScroll(window.scrollY || window.pageYOffset);
+
+    if (toTop) {
+        toTop.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 }
 
 // 平滑錨點（忽略 href="#"）
@@ -571,3 +579,175 @@ document.addEventListener('DOMContentLoaded', function () {
     // window.updateList();              // 強制載入下拉清單
     // window.signalRAttemptRestart?.(); // 手動重連 SignalR
 });
+
+
+// 以全站通用方式處理收藏按鈕（Search/Browse/首頁卡片都會套用）
+
+(function () {
+    // 避免同檔或多頁重複綁定
+    if (window.__favBound) return;
+    window.__favBound = true;
+
+    const LOGIN_URL = '/CustomersArea/CusLogReg/Login';
+
+    const FAV = {
+        myIds: new Set(),
+        inited: false,
+
+        async init() {
+            if (this.inited) return;
+            this.inited = true;
+
+            // 讀取「我已收藏」列表（未登入可能 401，忽略即可）
+            try {
+                const res = await fetch('/CustomersArea/Favorites/MyIds', { credentials: 'same-origin' });
+                if (res.ok && (res.headers.get('content-type') || '').includes('application/json')) {
+                    (await res.json()).forEach(id => this.myIds.add(+id));
+                }
+            } catch (_) { /* ignore */ }
+
+            this.paintAll();
+
+            // 事件委派
+            document.addEventListener('click', (ev) => this.onClick(ev));
+
+            // DOM 變化（例如 Swiper 注入）時重刷 UI
+            const mo = new MutationObserver(() => this.paintAll());
+            mo.observe(document.body, { childList: true, subtree: true });
+        },
+
+        async onClick(ev) {
+            const btn = ev.target.closest('.fav-btn, .fav-float');
+            if (!btn) return;
+
+            // 避免被判定拖拽 & 連點重複送出
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (btn.dataset.busy === '1') return;
+            btn.dataset.busy = '1';
+
+            const id = +btn.dataset.productId;
+            if (!id) { delete btn.dataset.busy; return; }
+
+            try {
+                const form = new URLSearchParams();
+                form.set('productId', String(id));
+
+                const res = await fetch('/CustomersArea/Favorites/Toggle', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest',   // 讓伺服器辨識為 Ajax（避免 302）
+                        'Accept': 'application/json',
+                        'RequestVerificationToken': (window.afToken || '')
+                    },
+                    body: form.toString()
+                });
+
+                // 未登入：可能被 302 追到 login 或直接回 401
+                if (res.status === 401 || res.redirected || (res.url && /\/login/i.test(res.url))) {
+                    await this.askLogin(); return;
+                }
+
+                // 安全解析 JSON；不是 JSON 就當錯誤處理
+                let json;
+                if ((res.headers.get('content-type') || '').includes('application/json')) {
+                    json = await res.json();
+                } else {
+                    const text = await res.text();
+                    throw new Error(text?.slice(0, 200) || `${res.status} ${res.statusText}`);
+                }
+
+                if (!json || json.ok !== true) {
+                    // 伺服器主動回覆需登入
+                    if (json?.redirect) { await this.askLogin(json.redirect); return; }
+                    throw new Error(json?.message || '收藏操作失敗');
+                }
+
+                // 更新本地狀態 + 畫面
+                if (json.isFav) this.myIds.add(id); else this.myIds.delete(id);
+                this.paintById(id, json.count);
+
+                // SweetAlert（大彈窗）
+                Swal.fire({
+                    icon: json.isFav ? 'success' : 'warning',
+                    title: json.isFav ? '已加入收藏！' : '已取消收藏！',
+                    text: (typeof json.count === 'number') ? `目前共有 ${json.count} 人收藏此商品` : '',
+                    confirmButtonText: '確定',
+                    confirmButtonColor: '#22B3C1',
+                    width: '32rem'
+                });
+
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: '操作失敗',
+                    text: (err && err.message) ? err.message : '請稍後再試',
+                    confirmButtonColor: '#22B3C1'
+                });
+            } finally {
+                delete btn.dataset.busy;
+            }
+        },
+
+        async askLogin(redirectFromServer) {
+            const result = await Swal.fire({
+                icon: 'info',
+                title: '請先登入',
+                text: '登入後即可收藏喜歡的商品。',
+                showCancelButton: true,
+                confirmButtonText: '立即登入',
+                cancelButtonText: '再等等',
+                confirmButtonColor: '#22B3C1'
+            });
+
+            // 使用者按「再等等」→ 不跳轉
+            if (!result.isConfirmed) return;
+
+            // 使用者按「立即登入」→ 導到登入頁，並帶回原頁
+            const base = redirectFromServer || window.customerLoginUrl || '/CustomersArea/CusLogReg/Login';
+            const returnUrl = encodeURIComponent(location.pathname + location.search);
+            location.href = base.includes('returnUrl=') ? base : `${base}?returnUrl=${returnUrl}`;
+        },
+
+        paintAll() {
+            document.querySelectorAll('.fav-btn, .fav-float').forEach(btn => {
+                const id = +btn.dataset.productId;
+                const isFav = this.myIds.has(id);
+                btn.classList.toggle('is-fav', isFav);
+                btn.setAttribute('aria-pressed', isFav ? 'true' : 'false');
+
+                const countEl = btn.querySelector('.fav-count');
+                if (countEl && countEl.dataset.loaded !== '1') {
+                    fetch('/CustomersArea/Favorites/Count?productId=' + id, { credentials: 'same-origin' })
+                        .then(r => r.ok ? r.json() : null)
+                        .then(j => {
+                            if (j && typeof j.count === 'number') {
+                                countEl.textContent = `(${j.count})`;
+                                countEl.dataset.loaded = '1';
+                            }
+                        }).catch(() => { });
+                }
+            });
+        },
+
+        paintById(id, count) {
+            document
+                .querySelectorAll(`.fav-btn[data-product-id="${id}"], .fav-float[data-product-id="${id}"]`)
+                .forEach(btn => {
+                    const isFav = this.myIds.has(id);
+                    btn.classList.toggle('is-fav', isFav);
+                    btn.setAttribute('aria-pressed', isFav ? 'true' : 'false');
+                    const countEl = btn.querySelector('.fav-count');
+                    if (countEl && typeof count === 'number') {
+                        countEl.textContent = `(${count})`;
+                        countEl.dataset.loaded = '1';
+                    }
+                });
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => FAV.init());
+})();

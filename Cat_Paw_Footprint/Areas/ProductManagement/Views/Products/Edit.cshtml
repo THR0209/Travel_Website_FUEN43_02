@@ -109,7 +109,7 @@
 
                 <div class="form-group mb-3">
                     <label asp-for="ProductAnalysis.ReleaseDate" class="control-label mb-1">預計上架時間：</label>
-                    <input type="datetime-local" asp-for="ProductAnalysis.ReleaseDate" class="form-control" value="@Model.ProductAnalysis?.ReleaseDate?.ToString("yyyy-MM-ddTHH:mm")" />
+                    <input type="datetime-local" asp-for="ProductAnalysis.ReleaseDate" class="form-control" />
                     <span asp-validation-for="ProductAnalysis.ReleaseDate" class="text-danger"></span>
                 </div>
 

@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using static Cat_Paw_Footprint.Areas.CustomersArea.Controllers.PaymentController;
+using Cat_Paw_Footprint.Areas.ProductManagement.Services;
 
 namespace Cat_Paw_Footprint
 {
@@ -208,6 +209,9 @@ namespace Cat_Paw_Footprint
 			//清理購物車DB
 			builder.Services.Configure<CleanupOptions>(builder.Configuration.GetSection("CleanupOptions"));
 			builder.Services.AddHostedService<PendingPaymentsCleanupService>();
+
+			builder.Services.AddHostedService<ProductPublishScheduler>(); // 商品上架排程用
+
 			var app = builder.Build();
 			app.MapHub<ChatHub>("/chatHub");
 			// Configure the HTTP request pipeline.

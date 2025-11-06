@@ -1,4 +1,5 @@
 ﻿using Cat_Paw_Footprint.Areas.Helper;
+using Cat_Paw_Footprint.Areas.ProductManagement.Services;
 using Cat_Paw_Footprint.Areas.ProductManagement.ViewModel;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
@@ -29,36 +30,53 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 			return View(await webtravel2Context.ToListAsync());
 		}
 
+
 		[HttpPost]
-		//[Route("Products/Index/Json")]
 		[Route("ProductManagement/Products/Index/Json")]
 		public async Task<IActionResult> IndexJson()
 		{
 			var data = await _context.Products
-			.Include(p => p.Region)
-			.Include(p => p.ProductAnalyses) // 更新912
-			.OrderByDescending(p => p.ProductCode)
-			.Select(p => new {
-				p.ProductID,
-				p.ProductCode,
-				p.ProductImageUrl,
-				p.ProductName,
-				p.ProductPrice,
-				StartDate = p.StartDate.HasValue ? p.StartDate.Value.ToString() : "",
-				EndDate = p.EndDate.HasValue ? p.EndDate.Value.ToString() : "",
-				p.MaxPeople,
-				p.RegionID,
-				p.IsActive,
-				RegionName = p.Region == null ? null : p.Region.RegionName,
-				Analyses = p.ProductAnalyses.Select(a => new {
-					releaseDate = a.ReleaseDate.HasValue ? a.ReleaseDate.Value.ToString() : "",
-					removalDate = a.RemovalDate.HasValue ? a.RemovalDate.Value.ToString() : ""
+				.Include(p => p.Region)
+				.Include(p => p.ProductAnalyses)
+				.OrderByDescending(p => p.ProductCode)
+				.Select(p => new
+				{
+					p.ProductID,
+					p.ProductCode,
+					p.ProductImageUrl,
+					p.ProductName,
+					p.ProductPrice,
+					p.StartDate,
+
+					p.MaxPeople,
+					p.RegionID,
+					p.IsActive,
+					RegionName = p.Region == null ? null : p.Region.RegionName,
+
+					// 上架/下架時間：取最新一筆分析，輸出 ISO UTC（帶 Z）
+
+					releaseDateUtc = p.ProductAnalyses
+						.OrderByDescending(a => a.ProductAnalysisID)
+						.Select(a => a.ReleaseDate.HasValue
+							? DateTime.SpecifyKind(a.ReleaseDate.Value, DateTimeKind.Utc).ToString("o")
+							: "")
+						.FirstOrDefault(),
+
+
+					removalDateUtc = p.ProductAnalyses
+						.OrderByDescending(a => a.ProductAnalysisID)
+						.Select(a => a.RemovalDate.HasValue
+							? DateTime.SpecifyKind(a.RemovalDate.Value, DateTimeKind.Utc).ToString("o")
+							: "")
+						.FirstOrDefault()
+
 				})
-			})
-			.ToListAsync();
+				.ToListAsync();
 
 			return Json(data);
 		}
+
+
 
 		// GET: ProductManagement/Products/Details/5
 		public async Task<IActionResult> Details(int? id)
@@ -289,11 +307,20 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 						}
 					}
 				}
+				// ===== ReleaseDate：台北時間 -> UTC，再寫入 ProductAnalysis =====
+				DateTime? releaseUtc = null;
+				if (vm.ReleaseDate.HasValue)
+				{
+					// 將表單 datetime-local（台北時間）轉成 UTC
+					var tz = TzHelper.GetTaipeiTimeZone();
+					releaseUtc = TimeZoneInfo.ConvertTimeToUtc(
+						DateTime.SpecifyKind(vm.ReleaseDate.Value, DateTimeKind.Unspecified), tz);
+				}
 
 				_context.ProductAnalysis.Add(new ProductAnalysis
 				{
 					ProductID = productId,
-					ReleaseDate = vm.ProductAnalysis.ReleaseDate
+					ReleaseDate = releaseUtc
 				});
 
 				// ===== 3. 寫入所有關聯表 =====
@@ -345,7 +372,7 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 					.Select(t => new ProductAnalysis
 					{
 						ProductID = t.ProductID,
-						ReleaseDate = t.ReleaseDate,
+						ReleaseDate = TzHelper.ToTaipeiFromUtc(t.ReleaseDate),
 					}).FirstOrDefault(),
 
 				// 已選飯店
@@ -377,16 +404,6 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 					.OrderBy(r => r.OrderIndex)
 					.Select(r => new OrderedItem { ID = r.RestaurantID, OrderIndex = r.OrderIndex })
 					.ToList(),
-
-				// 已選景點 (依天數)
-				//SelectedLocationsByDay = product.ProductLocations
-				//	.GroupBy(l => (int)l.DayNumber)
-				//	.ToDictionary(
-				//		g => g.Key,
-				//		g => g.OrderBy(l => l.OrderIndex)
-				//			  .Select(l => new OrderedItem { ID = l.LocationID, OrderIndex = l.OrderIndex })
-				//			  .ToList()
-				//	)
 
 				// ✅ 已選景點 (轉換成 List<DayLocations>)
 				SelectedLocations = product.ProductLocations
@@ -568,22 +585,31 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 					}
 				}
 
+				// 取或建 ProductAnalysis
 				var analysis = await _context.ProductAnalysis
-					.FirstOrDefaultAsync(p => p.ProductID == id);
+					.FirstOrDefaultAsync(a => a.ProductID == id);
+
+				// 這裡要改：從 vm.ProductAnalysis.ReleaseDate 讀值
+				DateTime? releaseUtc = null;
+				var localRelease = vm.ProductAnalysis?.ReleaseDate; // ← 讀正確欄位
+				if (localRelease.HasValue)
+				{
+					var tz = TzHelper.GetTaipeiTimeZone();
+					releaseUtc = TimeZoneInfo.ConvertTimeToUtc(
+						DateTime.SpecifyKind(localRelease.Value, DateTimeKind.Unspecified), tz);
+				}
 
 				if (analysis != null)
 				{
-					analysis.ReleaseDate = vm.ProductAnalysis.ReleaseDate;
-					// 其他要更新的欄位...
+					analysis.ReleaseDate = releaseUtc;
 					_context.ProductAnalysis.Update(analysis);
 				}
 				else
 				{
-					// 如果真的沒有才新增
 					_context.ProductAnalysis.Add(new ProductAnalysis
 					{
 						ProductID = id,
-						ReleaseDate = vm.ProductAnalysis.ReleaseDate
+						ReleaseDate = releaseUtc
 					});
 				}
 
