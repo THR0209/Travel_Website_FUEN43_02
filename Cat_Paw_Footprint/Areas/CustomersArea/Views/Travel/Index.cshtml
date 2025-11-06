@@ -43,12 +43,23 @@
                     </button>
                 </div>
 
-                <!-- ⭐ 單鍵排序切換 -->
-                <button class="btn"
-                        :class="sortDesc ? 'btn-warning' : 'btn-outline-primary'"
-                        v-on:click="toggleSort">
-                    ⭐ 排序：{{ sortDesc ? '高→低' : '低→高' }}
-                </button>
+                <!-- 排序區域 -->
+                <div>
+                    <!-- ⭐ 評分排序 -->
+                    <button class="btn"
+                            :class="sortActive ? 'btn-warning' : 'btn-outline-primary'"
+                            v-on:click="toggleSort('rating')">
+                        ⭐ 評分 {{ sortActive ? (sortDesc ? '⬇️ 高→低' : '⬆️ 低→高') : '' }}
+                    </button>
+
+                    <!-- 👁️ 瀏覽數排序 -->
+                    <button class="btn"
+                            :class="viewActive ? 'btn-warning' : 'btn-outline-primary'"
+                            v-on:click="toggleSort('views')">
+                        👁️ 瀏覽 {{ viewActive ? (viewDesc ? '⬇️ 高→低' : '⬆️ 低→高') : '' }}
+                    </button>
+
+                </div>                
 
             </div>
         </div>
@@ -58,7 +69,8 @@
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
 
                 <!-- 卡片開始 -->
-                <div v-for="(item, index) in filteredItems" :key="index" class="col">
+                <div v-for="item in filteredItems" :key="item.id" class="col">
+
                     <div class="card h-100 position-relative" style="z-index:1;">
 
                         <!-- 右上角＋鍵 -->
@@ -288,7 +300,7 @@
 
                             <!-- 詳細地址 -->
                             <div>
-                                <p><strong>📍 地址：</strong>{{ modalData.addr }}</p>
+                                <p><strong>地址：</strong>{{ modalData.addr }}</p>
                             </div>
 
                         </div>
@@ -386,6 +398,12 @@
                     travelInfo: null, // 距離與時間資訊
                     markers: [], // 多點標記陣列
 
+                    /* 排序參數 */
+                    sortActive: false,   // ⭐ 是否啟用評分排序
+                    viewActive: false,   // 👁️ 是否啟用瀏覽排序
+                    sortDesc: true,      // ⭐ 排序方向（true=高→低）
+                    viewDesc: true       // 👁️ 排序方向（true=高→低）
+
                 }
             },
 
@@ -450,14 +468,63 @@
                 },
 
                 /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）*/
-                toggleSort() {
-                    this.sortDesc = !this.sortDesc; // 切換狀態
-                    if (this.sortDesc) {
-                        this.items.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                    } else {
-                        this.items.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+                /* ⭐👁️ 互斥排序：只能擇一生效 */
+                toggleSort(type) {
+                    // 若使用者按的是「評分」
+                    if (type === 'rating') {
+                        // 若原本沒啟用 → 啟用評分排序、關閉瀏覽排序
+                        if (!this.sortActive) {
+                            this.sortActive = true;
+                            this.viewActive = false;
+                            this.sortDesc = true; // 預設高→低
+                        } else {
+                            // 若已啟用 → 切換升降序
+                            this.sortDesc = !this.sortDesc;
+                        }
+
+                        // 執行排序
+                        this.items.sort((a, b) =>
+                            this.sortDesc
+                                ? (b.rating || 0) - (a.rating || 0)
+                                : (a.rating || 0) - (b.rating || 0)
+                        );
                     }
+
+                    // 若使用者按的是「瀏覽數」
+                    if (type === 'views') {
+                        if (!this.viewActive) {
+                            this.viewActive = true;
+                            this.sortActive = false;
+                            this.viewDesc = true; // 預設高→低
+                        } else {
+                            this.viewDesc = !this.viewDesc;
+                        }
+
+                        // 執行排序
+                        this.items.sort((a, b) =>
+                            this.viewDesc
+                                ? (b.views || 0) - (a.views || 0)
+                                : (a.views || 0) - (b.views || 0)
+                        );
+                    }
+
+                    /* 🧩 排序完成後，等畫面更新完再重新初始化 Carousel */
+                    this.$nextTick(() => {
+                        document.querySelectorAll('.card-carousel').forEach(c => {
+                            const existing = bootstrap.Carousel.getInstance(c);
+                            if (existing) existing.dispose(); // 清除舊的實例
+
+                            // 重新啟動
+                            new bootstrap.Carousel(c, {
+                                interval: 3000,
+                                ride: 'carousel',
+                                pause: false,
+                                wrap: true
+                            });
+                        });
+                    });
                 },
+
 
                 /* 取得資料 (Ajax 呼叫 Controller API) */
                 async fetchData() {
