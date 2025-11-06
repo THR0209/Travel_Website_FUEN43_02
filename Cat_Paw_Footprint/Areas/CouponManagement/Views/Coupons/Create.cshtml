@@ -55,6 +55,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label asp-for="MinimumAmount" class="form-label fw-semibold"></label>
+                            <input asp-for="MinimumAmount" class="form-control" placeholder="滿額門檻" />
+                            <span asp-validation-for="MinimumAmount" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="MaximumDiscount" class="form-label fw-semibold"></label>
+                            <input asp-for="MaximumDiscount" class="form-control" placeholder="最大折抵" />
+                            <span asp-validation-for="MaximumDiscount" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
                             <label asp-for="StartDate" class="form-label fw-semibold"></label>
                             <input asp-for="StartDate" class="form-control" type="date" />
                             <span asp-validation-for="StartDate" class="text-danger"></span>
