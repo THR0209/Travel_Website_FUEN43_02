@@ -23,7 +23,8 @@ public class DiscountValueRangeAttribute : ValidationAttribute
 
         // 取得 MaximumDiscount 屬性 (這是固定金額折扣的最大限制)
         var maxDiscountProperty = validationContext.ObjectType.GetProperty("MaximumDiscount");
-        decimal maxDiscount = maxDiscountProperty != null ? (decimal)maxDiscountProperty.GetValue(validationContext.ObjectInstance) : decimal.MaxValue;
+        var maxValueObj = maxDiscountProperty?.GetValue(validationContext.ObjectInstance);
+        decimal maxDiscount = maxValueObj != null ? Convert.ToDecimal(maxValueObj) : decimal.MaxValue;
 
         // 檢查百分比折扣的範圍（0-1 之間）
         if (discountType == 1)

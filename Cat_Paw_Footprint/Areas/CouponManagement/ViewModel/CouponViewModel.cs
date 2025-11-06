@@ -47,7 +47,7 @@ namespace Cat_Paw_Footprint.Areas.CouponManagement.ViewModel
         [DisplayName("滿額門檻")]
         public decimal? MinimumAmount { get; set; }      // 滿額門檻
        
-        [DiscountValueRange]
+        //[DiscountValueRange]
         [DisplayName("折扣上限")]
         public decimal? MaximumDiscount { get; set; }    // 折扣上限
 
