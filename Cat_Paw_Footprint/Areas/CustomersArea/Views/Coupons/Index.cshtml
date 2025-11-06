@@ -1,12 +1,14 @@
-﻿@{
+@{
     ViewData["Title"] = "我的優惠券";
 }
 
-<div id="coupon-app" class="container py-4">
-    <h2 class="text-center mb-4 fw-bold">🎟 我的優惠券</h2>
+<div id="coupon-app" class="coupon-wrapper container py-5">
+    <h2 class="text-center mb-5 fw-bold text-primary">
+        <i class="fa-solid fa-ticket me-2"></i> 我的優惠券
+    </h2>
 
     <!-- Tabs -->
-    <ul class="nav nav-tabs justify-content-center mb-4">
+    <ul class="nav nav-pills justify-content-center mb-4 coupon-tabs">
         <li class="nav-item">
             <button class="nav-link"
                     :class="{ active: tab === 'usable' }"
@@ -30,9 +32,9 @@
         </li>
     </ul>
 
-
     <!-- Coupon Cards -->
-    <div class="row g-3">
+    <div class="row g-4 justify-content-center">
+
         <!-- 可使用 -->
         <template v-if="tab === 'usable' && coupons.usable.length">
             <div v-for="c in coupons.usable" :key="c.couponId" class="col-md-6">
@@ -46,43 +48,42 @@
                         <p class="mb-1">{{ c.desc }}</p>
                         <small class="text-muted">有效期限：{{ formatDate(c.endDate) }}</small>
                     </div>
+                    <div class="coupon-ribbon">可使用</div>
                 </div>
             </div>
         </template>
 
         <!-- 已使用 -->
         <template v-if="tab === 'used' && coupons.used.length">
-            <div v-for="c in coupons.used" :key="c.couponId" class="col-md-6">
-                <div class="card border-secondary h-100 shadow-sm opacity-75">
-                    <div class="card-body">
-                        <h4 class="fw-bold text-secondary mb-2">
-                            {{c.couponName}}
-                        </h4>
+            <div v-for="c in coupons.used" :key="c.couponId" class="col-md-6 col-lg-4">
+                <div class="coupon-card used">
+                    <div class="coupon-body">
+                        <h5 class="fw-bold mb-2 text-secondary">{{ c.couponName }}</h5>
                         <p class="mb-1 text-secondary">{{ c.desc }}</p>
                         <small class="text-muted">已使用</small>
                     </div>
+                    <div class="coupon-ribbon gray">已使用</div>
                 </div>
             </div>
         </template>
 
         <!-- 無法使用 -->
         <template v-if="tab === 'expired' && coupons.expired.length">
-            <div v-for="c in coupons.expired" :key="c.couponId" class="col-md-6">
-                <div class="card border-danger h-100 shadow-sm opacity-75">
-                    <div class="card-body">
-                        <h4 class="fw-bold text-danger mb-2">
-                            {{c.couponName}}
-                        </h4>
+            <div v-for="c in coupons.expired" :key="c.couponId" class="col-md-6 col-lg-4">
+                <div class="coupon-card expired">
+                    <div class="coupon-body">
+                        <h5 class="fw-bold mb-2 text-danger">{{ c.couponName }}</h5>
                         <p class="mb-1 text-danger">{{ c.desc }}</p>
                         <small class="text-muted">已過期</small>
                     </div>
+                    <div class="coupon-ribbon danger">已過期</div>
                 </div>
             </div>
         </template>
 
-        <!-- 無資料時 -->
+        <!-- 無資料 -->
         <div v-if="currentTabList.length === 0" class="text-center text-muted py-5">
-            <p>目前沒有這類優惠券</p>
+            <p>目前沒有這類優惠券 💤</p>
         </div>
     </div>
 </div>

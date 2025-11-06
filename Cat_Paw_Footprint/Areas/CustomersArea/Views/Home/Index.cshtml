@@ -63,14 +63,25 @@
                 background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             }
 
-        /* RWD 調整 */
+        /* 💡RWD：平板＆手機 */
+        /* 💡RWD：平板＆手機 */
+        @@media (max-width: 992px) {
+            .section-card
+
+        {
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+            border-radius: 16px;
+        }
+
+        }
         @@media (max-width: 768px) {
             .section-card
 
         {
-            padding: 1.4rem 1rem;
+            padding: 1.3rem;
             margin: 1.2rem 0.8rem;
-            border-radius: 16px;
+            border-radius: 14px;
         }
 
         }
@@ -79,10 +90,12 @@
         -------------------------- */
         .hero {
             position: relative;
-            height: 520px;
+            max-height: 600px;
+            height: 60vh;
+            min-height: 400px;
             border-radius: 0 0 40px 40px;
             overflow: hidden;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
         }
 
         #heroMedia {
@@ -97,7 +110,25 @@
             transform: scale(1.05);
             filter: brightness(0.75);
         }
+        /* 💡RWD：縮小高度 */
+        @@media (max-width: 768px) {
+            .hero
 
+        {
+            height: 50vh;
+            min-height: 320px;
+        }
+
+        }
+        @@media (max-width: 576px) {
+            .hero
+
+        {
+            height: 45vh;
+            min-height: 280px;
+        }
+
+        }
         /* --------------------------
             飄浮貓掌（裝飾）
             - pointer-events: none 避免遮擋互動
@@ -111,7 +142,7 @@
             top: 0;
             overflow: hidden;
             pointer-events: none;
-            z-index: 10;
+            z-index: 1;
         }
 
             .floating-paws span {
@@ -185,18 +216,20 @@
             - 包含 tabs、輸入欄、按鈕與內嵌人數控制
         -------------------------- */
         .search-wrapper {
-            position: absolute;
+            position: relative;
+            top: 25%;
             left: 50%;
             bottom: 40px;
             transform: translateX(-50%);
             width: 90%;
             max-width: 1100px;
-            background: rgba(255,255,255,.94);
+            max-height: 400px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(6px);
             border-radius: 20px;
-            box-shadow: 0 6px 25px rgba(0,0,0,.30);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.25);
             padding: 18px;
             z-index: 1000;
-            pointer-events: auto;
         }
 
             .search-wrapper h1 {
@@ -233,9 +266,8 @@
 
         .search-box {
             display: grid;
-            gap: 12px;
-            align-items: center;
             grid-template-columns: 2.2fr 2.2fr 1.6fr 140px;
+            gap: 12px;
         }
 
         .search-select {
@@ -279,23 +311,23 @@
                 background: linear-gradient(135deg, #22b3c1, #7ec8e3);
                 box-shadow: 0 4px 12px rgba(34, 179, 193, 0.4);
             }
-
         /* --------------------------
-            建議面板（dropdown-panel）與建議項目
-            - 面板會被 JS 移到 body，CSS 只負責外觀
+          建議面板（dropdown-panel）與建議項目
+          - 面板會被 JS 移到 body，CSS 只負責外觀
         -------------------------- */
         .dropdown-panel {
+            position: absolute;
+            z-index: 9999;
             background: #fff;
-            border-radius: 14px;
-            padding: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-            display: none;
-            animation: dropdownFade 0.15s ease;
-            max-width: 100vw;
-            overflow: visible;
-            height: auto;
+            border: 1px solid #dbe7ef;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-height: 260px;
+            overflow-y: auto;
             box-sizing: border-box;
-            z-index: 999999;
+            padding: 8px 10px;
+            font-size: 0.95rem;
         }
 
             .dropdown-panel::-webkit-scrollbar {
@@ -310,6 +342,195 @@
                 .dropdown-panel::-webkit-scrollbar-thumb:hover {
                     background-color: rgba(126, 200, 227, 0.8);
                 }
+        /* 💡RWD：平板 */
+        @@media (max-width: 992px) {
+            .search-wrapper {
+                top: auto;
+                bottom: 40px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 500px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(6px);
+                border-radius: 18px;
+                padding: 16px 14px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            }
+
+            .search-box {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .search-select {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+                border-radius: 12px;
+            }
+
+            .search-btn {
+                grid-column: span 2;
+                padding: 12px 0;
+            }
+
+        }
+
+        /* 💡RWD：手機版（768px 以下） */
+        @@media (max-width: 768px) {
+            .hero {
+                height: auto;
+                padding-bottom: 120px; /* 預留 hero 高度空間給搜尋框 */
+            }
+            .search-wrapper
+
+            {
+                position: absolute;
+                left: 50%;
+                bottom: 20px;
+                transform: translateX(-50%);
+                width: calc(100% - 28px);
+                max-width: 460px;
+                padding: 14px 12px;
+                border-radius: 18px;
+                background: rgba(255, 255, 255, 0.92);
+                box-sizing: border-box;
+                backdrop-filter: blur(6px);
+            }
+
+            .search-box {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                align-items: center;
+            }
+
+            .search-select {
+                padding: 8px 12px;
+                font-size: 0.95rem;
+                border-radius: 12px;
+            }
+
+            .search-btn {
+                padding: 10px 0;
+                font-size: 1rem;
+                border-radius: 12px;
+            }
+
+        }
+
+
+        /* 💡RWD：小手機（576px 以下） */
+        @@media (max-width: 576px) {
+            .hero {
+                height: auto;
+                min-height: 460px; /* 稍微加高一點 */
+                padding-top: 40px; /* 標題與上方空間 */
+                padding-bottom: 140px; /* 搜尋列預留空間 */
+            }
+
+            .search-wrapper {
+                position: absolute;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: calc(100% - 24px);
+                max-width: 430px;
+                background: rgba(255, 255, 255, 0.96);
+                border-radius: 16px;
+                padding: 16px 14px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            }
+
+            .search-box {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                align-items: center;
+            }
+
+            .search-select {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 10px;
+                font-size: 0.9rem;
+                border-radius: 10px;
+                border: 1px solid #e2e8f0;
+                background-color: #fff;
+                min-height: 42px;
+            }
+            /* 「人數選擇」區塊微調 */
+            #peopleInput, .people-label {
+                font-size: 0.85rem !important; /* 2 位旅客 變小 */
+                font-weight: 500;
+            }
+            /* + - 按鈕縮小 */
+            .people-controls button {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 0.9rem !important;
+                border-radius: 8px;
+                background: #f1f5f9;
+                border: 1px solid #d1d5db;
+                color: #333;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all .2s ease;
+            }
+
+                .people-controls button:hover {
+                    background: #e0f7fa;
+                    border-color: #7ec8e3;
+                    color: #22b3c1;
+                }
+
+            .search-btn {
+                grid-column: span 3;
+                width: 100%;
+                font-size: 0.95rem;
+                padding: 10px 0;
+                border-radius: 10px;
+                margin-top: 4px;
+                justify-self: end;
+            }
+            /* 標題微縮，讓 hero 更平衡 */
+            .search-wrapper h1 {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+            /* Tab 排列緊湊一點 */
+            .search-tabs {
+                gap: 6px;
+                margin-bottom: 1rem;
+            }
+
+            .search-tab {
+                padding: 4px 14px;
+                font-size: 0.9rem;
+            }
+
+            .dropdown-panel {
+                width: calc(80vw - 40px) !important; /* 留安全邊距 */
+                left: 50% !important;
+                transform: translateX(-50%);
+                font-size: 0.9rem;
+                padding: 8px;
+                border-radius: 10px;
+                max-height: 220px;
+            }
+
+                .dropdown-panel div,
+                .dropdown-panel li {
+                    padding: 6px 8px;
+                }
+        }
+
+  
         @@keyframes dropdownFade {
             from
 
@@ -450,7 +671,6 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
             margin-bottom: 1rem;
             transition: all 0.3s ease;
-            overflow: hidden;
             border: 1px solid #d8ebff;
         }
 
@@ -466,9 +686,8 @@
             padding: 0.6rem 1rem;
             cursor: pointer;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            font-size: 1.1rem;
+            align-items: center;
             transition: background .3s, color .3s;
         }
 
@@ -490,7 +709,6 @@
             padding: 1.2rem 1.5rem;
             color: #444;
             display: none;
-            line-height: 1.8;
             background: #fff;
             border-top: 1px solid #d8ebff;
             font-size: 1rem;
@@ -526,13 +744,23 @@
             font-size: 0.95rem;
             padding: 1rem 1.2rem;
         }
-        /* 搜尋列在小螢幕時調整欄位配置 */
-        .search-box {
-            grid-template-columns: 1fr;
+
+        }
+        /* 💡RWD：手機縮排與字級 */
+        @@media (max-width: 576px) {
+            .faq-question
+
+        {
+            font-size: 1rem;
+            padding: 0.8rem 1rem;
+        }
+
+        .faq-answer {
+            font-size: 0.9rem;
+            padding: 0.8rem 1rem;
         }
 
         }
-
         /* 熱門產品card */
         /* 統一產品卡樣式（修正版） */
         .product-card {
@@ -639,7 +867,7 @@
                 </div>
 
                 <!-- 搜尋 -->
-                <button type="submit" class="btn btn-outline-primary">搜尋</button>
+                <button type="submit" class="btn btn-outline-primary search-btn">搜尋</button>
             </div>
         </form>
     </div>

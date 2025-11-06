@@ -231,17 +231,25 @@ function setupScrollHandlers() {
             heroMedia.style.transform = `translateZ(0) scale(${1.1 + clamp / 2800}) translateY(${clamp * 0.06}px)`;
         }
     }
-
     function onScroll() {
         lastY = window.scrollY || window.pageYOffset;
         if (!ticking) {
-            window.requestAnimationFrame(() => { updateOnScroll(lastY); ticking = false; });
+            window.requestAnimationFrame(() => {
+                updateOnScroll(lastY);
+                ticking = false;
+            });
             ticking = true;
         }
     }
-
     window.addEventListener('scroll', onScroll, { passive: true });
     updateOnScroll(window.scrollY || window.pageYOffset);
+
+    if (toTop) {
+        toTop.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
 }
 
 // 平滑錨點（忽略 href="#"）

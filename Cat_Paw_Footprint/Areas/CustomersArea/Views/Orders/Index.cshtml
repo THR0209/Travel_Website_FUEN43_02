@@ -17,7 +17,7 @@
                     <th v-on:click="doSort('createTime')" class="cursor-pointer text-center">建立時間 {{ sortIcon('createTime') }}</th>
                     <th v-on:click="doSort('customerName')" class="cursor-pointer text-center">客戶 {{ sortIcon('customerName') }}</th>
                     <th v-on:click="doSort('status')" class="cursor-pointer text-center">狀態 {{ sortIcon('status') }}</th>
-                    <th style="width:140px">操作</th>
+                    <th class="cursor-pointer text-center" style="width:180px">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,7 +34,7 @@
                     </td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary" v-on:click="detail(o.id)">明細</button>
-                        <button class="btn btn-sm btn-primary" v-if="o.status === '未付款'" v-on:click="payOrder(o.id)">信用卡</button>
+                        <button class="btn btn-sm btn-outline-secondary ms-1" v-if="o.status === '未付款'" v-on:click="payOrder(o.id)">信用卡</button>
                         <button class="btn btn-sm btn-outline-danger ms-1" v-if="o.status !== '已取消'" v-on:click="cancelOrder(o.id)">取消</button>
                     </td>
                 </tr>

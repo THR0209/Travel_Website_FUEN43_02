@@ -2,46 +2,55 @@
     ViewData["Title"] = "修改個人資料";
 }
 
-<div id="editApp" class="container mt-5" style="max-width:500px;">
-    <h2 class="text-center mb-4">修改個人資料</h2>
+<div class="profile-edit-wrapper">
+    <div id="editApp" class="card profile-card fade-in-up">
+        <h3 class="text-center mb-4 fw-bold text-primary">
+            <i class="fa-solid fa-user-pen me-2"></i> 修改個人資料
+        </h3>
 
-    <div v-if="loading" class="text-center text-secondary">載入中...</div>
-
-    <!-- 重要：用 v-on:submit.prevent，Razor 不會吃掉 -->
-    <form v-if="!loading" v-on:submit.prevent="saveProfile" novalidate>
-        @Html.AntiForgeryToken()
-
-        <div class="mb-3">
-            <label class="form-label">姓名</label>
-            <input type="text" class="form-control" v-model="form.fullName" placeholder="請輸入姓名" required>
+        <div v-if="loading" class="text-center text-secondary py-3">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">載入中...</span>
+            </div>
+            <p class="mt-2">資料載入中...</p>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">電話</label>
-            <input type="tel" class="form-control" v-model="form.phone" placeholder="例如 0912345678" required>
-        </div>
+        <form v-if="!loading" v-on:submit.prevent="saveProfile" novalidate>
+            @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label class="form-label">地址</label>
-            <input type="text" class="form-control" v-model="form.address" placeholder="請輸入地址">
-        </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">姓名</label>
+                <input type="text" class="form-control" v-model="form.fullName" placeholder="請輸入姓名" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">身分證號</label>
-            <input type="text" class="form-control" v-model="form.IDNumber" maxlength="10" placeholder="例如 A123456789">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">信箱</label>
-            <input type="email" class="form-control" v-model="form.email" placeholder="例如 example@mail.com">
-        </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">電話</label>
+                <input type="tel" class="form-control" v-model="form.phone" placeholder="例如 0912345678" required>
+            </div>
 
-        <button type="submit" class="btn btn-primary w-100" :disabled="saving">
-            {{ saving ? "儲存中..." : "儲存修改" }}
-        </button>
-    </form>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">地址</label>
+                <input type="text" class="form-control" v-model="form.address" placeholder="請輸入地址">
+            </div>
 
-    <div class="text-center mt-3">
-        <span :style="{ color: messageColor }">{{ message }}</span>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">身分證號</label>
+                <input type="text" class="form-control" v-model="form.IDNumber" maxlength="10" placeholder="例如 A123456789">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">信箱</label>
+                <input type="email" class="form-control" v-model="form.email" placeholder="例如 example@mail.com">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3" :disabled="saving">
+                {{ saving ? "儲存中..." : "儲存修改" }}
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <span :style="{ color: messageColor }">{{ message }}</span>
+        </div>
     </div>
 </div>
 
