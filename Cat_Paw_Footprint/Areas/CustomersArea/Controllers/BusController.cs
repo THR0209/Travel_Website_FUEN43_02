@@ -25,12 +25,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 				// ✅ TDX 支援的縣市代碼（官方格式）
 				var cities = new[]
 				{
-			"Taipei", "NewTaipei", "Taoyuan", "Keelung", "Hsinchu", "HsinchuCounty",
-			"MiaoliCounty", "Taichung", "ChanghuaCounty", "NantouCounty",
-			"YunlinCounty", "Chiayi", "ChiayiCounty", "Tainan", "Kaohsiung",
-			"PingtungCounty", "YilanCounty", "HualienCounty", "TaitungCounty",
-			"PenghuCounty", "KinmenCounty", "LienchiangCounty"
-		};
+					"Taipei", "NewTaipei", "Taoyuan", "Keelung", "Hsinchu", "HsinchuCounty",
+					"MiaoliCounty", "Taichung", "ChanghuaCounty", "NantouCounty",
+					"YunlinCounty", "Chiayi", "ChiayiCounty", "Tainan", "Kaohsiung",
+					"PingtungCounty", "YilanCounty", "HualienCounty", "TaitungCounty",
+					"PenghuCounty", "KinmenCounty", "LienchiangCounty"
+				};
 
 				var allRoutes = new List<JsonElement>();
 
