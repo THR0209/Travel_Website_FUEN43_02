@@ -144,11 +144,17 @@ public partial class webtravel2Context : DbContext
 
     public virtual DbSet<TripProjectDetails> TripProjectDetails { get; set; }
 
+    public virtual DbSet<PromotionPics> PromotionPics { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<PromotionPics>(entity =>
+        {
+            entity.HasKey(e => e.PromotionPicID).IsClustered(false);
 
+            entity.Property(e => e.PictureUrl).HasMaxLength(300);
+        });
 
-		modelBuilder.Entity<CouponPics>(entity =>
+        modelBuilder.Entity<CouponPics>(entity =>
         {
             //entity.HasNoKey();
 
