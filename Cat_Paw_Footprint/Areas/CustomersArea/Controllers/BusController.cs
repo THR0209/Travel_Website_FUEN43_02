@@ -87,8 +87,6 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			}
 		}
 
-
-
 		// 🟢 查詢即時到站資訊 (ETA)
 		[HttpGet("eta")]
 		public async Task<IActionResult> GetBusETA(string city, string route)
