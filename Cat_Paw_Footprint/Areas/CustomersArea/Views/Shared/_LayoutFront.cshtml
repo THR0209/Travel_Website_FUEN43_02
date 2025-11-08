@@ -125,9 +125,7 @@
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-tickets"><span class="link-text">景點門票</span></a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-hotels"><span class="link-text">住宿</span></a></li>
                     <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#featured-transports"><span class="link-text">交通</span></a></li>
-                    <li class="nav-item border-end me-1 p-1">
-                        <a class="nav-link" asp-controller="Promotions" asp-action="index"><span class="link-text">優惠活動</span></a>
-                    </li>
+                    <li class="nav-item border-end me-1 p-1"><a class="nav-link" href="#promotions"><span class="link-text">優惠活動</span></a></li>
                     <!-- 幫助中心下拉選單 -->
                     <li class="nav-item dropdown border-end me-1 p-1">
                         <a class="nav-link dropdown-toggle" href="#" id="helpDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -369,87 +367,6 @@
     <script src="~/front-end/assets/js/popup.js"></script>
     <script src="~/front-end/assets/js/custom.js"></script>
     <script src="~/front-end/assets/js/webFront.js"></script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/CustomersArea/service-worker.js')
-                .then(reg => console.log('Service Worker 註冊成功:', reg))
-                .catch(err => console.log('Service Worker 註冊失敗:', err));
-        }
-
-         // 全域購物車計數更新
-        function updateCartCount(count) {
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) cartCount.innerText = count;
-        }
-
-        // ✅ 頁面載入時，只有登入會員才呼叫購物車 API
-        document.addEventListener('DOMContentLoaded', function () {
-            const isLoggedIn = @isCustomerLoggedIn.ToString().ToLower();
-            if (!isLoggedIn) return; // 🚫 未登入就直接跳出，不呼叫 API
-
-            fetch('/CustomersArea/Cart/count')
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.count > 0) updateCartCount(data.count);
-                })
-                .catch(error => console.error('Error fetching cart count:', error));
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const tripLink = document.getElementById("navTripLink");
-            if (!tripLink) return;
-
-            tripLink.addEventListener("click", function (e) {
-                e.preventDefault();
-
-                // 如果不在首頁 → 直接跳 Browse
-                if (!window.isHomePage) {
-                    window.location.href = "/CustomersArea/Products/Browse?type=trip";
-                }
-                // 如果現在在首頁 → 手動觸發首頁搜尋 Tab = trip
-                else {
-                    // ✅ 若首頁搜尋列已載入，切換成「套裝行程」Tab
-                    document.querySelector('.search-tab[data-type="trip"]')?.click();
-
-                    // ✅ 平滑滾動到搜尋欄
-                    const wrapper = document.querySelector(".search-wrapper");
-                    if (wrapper) {
-                        window.scrollTo({
-                            top: wrapper.offsetTop - 80,
-                            behavior: "smooth"
-                        });
-                    }
-                }
-            });
-        });
-    </script>
-
-    <script>
-        const favToast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true
-        });
-
-        function showFavResult(isFav, count){
-          favToast.fire({
-            icon: isFav ? 'success' : 'info',
-            title: isFav ? '已加入收藏' : '已取消收藏',
-            html: (typeof count === 'number')
-              ? `<span style="font-size:.9rem;">目前此商品被收藏 <b>${count}</b> 次</span>`
-              : ''
-          });
-        }
-    </script>
-
 
     @RenderSection("Scripts", required: false)
 </body>

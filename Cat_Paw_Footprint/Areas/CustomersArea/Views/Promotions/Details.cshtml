@@ -9,24 +9,43 @@
             <img :src="promotion.imageUrl || '/images/NoImage.png'"
                  class="card-img-top rounded-top-4"
                  :alt="promotion.promoName">
-            <div class="card-body p-4">
-                <h2 class="fw-bold mb-3 text-primary">{{ promotion.promoName }}</h2>
+
+            <div class="card-body p-4 text-center">
+                <h2 class="fw-bold mb-3 text-brand">{{ promotion.promoName }}</h2>
+
                 <p class="text-muted mb-2">
                     <i class="fa-regular fa-calendar me-1"></i>
                     {{ formatDate(promotion.startTime) }} ~ {{ formatDate(promotion.endTime) }}
                 </p>
-                <p class="mb-3 badge bg-warning text-dark">{{ promotion.promoDesc }}</p>
 
-                @* <div class="d-flex align-items-center gap-2 mt-3">
-                    <span class="badge bg-info text-dark">折扣類型：{{ discountTypeText(promotion.discountType) }}</span>
-                    <span class="badge bg-warning text-dark">折扣值：{{ promotion.discountValue }}</span>
-                </div> *@
+                <p class="badge bg-warning text-dark px-3 py-2">{{ promotion.promoDesc }}</p>
+
+                <!-- 🔹 限時優惠倒數區 -->
+                <div class="countdown-wrapper mt-4">
+                    <div v-if="timeRemaining.totalMs > 0">
+                        <div class="fw-bold mb-1">
+                            距離結束還有：
+                            <span class="text-danger">
+                                {{ timeRemaining.days }} 天
+                                {{ timeRemaining.hours }} 小時
+                                {{ timeRemaining.minutes }} 分鐘
+                            </span>
+                        </div>
+                        <div class="progress countdown-bar">
+                            <div class="progress-bar bg-gradient" role="progressbar"
+                                 :style="{ width: progressWidth + '%' }"></div>
+                        </div>
+                    </div>
+                    <div v-else class="text-muted small">
+                        活動已結束
+                    </div>
+                </div>
 
                 <div class="mt-4">
                     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
                         返回首頁
                     </a>
-                    <a asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                    <a asp-action="Index" class="btn btn-outline-primary rounded-pill px-4 ms-2">
                         返回列表
                     </a>
                 </div>
@@ -35,48 +54,71 @@
 
         <!-- 無資料 -->
         <div v-else class="text-center py-5 text-muted">
-            <i class="bi bi-emoji-frown" style="font-size:2rem;"></i>
+            <i class="fa-regular fa-face-frown" style="font-size:2rem;"></i>
             <p class="mt-2 mb-0">找不到指定的優惠活動</p>
         </div>
     </div>
 </section>
 
 @section Scripts {
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
         const app = Vue.createApp({
             data() {
-                return { promotion: null }
+                return {
+                    promotion: null,
+                    timeRemaining: { days: 0, hours: 0, minutes: 0, totalMs: 0 },
+                    progressWidth: 0,
+                    timer: null
+                };
             },
             methods: {
                 formatDate(dateStr) {
-                    if (!dateStr) return ''
-                    const date = new Date(dateStr)
-                    return isNaN(date) ? '' : date.toLocaleDateString('zh-TW')
+                    if (!dateStr) return '';
+                    const date = new Date(dateStr);
+                    return isNaN(date) ? '' : date.toLocaleDateString('zh-TW');
                 },
-                discountTypeText(type) {
-                    switch (type) {
-                        case 1: return '百分比折扣'
-                        case 2: return '固定金額折扣'
-                        default: return '未知'
+                updateCountdown() {
+                    if (!this.promotion?.endTime || !this.promotion?.startTime) return;
+
+                    const now = new Date();
+                    const end = new Date(this.promotion.endTime);
+                    const start = new Date(this.promotion.startTime);
+                    const total = end - start;
+                    const remaining = end - now;
+
+                    if (remaining <= 0) {
+                        this.timeRemaining = { days: 0, hours: 0, minutes: 0, totalMs: 0 };
+                        this.progressWidth = 100;
+                        clearInterval(this.timer);
+                        return;
                     }
+
+                    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+                    const minutes = Math.floor((remaining / (1000 * 60)) % 60);
+
+                    this.timeRemaining = { days, hours, minutes, totalMs: remaining };
+                    const progress = 100 - (remaining / total) * 100;
+                    this.progressWidth = Math.min(100, Math.max(0, progress));
                 }
             },
             mounted() {
-                const id = window.location.pathname.split('/').pop()
+                const id = window.location.pathname.split('/').pop();
                 axios.get(`/CustomersArea/Promotions/GetById/${id}`)
                     .then(res => {
-                        this.promotion = res.data
-                        console.log('優惠活動載入成功：', res.data)
+                        this.promotion = res.data;
+                        this.updateCountdown();
+                        this.timer = setInterval(this.updateCountdown, 60000); // 每分鐘更新
                     })
-                    .catch(err => {
-                        console.error('載入優惠活動失敗：', err)
-                    })
+                    .catch(err => console.error('載入優惠活動失敗：', err));
+            },
+            beforeUnmount() {
+                clearInterval(this.timer);
             }
-        })
-
-        app.mount('#promotion-detail')
+        });
+        app.mount('#promotion-detail');
     </script>
 }
