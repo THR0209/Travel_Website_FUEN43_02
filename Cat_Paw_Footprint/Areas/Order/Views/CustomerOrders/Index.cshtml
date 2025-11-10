@@ -86,9 +86,9 @@
                     <td class="text-center">{{ fmt(o.createTime) }}</td>
                     <td class="text-center">{{ o.customerName }}</td>
                     <td class="text-center"><span :class="['badge', statusClass(o.statusText)]">{{ o.statusText }}</span></td>
-                    <td class="d-flex gap-2">
-                        <button class="btn btn-sm btn-primary" v-on:click ="openEdit(o.id)">編輯</button>
-                        <button class="btn btn-sm btn-success" v-on:click ="openMail(o.id)">寄信</button>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-primary sm-2" v-on:click ="openEdit(o.id)">編輯</button>
+                        <button class="btn btn-sm btn-outline-success" v-on:click ="openMail(o.id)">寄信</button>
                     </td>
                 </tr>
                 <tr v-if="!loadingOrders && filteredOrders.length===0">

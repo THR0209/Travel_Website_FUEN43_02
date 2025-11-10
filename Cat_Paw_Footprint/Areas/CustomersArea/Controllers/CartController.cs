@@ -27,6 +27,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string ImageUrl { get; set; } = "";
 		}
 
+        private class CouponSession
+        {
+            public int id { get; set; }
+            public string? code { get; set; }
+            public int type { get; set; }
+            public decimal value { get; set; }
+            public string? hint { get; set; }
+        }
+
         private List<CartItem> GetCart()
         {
             if (CurrentCustomerId <= 0) return new List<CartItem>(); // 或 throw Unauthorized
@@ -50,13 +59,48 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		public IActionResult GetCartApi()
 		{
 			var items = GetCart();
-			var total = items.Sum(x => x.Price * x.Qty);
 
-            object? coupon = null;
+            CouponSession? coupon = null;
             var cj = HttpContext.Session.GetString("CART_COUPON");
             if (!string.IsNullOrWhiteSpace(cj))
-                coupon = JsonSerializer.Deserialize<object>(cj);
-            return Ok(new { items, total, coupon });
+            {
+                coupon = JsonSerializer.Deserialize<CouponSession>(cj);
+            }
+
+            decimal total = 0;
+            bool isFirstItem = true;
+
+            // This logic now exactly mirrors the Checkout method to ensure consistency
+            foreach (var it in items)
+            {
+                decimal finalAmount = it.Price * it.Qty;
+                if (coupon != null)
+                {
+                    if (coupon.type == 1) // Percentage
+                    {
+                        finalAmount *= coupon.value;
+                    }
+                    else // Fixed amount
+                    {
+                        if (isFirstItem)
+                        {
+                            finalAmount -= coupon.value;
+                            isFirstItem = false;
+                        }
+                    }
+                    finalAmount = Math.Max(0, finalAmount); // Match Checkout logic
+                }
+                total += (int)finalAmount; // Match Checkout logic (per-item rounding)
+            }
+            
+            total = Math.Max(0, total);
+
+            // For display, we still need the original coupon object format
+            object? couponForDisplay = null;
+            if (!string.IsNullOrWhiteSpace(cj))
+                couponForDisplay = JsonSerializer.Deserialize<object>(cj);
+
+            return Ok(new { items, total = (int)total, coupon = couponForDisplay });
 		}
 
 
@@ -133,22 +177,66 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             var items = GetCart();
             if (items.Count == 0) return BadRequest(new { ok = false, error = "購物車是空的" });
 
+            // Handle coupon logic
+            CouponSession? coupon = null;
+            var cj = HttpContext.Session.GetString("CART_COUPON");
+            if (!string.IsNullOrWhiteSpace(cj))
+            {
+                coupon = JsonSerializer.Deserialize<CouponSession>(cj);
+            }
+
+            bool isFirstItem = true;
             var now = DateTime.Now;
+
             foreach (var it in items)
             {
+                decimal finalAmount = it.Price * it.Qty;
+
+                if (coupon != null)
+                {
+                    if (coupon.type == 1) // Percentage
+                    {
+                        finalAmount *= coupon.value;
+                    }
+                    else // Fixed amount
+                    {
+                        if (isFirstItem)
+                        {
+                            finalAmount -= coupon.value;
+                            isFirstItem = false;
+                        }
+                    }
+                    finalAmount = Math.Max(0, finalAmount); // Ensure not negative
+                }
+
                 _db.CustomerOrders.Add(new Models.CustomerOrders
                 {
                     CustomerID = cid,
                     ProductID = it.ProductId,
                     OrderStatusID = 2,  // 未付款
-                    TotalAmount = it.Price * it.Qty,
+                    TotalAmount = (int)finalAmount,
                     CreateTime = now,
                     UpdateTime = now
                 });
             }
             await _db.SaveChangesAsync();
 
+            // Mark coupon as used
+            if (coupon != null && coupon.id > 0)
+            {
+                var rec = await _db.CustomerCouponsRecords
+                    .FirstOrDefaultAsync(x => x.CustomerID == cid && x.CouponID == coupon.id);
+                if (rec != null)
+                {
+                    rec.IsUsed = true;
+                    rec.UsedTime = DateTime.Now;
+                    await _db.SaveChangesAsync();
+                }
+            }
+
             SaveCart(new List<CartItem>());
+            // Clear coupon from session after checkout
+            HttpContext.Session.Remove("CART_COUPON");
             return Ok(new { ok = true });
         }
         // 批次刪除（接收 body: [1,2,3]）
@@ -173,17 +261,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
             var now = DateTime.Now;
 
-            var q =
-				from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
-				where r.CustomerID == cid
-					  && (r.IsUsed == null || r.IsUsed == false)
-					  && (r.Coupon != null)                              // 👈 防呆
-					  && (r.Coupon.DiscountCode == code)                   // 或改為 DisCountCode，依你實際對應
-					  && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code)
-					  && (r.Coupon.StartDate == null || r.Coupon.StartDate <= now)
-					  && (r.Coupon.EndDate == null || r.Coupon.EndDate >= now) // 名稱一致！
-				select r;
-
+            			var q =
+            				from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
+            				where r.CustomerID == cid
+            					  && (r.IsUsed == null || r.IsUsed == false)
+            					  && (r.Coupon != null)                              // 👈 防呆
+            					  && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code)
+            				select r;
 			var rec = await q.FirstOrDefaultAsync();
             if (rec == null) return BadRequest(new { ok = false, error = "此折價券不可使用" });
 
@@ -210,18 +294,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			HttpContext.Session.Remove("CART_COUPON");
 			return Ok(new { ok = true });
 		}
-		[HttpGet("first-product-id")]
-		public async Task<IActionResult> FirstProductId()
-		{
-			var id = await _db.Products
-				.AsNoTracking()
-				.OrderBy(p => p.ProductID)
-				.Select(p => p.ProductID)
-				.FirstOrDefaultAsync();
-
-			if (id == 0) return NotFound(new { ok = false, error = "沒有商品資料" });
-			return Ok(new { productId = id });
-		}
+		
         // 依 Session 的購物車，只針對指定 productIds 建立「未付款」訂單
         [HttpPost("checkout-by-selected")]
         public async Task<IActionResult> CheckoutBySelected([FromForm] int[] productIds)
@@ -236,15 +309,44 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             if (selected.Count == 0)
                 return BadRequest(new { ok = false, error = "找不到指定商品" });
 
+            // Handle coupon logic
+            CouponSession? coupon = null;
+            var cj = HttpContext.Session.GetString("CART_COUPON");
+            if (!string.IsNullOrWhiteSpace(cj))
+            {
+                coupon = JsonSerializer.Deserialize<CouponSession>(cj);
+            }
+
+            bool isFirstItem = true;
             var now = DateTime.Now;
+
             foreach (var it in selected)
             {
+                decimal finalAmount = it.Price * it.Qty;
+
+                if (coupon != null)
+                {
+                    if (coupon.type == 1) // Percentage
+                    {
+                        finalAmount *= coupon.value;
+                    }
+                    else // Fixed amount
+                    {
+                        if (isFirstItem)
+                        {
+                            finalAmount -= coupon.value;
+                            isFirstItem = false;
+                        }
+                    }
+                    finalAmount = Math.Max(0, finalAmount); // Ensure not negative
+                }
+
                 _db.CustomerOrders.Add(new CustomerOrders
                 {
                     CustomerID = customerId,
                     ProductID = it.ProductId,
                     OrderStatusID = (int)OrderStatusId.Unpaid, // 未付款
-                    TotalAmount = it.Price * it.Qty,
+                    TotalAmount = (int)finalAmount,
                     CreateTime = now,
                     UpdateTime = now
                 });
@@ -254,6 +356,12 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             // 從購物車移除已結帳（未付款）的項目
             items.RemoveAll(x => productIds.Contains(x.ProductId));
             SaveCart(items);
+
+            // Clear coupon from session if all items that were in the cart are checked out
+            if (items.Count == 0)
+            {
+                HttpContext.Session.Remove("CART_COUPON");
+            }
 
             return Ok(new { ok = true });
         }

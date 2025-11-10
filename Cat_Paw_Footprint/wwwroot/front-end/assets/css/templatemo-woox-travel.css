@@ -3614,20 +3614,19 @@ input, select, textarea {
     display: inline-flex;
     align-items: center;
     gap: .35rem;
-    border: 1px solid #cfeff2;
-    background: #fff;
-    color: #22B3C1;
+    border: 1px solid #ff6b6b;
+    background: transparent;
+    color: #ff8c8c;
     font-weight: 700;
-    padding: 8px 12px;
+    padding: 2px 8px;
     border-radius: 999px;
     transition: all .2s ease;
     box-shadow: 0 4px 12px rgba(34,179,193,0.08);
 }
 
     .fav-btn:hover {
-        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        background: #ff4c4c;
         color: #fff;
-        border-color: transparent;
         transform: translateY(-1px);
         box-shadow: 0 6px 16px rgba(34,179,193,0.22);
     }
@@ -3672,4 +3671,170 @@ input, select, textarea {
 .fav-btn.is-fav .fav-count {
     color: #fff;
     opacity: .85;
+}
+
+/* =======================================================
+📢 優惠活動卡片樣式（精緻版）
+======================================================= */
+.text-brand {
+    color: #7ec8e3;
+}
+
+/* 整體容器 */
+.promotion-wrapper {
+    background: linear-gradient(180deg, #f4fbff 0%, #ffffff 100%);
+    border-radius: 24px;
+}
+
+/* 卡片主體 */
+.promo-card {
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+    .promo-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 22px rgba(34, 179, 193, 0.25);
+    }
+
+/* 圖片區塊 */
+.promo-thumb {
+    position: relative;
+    overflow: hidden;
+}
+
+    .promo-thumb img {
+        height: 160px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+.promo-card:hover .promo-thumb img {
+    transform: scale(1.05);
+}
+
+/* 滑入遮罩 */
+.promo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 179, 193, 0.35);
+    opacity: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    border-radius: inherit;
+}
+
+.promo-card:hover .promo-overlay {
+    opacity: 1;
+}
+
+.promo-more {
+    color: #fff;
+    background: rgba(0,0,0,0.35);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.8rem;
+    backdrop-filter: blur(2px);
+}
+
+/* 文字縮排 */
+.card-body {
+    padding: 0.9rem 1rem;
+}
+
+/* 兩行省略描述 */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* RWD 微調 */
+@media (max-width: 576px) {
+    .promo-thumb img {
+        height: 130px;
+    }
+
+    .card-body {
+        padding: 0.8rem;
+    }
+
+    .promo-more {
+        font-size: 0.75rem;
+    }
+}
+/* =======================================================
+📢 優惠活動詳情圖片調整
+======================================================= */
+#promotion-detail .card {
+    max-width: 800px; /* 限制整張卡片最大寬度 */
+    margin: 0 auto;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* 🔹 圖片縮小置中 */
+#promotion-detail .card-img-top {
+    width: 80%; /* 改成 80% 寬，不要滿版 */
+    max-height: 450px; /* 限制最大高度 */
+    object-fit: cover; /* 維持比例裁切 */
+    border-radius: 16px; /* 讓邊角仍然圓滑 */
+    display: block;
+    margin: 1.5rem auto 0; /* 置中 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 🔹 內容置中與配色 */
+#promotion-detail .card-body {
+    text-align: center;
+}
+
+/* 🔹 手機版再小一點 */
+@media (max-width: 576px) {
+    #promotion-detail .card-img-top {
+        width: 90%;
+        max-height: 220px;
+    }
+}
+/* =======================================================
+⏳ 限時優惠倒數條
+======================================================= */
+.text-brand {
+    color: #7ec8e3 !important;
+}
+
+.countdown-wrapper {
+    background: #f8fcfd;
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    max-width: 420px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(126, 200, 227, 0.1);
+}
+
+.countdown-bar {
+    height: 10px;
+    border-radius: 999px;
+    overflow: hidden;
+    background-color: #e9f6f9;
+}
+
+    .countdown-bar .bg-gradient {
+        background: linear-gradient(90deg, #22b3c1, #7ec8e3);
+        transition: width 0.6s ease;
+    }
+
+/* 手機版微調 */
+@media (max-width: 576px) {
+    .countdown-wrapper {
+        padding: 0.8rem 1rem;
+    }
+
+    .countdown-bar {
+        height: 8px;
+    }
 }
