@@ -7,7 +7,6 @@
 
         <div class="mb-3 d-flex gap-2">
             <button class="btn btn-outline-secondary" v-on:click="reload">重新整理</button>
-            <button class="btn btn-outline-primary" v-on:click="addDemo">加一個範例商品</button>
         </div>
 
         <div v-if="items.length===0" class="alert alert-info text-center">購物車是空的</div>
@@ -192,22 +191,6 @@
                   if(!v) return '';
                   const d = new Date(v);
                   return isNaN(d) ? '' : d.toLocaleDateString('zh-TW');
-                }
-
-                async function addDemo(){
-                  try{
-                    const fp = await axios.get('/CustomersArea/Cart/first-product-id');
-                    const pid = fp.data?.productId;
-                    if (!pid) { alert('找不到任何商品'); return; }
-
-                    await axios.post('/CustomersArea/Cart/add',
-                      new URLSearchParams({ productId: pid, qty: 1 })
-                    );
-                    await reload();
-                  }catch(err){
-                    console.error(err);
-                    alert('加入範例商品失敗：' + (err?.response?.status || ''));
-                  }
                 }
 
                 function couponLabel(c){
@@ -441,7 +424,7 @@
                   items,couponLabel,couponCode,discountHint,unlockCouponSelect,
                   selected,checkAll,toggleAll,batchRemove,customerId,selectedTotal,
                   inc, dec, update, remove,applyCouponById,clearCart,coupons,
-                  clearCoupon,checkout,finalTotal,addDemo,selectedCouponCode,
+                  clearCoupon,checkout,finalTotal,selectedCouponCode,
                   payByTransfer,loadCoupons,toDate,applySelectedCoupon,
                   beforePaySubmit,onCouponChange
                 };
