@@ -92,10 +92,10 @@
                         </div>
                         <div class="price">NT$ @p.MinPrice.ToString("N0") 起</div>
 
-                        <div class="mt-2 d-flex gap-2">
+                        <div class="mt-2 d-flex align-items-center gap-2">
                             <a asp-area="CustomersArea" asp-controller="Products" asp-action="Details" asp-route-id="@p.ProductID"
                                class="btn btn-sm btn-outline-secondary">查看詳情</a>
-                            <button type="button" class="btn btn-sm btn-primary add-to-cart-btn" data-product-id="@p.ProductID">加入購物車</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary add-to-cart-btn" data-product-id="@p.ProductID">加入購物車</button>
                             <!-- ❤️ 收藏 -->
                             <button type="button" class="fav-btn btn-sm"
                                     data-product-id="@p.ProductID" aria-pressed="false" title="加入收藏">

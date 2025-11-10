@@ -294,18 +294,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			HttpContext.Session.Remove("CART_COUPON");
 			return Ok(new { ok = true });
 		}
-		[HttpGet("first-product-id")]
-		public async Task<IActionResult> FirstProductId()
-		{
-			var id = await _db.Products
-				.AsNoTracking()
-				.OrderBy(p => p.ProductID)
-				.Select(p => p.ProductID)
-				.FirstOrDefaultAsync();
-
-			if (id == 0) return NotFound(new { ok = false, error = "沒有商品資料" });
-			return Ok(new { productId = id });
-		}
+		
         // 依 Session 的購物車，只針對指定 productIds 建立「未付款」訂單
         [HttpPost("checkout-by-selected")]
         public async Task<IActionResult> CheckoutBySelected([FromForm] int[] productIds)

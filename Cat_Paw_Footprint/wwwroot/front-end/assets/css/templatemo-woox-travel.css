@@ -3614,20 +3614,19 @@ input, select, textarea {
     display: inline-flex;
     align-items: center;
     gap: .35rem;
-    border: 1px solid #cfeff2;
-    background: #fff;
-    color: #22B3C1;
+    border: 1px solid #ff6b6b;
+    background: transparent;
+    color: #ff8c8c;
     font-weight: 700;
-    padding: 8px 12px;
+    padding: 2px 8px;
     border-radius: 999px;
     transition: all .2s ease;
     box-shadow: 0 4px 12px rgba(34,179,193,0.08);
 }
 
     .fav-btn:hover {
-        background: linear-gradient(135deg,#7ec8e3,#22B3C1);
+        background: #ff4c4c;
         color: #fff;
-        border-color: transparent;
         transform: translateY(-1px);
         box-shadow: 0 6px 16px rgba(34,179,193,0.22);
     }
