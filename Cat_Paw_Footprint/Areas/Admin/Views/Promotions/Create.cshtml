@@ -31,6 +31,17 @@
                 <div class="card-body">
                     <form asp-action="Create" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label for="coverFile" class="form-label fw-semibold">封面圖片</label>
+                            <input type="file" class="form-control" id="coverFile" name="coverFile" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(Model.CoverImage))
+                            {
+                                <div class="mt-2">
+                                    <img src="@Model.CoverImage" alt="封面預覽" style="max-height:150px;border-radius:6px;" />
+                                </div>
+                            }
+                        </div>
+
 
                         <div class="mb-3 mt-3">
                             <label asp-for="PromoName" class="form-label fw-semibold"></label>

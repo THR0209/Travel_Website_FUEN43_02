@@ -7,6 +7,18 @@
 @section Styles {
     <link href="~/lib/datatables/css/jquery.datatables.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.4.0/css/fixedHeader.dataTables.min.css" />
+
+    <!-- CKEditor 套件 -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.css" crossorigin>
+    <link href="~/js/myckeditor.js" rel="stylesheet" />
+
+    <style>
+        /* CKEditor 內文區高度設定 */
+        .ck-editor__editable_inline {
+            min-height: 250px; /* 調高或調低這個值即可 */
+        }
+    </style>
+
 }
 
 <div class="container mt-4">
@@ -27,9 +39,15 @@
                             <span asp-validation-for="PromoName" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3">
+                        @* <div class="mb-3">
                             <label asp-for="PromoDesc" class="form-label fw-semibold"></label>
                             <input asp-for="PromoDesc" class="form-control" />
+                            <span asp-validation-for="PromoDesc" class="text-danger"></span>
+                        </div> *@
+
+                        <div class="mb-3">
+                            <label asp-for="PromoDesc" class="control-label"></label>
+                            <textarea asp-for="PromoDesc" class="form-control" id="editor"></textarea>
                             <span asp-validation-for="PromoDesc" class="text-danger"></span>
                         </div>
 
@@ -61,11 +79,12 @@
                         </div>
 
                         <div class="mb-3 form-check">
-                            <input type="hidden" asp-for="IsActive" value="false" />
-                            <input type="checkbox" class="form-check-input" asp-for="IsActive" value="true" />
+                            <input type="checkbox" asp-for="IsActive" class="form-check-input" value="true" />
+                            <input type="hidden" name="IsActive" value="false" />
                             <label asp-for="IsActive" class="form-check-label fw-semibold">上架</label>
-                            <span asp-validation-for="IsActive" class="text-danger"></span>
                         </div>
+
+
 
                         <hr />
                         <h5 class="fw-bold"><i class="fa-solid fa-boxes-stacked me-2"></i>綁定產品</h5>
@@ -111,6 +130,11 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
+    <script src="~/js/myckeditor.js"></script>
+
 
     <script src="~/lib/datatables/js/jquery.datatables.min.js"></script>
     <script src="https://cdn.datatables.net/fixedheader/3.4.0/js/dataTables.fixedHeader.min.js"></script>

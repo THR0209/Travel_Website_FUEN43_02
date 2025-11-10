@@ -23,6 +23,8 @@ public partial class Promotions
 
     public bool IsActive { get; set; }
 
+    public string? CoverImage { get; set; }
+
     public DateTime? CreateTime { get; set; }
 
     public DateTime? UpdateTime { get; set; }
