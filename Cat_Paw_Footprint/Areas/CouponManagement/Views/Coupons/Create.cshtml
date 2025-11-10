@@ -38,9 +38,13 @@
 
                         <div class="mb-3">
                             <label asp-for="CouponDesc" class="form-label fw-semibold"></label>
-                            <input asp-for="CouponDesc" class="form-control" placeholder="輸入優惠券描述" />
+                            <textarea asp-for="CouponDesc"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="輸入優惠券描述"></textarea>
                             <span asp-validation-for="CouponDesc" class="text-danger"></span>
                         </div>
+
 
                         <div class="mb-3">
                             <label asp-for="DiscountType" class="form-label fw-semibold"></label>
@@ -144,7 +148,7 @@
         document.getElementById("btnFillExample").addEventListener("click", function () {
             document.getElementById("CouponName").value = "聖誕節優惠";
             document.getElementById("DiscountCode").value = "Chrismas2025";
-            document.getElementById("CouponDesc").value = "聖誕節優惠活動，滿千折百。";
+            document.getElementById("CouponDesc").value = "聖誕佳節來臨，貓爪足跡陪你一起歡慶溫馨時刻！凡於活動期間消費滿 1,000 元，即可現折 100 元，不限商品、任意旅程都能享受節慶優惠。無論是安排一場浪漫的雙人假期，或是規劃一家人的冬季出遊，都能在聖誕氛圍中輕鬆出發。活動期間數量有限，折扣自動於結帳時抵扣，讓你的旅程更甜、更暖、更省。快把握這份專屬聖誕驚喜，一起為今年畫下最幸福的回憶！";
 
             // 折扣方式 → 固定金額折扣
             document.getElementById("DiscountType").value = "2";

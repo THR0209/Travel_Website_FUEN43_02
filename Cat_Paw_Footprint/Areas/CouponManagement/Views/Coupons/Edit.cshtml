@@ -38,7 +38,10 @@
 
                         <div class="mb-3">
                             <label asp-for="CouponDesc" class="form-label fw-semibold"></label>
-                            <input asp-for="CouponDesc" class="form-control" placeholder="輸入優惠券描述" />
+                            <textarea asp-for="CouponDesc"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="輸入優惠券描述"></textarea>
                             <span asp-validation-for="CouponDesc" class="text-danger"></span>
                         </div>
 
