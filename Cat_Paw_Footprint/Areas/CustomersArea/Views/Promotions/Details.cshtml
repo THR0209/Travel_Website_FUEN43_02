@@ -21,6 +21,10 @@
 
                 <p class="badge bg-warning text-dark px-3 py-2">{{ promotion.promoSummary }}</p>
 
+                @* <div class="small text-secondary mb-0" v-html="p.promoDesc"></div> *@
+                <!-- ✅ 優惠活動描述（CKEditor HTML） -->
+                <div class="promo-desc text-start mt-4" v-html="promotion.promoDesc"></div>
+
                 <!-- 🔹 限時優惠倒數區 -->
                 <div class="countdown-wrapper mt-4">
                     <div v-if="timeRemaining.totalMs > 0">

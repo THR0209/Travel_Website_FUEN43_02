@@ -50,7 +50,8 @@
       var o = Object.getOwnPropertySymbols(e);
       r && (o = o.filter(function (r) {
         return Object.getOwnPropertyDescriptor(e, r).enumerable;
-      })), t.push.apply(t, o);
+      })), t.push.
+      (t, o);
     }
     return t;
   }

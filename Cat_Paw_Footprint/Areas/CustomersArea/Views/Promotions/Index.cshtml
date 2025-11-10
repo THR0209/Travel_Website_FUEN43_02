@@ -6,6 +6,7 @@
     <h2 class="text-center mb-5 fw-bold text-brand">
         <i class="fa-solid fa-bullhorn me-2"></i> 優惠活動
     </h2>
+
     <!-- 🔍 搜尋列 -->
     <div class="d-flex justify-content-center mb-4">
         <input v-model="searchQuery"
@@ -15,18 +16,19 @@
     </div>
 
     <!-- 有資料 -->
-    <div v-if="promotions.length > 0" class="row g-3 g-md-4 justify-content-center">
-        <div v-for="p in promotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-3">
+    <div v-if="filteredPromotions.length > 0" class="row g-3 g-md-4 justify-content-center">
+        <div v-for="p in filteredPromotions" :key="p.promoID" class="col-12 col-sm-6 col-lg-3">
             <a :href="'/CustomersArea/Promotions/Details/' + p.promoID" class="text-decoration-none text-dark">
                 <div class="card promo-card shadow-sm h-100 border-0">
-                    <div class="promo-thumb">
+                    <div class="promo-thumb position-relative">
                         <img :src="p.coverImage || '/images/NoImage.png'"
                              :alt="p.promoName"
                              class="card-img-top"
                              style="object-fit: cover; height: 200px; border-radius: 6px;">
-
-                        <div class="promo-overlay">
-                            <span class="promo-more">查看活動</span>
+                        <div class="promo-overlay position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-25 text-white fw-bold"
+                             style="opacity: 0; transition: opacity .3s;"
+                             @@mouseenter="hover = true" @@mouseleave="hover = false">
+                            查看活動
                         </div>
                     </div>
                     <div class="card-body">
@@ -42,10 +44,10 @@
         </div>
     </div>
 
-    <!-- 無資料 -->
+    <!-- 無搜尋結果 -->
     <div v-else class="text-center text-muted py-5">
         <i class="fa-solid fa-paw mb-3" style="font-size:2rem; color:#7ec8e3;"></i>
-        <p class="mb-0">目前沒有可顯示的優惠活動 💤</p>
+        <p class="mb-0">找不到符合的優惠活動 💤</p>
     </div>
 </div>
 
@@ -56,18 +58,18 @@
     <script>
         const app = Vue.createApp({
             data() {
-                return { 
-                    promotions: [] ,
+                return {
+                    promotions: [],
                     searchQuery: ''
                 }
             },
             computed: {
                 filteredPromotions() {
                     if (!this.searchQuery) return this.promotions
-                    const keyword = this.searchQuery.toLowerCase()
+                    const keyword = this.searchQuery.toLowerCase().trim()
                     return this.promotions.filter(p =>
-                        p.promoName?.toLowerCase().includes(keyword) ||
-                        p.promoSummary?.toLowerCase().includes(keyword)
+                        (p.promoName && p.promoName.toLowerCase().includes(keyword)) ||
+                        (p.promoSummary && p.promoSummary.toLowerCase().includes(keyword))
                     )
                 }
             },
@@ -82,13 +84,12 @@
                 axios.get('/CustomersArea/Promotions/GetAllActivePromotions')
                     .then(res => {
                         this.promotions = res.data || []
-                        console.log('載入優惠活動成功：', this.promotions)
+                        console.log('✅ 載入優惠活動成功：', this.promotions)
                     })
-                    .catch(err => console.error('載入優惠活動失敗：', err))
+                    .catch(err => console.error('❌ 載入優惠活動失敗：', err))
             }
         })
 
         app.mount('#promotion-list')
     </script>
 }
-

@@ -68,13 +68,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                                isActive = c.IsActive, // ✨ 新增 IsActive
                                rule = c.MinimumAmount != null
                                    ? (c.DiscountType == 1
-                                       ? $"訂購金額須滿 TWD {c.MinimumAmount:N0} 打 {(c.DiscountValue * 10):0.##} 折"
+                                       ? $"訂購金額須滿 TWD {c.MinimumAmount:N0}, 打 {(c.DiscountValue * 10):0.##} 折"
                                            + (c.MaximumDiscount != null ? $"，最高折抵 {c.MaximumDiscount:N0} 元" : "")
                                        : $"訂購金額須滿 TWD {c.MinimumAmount:N0} 折 {c.DiscountValue:N0} 元")
                                    : (c.DiscountType == 1
-                                       ? $"訂購金額須滿 TWD 1打 {(c.DiscountValue * 10):0.##} 折"
+                                       ? $"訂購金額須滿 TWD 1, 打 {(c.DiscountValue * 10):0.##} 折"
                                            + (c.MaximumDiscount != null ? $"，最高折抵 {c.MaximumDiscount:N0} 元" : "")
-                                       : $"訂購金額須滿 TWD 1折 {c.DiscountValue:N0} 元")
+                                       : $"訂購金額須滿 TWD 1, 折 {c.DiscountValue:N0} 元")
                            }).ToList();
 
             // 4️⃣ 分類回傳
