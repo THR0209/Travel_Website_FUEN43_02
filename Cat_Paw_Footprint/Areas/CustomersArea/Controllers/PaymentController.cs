@@ -172,7 +172,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
 			try
 			{
-				var used = System.Text.Json.JsonSerializer.Deserialize<UsedCouponDto>(couponJson);
+				var used = System.Text.Json.JsonSerializer.Deserialize<CouponSession>(couponJson);
 				if (used?.id > 0)
 				{
 					var rec = await _db.CustomerCouponsRecords
@@ -201,6 +201,15 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			public string? type { get; set; }   // percent / fixed（可有可無）
 			public decimal? value { get; set; } // 可有可無
 		}
+
+        private class CouponSession
+        {
+            public int id { get; set; }
+            public string? code { get; set; }
+            public int type { get; set; }
+            public decimal value { get; set; }
+            public string? hint { get; set; }
+        }
 
 		private class AppliedCoupon
 		{
@@ -289,44 +298,44 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 			if (sel.Count == 0)
 				return BadRequest("勾選的商品不在購物車內。");
 
-			var originalTotal = sel.Sum(s => s.Price * s.Qty);
-
-			// 只要 Session 還有 CART_COUPON 才視為要套用
-			var couponJson = HttpContext.Session.GetString("CART_COUPON");
-			var finalTotal = originalTotal;
-
-			if (!string.IsNullOrWhiteSpace(couponJson))
-			{
-				try
-				{
-					var used = System.Text.Json.JsonSerializer.Deserialize<UsedCouponDto>(couponJson);
-					if (used != null)
-					{
-						var v = (decimal)(used.value ?? 0);
-						if (used.type == "1" || string.Equals(used.type, "percent", StringComparison.OrdinalIgnoreCase))
-						{
-							var discountAmt = Math.Floor(originalTotal * (v / 100m));
-							finalTotal = (int)Math.Max(0, originalTotal - discountAmt);
-						}
-						else if (used.type == "2" || string.Equals(used.type, "fixed", StringComparison.OrdinalIgnoreCase))
-						{
-							finalTotal = (int)Math.Max(0, originalTotal - v);
-						}
-					}
-				}
-				catch { /* ignore */ }
-			}
+            // Handle coupon logic
+            CouponSession? coupon = null;
+            var couponJson = HttpContext.Session.GetString("CART_COUPON");
+            if (!string.IsNullOrWhiteSpace(couponJson))
+            {
+                coupon = System.Text.Json.JsonSerializer.Deserialize<CouponSession>(couponJson);
+            }
 
 			var now = DateTime.Now;
 			var newOrders = new List<CustomerOrders>();
+            bool isFirstItem = true;
+
 			foreach (var it in sel)
 			{
+                decimal finalAmount = it.Price * it.Qty;
+                if (coupon != null)
+                {
+                    if (coupon.type == 1) // Percentage
+                    {
+                        finalAmount *= coupon.value;
+                    }
+                    else // Fixed amount
+                    {
+                        if (isFirstItem)
+                        {
+                            finalAmount -= coupon.value;
+                            isFirstItem = false;
+                        }
+                    }
+                    finalAmount = Math.Max(0, finalAmount);
+                }
+
 				var order = new CustomerOrders
 				{
 					CustomerID = cid,
 					ProductID = it.ProductId,
 					OrderStatusID = 2, // 未付款
-					TotalAmount = it.Price * it.Qty,
+					TotalAmount = (int)finalAmount, // Use the correctly discounted amount
 					CreateTime = now,
 					UpdateTime = now
 				};
@@ -468,6 +477,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 								  $"CF1(customerId)={customerId}, CF2(snapKey)={snapKey}, CF3(orderId)={orderId}");
 			}
 			if (customerId <= 0) return Content("1|OK");
+
+            // Mark coupon as used upon successful payment confirmation
+            await MarkUsedCouponAsync(customerId);
 
 			var now = DateTime.Now;
 

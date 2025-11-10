@@ -52,20 +52,21 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             // 3️⃣ 撈出優惠券資料並組合資訊
             var coupons = (from r in customerCoupons
                            join c in _context.Coupons on r.CouponID equals c.CouponID
-                           where c.IsActive == true
                            select new
                            {
-                               CouponID = c.CouponID,
-                               CouponName = c.CouponName,
-                               Desc = c.CouponDesc,
-                               DiscountType = c.DiscountType,
-                               DiscountValue = c.DiscountValue,
-                               MinimumAmount = c.MinimumAmount,
-                               StartDate = c.StartDate,
-                               EndDate = r.ExpireTime, // ✅ 改成會員個別有效期限
-                               IsUsed = r.IsUsed,
-                               IsExpired = r.ExpireTime < now, // ✅ 改成依據個人 ExpireTime 判斷
-                               Rule = c.MinimumAmount != null
+                               couponId = c.CouponID,
+                               couponName = c.CouponName,
+                               couponCode = c.CouponCode, // ✨ 新增 CouponCode
+                               desc = c.CouponDesc,
+                               discountType = c.DiscountType,
+                               discountValue = c.DiscountValue,
+                               minimumAmount = c.MinimumAmount,
+                               startDate = c.StartDate,
+                               endDate = r.ExpireTime, // ✅ 改成會員個別有效期限
+                               isUsed = r.IsUsed,
+                               isExpired = r.ExpireTime < now, // ✅ 改成依據個人 ExpireTime 判斷
+                               isActive = c.IsActive, // ✨ 新增 IsActive
+                               rule = c.MinimumAmount != null
                                    ? (c.DiscountType == 1
                                        ? $"訂購金額須滿 TWD {c.MinimumAmount:N0} 打 {(c.DiscountValue * 10):0.##} 折"
                                            + (c.MaximumDiscount != null ? $"，最高折抵 {c.MaximumDiscount:N0} 元" : "")
@@ -77,9 +78,9 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                            }).ToList();
 
             // 4️⃣ 分類回傳
-            var usable = coupons.Where(c => !(bool)c.IsUsed && !c.IsExpired).ToList();
-            var used = coupons.Where(c => (bool)c.IsUsed).ToList();
-            var expired = coupons.Where(c => !(bool)c.IsUsed && c.IsExpired).ToList();
+            var usable = coupons.Where(c => !(bool)c.isUsed).ToList();
+            var used = coupons.Where(c => (bool)c.isUsed).ToList();
+            var expired = new List<object>(); // Always empty
 
             return Json(new
             {

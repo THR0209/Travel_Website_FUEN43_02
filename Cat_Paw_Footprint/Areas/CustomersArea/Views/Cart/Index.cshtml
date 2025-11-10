@@ -49,8 +49,8 @@
 
                 <tfoot>
                     <tr>
-                        <th colspan="3" class="text-end">總計</th>
-                        <th class="text-end">NT$ {{ total.toLocaleString() }}</th>
+                        <th colspan="3" class="text-end">已勾選項目小計</th>
+                        <th class="text-end">NT$ {{ selectedTotal.toLocaleString() }}</th>
                         <th></th>
                     </tr>
                 </tfoot>
@@ -144,7 +144,6 @@
               setup(){
                 const customerId = ref(0); // 先用輸入測試，未接登入前暫用
                 const items = ref([]);
-                const total = ref(0);
                 const couponCode = ref('');
                 const discountHint = ref('');
                 const selected = ref([]);
@@ -152,26 +151,38 @@
                 const selectedCouponCode = ref('__PLEASE__');
                 const coupons = ref([]);
                 const couponSelectLocked = ref(false);
-                const discount = computed(() => {
-                  if (!selectedCouponCode.value) return 0;
+                const apiTotal = ref(0);
 
-                  // 找到被選的券（API 回來屬性: { couponId, code, discountType, discountValue, ... }）
-                  const c = coupons.value.find(x => x.code === selectedCouponCode.value);
-                  if (!c) return 0;
-
-                  // discountType: 1=折數(百分比 off), 2=固定金額
-                  if (c.discountType === 1) {
-                    // 10 表示 10% OFF
-                    const percent = Number(c.discountValue || 0) / 100;
-                    return Math.floor((total.value || 0) * percent);
-                  }
-                  if (c.discountType === 2) {
-                    return Math.min(c.discountValue, total.value || 0);
-                  }
-                  return 0;
+                const selectedTotal = computed(() => {
+                    if (selected.value.length === 0) return 0;
+                    return items.value
+                        .filter(it => selected.value.includes(it.productId))
+                        .reduce((sum, it) => sum + (it.price * it.qty), 0);
                 });
 
-                const finalTotal = computed(() => Math.max(0, (total.value || 0) - discount.value));
+                const finalTotal = computed(() => {
+                    if (selected.value.length === 0) return 0;
+
+                    let calculatedTotal = selectedTotal.value || 0;
+
+                    if (selectedCouponCode.value && selectedCouponCode.value !== '__NONE__') {
+                        const c = coupons.value.find(x => x.code === selectedCouponCode.value);
+                        if (c) {
+                            if (c.discountType === 1) { // Percentage
+                                calculatedTotal *= c.discountValue;
+                            } else if (c.discountType === 2) { // Fixed amount
+                                calculatedTotal -= c.discountValue;
+                            }
+                        }
+                    }
+                    
+                    return Math.floor(Math.max(0, calculatedTotal));
+                });
+
+                const discount = computed(() => {
+                    // The discount is now the difference between the original total and the final floored total.
+                    return (selectedTotal.value || 0) - finalTotal.value;
+                });
 
                 function unlockCouponSelect(){
                   couponSelectLocked.value = false;
@@ -219,19 +230,20 @@
 
                 async function loadCoupons(){
                   try {
-                    const res = await axios.get('/CustomersArea/Coupons/api');
-                    const raw = Array.isArray(res.data) ? res.data : [];
+                    const res = await axios.get('/CustomersArea/Coupons/GetMyCoupons');
+                    const raw = Array.isArray(res.data.usable) ? res.data.usable : [];
 
                     coupons.value = raw.map(c => ({
-                      couponId: c.couponId ?? c.CouponID ?? 0,
-                      code: c.code ?? c.couponCode ?? c.CouponCode ?? c.disCountCode ?? c.DisCountCode ?? '',                      
-                      name: c.name ?? c.couponDesc ?? c.CouponDesc ?? '',
-                      discountType: Number(c.discountType ?? c.DiscountType ?? 0),
-                      discountValue: Number(c.discountValue ?? c.DiscountValue ?? 0),
-                      expireAt: c.expireAt ?? c.endDate ?? c.EndDate ?? null
+                      couponId: c.couponId,
+                      code: c.couponCode,
+                      name: c.couponName,
+                      discountType: c.discountType,
+                      discountValue: c.discountValue,
+                      expireAt: c.endDate
                     }));
+
                     if (!selectedCouponCode.value) selectedCouponCode.value = '__PLEASE__';
-                    } catch (err) {
+                  } catch (err) {
                     console.error('載入優惠券失敗', err);
                     coupons.value = [];
                   }
@@ -357,7 +369,7 @@
                 async function reload(){
                   const { data } = await axios.get('/CustomersArea/Cart/api');
                   items.value = data.items || [];
-                  total.value = data.total || 0;
+                  apiTotal.value = data.total || 0;
                   // 回填折扣資訊（若後端有保存在 Session）
                   couponCode.value = data.coupon?.code || '';
                   discountHint.value = data.coupon?.hint || '';
@@ -427,7 +439,7 @@
 
                 return {
                   items,couponLabel,couponCode,discountHint,unlockCouponSelect,
-                  selected,checkAll,toggleAll,batchRemove,customerId,total,
+                  selected,checkAll,toggleAll,batchRemove,customerId,selectedTotal,
                   inc, dec, update, remove,applyCouponById,clearCart,coupons,
                   clearCoupon,checkout,finalTotal,addDemo,selectedCouponCode,
                   payByTransfer,loadCoupons,toDate,applySelectedCoupon,
