@@ -78,6 +78,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var promo = await _context.Promotions
+                .Include(p => p.Products_Promotions)
+                    .ThenInclude(pp => pp.Product)
                 .Where(p => p.PromoID == id && p.IsActive)
                 .Select(p => new
                 {
@@ -90,8 +92,17 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                     p.DiscountType,
                     p.DiscountValue,
                     CoverImage = string.IsNullOrEmpty(p.CoverImage)
-                    ? "/images/NoImage.png" // 🟢 沒上傳用預設圖
-                    : p.CoverImage          // 🟢 有上傳的用 ImgBB 連結
+                        ? "/images/NoImage.png"
+                        : p.CoverImage,
+                    Products = p.Products_Promotions.Select(pp => new
+                    {
+                        pp.Product.ProductID,
+                        pp.Product.ProductName,
+                        pp.Product.ProductPrice,
+                        ProductImageUrl = string.IsNullOrEmpty(pp.Product.ProductImageUrl)
+                            ? "/images/NoImage.png"
+                            : pp.Product.ProductImageUrl
+                    }).ToList()
                 })
                 .FirstOrDefaultAsync();
 
@@ -100,6 +111,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
             return Json(promo);
         }
+
 
 
 
