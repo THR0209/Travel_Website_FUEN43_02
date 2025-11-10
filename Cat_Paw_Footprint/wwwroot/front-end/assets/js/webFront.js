@@ -49,7 +49,7 @@
     });
 
 /* ---------------------------------------------------
- * 2. 首頁 Trip Link / Promotion Link 行為
+ * 2. 首頁 Trip Link / Promotion Link 行為 (有異常)
  * --------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", function () {
     const path = window.location.pathname.toLowerCase();
