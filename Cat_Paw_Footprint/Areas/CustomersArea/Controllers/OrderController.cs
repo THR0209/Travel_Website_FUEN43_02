@@ -119,7 +119,7 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                     CustomerID = cid,
                     EmployeeID = assignedEmp.EmployeeID,    // 沒指定就 null 或排程分派
 					Subject = $"取消訂單申請 #{orderCode}",
-                    TicketTypeID = 1,              // ← 請依你們的對照表給一個有效值
+                    TicketTypeID = 3,              // ← 請依你們的對照表給一個有效值
                     Description = reason,
                     StatusID = 1,                  // ← 例如 1=新建立
                     PriorityID = 2,                // ← 給個預設優先權

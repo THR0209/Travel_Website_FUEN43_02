@@ -81,27 +81,27 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Services
 					p.IsActive = true;
 
 				//// === 下架（可選）：RemovalDate < now，且目前已上架 ===
-				//var toDeactivate = await db.Products
-				//	.Where(p => p.IsActive == true)
-				//	.Join(db.ProductAnalysis,
-				//		  p => p.ProductID,
-				//		  a => a.ProductID,
-				//		  (p, a) => new { p, a })
-				//	.Where(x => x.a.RemovalDate != null && x.a.RemovalDate < now)
-				//	.Select(x => x.p)
-				//	.Distinct()
-				//	.ToListAsync(ct);
+				var toDeactivate = await db.Products
+					.Where(p => p.IsActive == true)
+					.Join(db.ProductAnalysis,
+						  p => p.ProductID,
+						  a => a.ProductID,
+						  (p, a) => new { p, a })
+					.Where(x => x.a.RemovalDate != null && x.a.RemovalDate < now)
+					.Select(x => x.p)
+					.Distinct()
+					.ToListAsync(ct);
 
 				//foreach (var p in toDeactivate)
 				//	p.IsActive = false;
 
-				//if (toActivate.Count + toDeactivate.Count > 0)
-				//{
-				//	await db.SaveChangesAsync(ct);
-				//	_logger.LogInformation(
-				//		"ProductPublishScheduler: Activated {A}, Deactivated {D} at {Now}",
-				//		toActivate.Count, toDeactivate.Count, now);
-				//}
+				if (toActivate.Count + toDeactivate.Count > 0)
+				{
+					await db.SaveChangesAsync(ct);
+					_logger.LogInformation(
+						"ProductPublishScheduler: Activated {A}, Deactivated {D} at {Now}",
+						toActivate.Count, toDeactivate.Count, now);
+				}
 			}
 			catch (Exception ex)
 			{

@@ -62,6 +62,7 @@
                         <td>@item.RegionName</td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@item.LocationID" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-pen-to-square"></i>編輯</a>
+                            <a asp-action="Delete" asp-route-id="@item.LocationID" class="btn btn-sm btn-outline-danger">刪除</a>
                         </td>
                     </tr>
                 }

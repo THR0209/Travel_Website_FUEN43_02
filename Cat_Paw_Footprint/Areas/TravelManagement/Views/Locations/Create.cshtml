@@ -20,6 +20,12 @@
 <div class="container mt-4">
     <div class="card shadow p-4">
         <h2 class="mb-3">新增景點</h2>
+
+        <button type="button" class="btn btn-outline-success btn-sm ms-2" id="btnAutoFill">
+            <i class="bi bi-magic"></i> 一鍵輸入示範
+        </button>
+
+
         <h6 class="text-muted mb-4">景點詳細資訊</h6>
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -276,6 +282,15 @@
                 }
             });
         });
+
+        // 一鍵輸入示範按鈕
+        document.getElementById("btnAutoFill").addEventListener("click", function () {
+            document.getElementById("LocationName").value = "澎湖跨海大橋";
+            document.getElementById("LocationAddr").value = "澎湖縣白沙鄉通梁村200號";
+            document.getElementById("LocationPrice").value = "0";
+            document.getElementById("editor").value = "澎湖跨海大橋是澎湖著名地標...";
+        });
+
         
 
     </script>

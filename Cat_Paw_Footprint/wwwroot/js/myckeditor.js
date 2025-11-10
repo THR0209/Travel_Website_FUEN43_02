@@ -330,6 +330,8 @@ const editorConfig = {
 ClassicEditor.create(document.querySelector('#editor'), editorConfig)
 	.then(editor => {
 		window.ckeditor = editor; // 讓全域可用
+		window.editorInstance = editor;  // ✅ 新增這行讓其他地方可共用
+		console.log("✅ CKEditor 初始化成功");
 	})
 	.catch(error => {
 		console.error('CKEditor 啟動失敗', error);
