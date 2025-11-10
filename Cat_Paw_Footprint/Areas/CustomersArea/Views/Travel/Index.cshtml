@@ -143,7 +143,7 @@
             </div>
         </div>
 
-        <!-- 右側：排行程 + 地圖 -->
+        <!-- 右側：排行程 + 地圖 + 公車 -->
         <div class="col-md-4">
 
             <!-- 排行程區塊，支援多天與時間推算 -->
@@ -330,7 +330,7 @@
         </div>
     </div>
 
-    <!-- 🟢 公車功能共用 Modal（全國路線搜尋 + 鍵盤輸入版） -->
+    <!-- 公車功能共用 Modal（全國路線搜尋 + 鍵盤輸入版） -->
     <div class="modal fade" id="busModal" tabindex="-1" aria-labelledby="busModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content shadow-lg border-0">
@@ -348,16 +348,18 @@
                                 v-on:click="switchBusTab('eta')">
                             🚌 動態公車
                         </button>
-                        <button class="btn"
+                        <div>
+                        @* <button class="btn"
                                 :class="busTab==='nearby' ? 'btn-success' : 'btn-outline-success'"
                                 v-on:click="switchBusTab('nearby')">
                             📍 附近站牌
-                        </button>
-                        <button class="btn"
+                        </button> *@
+                        @* <button class="btn"
                                 :class="busTab==='route' ? 'btn-success' : 'btn-outline-success'"
                                 v-on:click="switchBusTab('route')">
                             🗺️ 路線規劃
-                        </button>
+                        </button> *@
+                        </div>
                     </div>
 
                     <!-- ================= -->
@@ -442,16 +444,16 @@
                     </div>
 
                     <!-- 📍 附近站牌 -->
-                    <div v-if="busTab==='nearby'" class="text-center py-5">
+                    @* <div v-if="busTab==='nearby'" class="text-center py-5">
                         <h5>📍 顯示您附近的公車站牌</h5>
                         <p class="text-muted">（未來可整合定位 API）</p>
-                    </div>
+                    </div> *@
 
                     <!-- 🗺️ 路線規劃 -->
-                    <div v-if="busTab==='route'" class="text-center py-5">
+                    @* <div v-if="busTab==='route'" class="text-center py-5">
                         <h5>🗺️ 公車路線規劃功能</h5>
                         <p class="text-muted">（預留給之後的 Google Transit 查詢）</p>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
@@ -548,7 +550,7 @@
                     busDirection: 0,           // 去程/返程
                     autoUpdateTimer: null,     // 定時刷新 ETA
                     busTab: "eta",             // 當前子頁面
-                    showBusList: true,   // 🆕 控制是否顯示路線清單
+                    showBusList: true,   // 控制是否顯示路線清單
 
 
                 }
@@ -841,29 +843,55 @@
                     }
                 },
 
-                /* 測試是否能規劃路線，不會更新畫面 */
-                async tryRoute(list) {
-                    if (!this.directionsService) return false;
-                    if (list.length < 2) return true; // 一個點不需要路線
+                /* 刪除行程 (新) */
+                async deleteTrip() {
+                    if (!this.selectedProject) {
+                        showAlert('warning', "未選擇行程", "請先選擇要刪除的行程。");
+                        return;
+                    }
 
-                    const waypoints = list.slice(1, -1).map(p => ({
-                        location: { lat: p.lat, lng: p.lng },
-                        stopover: true
-                    }));
-
-                    const request = {
-                        origin: { lat: list[0].lat, lng: list[0].lng },
-                        destination: { lat: list[list.length - 1].lat, lng: list[list.length - 1].lng },
-                        waypoints,
-                        travelMode: google.maps.TravelMode.DRIVING
-                    };
-
-                    // 回傳 Promise 形式
-                    return new Promise(resolve => {
-                        this.directionsService.route(request, (result, status) => {
-                            resolve(status === 'OK');
-                        });
+                    /* 確認刪除 */
+                    const result = await showConfirm({
+                        title: `確定要刪除此行程嗎？`,
+                        text: `此操作無法復原，行程資料將永久刪除。`,
+                        confirmText: `🗑 刪除`
                     });
+
+                    if (result.isConfirmed) {
+                            try {
+                                // 呼叫後端刪除 API
+                                await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
+
+                                // 顯示成功提示
+                                showAlert('success', '刪除成功！', `該行程已從清單中移除`);
+
+                                // 重設畫面狀態
+                                this.selectedProject = "";
+                                this.loadTripList();
+                                this.totalDays = 1;
+                                this.currentDay = 1;
+                                this.projectName = '';
+                                this.tripDays = [{ day: 1, items: [] }];
+
+                                // ✅ 清空地圖內容（包含路線與標記）
+                                if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
+                                if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
+                                this.markers.forEach(m => m.setMap(null));
+                                this.markers = [];
+                                this.travelInfo = null;
+
+                                // 更新行程清單
+                                await this.loadTripList();
+
+                                // 重新繪製空地圖
+                                this.map.setCenter({ lat: 23.5, lng: 121 });
+                                this.map.setZoom(7);
+                            } catch (error) {
+                                // 錯誤處理
+                                console.error("❌ 刪除錯誤：", error);
+                                showAlert('error', '刪除失敗！', `請確認伺服器連線或稍後再試。`);
+                            }
+                    }
                 },
 
                 /* 刪除單一行程 */
@@ -945,58 +973,7 @@
                         this.tripDays.push({ day: d, items });
                     }
                     this.drawRoute();
-                },
-
-                /* 刪除行程 (新) */
-                async deleteTrip() {
-                    if (!this.selectedProject) {
-                        showAlert('warning', "未選擇行程", "請先選擇要刪除的行程。");
-                        return;
-                    }
-
-                    /* 確認刪除 */
-                    const result = await showConfirm({
-                        title: `確定要刪除此行程嗎？`,
-                        text: `此操作無法復原，行程資料將永久刪除。`,
-                        confirmText: `🗑 刪除`
-                    });
-
-                    if (result.isConfirmed) {
-                            try {
-                                // 呼叫後端刪除 API
-                                await fetch(`/api/trips/${this.selectedProject}`, { method: "DELETE" });
-
-                                // 顯示成功提示
-                                showAlert('success', '刪除成功！', `該行程已從清單中移除`);
-
-                                // 重設畫面狀態
-                                this.selectedProject = "";
-                                this.loadTripList();
-                                this.totalDays = 1;
-                                this.currentDay = 1;
-                                this.projectName = '';
-                                this.tripDays = [{ day: 1, items: [] }];
-
-                                // ✅ 清空地圖內容（包含路線與標記）
-                                if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
-                                if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
-                                this.markers.forEach(m => m.setMap(null));
-                                this.markers = [];
-                                this.travelInfo = null;
-
-                                // 更新行程清單
-                                await this.loadTripList();
-
-                                // 重新繪製空地圖
-                                this.map.setCenter({ lat: 23.5, lng: 121 });
-                                this.map.setZoom(7);
-                            } catch (error) {
-                                // 錯誤處理
-                                console.error("❌ 刪除錯誤：", error);
-                                showAlert('error', '刪除失敗！', `請確認伺服器連線或稍後再試。`);
-                            }
-                    }
-                },
+                },                               
 
                 /* 儲存邏輯自動判斷新建或更新 */
                 async saveTrip() {
@@ -1035,19 +1012,7 @@
                     const msg = await res.text();
                     showAlert('success',msg);
                     this.loadTripList();
-                },
-
-                /* 初始化地圖 */
-                initMap() {
-                    console.log("🗺️ Google Map 初始化成功");
-                this.map = new google.maps.Map(document.getElementById("map"), {
-                    center: { lat: 23.5, lng: 121 },    // 台灣中心點
-                    zoom: 7,
-                });
-
-                this.directionsService = new google.maps.DirectionsService();
-                this.directionsRenderer = new google.maps.DirectionsRenderer({ map: this.map });
-                },
+                },                
 
                 /* 根據當前天的行程 tripDays[currentDay-1].items 動態繪製地圖：
                      0 個點 → 清空地圖
@@ -1214,22 +1179,7 @@
                         const prevM = prevTotal % 60;
                         items[i].startTime = `${String(prevH).padStart(2, "0")}:${String(prevM).padStart(2, "0")}`;
                     }
-                },
-
-                 /* 更新地圖標記 */
-                updateMapMarkers() {
-                    this.markers.forEach(m => m.setMap(null));
-                    this.markers = [];
-                    const day = this.tripDays[this.currentDay - 1];
-                    day.items.forEach(p => {
-                        const marker = new google.maps.Marker({
-                            position: { lat: p.lat, lng: p.lng },
-                            map: this.map,
-                            title: p.name
-                        });
-                        this.markers.push(marker);
-                    });
-                },
+                },                 
 
                 /* 拖曳完後自動重算時間並更新地圖 */
                 updateSequence() {
@@ -1256,8 +1206,64 @@
                     // 重新觸發 Vue 更新畫面（防止 index 顯示未更新）
                     this.tripList = [...this.tripList];
                 },
+                /*==============  地圖API (開始) ===================*/
 
-                /*==============  公車API  ===================*/
+                /* 初始化地圖 */
+                initMap() {
+                    console.log("🗺️ Google Map 初始化成功");
+                this.map = new google.maps.Map(document.getElementById("map"), {
+                    center: { lat: 23.5, lng: 121 },    // 台灣中心點
+                    zoom: 7,
+                });
+
+                this.directionsService = new google.maps.DirectionsService();
+                this.directionsRenderer = new google.maps.DirectionsRenderer({ map: this.map });
+                },
+
+                /* 測試是否能規劃路線，不會更新畫面 */
+                async tryRoute(list) {
+                    if (!this.directionsService) return false;
+                    if (list.length < 2) return true; // 一個點不需要路線
+
+                    const waypoints = list.slice(1, -1).map(p => ({
+                        location: { lat: p.lat, lng: p.lng },
+                        stopover: true
+                    }));
+
+                    const request = {
+                        origin: { lat: list[0].lat, lng: list[0].lng },
+                        destination: { lat: list[list.length - 1].lat, lng: list[list.length - 1].lng },
+                        waypoints,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    };
+
+                    // 回傳 Promise 形式
+                    return new Promise(resolve => {
+                        this.directionsService.route(request, (result, status) => {
+                            resolve(status === 'OK');
+                        });
+                    });
+                },
+
+                /* 更新地圖標記 */
+                updateMapMarkers() {
+                    this.markers.forEach(m => m.setMap(null));
+                    this.markers = [];
+                    const day = this.tripDays[this.currentDay - 1];
+                    day.items.forEach(p => {
+                        const marker = new google.maps.Marker({
+                            position: { lat: p.lat, lng: p.lng },
+                            map: this.map,
+                            title: p.name
+                        });
+                        this.markers.push(marker);
+                    });
+                },
+
+                /*==============  地圖API (結束) ===================*/
+
+                /*==============  公車API (開始) ===================*/
+
                 /* 🟢 載入全台公車路線 */
                 async loadAllBusRoutes() {
                     try {
@@ -1292,6 +1298,8 @@
                     else if (key !== "更多") this.busKeyword += key;
                     this.filterBusRoutes();
                 },
+
+                /* 重設搜尋 */
                 resetBusSearch() {
                     this.busKeyword = "";
                     this.filteredRoutes = this.busRoutes.slice(0, 30);
@@ -1370,6 +1378,8 @@
                     if (stop.EstimateTime <= 180) return "bg-warning text-dark";
                     return "bg-info text-dark";
                 },
+
+                /* 格式化 ETA 文字 */
                 formatETA(stop) {
                     if (stop.StopStatus === 1) return "尚未發車";
                     if (stop.StopStatus === 2) return "交管不停靠";
@@ -1388,6 +1398,7 @@
                         this.autoUpdateTimer = null;
                     }
                 },
+                /*==============  公車API (結束)  ===================*/
 
             },
 
@@ -1451,8 +1462,7 @@
                         console.log("🛑 已停止公車自動更新");
                     }
                 });
-
-                this.loadAllBusRoutes(); // 預載公車路線清單
+                this.loadAllBusRoutes(); // 載入公車路線
 
             },
 

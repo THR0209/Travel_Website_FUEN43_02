@@ -14,80 +14,146 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 		{
 			_tdx = tdx;
 		}
+		///<summary>
 
-		// 🟢 取得全台公車路線（逐一載入＋延遲避免被封鎖）
+		// 🟢 取得全台公車路線（逐一載入＋延遲避免被封鎖） (舊)
 		// 呼叫方式：https://localhost:7132/api/bus/routes
+		//[HttpGet("routes")]
+		//public async Task<IActionResult> GetBusRoutes()
+		//{
+		//	try
+		//	{
+		//		// 官方 TDX 縣市代碼清單（22 個）
+		//		var cities = new[]
+		//		{
+		//			"Taipei", "NewTaipei", "Taoyuan", "Keelung", "Hsinchu", "HsinchuCounty",
+		//			"MiaoliCounty", "Taichung", "ChanghuaCounty", "NantouCounty",
+		//			"YunlinCounty", "Chiayi", "ChiayiCounty", "Tainan", "Kaohsiung",
+		//			"PingtungCounty", "YilanCounty", "HualienCounty", "TaitungCounty",
+		//			"PenghuCounty", "KinmenCounty", "LienchiangCounty"
+		//		};
+
+		//		// 用來儲存所有城市的路線
+		//		var allRoutes = new List<JsonElement>();
+
+		//		// 逐一請求（避免 TooManyRequests）
+		//		foreach (var city in cities)
+		//		{
+		//			try
+		//			{
+		//				// 🔹 建立查詢 URL
+		//				var url = $"https://tdx.transportdata.tw/api/basic/v2/Bus/Route/City/{city}?$format=JSON";
+
+		//				// 🔹 呼叫 TDX API
+		//				var json = await _tdx.GetAsync(url);
+
+		//				// 🔹 將 JSON 轉成可枚舉資料
+		//				var routes = JsonSerializer.Deserialize<List<JsonElement>>(json);
+
+		//				// 🔹 如果成功解析則加入集合
+		//				if (routes != null)
+		//				{
+		//					allRoutes.AddRange(routes);
+		//					Console.WriteLine($"✅ 已載入 {city}（{routes.Count} 筆）");
+		//				}
+		//				else
+		//				{
+		//					Console.WriteLine($"⚠️ {city} 無回傳資料（可能該縣市暫無公車路線）");
+		//				}
+
+		//				// 每次查完一個縣市就延遲 1.5 秒，避免被 TDX 判定過度頻繁
+		//				await Task.Delay(1500);
+		//			}
+		//			catch (Exception ex)
+		//			{
+		//				// ❌ 若個別城市查詢失敗，仍不中斷流程
+		//				Console.WriteLine($"⚠️ 無法載入 {city}：{ex.Message}");
+
+		//				// ⏳ 延長等待時間讓 TDX API 緩一口氣（防止被短時間封鎖）
+		//				await Task.Delay(2000);
+		//			}
+		//		}
+
+		//		// ✅ 全部完成
+		//		Console.WriteLine($"✅ 已整合 {allRoutes.Count} 條全台公車路線");
+
+		//		// ✅ 回傳成功結果給前端
+		//		return Ok(allRoutes);
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		// ❌ 若整體出現非預期錯誤
+		//		Console.WriteLine($"❌ 無法讀取全台公車路線：{ex.Message}");
+		//		return BadRequest(new { message = "讀取全台公車路線失敗", error = ex.Message });
+		//	}
+		//}
+		///</summary>
+		///
+
 		[HttpGet("routes")]
-		public async Task<IActionResult> GetBusRoutes()
+		public async Task<IActionResult> GetBusRoutesFast()
 		{
 			try
 			{
-				// ✅ 官方 TDX 縣市代碼清單（22 個）
 				var cities = new[]
 				{
-					"Taipei", "NewTaipei", "Taoyuan", "Keelung", "Hsinchu", "HsinchuCounty",
-					"MiaoliCounty", "Taichung", "ChanghuaCounty", "NantouCounty",
-					"YunlinCounty", "Chiayi", "ChiayiCounty", "Tainan", "Kaohsiung",
-					"PingtungCounty", "YilanCounty", "HualienCounty", "TaitungCounty",
-					"PenghuCounty", "KinmenCounty", "LienchiangCounty"
-				};
+			"Taipei", "NewTaipei", "Taoyuan", "Keelung", "Hsinchu", "HsinchuCounty",
+			"MiaoliCounty", "Taichung", "ChanghuaCounty", "NantouCounty",
+			"YunlinCounty", "Chiayi", "ChiayiCounty", "Tainan", "Kaohsiung",
+			"PingtungCounty", "YilanCounty", "HualienCounty", "TaitungCounty",
+			"PenghuCounty", "KinmenCounty", "LienchiangCounty"
+		};
 
-				// ✅ 用來儲存所有城市的路線
 				var allRoutes = new List<JsonElement>();
+				var cityGroups = cities.Chunk(5).ToList(); // 每批處理 5 個城市
+				int batchIndex = 1;
 
-				// ✅ 逐一請求（避免 TooManyRequests）
-				foreach (var city in cities)
+				foreach (var group in cityGroups)
 				{
-					try
+					Console.WriteLine($"🚀 第 {batchIndex} 批開始（{string.Join(", ", group)}）");
+
+					// 同時執行這一批城市
+					var tasks = group.Select(async city =>
 					{
-						// 🔹 建立查詢 URL
-						var url = $"https://tdx.transportdata.tw/api/basic/v2/Bus/Route/City/{city}?$format=JSON";
-
-						// 🔹 呼叫 TDX API
-						var json = await _tdx.GetAsync(url);
-
-						// 🔹 將 JSON 轉成可枚舉資料
-						var routes = JsonSerializer.Deserialize<List<JsonElement>>(json);
-
-						// 🔹 如果成功解析則加入集合
-						if (routes != null)
+						try
 						{
-							allRoutes.AddRange(routes);
-							Console.WriteLine($"✅ 已載入 {city}（{routes.Count} 筆）");
+							string url = $"https://tdx.transportdata.tw/api/basic/v2/Bus/Route/City/{city}?$format=JSON";
+							string json = await _tdx.GetAsync(url);
+
+							using var doc = JsonDocument.Parse(json);
+							var arr = doc.RootElement.EnumerateArray()
+									.Select(e => e.Clone())   // Clone 每個元素
+									.ToList();
+
+							lock (allRoutes)
+							{
+								allRoutes.AddRange(arr);
+							}
+							Console.WriteLine($"✅ {city} 成功載入 {arr.Count} 筆");
 						}
-						else
+						catch (Exception ex)
 						{
-							Console.WriteLine($"⚠️ {city} 無回傳資料（可能該縣市暫無公車路線）");
+							Console.WriteLine($"⚠️ {city} 發生錯誤：{ex.Message}");
 						}
+					});
 
-						// 💤 每次查完一個縣市就延遲 1.5 秒，避免被 TDX 判定過度頻繁
-						await Task.Delay(1500);
-					}
-					catch (Exception ex)
-					{
-						// ❌ 若個別城市查詢失敗，仍不中斷流程
-						Console.WriteLine($"⚠️ 無法載入 {city}：{ex.Message}");
+					await Task.WhenAll(tasks);
+					Console.WriteLine($"🟢 第 {batchIndex} 批完成，目前總筆數：{allRoutes.Count}");
 
-						// ⏳ 延長等待時間讓 TDX API 緩一口氣（防止被短時間封鎖）
-						await Task.Delay(2000);
-					}
+					// 分批之間延遲（可依實測縮短）
+					await Task.Delay(12000); // 稍等避免 TooManyRequests
+					batchIndex++;
 				}
 
-				// ✅ 全部完成
-				Console.WriteLine($"✅ 已整合 {allRoutes.Count} 條全台公車路線");
-
-				// ✅ 回傳成功結果給前端
+				Console.WriteLine($"🎉 全部完成，共整合 {allRoutes.Count} 筆");
 				return Ok(allRoutes);
 			}
 			catch (Exception ex)
 			{
-				// ❌ 若整體出現非預期錯誤
-				Console.WriteLine($"❌ 無法讀取全台公車路線：{ex.Message}");
-				return BadRequest(new { message = "讀取全台公車路線失敗", error = ex.Message });
+				Console.WriteLine($"❌ 錯誤：{ex.Message}");
+				return BadRequest(new { message = "讀取公車路線失敗", error = ex.Message });
 			}
 		}
-
-
 
 		// 🟢 查詢即時到站資訊 (ETA)
 		[HttpGet("eta")]
