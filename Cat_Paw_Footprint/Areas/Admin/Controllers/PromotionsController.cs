@@ -1,8 +1,10 @@
 ﻿using Cat_Paw_Footprint.Areas.Admin.ViewModel;
+using Cat_Paw_Footprint.Areas.Helper;
 using Cat_Paw_Footprint.Data;
 using Cat_Paw_Footprint.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cat_Paw_Footprint.Areas.Admin.Controllers
@@ -36,7 +38,10 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 					IsActive = p.IsActive,
 					CreateTime = p.CreateTime,
 					UpdateTime = p.UpdateTime,
-					Products = p.Products_Promotions.Select(pp => new ProductViewModel
+                    // 🟢 一定要加這行
+                    CoverImage = p.CoverImage,
+                    PromoSummary = p.PromoSummary,
+                    Products = p.Products_Promotions.Select(pp => new ProductViewModel
 					{
 						ProductID = pp.ProductID,
 						ProductName = pp.Product.ProductName,
@@ -72,7 +77,10 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				IsActive = p.IsActive,
 				CreateTime = p.CreateTime,
 				UpdateTime = p.UpdateTime,
-				Products = p.Products_Promotions.Select(pp => new ProductViewModel
+                // 🟢 一定要加這行
+                CoverImage = p.CoverImage,
+                PromoSummary = p.PromoSummary,
+                Products = p.Products_Promotions.Select(pp => new ProductViewModel
 				{
 					ProductID = pp.ProductID,
 					ProductName = pp.Product.ProductName,
@@ -101,7 +109,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 		// Create (POST)
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(PromotionViewModel vm)
+		public async Task<IActionResult> Create(PromotionViewModel vm, IFormFile? coverFile)
 		{
 			if (ModelState.IsValid)
 			{
@@ -109,7 +117,8 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				{
 					PromoName = vm.PromoName,
 					PromoDesc = vm.PromoDesc,
-					StartTime = vm.StartTime,
+                    PromoSummary = vm.PromoSummary,
+                    StartTime = vm.StartTime,
 					EndTime = vm.EndTime,
 					DiscountType = vm.DiscountType,
 					DiscountValue = vm.DiscountValue,
@@ -118,8 +127,15 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 					UpdateTime = DateTime.Now
 				};
 
-				// 先存 Promotion，確保有正確的 PromoID
-				_context.Promotions.Add(promo);
+                // ✅ 封面上傳到 ImgBB
+                if (coverFile != null && coverFile.Length > 0)
+                {
+                    var imageUrl = await ImgBBHelper.UploadSingleImageAsync(coverFile);
+                    promo.CoverImage = imageUrl;
+                }
+
+                // 先存 Promotion，確保有正確的 PromoID
+                _context.Promotions.Add(promo);
 				await _context.SaveChangesAsync();
 
 				// 再存 Products_Promotions
@@ -172,7 +188,9 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				IsActive = p.IsActive,
 				CreateTime = p.CreateTime,
 				UpdateTime = p.UpdateTime,
-				Products = _context.Products.Select(x => new ProductViewModel
+                CoverImage = p.CoverImage, // 🟢 顯示原本封面
+                PromoSummary = p.PromoSummary,
+                Products = _context.Products.Select(x => new ProductViewModel
 				{
 					ProductID = x.ProductID,
 					ProductName = x.ProductName,
@@ -190,7 +208,7 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 		// Edit (POST)
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(PromotionViewModel vm)
+		public async Task<IActionResult> Edit(PromotionViewModel vm, IFormFile? coverFile)
 		{
 			if (ModelState.IsValid)
 			{
@@ -207,9 +225,16 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				promo.DiscountValue = vm.DiscountValue;
 				promo.IsActive = vm.IsActive;
 				promo.UpdateTime = DateTime.Now;
+				promo.PromoSummary = vm.PromoSummary;
 
-				// 存一次，確保 PromoID 還存在資料庫
-				await _context.SaveChangesAsync();
+                // 🟢 若有上傳新封面
+                if (coverFile != null && coverFile.Length > 0)
+                {
+                    promo.CoverImage = await ImgBBHelper.UploadSingleImageAsync(coverFile);
+                }
+
+                // 存一次，確保 PromoID 還存在資料庫
+                await _context.SaveChangesAsync();
 
 				// 先清掉舊的綁定
 				var oldLinks = _context.Products_Promotions.Where(pp => pp.PromoID == promo.PromoID);
@@ -270,8 +295,9 @@ namespace Cat_Paw_Footprint.Areas.Admin.Controllers
 				IsActive = promo.IsActive,
 				CreateTime = promo.CreateTime,
 				UpdateTime = promo.UpdateTime,
+                PromoSummary = promo.PromoSummary,
 
-				Products = promo.Products_Promotions.Select(pp => new ProductViewModel
+                Products = promo.Products_Promotions.Select(pp => new ProductViewModel
 				{
 					ProductID = pp.ProductID,
 					ProductName = pp.Product.ProductName,

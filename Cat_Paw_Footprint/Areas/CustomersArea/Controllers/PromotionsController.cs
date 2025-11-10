@@ -39,10 +39,13 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                 {
                     p.PromoID,
                     p.PromoName,
+                    p.PromoSummary,
                     p.PromoDesc,
                     p.StartTime,
                     p.EndTime,
-                    ImageUrl = "/images/NoImage.png" // 統一預設圖
+                    CoverImage = string.IsNullOrEmpty(p.CoverImage)
+                    ? "/images/NoImage.png" // 🟢 沒上傳用預設圖
+                    : p.CoverImage          // 🟢 有上傳的用 ImgBB 連結
                 })
                 .ToListAsync();
 
@@ -80,17 +83,20 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                 {
                     p.PromoID,
                     p.PromoName,
+                    p.PromoSummary,
                     p.PromoDesc,
                     p.StartTime,
                     p.EndTime,
                     p.DiscountType,
                     p.DiscountValue,
-                    ImageUrl = "/images/NoImage.png"
+                    CoverImage = string.IsNullOrEmpty(p.CoverImage)
+                    ? "/images/NoImage.png" // 🟢 沒上傳用預設圖
+                    : p.CoverImage          // 🟢 有上傳的用 ImgBB 連結
                 })
                 .FirstOrDefaultAsync();
 
             if (promo == null)
-                return NotFound();
+                return NotFound(new { message = "找不到優惠活動。" });
 
             return Json(promo);
         }
@@ -104,16 +110,18 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
             var promos = await _context.Promotions
                 .Where(p => p.IsActive)
                 .OrderByDescending(p => p.StartTime)
-                .Take(5)
+                .Take(10)
                 .Select(p => new
                 {
                     p.PromoID,
                     p.PromoName,
+                    p.PromoSummary,
                     p.PromoDesc,
                     p.StartTime,
                     p.EndTime,
-                   // ImageUrl = string.IsNullOrEmpty(p.ImageUrl) ? "/images/NoImage.png" : p.ImageUrl
-                    ImageUrl = "/images/NoImage.png" // 固定給一張
+                    CoverImage = string.IsNullOrEmpty(p.CoverImage)
+                    ? "/images/NoImage.png" // 🟢 沒上傳用預設圖
+                    : p.CoverImage          // 🟢 有上傳的用 ImgBB 連結
                 })
                 .ToListAsync();
 

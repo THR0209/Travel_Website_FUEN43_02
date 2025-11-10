@@ -59,5 +59,9 @@ namespace Cat_Paw_Footprint.Areas.Admin.ViewModel
             DiscountType == 1 ? $"{DiscountValue}%" :
             DiscountType == 2 ? $"{DiscountValue} 元" :
             DiscountValue.ToString();
+
+        public string? CoverImage { get; set; }
+        [Display(Name = "活動簡述")]
+        public string? PromoSummary { get; set; }
     }
 }

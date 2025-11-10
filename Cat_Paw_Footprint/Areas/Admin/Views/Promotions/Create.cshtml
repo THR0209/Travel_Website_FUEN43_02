@@ -29,11 +29,17 @@
                     <i class="fa-solid fa-plus me-2"></i> 新增優惠活動
                 </div>
                 <div class="card-body">
-                    <form asp-action="Create" method="post">
+                    <form asp-action="Create" method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                         <div class="mb-3">
                             <label for="coverFile" class="form-label fw-semibold">封面圖片</label>
                             <input type="file" class="form-control" id="coverFile" name="coverFile" accept="image/*" />
+
+                            <!-- 🟢 新增即時預覽用的容器 -->
+                            <div id="coverPreviewContainer" class="mt-2" style="display:none;">
+                                <img id="coverPreview" src="#" alt="封面預覽" style="max-height:150px;border-radius:6px;" />
+                            </div>
+
                             @if (!string.IsNullOrEmpty(Model.CoverImage))
                             {
                                 <div class="mt-2">
@@ -54,6 +60,13 @@
                             <input asp-for="PromoDesc" class="form-control" />
                             <span asp-validation-for="PromoDesc" class="text-danger"></span>
                         </div> *@
+
+
+                        <div class="mb-3 mt-3">
+                            <label asp-for="PromoSummary" class="form-label fw-semibold"></label>
+                            <input asp-for="PromoSummary" class="form-control" />
+                            <span asp-validation-for="PromoSummary" class="text-danger"></span>
+                        </div>
 
                         <div class="mb-3">
                             <label asp-for="PromoDesc" class="control-label"></label>
@@ -161,6 +174,21 @@
                 },
                 fixedHeader: true
             });
+        });
+    </script>
+
+    <script>
+        document.getElementById("coverFile").addEventListener("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const img = document.getElementById("coverPreview");
+                img.src = ev.target.result;
+                document.getElementById("coverPreviewContainer").style.display = "block";
+            };
+            reader.readAsDataURL(file);
         });
     </script>
 }

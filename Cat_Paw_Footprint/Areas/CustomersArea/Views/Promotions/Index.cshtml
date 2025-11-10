@@ -6,6 +6,13 @@
     <h2 class="text-center mb-5 fw-bold text-brand">
         <i class="fa-solid fa-bullhorn me-2"></i> 優惠活動
     </h2>
+    <!-- 🔍 搜尋列 -->
+    <div class="d-flex justify-content-center mb-4">
+        <input v-model="searchQuery"
+               type="text"
+               class="form-control w-50"
+               placeholder="輸入關鍵字搜尋優惠活動..." />
+    </div>
 
     <!-- 有資料 -->
     <div v-if="promotions.length > 0" class="row g-3 g-md-4 justify-content-center">
@@ -13,9 +20,11 @@
             <a :href="'/CustomersArea/Promotions/Details/' + p.promoID" class="text-decoration-none text-dark">
                 <div class="card promo-card shadow-sm h-100 border-0">
                     <div class="promo-thumb">
-                        <img :src="p.imageUrl || '/images/NoImage.png'"
+                        <img :src="p.coverImage || '/images/NoImage.png'"
                              :alt="p.promoName"
-                             class="card-img-top">
+                             class="card-img-top"
+                             style="object-fit: cover; height: 200px; border-radius: 6px;">
+
                         <div class="promo-overlay">
                             <span class="promo-more">查看活動</span>
                         </div>
@@ -26,7 +35,7 @@
                             <i class="fa-regular fa-calendar me-1"></i>
                             {{ formatDate(p.startTime) }} ~ {{ formatDate(p.endTime) }}
                         </p>
-                        <p class="small text-secondary mb-0 line-clamp-2">{{ p.promoDesc }}</p>
+                        <p class="small text-secondary mb-0 line-clamp-2">{{ p.promoSummary }}</p>
                     </div>
                 </div>
             </a>
@@ -47,7 +56,20 @@
     <script>
         const app = Vue.createApp({
             data() {
-                return { promotions: [] }
+                return { 
+                    promotions: [] ,
+                    searchQuery: ''
+                }
+            },
+            computed: {
+                filteredPromotions() {
+                    if (!this.searchQuery) return this.promotions
+                    const keyword = this.searchQuery.toLowerCase()
+                    return this.promotions.filter(p =>
+                        p.promoName?.toLowerCase().includes(keyword) ||
+                        p.promoSummary?.toLowerCase().includes(keyword)
+                    )
+                }
             },
             methods: {
                 formatDate(dateStr) {

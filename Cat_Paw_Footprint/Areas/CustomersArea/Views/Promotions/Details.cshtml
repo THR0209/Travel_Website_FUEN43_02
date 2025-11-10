@@ -6,9 +6,10 @@
     <div class="container">
         <!-- 載入成功 -->
         <div v-if="promotion" class="card shadow-sm border-0 rounded-4">
-            <img :src="promotion.imageUrl || '/images/NoImage.png'"
-                 class="card-img-top rounded-top-4"
-                 :alt="promotion.promoName">
+            <img :src="promotion.coverImage || '/images/NoImage.png'"
+                 :alt="promotion.promoName"
+                 class="card-img-top"
+                 style="object-fit: cover; height: 800px; border-radius: 6px;">
 
             <div class="card-body p-4 text-center">
                 <h2 class="fw-bold mb-3 text-brand">{{ promotion.promoName }}</h2>
@@ -18,7 +19,7 @@
                     {{ formatDate(promotion.startTime) }} ~ {{ formatDate(promotion.endTime) }}
                 </p>
 
-                <p class="badge bg-warning text-dark px-3 py-2">{{ promotion.promoDesc }}</p>
+                <p class="badge bg-warning text-dark px-3 py-2">{{ promotion.promoSummary }}</p>
 
                 <!-- 🔹 限時優惠倒數區 -->
                 <div class="countdown-wrapper mt-4">
@@ -106,14 +107,14 @@
                 }
             },
             mounted() {
-                const id = window.location.pathname.split('/').pop();
-                axios.get(`/CustomersArea/Promotions/GetById/${id}`)
-                    .then(res => {
-                        this.promotion = res.data;
-                        this.updateCountdown();
-                        this.timer = setInterval(this.updateCountdown, 60000); // 每分鐘更新
-                    })
-                    .catch(err => console.error('載入優惠活動失敗：', err));
+            const id = window.location.pathname.split('/').pop();
+            axios.get(`/CustomersArea/Promotions/GetById?id=${id}`)
+                .then(res => {
+                    this.promotion = res.data;
+                    this.updateCountdown();
+                    this.timer = setInterval(this.updateCountdown, 60000); // 每分鐘更新
+                })
+                .catch(err => console.error('載入優惠活動失敗：', err));
             },
             beforeUnmount() {
                 clearInterval(this.timer);

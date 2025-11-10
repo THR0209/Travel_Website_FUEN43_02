@@ -29,5 +29,7 @@ public partial class Promotions
 
     public DateTime? UpdateTime { get; set; }
 
-	public virtual ICollection<Products_Promotions> Products_Promotions { get; set; } = new List<Products_Promotions>();
+    public string? PromoSummary { get; set; }
+
+    public virtual ICollection<Products_Promotions> Products_Promotions { get; set; } = new List<Products_Promotions>();
 }
