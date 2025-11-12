@@ -10,40 +10,51 @@
     ViewData["Title"] = "自由行專區";
 }
 
+@* Vue 掛載根節點，整個頁面由 Vue 控制；container-fluid 使寬度滿版，px-5 增加水平內距 *@
 <div id="app" class="container-fluid px-5">
     <div class="row">
 
         <!-- 上方：篩選與按鈕 -->
+        @* 固定在頁面上方(sticky-top)，白底、陰影、內距 3，z-index 層級 3 *@
         <div class="top-buttons sticky-top bg-white shadow-sm py-3 z-3">
+            @* 使用 flex 排版，允許換行，兩端對齊，中間垂直置中，項目間距 gap-3 *@
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <!-- 搜尋框 -->
+                @* v-model 綁定 Vue data.keyword，w-25 設為寬度 25% *@
                 <input type="text" v-model="keyword" placeholder="搜尋名稱或地區"
                        class="form-control w-25" />
 
-                <!-- 地區篩選 -->
+                <!-- 大區篩選（北部/中部/南部/東部/離島） -->
                 <select class="form-select w-25" v-model="selectedRegion" v-on:change="selectedDistrict=''">
                     <option value="">🌎 全部地區</option>
+                    @* 由 regions 陣列產生選項，使用 :key 提高渲染效能 *@
                     <option v-for="region in regions" :key="region" :value="region">{{ region }}</option>
                 </select>
 
-                <!-- 縣市篩選 -->
+                <!-- 縣市篩選（根據所選地區動態更新） -->
                 <select class="form-select w-25" v-model="selectedDistrict">
                     <option value="">🏞️ 全部地區</option>
+                    @* 使用 computed.availableDistricts 自動產生可選縣市 *@
                     <option v-for="district in availableDistricts" :key="district" :value="district">{{ district }}</option>
                 </select>
 
                 <!-- 分類按鈕 - (景點、美食、住宿) -->
-                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                @* flex 排版，按鈕可換行排列 *@
+                <div class="d-flex justify-content-center gap-2 flex-wrap"> 
                     <button v-for="btn in buttons" :key="btn.type"
-                            class="btn rounded-pill"
+                            @* Bootstrap 圓角膠囊樣式按鈕 *@
+                            class="btn rounded-pill" 
+                            @* 若目前分類相同 → 黃色實心，否則灰色外框 *@
                             :class="{'btn-warning': currentType===btn.type, 'btn-outline-secondary': currentType!==btn.type}"
+                            @* 點擊後執行 changeType() 方法切換分類 *@
                             v-on:click="changeType(btn.type)">
+                        @* 顯示按鈕文字（例如：景點、美食、住宿） *@
                         {{ btn.label }}
                     </button>
                 </div>
 
-                <!-- 排序區域 -->
+                <!-- 排序功能區（⭐ 評分排序 / 👁️ 瀏覽數排序） -->
                 <div>
                     <!-- ⭐ 評分排序 -->
                     <button class="btn"
@@ -61,7 +72,7 @@
 
                 </div>                
 
-                <!-- API專區 -->
+                <!-- API功能專區 -->
                 <div>
                     <!-- 公車查詢 -->
                     <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#busModal">
@@ -72,11 +83,15 @@
             </div>
         </div>
 
-        <!-- 左側：動態卡片區 -->
+        <!-- 左側：主卡片展示區 -->
+        @* 左側主內容區，佔 8 欄（右側行程 + 地圖佔 4 欄） *@
         <div class="col-md-8">
+            @* Bootstrap RWD 設定：手機 1 欄、平板 2 欄、桌機 4 欄，間距 g-4 *@
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
 
-                <!-- 卡片開始 -->
+                <!-- 每個項目的卡片 -->
+                @* 使用 Vue v-for 動態產生每個項目的卡片（景點 / 美食 / 住宿） *@
+                @* filteredItems 為經過搜尋與篩選後的資料 *@
                 <div v-for="item in filteredItems" :key="item.id" class="col">
 
                     <div class="card h-100 position-relative" style="z-index:1;">
@@ -84,24 +99,27 @@
                         <!-- 右上角＋鍵 -->
                         <button class="btn btn-sm btn-success position-absolute top-0 end-0 m-2"
                                 style="z-index: 10;"
+                                @* .stop 阻止冒泡，以免點擊同時開啟 modal *@
                                 v-on:click.stop="addToTrip(item)">
                             ＋
                         </button>
 
-                        <!-- 點擊開啟 Modal-->
+                        <!-- 點擊卡片開啟詳細 Modal-->
+                        @* 綁定 openModal() 方法，傳入該項目資料 *@
                         <div v-on:click="openModal(item)">
 
-                            <!-- Bootstrap 輪播 -->
+                            <!-- Bootstrap 輪播（Bootstrap Carousel）：顯示多張圖片 -->
+                            @* 每 3 秒自動輪播，ID 動態對應項目 ID *@
                             <div :id="'carousel-'+item.id" class="carousel slide card-carousel"
                                  data-bs-ride="carousel" data-bs-interval="3000">
+                                @* 輪播圖片容器 *@
                                 <div class="carousel-inner">
 
                                     <!-- 沒有圖片 -> 顯示預設圖片 -->
                                     <div v-if="!item.pictureUrl || item.pictureUrl.length===0"
-                                         class="carousel-item active">
-
-                                        <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
+                                         class="carousel-item active">                                                                                 
                                         <div class="pic">
+                                            @* 固定寬度 100% 顯示 NoImage *@
                                             <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="圖片" />
                                         </div>
                                     </div>
@@ -109,37 +127,42 @@
                                     <!-- 有圖片 -> 顯示輪播 -->
                                     <div v-else v-for="(pic, i) in item.pictureUrl" :key="i"
                                          class="carousel-item" 
+                                         @* 第一張圖片設為 active 才能正常顯示 *@
                                          :class="{'active': i===0}">
-
-                                        <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
+                                            <!-- 動態載入圖片，若錯誤則換成預設圖 -->
+                                            @* 優先顯示已載入圖片，否則使用原始 URL 或預設圖 *@
                                             <img :src="item._loadedImages?.[i]
                                                            ? item._loadedImages[i]         
-                                                           : (pic && pic.trim() !== '' ? pic : noImage)" 
+                                                           : (pic && pic.trim() !== '' ? pic : noImage)"
+                                                 @* 載入成功時更新 _loadedImages *@
                                                  v-on:load="() => onImageLoad(item, i, pic)"
+                                                 @* 載入失敗時替換為預設圖 *@
                                                  v-on:error="() => onImageError(item, i)"
                                                  class="d-block w-100"
                                                  alt="圖片" />
-
                                         </div>
                                     </div>
 
                                 </div>
                             </div>
 
-                            <!-- 平均分與瀏覽次數 -->
+                            <!-- 卡片底部：名稱、評分、瀏覽次數 -->
                             <div class="card-body text-center">
                                 <h5 class="card-title">{{ item.name }}</h5>
-                                <!-- 🆕 評分區域 (可點擊星星評分) -->
+                                <!-- 評分區域 (可點擊星星評分) -->
                                 <div class="rating mb-1">
+                                    @* 產生 5 顆星 *@
                                     <i v-for="n in 5" :key="n"
                                        class="bi"
+                                       @* 高亮顯示已評分的星數 *@
                                        :class="n <= (item.userRating || 0) ? 'bi-star-fill text-warning' : 'bi-star text-muted'"
+                                       @* 點擊執行 rateItem() 評分方法 *@
                                        v-on:click.stop="rateItem(item, n)">
                                     </i>
                                 </div>
 
-                                <!-- 🆕 顯示平均分與瀏覽次數 -->
+                                <!-- 顯示平均分與瀏覽次數 -->
                                 <p>⭐ {{ (item.rating ?? 0).toFixed(1) }}　👁️ {{ item.views }}</p>
                             </div>
                         </div>
@@ -148,69 +171,82 @@
             </div>
         </div>
 
-        <!-- 右側：排行程 + 地圖 + 公車 -->
+        <!-- 右側：排行程 + 地圖 -->
         <div class="col-md-4">
 
-            <!-- 排行程區塊，支援多天與時間推算 -->
+            <!-- 排行程區塊 -->
             <div class="card mb-3 trip-card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <span>排行程</span>
-                    <!-- 清空按鈕 -->
                     <button class="btn btn-sm btn-danger" v-on:click="clearTrip">清空</button>
                 </div>
                 <div class="card-body">
 
-                    <!-- 行程清單下拉選單 -->
+                    <!-- 下拉選單：選擇或新增行程 -->
                     <div class="mb-3">
                         <label class="form-label small text-muted">🗂 我的行程清單</label>
+                        @* 下拉選單與刪除按鈕同排 *@
                         <div class="input-group">
+                            @* Vue 雙向綁定目前選中行程 ID *@
                             <select class="form-select" v-model="selectedProject" v-on:change="onTripSelected">
-                                <option value="">➕ 新建立行程</option>
-                                <option v-for="trip in tripList" :key="trip.projectID" :value="trip.projectID">
-                                    {{ trip.projectName }}
+                                @* 若未選中則代表新建行程 *@
+                                <option value="">➕ 新建立行程</option>   
+                                @* tripList 為從後端載入的行程清單 *@
+                                <option v-for="trip in tripList" :key="trip.projectID" :value="trip.projectID"> 
+                                    @* 顯示行程名稱 *@
+                                    {{ trip.projectName }}  
                                 </option>
                             </select>
                             <button class="btn btn-outline-danger" v-if="selectedProject" v-on:click="deleteTrip">🗑 刪除</button>
                         </div>
                     </div>
 
-                    <!-- 行程名稱 & 天數設定 -->
+                    <!-- 行程名稱 + 天數設定 + 選擇天 -->
                     <div class="d-flex flex-wrap gap-2 mb-3">
+                        @* 綁定行程名稱 *@
                         <input v-model="projectName" placeholder="行程名稱" class="form-control w-50" />
+                        @* 綁定總天數（數值型） *@
                         <input type="number" min="1" v-model.number="totalDays" class="form-control w-25" placeholder="天數" />
+                        @* 綁定目前顯示的天數 *@
                         <select class="form-select w-25" v-model="currentDay">
+                            @* 動態產生第 n 天選項 *@
                             <option v-for="n in totalDays" :key="n" :value="n">第 {{ n }} 天</option>
                         </select>
                     </div>
 
-                    <!-- 多天行程陣列 tripDays -->
+                    <!-- 每天行程清單（支援拖曳排序）tripDays -->
+                    @* 每天的行程為 tripDays 陣列第 n-1 項 *@
                     <draggable v-model="tripDays[currentDay-1].items" item-key="uid" handle=".drag-handle" v-on:end="updateSequence">
+                        @* 使用插槽樣式呈現每個行程項目 *@
                         <template #item="{ element, index }">
                             <div class="border rounded p-2 mb-2 bg-light">
                                 <div class="d-flex justify-content-between align-items-center">
+                                    @* 行程順序 + 名稱，左側為拖曳手把 *@
                                     <span><i class="bi bi-list drag-handle me-2"></i>{{ index+1 }}. {{ element.name }}</span>
+                                    @* 刪除該行程項目 *@
                                     <button class="btn btn-sm btn-outline-danger" v-on:click="removeItem(index)">✖</button>
                                 </div>
 
-                                <!-- 時間欄位 -->
+                                <!-- 行程時間設定 -->
                                 <div class="mt-2 d-flex gap-2">
                                     <!-- 開始時間 -->
                                     <div>
                                         <label class="form-label mb-0 small">開始</label>
                                         <input type="time" v-model="element.startTime"
                                                class="form-control form-control-sm"
-                                               v-on:change="onTimeChange(currentDay-1, index)" />
+                                               v-on:change="onTimeChange(currentDay-1, index)" />   @* 改變時間後觸發時間重新計算 *@
                                     </div>
                                     <!-- 停留時間 -->
                                     <div>
                                         <label class="form-label mb-0 small">停留(分)</label>
                                         <input type="number" min="0" v-model.number="element.stayMinute"
                                                class="form-control form-control-sm"
-                                               v-on:change="onTimeChange(currentDay-1, index)" />
+                                               v-on:change="onTimeChange(currentDay-1, index)" />   @* 改變停留時間後自動推算後續時間 *@
                                     </div>
                                     <!-- 路程時間 -->
                                     <div>
                                         <label class="form-label mb-0 small">行車(分)</label>
+                                        @* 由 Google Maps 自動計算，唯讀 *@
                                         <input type="number" v-model.number="element.driveMinute" class="form-control form-control-sm" readonly />
                                     </div>
                                 </div>
@@ -233,6 +269,7 @@
                 <div class="card-header bg-success text-white">行程地圖</div>
                 <div class="card-body">
                     <!-- 地圖顯示區 -->
+                    @* 地圖容器，Vue mounted 時由 Google Maps 初始化 *@
                     <div id="map" style="height: 400px; width: 100%;"></div>
                 </div>
             </div>
@@ -240,40 +277,46 @@
 
     </div>
 
-    <!-- 卡片的詳細內容 Modal - 點圖片顯示詳情 -->
+    <!-- 卡片的詳細內容 Modal - 點卡片後顯示 -->
     <div id="detailModal" class="modal fade" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        @* 使用大型視窗（modal-lg）以容納圖片與地圖 *@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
+                    @* 顯示項目名稱（Vue 綁定 modalData） *@
                     <h5 class="modal-title" id="detailModalLabel">{{ modalData.name }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    @* 左右分兩欄：左為輪播圖 + 地址，右為小地圖 *@
                     <div class="row">
                         <!-- 左側 - 輪播區域 -->
                         <div class="col-md-6">
                             <!-- Modal 內的輪播 -->
+                            @* v-if 防止資料未載入時報錯 *@
+                            @* 動態指定每個 Modal 的 carousel ID *@
                             <div v-if="modalData" :id="'carousel-modal-'+modalData.id"
-                                 class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">
+                                 class="carousel slide modal-carousel mb-3" data-bs-ride="carousel">    
 
                                  <!-- 圖片區 -->
                                 <div class="carousel-inner">
 
                                     <!-- 沒有圖片 → 顯示預設圖 -->
                                     <div v-if="!modalData.pictureUrl || modalData.pictureUrl.length === 0"
+                                         @* 沒有圖片時建立唯一 active 項 *@
                                          class="carousel-item active">
                                         <div class="pic">
-                                            <img src="@Url.Content("/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
+                                            <img src="@Url.Content("~/images/NoImage.png")" class="d-block w-100 noimage" alt="無圖片" />
                                         </div>
                                     </div>
 
-                                    <!-- 有圖片 → 顯示輪播 -->
+                                    <!-- 有圖片 → 逐一建立.顯示輪播 -->
                                     <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
                                          class="carousel-item" :class="{ 'active': i === 0 }">
                                         <div class="pic">
-                                            <img 
-                                                :src="pic ? pic : noImage"
-                                                 @* v-on:error="e => e.target.src = noImage" *@
+                                            @* 若該張圖片 URL 無效則使用預設 noImage *@
+                                            <img :src="pic ? pic : noImage"
+                                                 @* 若載入錯誤觸發 Vue 方法更換預設圖 *@
                                                  v-on:error ="handleImageError($event)"
                                                  class="d-block w-100"
                                                  alt="圖片" />
@@ -296,6 +339,12 @@
                                 </button>
                             </div>
 
+                            <!-- 詳細地址 -->
+                            <div>
+                                @* Vue 綁定 modalData.addr 顯示地址 *@
+                                <p><strong>地址：</strong>{{ modalData.addr }}</p>
+                            </div>
+
                             <!-- Model 內的 星星評論區 -->
                             @*<div class="card-body text-center">
                                 <h5 class="card-title">{{ modalData.name }}</h5>
@@ -312,16 +361,11 @@
                                 <!-- 平均分與瀏覽次數 -->
                                 <p>⭐ {{ modalData.rating.toFixed(1) }}　👁️ {{ modalData.views }}</p>
                             </div> *@
-
-                            <!-- 詳細地址 -->
-                            <div>
-                                <p><strong>地址：</strong>{{ modalData.addr }}</p>
-                            </div>
-
                         </div>
 
                         <!-- 右側 - 地圖區域 -->
                         <div class="col-md-6">
+                            @* 地圖容器，由 openModal() 初始化 Google Map *@
                             <div id="detailMap" style="width:100%; height:300px; border-radius:10px; border:1px solid #ccc;"></div>
                         </div>
                     </div>
@@ -329,7 +373,8 @@
                     <!-- 分隔線 -->
                     <hr class="my-3" />                    
 
-                    <!-- 文字介紹區 -->
+                    <!-- 文字介紹區 - 使用 CKEditor5 富文字格式）-->
+                    @* 使用 v-html 將 HTML 格式內容渲染至頁面 *@
                     <div class="mt-3 ck-content" v-html="modalData.desc"></div>    
 
                 </div>
@@ -337,9 +382,11 @@
         </div>
     </div>
 
-    <!-- 公車功能共用 Modal（全國路線搜尋 + 鍵盤輸入版） -->
+    <!-- 公車查詢 Modal（整合 TDX 公車動態 API） -->
     <div class="modal fade" id="busModal" tabindex="-1" aria-labelledby="busModalLabel" aria-hidden="true">
+        @* 可捲動的 Modal，大尺寸 *@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            @* 去除邊框，加入陰影效果 *@
             <div class="modal-content shadow-lg border-0">
                 <div class="modal-header bg-success text-white">
                     <h5 class="modal-title" id="busModalLabel">🚍 公車功能專區</h5>
@@ -348,10 +395,11 @@
 
                 <div class="modal-body">
 
-                    <!-- 🟢 功能切換 -->
+                    <!-- 公車功能切換（目前僅啟用 ETA） -->
                     <div class="d-flex justify-content-center gap-2 mb-3 flex-wrap">
                         <button class="btn"
                                 :class="busTab==='eta' ? 'btn-success' : 'btn-outline-success'"
+                                @* 點擊切換到 ETA（動態公車）頁面 *@
                                 v-on:click="switchBusTab('eta')">
                             🚌 動態公車
                         </button>
@@ -369,20 +417,21 @@
                         </div>
                     </div>
 
-                    <!-- ================= -->
-                    <!-- 🚌 動態公車主畫面 -->
-                    <!-- ================= -->
+                    <!-- 動態公車主畫面（輸入號碼查詢 ETA） -->
+                    @* 只有當 busTab 為 eta 時顯示 *@
                     <div v-if="busTab==='eta'" class="bus-search text-center">
 
-                        <!-- 🆕 搜尋欄位 -->
+                        <!-- 搜尋輸入框 -->
                         <div class="input-group mb-3 justify-content-center">
                             <input v-model="busKeyword"
                                    class="form-control text-center fs-5 w-50"
+                                   @* 綁定 busKeyword（Vue data） *@
                                    placeholder="輸入公車號碼或名稱（例：紅9、小3、5116）"/>
+                            @* 點擊清空搜尋結果 *@
                             <button class="btn btn-outline-secondary" v-on:click="resetBusSearch">重設</button>
                         </div>
 
-                        <!-- 🆕 中文＋數字鍵盤 -->
+                        <!-- 中文＋數字虛擬鍵盤 -->
                         <div class="num-pad mb-3">
                             <div class="d-flex justify-content-center mb-2">
                                 <button v-for="key in ['紅','藍','1','2','3']" :key="key" class="pad-btn" v-on:click="appendKey(key)">{{ key }}</button>
@@ -398,23 +447,27 @@
                             </div>
                         </div>
 
-                        <!-- 🆕 即時篩選清單（只在 showBusList 為 true 時顯示） -->
+                        <!-- 篩選後的公車清單（只在 showBusList 為 true 時顯示） -->
+                        @* showBusList 控制顯示狀態 *@
                         <ul class="list-group" v-if="showBusList && filteredRoutes.length > 0">
                             <li v-for="route in filteredRoutes"
                                 :key="route.RouteUID"
                                 class="list-group-item list-group-item-action text-start"
+                                @* 點擊項目執行 selectBusRoute() 取得 ETA *@
                                 v-on:click="selectBusRoute(route)">
+                                @* 顯示公車名稱（中文） *@
                                 <div class="fw-bold text-primary">{{ route.RouteName.Zh_tw }}</div>
+                                @* 顯示起訖站名稱 *@
                                 <div class="small text-muted">{{ route.DepartureStopNameZh }} ⇔ {{ route.DestinationStopNameZh }}</div>
                             </li>
                         </ul>
 
-
+                        @* 若沒有搜尋結果時顯示提示 *@
                         <div v-else class="text-center text-muted py-3">
                             請輸入公車號碼或名稱開始搜尋
                         </div>
 
-                        <!-- 🆕 顯示選擇後的 ETA -->
+                        <!-- 顯示選擇後的 ETA 資料 -->
                         <div v-if="selectedRoute" class="mt-4">
                             <h5 class="text-center mb-3">
                                 {{ selectedRoute.RouteName.Zh_tw }}
@@ -437,12 +490,16 @@
                                 </div>
                             </div>
 
+                            <!-- ETA 即時到站資料清單 -->
                             <ul class="list-group">
                                 <li v-for="stop in filteredBusStops"
                                     :key="stop.StopUID"
+                                    @* 顯示每個站牌名稱與預估時間 *@
                                     class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>{{ stop.StopName.Zh_tw }}</div>
+                                    @* 使用 getEtaClass 設定背景顏色 *@
                                     <span class="badge px-3 py-2 fs-6" :class="getEtaClass(stop)">
+                                        @* 呼叫 formatETA() 格式化顯示（例：3 分、進站中） *@
                                         {{ formatETA(stop) }}
                                     </span>
                                 </li>
@@ -472,49 +529,55 @@
     <script src="https://unpkg.com/vue@3.5.22/dist/vue.global.js"></script>
 
     <!-- 支援拖曳排序 -->
+    @* Sortable.js：拖曳排序核心 *@
     <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
+    @* vuedraggable：Vue 封裝的 Sortable 元件 *@
     <script src="https://unpkg.com/vuedraggable@4.0.1/dist/vuedraggable.umd.min.js"></script>
 
     <!-- Google Maps API -->
     <script async defer
+            @* 載入 Google Maps + Places API，callback 為 initMap() *@
             src="https://maps.googleapis.com/maps/api/js?key=@ViewBag.GoogleMapKey&libraries=places&callback=initMap">
     </script>
 
     <script>
-        const { createApp } = Vue;
+        const { createApp } = Vue;  // 解構賦值取得 Vue 的 createApp 方法
         let app; // 全域變數：讓 initMap() 能呼叫 Vue 方法
 
-        /* 全域 callback（Google 會自動呼叫這個） */
+        /* Google 會在地圖腳本載入完成後，自動呼叫 initMap()
+           因為 callback 不是在 Vue 內，所以要用全域橋接 */
         window.initMap = function () {
             console.log("✅ Google Map script loaded, calling Vue method...");
-            if (app && app._instance && app._instance.proxy) {
-                app._instance.proxy.initMap(); // 呼叫 Vue 內的 initMap()
+            if (app && app._instance && app._instance.proxy) {  // 確保 Vue 實例已存在 
+                app._instance.proxy.initMap();  // 呼叫 Vue 內定義的 initMap() 方法 
             }
         };
 
+        /*  Vue 應用主體初始化 */
         app = createApp({
             /* 註冊子元件 */
-            components: { draggable: window.vuedraggable }, // CDN 模式需使用 window.vuedraggable
+            components: { draggable: window.vuedraggable }, // 註冊拖曳元件（CDN 模式使用 window.vuedraggable）
 
-            /* 變動的資料 */
+            /* 變動的資料 - 所有前端資料、狀態、暫存變數都放這裡 */
             data() {
                 return {
+                    /* 分類按鈕設定（景點 / 美食 / 住宿） */
                     buttons: [
                         { label: "景點", type: "locations" },
                         { label: "美食", type: "restaurants" },
                         { label: "住宿", type: "hotels" }
                     ],
                     currentType: "locations",   // 預設分類
-                    items: [],  // 目前分類的資料清單
-                    keyword: "",       // 搜尋關鍵字
-                    modalData: {},     // Modal 詳情資料
+                    items: [],  // 儲存目前分類的所有項目清單
+                    keyword: "",       // 搜尋框關鍵字
+                    modalData: {},     // Modal 彈窗詳細資料綁定物件
                     sortDesc: true ,    // 排序狀態（true = 高→低）
 
-                    /* 補強說明「地區與縣市動態綁定」 */
+                    /* 地區與縣市動態綁定 */
                     selectedRegion: "離島",   // 預設地區
                     selectedDistrict: "澎湖",     // 預設縣市
                     regions: ["北部", "中部", "南部", "東部", "離島"],    // 地區清單
-                    districtsByRegion: {    // 縣市對應地區
+                    districtsByRegion: {    // 對應表：每個地區包含的縣市
                         "北部": ["台北市", "新北市", "基隆市", "桃園市", "新竹縣", "新竹市", "宜蘭縣"],
                         "中部": ["苗栗縣", "台中市", "彰化縣", "南投縣", "雲林縣"],
                         "南部": ["嘉義縣", "嘉義市", "台南市", "高雄市", "屏東縣"],
@@ -522,93 +585,93 @@
                         "離島": ["澎湖", "金門", "馬祖", "綠島", "蘭嶼", "小琉球"]
                     },
 
-                    /* 行程清單 */
-                    projectName: '',    // 行程名稱
-                    totalDays: 1,   // 行程天數
-                    currentDay: 1,  // 目前選擇的天數
-                    tripDays: [{ day: 1, items: [] }],  // 多天行程陣列
+                    /* 行程規劃相關資料 */
+                    projectName: '',    // 行程名稱（使用者輸入或資料庫載入）
+                    totalDays: 1,   // 總天數，預設 1 天
+                    currentDay: 1,  // 目前顯示第幾天的行程
+                    tripDays: [{ day: 1, items: [] }],  // 每天的行程（包含多筆項目）
 
-                    /* 行程管理用變數 */
-                    tripList: [],          // 行程清單
-                    selectedProject: '',    // 目前選中的行程
+                    /* 行程管理資料 */
+                    tripList: [],          // 從後端取得的行程清單
+                    selectedProject: '',    // 當前選中的行程 ID
 
-                    /* 目前登入使用者資訊 */
-                    currentUser: null,
+                    /* 登入使用者資訊 */
+                    currentUser: null,  // 目前登入的使用者資料（若未登入為 null）
 
-                    /* 新增地圖相關變數 */
-                    map: null,  // 地圖物件
-                    directionsService: null,    // 路線服務
-                    directionsRenderer: null,   // 路線繪製器
-                    travelInfo: null, // 距離與時間資訊
-                    markers: [], // 多點標記陣列
+                    /* Google Map 相關變數 */
+                    map: null,  // Google Map 物件（主要地圖）
+                    directionsService: null,    // 路線服務 - Google Directions API 服務實例
+                    directionsRenderer: null,   // 路線繪製器 - 負責顯示路線的 Renderer
+                    travelInfo: null, // 儲存路線總距離與時間資訊
+                    markers: [], // 地圖上所有標記物件陣列
 
-                    /* 排序參數 */
-                    sortActive: false,   // ⭐ 是否啟用評分排序
-                    viewActive: false,   // 👁️ 是否啟用瀏覽排序
-                    sortDesc: true,      // ⭐ 排序方向（true=高→低）
-                    viewDesc: true,       // 👁️ 排序方向（true=高→低）
+                    /* 排序控制狀態 */
+                    sortActive: false,   // 是否啟用「評分排序」
+                    viewActive: false,   // 是否啟用「瀏覽數排序」
+                    sortDesc: true,      // 評分排序方向（true=高→低）
+                    viewDesc: true,      // 瀏覽數排序方向（true=高→低）
 
-                    /* 公車查詢相關 */
-                    busKeyword: "",            // 使用者輸入的搜尋字
-                    busRoutes: [],             // 全台路線清單（由後端載入）
-                    filteredRoutes: [],        // 篩選後顯示清單
+                    /* 公車查詢功能相關 */
+                    busKeyword: "",            // 公車搜尋關鍵字
+                    busRoutes: [],             // 從 API 載入的全台公車路線資料
+                    filteredRoutes: [],        // 篩選後顯示在清單中的路線
                     selectedRoute: null,       // 使用者選擇的公車路線
-                    busStops: [],              // 到站資料
-                    busDirection: 0,           // 去程/返程
-                    autoUpdateTimer: null,     // 定時刷新 ETA
-                    busTab: "eta",             // 當前子頁面
-                    showBusList: true,   // 控制是否顯示路線清單
+                    busStops: [],              // 公車站牌即時到站資料（ETA）
+                    busDirection: 0,           // 去程 (0) / 返程 (1)
+                    autoUpdateTimer: null,     // 自動更新 ETA 的計時器 ID
+                    busTab: "eta",             // 當前子頁面（eta=動態公車）
+                    showBusList: true,   // 是否顯示公車路線清單（false 代表顯示 ETA 頁）
 
-                    /* 圖片 */
-                    noImage: @Html.Raw(Json.Serialize(Url.Content("~/images/NoImage.png"))),
+                    /* 圖片資源設定 */
+                    noImage: @Html.Raw(Json.Serialize(Url.Content("~/images/NoImage.png"))), // 預設圖片（後端路徑轉為 JSON 安全格式） 
 
                 }
             },
 
-            /* 計算屬性 */
+            /* 計算屬性 - 當資料變化時自動重新計算（不需手動呼叫） */
             computed: {
-                /* 根據地區動態顯示對應縣市 */
+                /* 根據所選「地區」動態顯示對應縣市清單 */
                 availableDistricts() {
-                    return this.selectedRegion
-                        ? this.districtsByRegion[this.selectedRegion]
-                        : Object.values(this.districtsByRegion).flat();
+                    return this.selectedRegion  // 若有選擇地區
+                        ? this.districtsByRegion[this.selectedRegion]   // 回傳該地區的縣市清單
+                        : Object.values(this.districtsByRegion).flat(); // 否則回傳所有縣市
                 },                
 
                 /* 綜合搜尋過濾 (支援多關鍵字) */
                 filteredItems() {
-                    const keys = this.keyword.toLowerCase().trim().split(/\s+/); // 以空白分割多關鍵字
+                    const keys = this.keyword.toLowerCase().trim().split(/\s+/); // 以空白分割多關鍵字，支援多詞搜尋
 
-                    return this.items.filter(x => {
-                        // 🔹 將所有可能比對的欄位轉小寫
+                    return this.items.filter(x => { // 從所有項目中篩選符合條件的資料
+                        // 將名稱、地址、地區、縣市都組合成可比對字串
                         const text = [
                             x.name,
                             x.addr,
                             x.regionName,
                             x.districtName
-                        ].join(" ").toLowerCase();
+                        ].join(" ").toLowerCase();  // 組合成單一字串並轉小寫,全轉小寫避免大小寫誤差
 
-                        // 🔹 每個關鍵字都必須出現在文字中
+                        // 每個關鍵字都必須出現在文字中
                         const matchKeyword = !this.keyword || keys.every(k => text.includes(k));
-
+                        // 若有選地區則比對 regionName
                         const matchRegion =
                             !this.selectedRegion || x.regionName === this.selectedRegion;
-
+                        // 若有選縣市則比對 districtName
                         const matchDistrict =
                             !this.selectedDistrict || x.districtName === this.selectedDistrict;
-
+                        // 三項條件都通過才保留
                         return matchKeyword && matchRegion && matchDistrict;
                     });
                 },
 
                 /* 公車去返程過濾 */
                 filteredStops() {
-                    return this.busStops.filter(s => s.Direction === this.direction);
+                    return this.busStops.filter(s => s.Direction === this.direction);   // 根據 busDirection 篩選站牌,方向值 (0/1) 過濾站牌
                 },
 
                 /* 篩選當前方向的站牌 */
                 filteredBusStops() {
-                    if (!this.selectedRoute) return [];
-                    return this.busStops.filter(s => s.Direction === this.busDirection);
+                    if (!this.selectedRoute) return []; // 若無選擇路線則回傳空陣列
+                    return this.busStops.filter(s => s.Direction === this.busDirection);    // 根據 busDirection 過濾出去程或返程
                 },
 
             },
@@ -616,61 +679,60 @@
             /* 方法(事件處理) */
             methods: {
 
-                // 圖片載入錯誤處理
+                /* 圖片載入錯誤時的替代處理 */ 
                 handleImageError(e) {
-                  e.target.src = this.noImage;
+                  e.target.src = this.noImage;  // 將圖片來源替換為預設圖片
                 },
 
-                // 🟢 圖片載入成功
+                /* 圖片載入成功事件 */
                 onImageLoad(item, index, pic) {
-                    if (!item._loadedImages) item._loadedImages = {};
-                    item._loadedImages[index] = pic;
+                    if (!item._loadedImages) item._loadedImages = {};   // 若無內部緩存則建立
+                    item._loadedImages[index] = pic;    // 標記該圖片已成功載入
                 },
 
-                // 🔴 圖片載入失敗
+                /* 圖片載入失敗事件 */
                 onImageError(item, index) {
-                    if (!item._loadedImages) item._loadedImages = {};
-                    item._loadedImages[index] = this.noImage;
+                    if (!item._loadedImages) item._loadedImages = {};   // 若無內部緩存則建立
+                    item._loadedImages[index] = this.noImage;   // 標記該圖片載入失敗，使用預設圖片
                 },
 
                 /* 取得目前登入者資訊 */
                 async getCurrentUser() {
                     try {
                         const res = await fetch('/api/currentUser', {
-                        credentials: 'include'
+                        credentials: 'include'  // 帶上 Cookie 以取得登入者資訊
                         });
                         if (!res.ok) throw new Error('尚未登入');
                         const data = await res.json();
                         console.log("👤 目前登入者：", data);
-                        this.currentUser = data;
+                        this.currentUser = data;    // 將登入者資訊儲存於 Vue 變數
                     } catch (err) {
                         console.warn("⚠️ 無法取得登入者資訊", err);
-                        this.currentUser = null;
+                        this.currentUser = null;    // 未登入或發生錯誤時設為 null
                     }
                 },
 
                 /* 改變分類 (景點/美食/住宿) */
                 async changeType(type) {
-                    this.currentType = type;
-                    await this.fetchData();
+                    this.currentType = type;    // 更新目前分類
+                    await this.fetchData(); // 重新取得該分類資料
                 },
 
-                /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）*/
-                /* ⭐👁️ 互斥排序：只能擇一生效 */
+                /* 切換排序行為(單鍵) - 評分排序（高→低) <-> (低→高）
+                   互斥排序：只能擇一生效 */
                 toggleSort(type) {
                     // 若使用者按的是「評分」
                     if (type === 'rating') {
                         // 若原本沒啟用 → 啟用評分排序、關閉瀏覽排序
-                        if (!this.sortActive) {
-                            this.sortActive = true;
-                            this.viewActive = false;
+                        if (!this.sortActive) { 
+                            this.sortActive = true; // 啟用評分排序
+                            this.viewActive = false;    // 關閉瀏覽數排序
                             this.sortDesc = true; // 預設高→低
-                        } else {
-                            // 若已啟用 → 切換升降序
-                            this.sortDesc = !this.sortDesc;
+                        } else {                            
+                            this.sortDesc = !this.sortDesc; // 若已啟用 → 切換升降序
                         }
 
-                        // 執行排序
+                        // 依照評分排序（缺值視為 0）
                         this.items.sort((a, b) =>
                             this.sortDesc
                                 ? (b.rating || 0) - (a.rating || 0)
@@ -680,6 +742,7 @@
 
                     // 若使用者按的是「瀏覽數」
                     if (type === 'views') {
+                        // 若原本沒啟用 → 啟用瀏覽排序、關閉評分排序
                         if (!this.viewActive) {
                             this.viewActive = true;
                             this.sortActive = false;
@@ -688,7 +751,7 @@
                             this.viewDesc = !this.viewDesc;
                         }
 
-                        // 執行排序
+                        // 依照瀏覽數排序（缺值視為 0）
                         this.items.sort((a, b) =>
                             this.viewDesc
                                 ? (b.views || 0) - (a.views || 0)
@@ -696,18 +759,18 @@
                         );
                     }
 
-                    /* 🧩 排序完成後，等畫面更新完再重新初始化 Carousel */
+                    /* 排序完成後，等畫面更新完再重新初始化 Bootstrap Carousel */
                     this.$nextTick(() => {
                         document.querySelectorAll('.card-carousel').forEach(c => {
                             const existing = bootstrap.Carousel.getInstance(c);
-                            if (existing) existing.dispose(); // 清除舊的實例
+                            if (existing) existing.dispose(); // 清除舊的輪播實例
 
                             // 重新啟動
                             new bootstrap.Carousel(c, {
-                                interval: 3000,
-                                ride: 'carousel',
-                                pause: false,
-                                wrap: true
+                                interval: 3000, // 自動輪播間隔
+                                ride: 'carousel',   // 自動播放
+                                pause: false,   // 不暫停
+                                wrap: true  // 循環播放
                             });
                         });
                     });
@@ -720,7 +783,7 @@
                             "X-Requested-With": "XMLHttpRequest" // 識別為 Ajax 呼叫
                         }
                     });
-                    const json = await res.json();
+                    const json = await res.json();  // 解析 JSON 回應
 
                     // 後端 JSON 轉換成前端使用格式
                     this.items = json.map(x => ({
@@ -734,28 +797,26 @@
                         districtName: x.districtName,
                         rating: x.rating,
                         views: x.views,
-                        // pictureUrl: x.pictureUrl || []
-                        // pictureUrl: (x.pictureUrl && x.pictureUrl.length > 0) ? x.pictureUrl : [this.noImage]
                         pictureUrl:
                                 (x.pictureUrl && Array.isArray(x.pictureUrl) && x.pictureUrl.some(p => p && p.trim() !== ''))
-                                ? x.pictureUrl.filter(p => p && p.trim() !== '')
-                                : [],
+                                ? x.pictureUrl.filter(p => p && p.trim() !== '')    // 若圖片陣列存在且非空，則保留有效圖片
+                                : [],   // 否則設為空陣列
 
                     }));
 
-                    // 每次切換分類後初始化 _loadedImages 讓載入中顯示 noImage
+                    // 初始化每筆項目的 _loadedImages 狀態，防止載入圖異常  
                     this.items.forEach(item => item._loadedImages = {});
 
 
-                    // 等 Vue 渲染完卡片後再初始化所有 carousel
+                    // 等 Vue 渲染完成後，重新初始化所有圖片輪播
                     this.$nextTick(() => {
                         document.querySelectorAll('.card-carousel').forEach(c => {
 
-                            // 🧹 先清除舊的 Carousel 實例（防止秒數跑掉）
+                            // 先清除舊的 Carousel 實例（防止秒數跑掉）
                             const existing = bootstrap.Carousel.getInstance(c);
-                            if (existing) existing.dispose();
+                            if (existing) existing.dispose();   // 清除舊的輪播實例（避免重複啟動）
 
-                            // ✅ 再重新初始化新的一個
+                            // 再重新初始化新的一個
                             new bootstrap.Carousel(c, {
                                 interval: 3000,
                                 ride: 'carousel',
@@ -766,24 +827,24 @@
                     });
                 },
 
-                /* Modal 顯示詳細資料 */
+                /* Modal 顯示詳細資料（點擊卡片觸發） */
                 openModal(item) {
-                    this.modalData = item;  // 設定 Modal 資料
-                    this.increaseViewCount(item);   // 🆕 點開 Modal 時增加瀏覽次數
+                    this.modalData = item;  // 將選中的項目資料指定給 modalData
+                    this.increaseViewCount(item);   // 點開 Modal 時增加瀏覽次數
 
-                    // 顯示 Modal
+                    // 顯示 Bootstrap  Modal
                     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
                     modal.show();
 
-                    // Modal 顯示後初始化輪播（先清除舊的）
+                    // Modal 顯示後初始化內部輪播 & 地圖（先清除舊的）
                     this.$nextTick(() => {
 
                          // 初始化輪播
-                        const carouselId = `carousel-modal-${item.id}`;
-                        const carouselEl = document.getElementById(carouselId);
+                        const carouselId = `carousel-modal-${item.id}`; // 動態取得 Modal 內輪播 ID
+                        const carouselEl = document.getElementById(carouselId); // 取得輪播元素
                         if (carouselEl) {
                             const existing = bootstrap.Carousel.getInstance(carouselEl);
-                            if (existing) existing.dispose(); // 🔹 確保使用新設定
+                            if (existing) existing.dispose(); // 清除舊的輪播實例
 
                             // Modal 專用輪播設定
                             new bootstrap.Carousel(carouselEl, {
@@ -791,21 +852,21 @@
                             ride: 'carousel', // 自動播放
                             pause: true, // 滑鼠移上暫停
                             wrap: true // 可循環播放
-                            });
+                            }); // 初始化輪播
                         }
 
                         // 初始化小地圖（Modal 右邊）
-                        if (typeof google !== "undefined" && item.lat && item.lng) {
-                            const mapEl = document.getElementById("detailMap");
-                            const loc = { lat: Number(item.lat), lng: Number(item.lng) };
-                            const map = new google.maps.Map(mapEl, {
-                                center: loc,
-                                zoom: 14
+                        if (typeof google !== "undefined" && item.lat && item.lng) {    // 確保 Google Maps 已載入且有經緯度
+                            const mapEl = document.getElementById("detailMap"); // 取得地圖容器
+                            const loc = { lat: Number(item.lat), lng: Number(item.lng) };   // 項目經緯度
+                            const map = new google.maps.Map(mapEl, {    // 建立地圖
+                                center: loc,    // 以項目位置為中心
+                                zoom: 14    // 放大級別
                             });
-                            new google.maps.Marker({
-                                position: loc,
-                                map,
-                                title: item.name
+                            new google.maps.Marker({    // 在地圖上放置標記
+                                position: loc,  // 標記位置
+                                map,    // 指定地圖
+                                title: item.name    // 標記標題
                             });
                         }
 
@@ -813,21 +874,21 @@
 
                 },
 
-                //【增加瀏覽次數】當使用者點開卡片（openModal）時觸發
+                /* 累加瀏覽數（在 openModal 時呼叫） */
                 increaseViewCount(item) {
-                    fetch(`/api/views/increase?type=${this.currentType}&id=${item.id}`, { method: "POST" })
+                    fetch(`/api/views/increase?type=${this.currentType}&id=${item.id}`, { method: "POST" }) 
                         .then(() => {
-                            item.views++;
+                            item.views++;   // 前端即時加 1 顯示
                             console.log(`👁️ 已累加 ${item.name} 的瀏覽次數`);
                         })
                         .catch(err => console.warn("❌ 無法更新瀏覽數", err));
                 },
 
-                //【評分功能】點擊星星時觸發
+                /* 評分功能（點擊星星觸發） */
                 async rateItem(item, userScore) {
-                    const newRating = ((item.rating || 0) + userScore) / 2;
-                    item.rating = parseFloat(newRating.toFixed(1));
-                    item.userRating = userScore;
+                    const newRating = ((item.rating || 0) + userScore) / 2; // 平均化新舊分數
+                    item.rating = parseFloat(newRating.toFixed(1)); // 四捨五入保留 1 位小數
+                    item.userRating = userScore;    // 儲存使用者本次評分
 
                     try {
                         const res = await fetch(`/api/rating/update?type=${this.currentType}&id=${item.id}&score=${item.rating}`, {
@@ -841,16 +902,17 @@
                     }
                 },
 
-                /* 加入行程（支援多天） */
+                /* 加入行程（支援多天規劃） */
                 async addToTrip(item) {
-                    // 先檢查經緯度是否合法
+                    // 先檢查確認座標是否存在
                     if (isNaN(item.lat) || isNaN(item.lng)) {
                         showAlert('warning', "該地點缺少經緯度，無法加入行程");
                         return;
                     }
 
-                    // 暫時加進來（用來測試是否能規劃）
+                    // 取目前天數的行程資料
                     const day = this.tripDays[this.currentDay - 1];
+                    // 準備暫時加入的項目（包含標籤、經緯度等）
                     const tempItem = {
                         uid: `${this.currentType}-${item.id}-${Date.now()}`,
                         id: item.id,
@@ -864,23 +926,22 @@
                         driveMinute: 0
                     };
 
-                    // 模擬加入後的清單
+                    // 模擬加進清單
                     const tempList = [...day.items, tempItem];
 
-                    // 嘗試預先規劃路線
+                    // 測試是否可規劃路線
                     const canRoute = await this.tryRoute(tempList);
 
+                    // 若能成功規劃 → 真正加入行程
                     if (canRoute) {
-                        // 能成功規劃，才真的加入
                         day.items.push(tempItem);
-                        this.drawRoute();
+                        this.drawRoute();   // 重新繪製路線
                     } else {
-                        // 規劃失敗，不加入
                         showAlert('warning', "行車無法規劃路線","請檢查座標或嘗試重新整理", 3000);
                     }
                 },
 
-                /* 刪除行程 (新) */
+                /* 刪除整份行程（選中後刪除） */
                 async deleteTrip() {
                     if (!this.selectedProject) {
                         showAlert('warning', "未選擇行程", "請先選擇要刪除的行程。");
@@ -910,7 +971,7 @@
                                 this.projectName = '';
                                 this.tripDays = [{ day: 1, items: [] }];
 
-                                // ✅ 清空地圖內容（包含路線與標記）
+                                // 清空地圖內容（包含路線與標記）
                                 if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
                                 if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
                                 this.markers.forEach(m => m.setMap(null));
@@ -931,13 +992,13 @@
                     }
                 },
 
-                /* 刪除單一行程 */
+                /* 刪除當天的某一筆行程 */
                 removeItem(index) {
-                    this.tripDays[this.currentDay - 1].items.splice(index, 1);
-                    this.drawRoute();
+                    this.tripDays[this.currentDay - 1].items.splice(index, 1);  // 從清單中移除指定項目
+                    this.drawRoute();   // 重新繪製路線
                 },
 
-                /* 清空當天行程 (新) */
+                /* 清空當天所有行程 */
                 async clearTrip() {
                     const current = this.tripDays[this.currentDay - 1];
                     if (current.items.length === 0) {
@@ -951,11 +1012,11 @@
                         confirmText: `🗑 清空`
                     });
 
-                    if (result.isConfirmed) {
-                        // 清空當前天行程資料
-                        current.items = [];
-                        this.updateMapMarkers();
-                        // 清除所有標記與路線
+                    if (result.isConfirmed) {                        
+                        current.items = []; // 清空當前天行程資料
+                        this.updateMapMarkers();    //  移除所有地圖標記
+
+                        // 清除所有 Google Maps 元件
                         if (this.directionsRenderer) this.directionsRenderer.set('directions', null);
                         if (this.singleMarker) { this.singleMarker.setMap(null); this.singleMarker = null; }
                         this.markers.forEach(m => m.setMap(null));
@@ -977,22 +1038,26 @@
 
                 /* 取得行程清單 */
                 async loadTripList() {
-                    if (!this.currentUser) return;
+                    if (!this.currentUser) return;  // 未登入不載入
                     const res = await fetch(`/api/trips/list?customerId=${this.currentUser.customerId}`);
-                    this.tripList = await res.json();
+                    this.tripList = await res.json();   // 載入屬於該使用者的行程
                 },
 
-                /* 當下拉選單變更時載入行程 */
+                /* 下拉選單選取後載入行程詳細內容 */
                 async onTripSelected() {
-                    if (!this.selectedProject) {
+                    if (!this.selectedProject) {    // 未選擇行程則重設
                         this.projectName = ''; this.totalDays = 1; this.tripDays = [{ day: 1, items: [] }];
                         return;
                     }
+
                     const res = await fetch(`/api/trips/${this.selectedProject}`);
                     const data = await res.json();
+
                     this.projectName = data.projectName;
                     this.totalDays = data.totalDays;
                     this.tripDays = [];
+
+                    // 根據天數重建 tripDays 陣列
                     for (let d = 1; d <= data.totalDays; d++) {
                         const items = data.details.filter(x => x.tripDate === d)
                         .map(x => ({
@@ -1009,10 +1074,10 @@
 
                         this.tripDays.push({ day: d, items });
                     }
-                    this.drawRoute();
-                },                               
+                    this.drawRoute();   // 載入完畢後重新繪製地圖
+                },
 
-                /* 儲存邏輯自動判斷新建或更新 */
+                /* 儲存行程邏輯（自動判斷新增或更新） */
                 async saveTrip() {
                     if (!this.currentUser) {
                         showAlert('warning',"尚未登入！");
@@ -1057,11 +1122,10 @@
                      2 個以上 → 自動規劃行車路線並顯示距離/時間
                 */
                 async drawRoute() {
-                    // 改為使用「目前天數」的行程
-                    const tripList = this.tripDays[this.currentDay - 1].items;
+                    const tripList = this.tripDays[this.currentDay - 1].items;  // 取得當前天的所有行程項目
                     console.log(`📍 第 ${this.currentDay} 天行程：`, tripList);
 
-                    // 檢查是否有缺少經緯度的項目
+                    // 若有缺少經緯度的項目 → 無法規劃
                     const invalid = tripList.filter(x => isNaN(x.lat) || isNaN(x.lng));
                     if (invalid.length > 0) {
                         console.warn("⚠️ 缺少座標：", invalid);
@@ -1101,9 +1165,9 @@
                         });
 
                         // 聚焦單一地點
-                        this.map.setCenter(position);
+                        this.map.setCenter(position);   // 將地圖中心移至該點
                         this.map.setZoom(14); // 放大至區域
-                        tripList[0].driveMinute = 0; // 第一個地點永遠 0
+                        tripList[0].driveMinute = 0; // 第一個地點的行車時間永遠為 0
                         return;
                     }
 
