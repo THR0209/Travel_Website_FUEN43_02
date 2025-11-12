@@ -56,7 +56,6 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                            {
                                couponId = c.CouponID,
                                couponName = c.CouponName,
-                               couponCode = c.CouponCode, // ✨ 新增 CouponCode
                                desc = c.CouponDesc,
                                discountType = c.DiscountType,
                                discountValue = c.DiscountValue,
@@ -65,7 +64,6 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
                                endDate = r.ExpireTime, // ✅ 改成會員個別有效期限
                                isUsed = r.IsUsed,
                                isExpired = r.ExpireTime < now, // ✅ 改成依據個人 ExpireTime 判斷
-                               isActive = c.IsActive, // ✨ 新增 IsActive
                                rule = c.MinimumAmount != null
                                    ? (c.DiscountType == 1
                                        ? $"訂購金額須滿 TWD {c.MinimumAmount:N0}, 打 {(c.DiscountValue * 10):0.##} 折"

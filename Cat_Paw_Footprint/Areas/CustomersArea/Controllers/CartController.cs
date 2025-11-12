@@ -251,25 +251,24 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 
         // 折價券：套用
         [HttpPost("apply-coupon")]
-        public async Task<IActionResult> ApplyCoupon([FromForm] string code)
+        public async Task<IActionResult> ApplyCoupon([FromForm] int couponId)
         {
             var cid = CurrentCustomerId;
             if (cid <= 0) return Unauthorized();
 
-            code = (code ?? "").Trim();
-            if (string.IsNullOrEmpty(code)) return BadRequest(new { ok = false, error = "請輸入折價碼" });
+            if (couponId <= 0) return BadRequest(new { ok = false, error = "請選擇有效的優惠券" });
 
             var now = DateTime.Now;
 
-            			var q =
-            				from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
-            				where r.CustomerID == cid
-            					  && (r.IsUsed == null || r.IsUsed == false)
-            					  && (r.Coupon != null)                              // 👈 防呆
-            					  && (r.Coupon.CouponCode == code || r.Coupon.DiscountCode == code)
-            				select r;
-			var rec = await q.FirstOrDefaultAsync();
-            if (rec == null) return BadRequest(new { ok = false, error = "此折價券不可使用" });
+            var q =
+                from r in _db.CustomerCouponsRecords.Include(r => r.Coupon)
+                where r.CustomerID == cid && r.CouponID == couponId
+                      && (r.IsUsed == null || r.IsUsed == false)
+                      && (r.Coupon != null)
+                select r;
+
+            var rec = await q.FirstOrDefaultAsync();
+            if (rec == null) return BadRequest(new { ok = false, error = "此優惠券不可使用" });
 
             // 寫入 Session（後續付款成功要把它標記已用）
             var couponObj = new

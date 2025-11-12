@@ -59,16 +59,16 @@
         <div class="coupon-card mb-3">
             <div class="input-group w-auto">
                 <span class="input-group-text">我的優惠券</span>
-                <select class="form-select" v-model="selectedCouponCode" v-on:change="onCouponChange">
+                <select class="form-select" v-model="selectedCouponId" v-on:change="onCouponChange">
                     <option value="__PLEASE__" disabled>請選擇優惠券</option>
                     <option value="__NONE__">無</option>
-                    <option v-for="c in coupons" :key="c.couponId" :value="c.code">
+                    <option v-for="c in coupons" :key="c.couponId" :value="c.couponId">
                         {{ couponLabel(c) }}
                     </option>
                 </select>
                 <button class="btn btn-outline-primary"
                         v-on:click="applySelectedCoupon"
-                        :disabled="!selectedCouponCode || selectedCouponCode==='__PLEASE__' || selectedCouponCode==='__NONE__'">
+                        :disabled="!selectedCouponId || selectedCouponId==='__PLEASE__' || selectedCouponId==='__NONE__'">
                     套用
                 </button>
                 <button class="btn btn-outline-secondary" v-on:click="clearCoupon">清除</button>
@@ -147,7 +147,7 @@
                 const discountHint = ref('');
                 const selected = ref([]);
                 const checkAll = ref(false);
-                const selectedCouponCode = ref('__PLEASE__');
+                const selectedCouponId = ref('__PLEASE__');
                 const coupons = ref([]);
                 const couponSelectLocked = ref(false);
                 const apiTotal = ref(0);
@@ -164,8 +164,8 @@
 
                     let calculatedTotal = selectedTotal.value || 0;
 
-                    if (selectedCouponCode.value && selectedCouponCode.value !== '__NONE__') {
-                        const c = coupons.value.find(x => x.code === selectedCouponCode.value);
+                    if (selectedCouponId.value && selectedCouponId.value !== '__NONE__') {
+                        const c = coupons.value.find(x => x.couponId === selectedCouponId.value);
                         if (c) {
                             if (c.discountType === 1) { // Percentage
                                 calculatedTotal *= c.discountValue;
@@ -201,12 +201,12 @@
 
                 async function onCouponChange(){
                 // 選「無」就立刻清掉後端 Session 的 CART_COUPON，避免後續 CheckoutCredit 抓到舊券
-                if (selectedCouponCode.value === '__NONE__') {
+                if (selectedCouponId.value === '__NONE__') {
                   try {
                     await axios.post('/CustomersArea/Cart/clear-coupon');
                   } finally {
                     discountHint.value = '';
-                    // 不要把 selectedCouponCode 置空，保留 'none' 才不會又被誤認為有券
+                    // 不要把 selectedCouponId 置空，保留 'none' 才不會又被誤認為有券
                   }
                 }
                 }
@@ -225,7 +225,7 @@
                       expireAt: c.endDate
                     }));
 
-                    if (!selectedCouponCode.value) selectedCouponCode.value = '__PLEASE__';
+                    if (!selectedCouponId.value) selectedCouponId.value = '__PLEASE__';
                   } catch (err) {
                     console.error('載入優惠券失敗', err);
                     coupons.value = [];
@@ -234,9 +234,9 @@
 
                 async function applySelectedCoupon(){
                   try{
-                    if (selectedCouponCode.value === '__PLEASE__') return;
+                    if (selectedCouponId.value === '__PLEASE__') return;
 
-                    if (selectedCouponCode.value === '__NONE__') {
+                    if (selectedCouponId.value === '__NONE__') {
                     await axios.post('/CustomersArea/Cart/clear-coupon');
                     discountHint.value = '';
                     await reload();
@@ -246,7 +246,7 @@
                     }
 
                     const res = await axios.post('/CustomersArea/Cart/apply-coupon',
-                     new URLSearchParams({ code: selectedCouponCode.value })
+                     new URLSearchParams({ couponId: selectedCouponId.value })
                     );
                     discountHint.value = res.data?.hint || '已套用優惠券';
                     await reload();
@@ -267,7 +267,7 @@
                 async function beforePaySubmit(e){
                   try {
                     // 若選「無」→ 再清一次後端券
-                    if (selectedCouponCode.value === '__NONE__') {
+                    if (selectedCouponId.value === '__NONE__') {
                       await axios.post('/CustomersArea/Cart/clear-coupon');
                     }
                   } catch {}
@@ -354,7 +354,7 @@
                   items.value = data.items || [];
                   apiTotal.value = data.total || 0;
                   // 回填折扣資訊（若後端有保存在 Session）
-                  couponCode.value = data.coupon?.code || '';
+                  couponCode.value = data.coupon?.id || '';
                   discountHint.value = data.coupon?.hint || '';
                 }
                 function inc(it){ it.qty++; update(it); }
@@ -375,6 +375,8 @@
                 function toggleAll(){
                   selected.value = checkAll.value ? items.value.map(i=>i.productId) : [];
                 }
+
+
 
                 async function batchRemove(){
                   await axios.post('/CustomersArea/Cart/batch-remove', selected.value);
@@ -400,7 +402,7 @@
                     await axios.post('/CustomersArea/Cart/clear-coupon');
                   }finally{
                     couponCode.value = '';
-                    selectedCouponCode.value = '__PLEASE__';
+                    selectedCouponId.value = '__PLEASE__';
                     discountHint.value = '';
                     await reload();
                   }
@@ -424,7 +426,7 @@
                   items,couponLabel,couponCode,discountHint,unlockCouponSelect,
                   selected,checkAll,toggleAll,batchRemove,customerId,selectedTotal,
                   inc, dec, update, remove,applyCouponById,clearCart,coupons,
-                  clearCoupon,checkout,finalTotal,selectedCouponCode,
+                  clearCoupon,checkout,finalTotal,selectedCouponId,
                   payByTransfer,loadCoupons,toDate,applySelectedCoupon,
                   beforePaySubmit,onCouponChange
                 };
