@@ -145,23 +145,23 @@
         /* 一鍵輸入 */
         document.getElementById("btnAutoFill").addEventListener("click", function () {
             // 一般文字欄位
-            document.getElementById("LocationName").value = "澎湖跨海大橋2";
-            document.getElementById("LocationAddr").value = "澎湖縣白沙鄉通梁村200號";
+            document.getElementById("LocationName").value = "新竹巨城購物中心";
+            document.getElementById("LocationAddr").value = "新竹市東區中央路229號";
             document.getElementById("LocationPrice").value = "0";
 
 
             // 下拉式選單（區域）
             const regionSelect = document.getElementById("RegionID");
-            regionSelect.value = "5";  // 請改成離島在資料庫中的 RegionID 值
+            regionSelect.value = "1";  // 請改成在資料庫中的 RegionID 值
             regionSelect.dispatchEvent(new Event("change")); // 觸發 onchange（若有連動地區）
 
             // 下拉式選單（地區名稱）
             const districtSelect = document.getElementById("DistrictID");
-            districtSelect.value = "20"; // 改成對應澎湖縣所在 DistrictID
+            districtSelect.value = "6"; // 改成對應 新竹市 所在 DistrictID
 
             // 關鍵字下拉（例如景點 / 海景）
             const keywordSelect = document.getElementById("keywordSelect");
-            keywordSelect.value = "3"; // 假設「離島」的 KeywordID = 3
+            keywordSelect.value = "9"; // 假設「親子」的 KeywordID = 9
             keywordSelect.dispatchEvent(new Event("change"));
 
             // ✅ 觸發地址自動轉經緯度
