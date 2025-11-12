@@ -9,74 +9,189 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <style>
         .page-wrap {
-            margin-top: 18px;
+            margin-top: 18px
         }
 
         .layout {
             display: grid;
             grid-template-columns: minmax(0,1fr) 360px;
-            gap: 24px;
+            gap: 24px
         }
-
         @@media (max-width: 992px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
+            .layout
+
+        {
+            grid-template-columns: 1fr
         }
 
-        /* 畫廊 */
-        .hero-img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            border-radius: 14px;
-            overflow: hidden;
         }
 
-            .hero-img img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-        .thumbs {
-            display: grid;
-            grid-template-columns: repeat(5,1fr);
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .thumb {
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-            .thumb.active {
-                border-color: #22B3C1;
-            }
-
-            .thumb img {
-                width: 100%;
-                aspect-ratio: 4/3;
-                object-fit: cover;
-            }
-
+        /* 主要標題與可讀性強化 */
         .title {
-            font-size: 1.6rem;
-            font-weight: 800;
+            font-size: 1.9rem;
+            font-weight: 900;
+            letter-spacing: .5px
         }
 
         .meta {
-            color: #6b7d90;
+            color: #6b7d90
         }
 
         .badge-cat {
             background: #f2fbfe;
-            border: 1px solid #d7eef6;
+            border: 1px solid #d7eef6
         }
 
-        /* 右側預訂盒 */
+        /* 區塊標題與卡片 */
+        .sec-title {
+            position: relative;
+            display: inline-block;
+            font-weight: 900;
+            margin-bottom: .9rem;
+            font-size: 1.25rem
+        }
+
+            .sec-title:before {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: -8px;
+                height: 12px;
+                background: linear-gradient(90deg,#dff6fa,#fff);
+                z-index: -1;
+                border-radius: 6px
+            }
+
+        .day-title {
+            font-weight: 900;
+            color: #22B3C1;
+            font-size: 1.15rem;
+            margin: .1rem 0 .6rem
+        }
+
+        .card-soft {
+            border: 1px solid #eef3f8;
+            border-radius: 14px;
+            padding: 16px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,.04)
+        }
+
+            .ck-content, .card-soft p {
+                font-size: 1.02rem;
+                line-height: 1.9
+            }
+
+        /* 時間軸 */
+        .timeline {
+            position: relative;
+            margin: 1rem 0 0 1rem;
+            border-left: 3px solid #e8eef6
+        }
+
+            .timeline .node {
+                width: 12px;
+                height: 12px;
+                background: #22B3C1;
+                border-radius: 50%;
+                position: absolute;
+                left: -7.5px;
+                top: .55rem
+            }
+
+        .day-block {
+            position: relative;
+            padding-left: 1rem;
+            margin-bottom: 1rem
+        }
+
+        /* 圖文並列（桌機兩欄、手機單欄） */
+        .spot-row {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 14px;
+            align-items: start;
+            margin: .75rem 0
+        }
+        @@media (max-width: 768px) {
+            .spot-row
+
+        {
+            grid-template-columns: 1fr
+        }
+
+        }
+
+        .spot-thumb {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f7fafb;
+            border: 1px solid #e9eef3;
+            cursor: pointer
+        }
+
+            .spot-thumb img {
+                display: block;
+                width: 100%;
+                height: 200px;
+                object-fit: cover
+            }
+        @@media (max-width: 768px) {
+            .spot-thumb img
+
+        {
+            height: 180px
+        }
+
+        }
+
+        /* 小籤樣式 */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-weight: 800
+        }
+
+            .chip i {
+                font-size: 1.05rem
+            }
+
+        .chip-pin {
+            background: #f8fafc;
+            border: 1px solid #e6edf2;
+            color: #0f172a
+        }
+
+        .chip-meal {
+            background: #fff7ed;
+            border: 1px solid #ffedd5;
+            color: #9a3412
+        }
+
+        .chip-hotel {
+            background: #eef2ff;
+            border: 1px solid #e0e7ff;
+            color: #3730a3
+        }
+
+        .chip-transport {
+            background: #ecfeff;
+            border: 1px solid #cffafe;
+            color: #155e75
+        }
+
+        .hotel-addr {
+            display: block;
+            margin: .15rem 0 .25rem;
+            color: #64748b
+        }
+
+        /* 右側預訂盒與總金額 */
         .book-box {
             position: sticky;
             top: 88px;
@@ -90,31 +205,31 @@
         .price {
             color: #00a66a;
             font-weight: 800;
-            font-size: 1.4rem;
+            font-size: 1.6rem
         }
 
         .control {
             background: #f7fbff;
             border: 1px solid #e5eef7;
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: 10px 12px
         }
 
             .control + .control {
-                margin-top: 10px;
+                margin-top: 10px
             }
 
         .people-inline {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 12px
         }
 
             .people-inline .btn {
                 width: 32px;
                 height: 32px;
-                padding: 0;
+                padding: 0
             }
 
         .btn-book {
@@ -124,216 +239,109 @@
             background: #22B3C1;
             color: #fff;
             border: none;
-            border-radius: 10px;
+            border-radius: 10px
         }
 
         .is-invalid {
             border: 2px solid #dc3545 !important;
-            background: #fff5f5 !important;
+            background: #fff5f5 !important
         }
 
-        /* 總金額列 */
         .total-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px dashed #e5eef7;
+            border-top: 1px dashed #e5eef7
         }
 
             .total-row .label {
-                font-weight: 800;
+                font-weight: 800
             }
 
             .total-row .value {
                 font-weight: 900;
-                font-size: 1.1rem;
-                color: #0f766e;
+                font-size: 1.15rem;
+                color: #0f766e
+            }
+
+        /* 主要畫廊 */
+        .hero-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #f7fafb
+        }
+
+            .hero-img img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover
+            }
+
+        .thumbs {
+            display: grid;
+            grid-template-columns: repeat(5,1fr);
+            gap: 8px;
+            margin-top: 8px
+        }
+
+        .thumb {
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent
+        }
+
+            .thumb.active {
+                border-color: #22B3C1
+            }
+
+            .thumb img {
+                width: 100%;
+                aspect-ratio: 4/3;
+                object-fit: cover
             }
 
         /* Tabs */
         .nav-tabs .nav-link {
             border: none;
             border-bottom: 3px solid transparent;
-            font-weight: 700;
-            color: #4b5563;
+            font-weight: 800;
+            color: #334155
         }
 
             .nav-tabs .nav-link.active {
                 color: #22B3C1;
-                border-color: #22B3C1;
+                border-color: #22B3C1
             }
 
-        /* 行程介紹樣式 */
-        .timeline {
-            position: relative;
-            margin: 1rem 0 0 1rem;
-            border-left: 3px solid #e8eef6;
-        }
-
-            .timeline .node {
-                width: 12px;
-                height: 12px;
-                background: #22B3C1;
-                border-radius: 50%;
-                position: absolute;
-                left: -7.5px;
-                top: .55rem;
-            }
-
-        .day-block {
-            position: relative;
-            padding-left: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .day-title {
-            font-weight: 800;
-            color: #22B3C1;
-        }
-
-        .list-slim {
-            list-style: none;
-            padding-left: 0;
-            margin: .25rem 0 .75rem;
-        }
-
-            .list-slim li {
-                margin: .35rem 0;
-            }
-
-        .sec-title {
-            position: relative;
-            display: inline-block;
-            font-weight: 800;
-            margin-bottom: .75rem;
-        }
-
-            .sec-title:before {
-                content: "";
-                position: absolute;
-                left: 0;
-                right: 0;
-                bottom: -6px;
-                height: 10px;
-                background: linear-gradient(90deg,#dff6fa,#fff);
-                z-index: -1;
-            }
-
-        .card-soft {
-            border: 1px solid #eef3f8;
-            border-radius: 14px;
-            padding: 14px;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,.04);
-        }
-
-        .carousel .carousel-item img {
-            height: 240px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-
-        /* --- daterangepicker 微客製 --- */
+        /* daterangepicker 微調 */
         .daterangepicker {
             border-radius: 16px;
             border: 1px solid #e6e6e6;
             box-shadow: 0 10px 30px rgba(0,0,0,.08);
-            font-family: 'Public Sans', system-ui, -apple-system, 'Noto Sans TC', sans-serif;
+            font-family: 'Public Sans',system-ui,-apple-system,'Noto Sans TC',sans-serif
         }
-
-            .daterangepicker .drp-calendar.left .calendar-table thead tr:nth-child(1) th {
-                font-size: 20px;
-                font-weight: 700;
-                padding: 20px 24px;
-            }
-
-            .daterangepicker .drp-calendar .prev, .daterangepicker .drp-calendar .next {
-                width: 20px;
-                height: 20px;
-                border-radius: 10px;
-                border: 1px solid #dfe6e9;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-            }
-
-                .daterangepicker .drp-calendar .prev:hover, .daterangepicker .drp-calendar .next:hover {
-                    background: #f7f9fa;
-                }
-
-            .daterangepicker .calendar-table thead tr:nth-child(2) th {
-                color: #7f8c8d;
-                font-weight: 600;
-                padding: 8px 0;
-            }
-
-            .daterangepicker .calendar-table td {
-                height: 20px;
-                vertical-align: top;
-                position: relative;
-                padding-top: 6px;
-                font-weight: 700;
-            }
-
-                .daterangepicker .calendar-table td:after {
-                    content: attr(data-price);
-                    position: absolute;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    bottom: 6px;
-                    font-size: 12px;
-                    font-weight: 600;
-                    color: #7f8c8d;
-                    white-space: nowrap;
-                }
-
-            .daterangepicker td.off, .daterangepicker td.disabled {
-                color: #c9c9c9 !important;
-            }
-
-                .daterangepicker td.off:after, .daterangepicker td.disabled:after {
-                    color: #d8d8d8;
-                }
 
             .daterangepicker td.active, .daterangepicker td.active:hover {
                 background: #22B3C1;
                 border-radius: 10px;
-                color: #fff !important;
+                color: #fff !important
             }
 
-                .daterangepicker td.active:after {
-                    color: #e8ffff;
-                }
-
-            .daterangepicker td.available:hover {
-                background: #eaf7f8;
-                border-radius: 10px;
-            }
-
-        .drp-footer-note {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px 6px;
-            color: #7f8c8d;
-            font-size: 12px;
+        /* Modal 內顯示大圖避免裁切 */
+        .modal .carousel-item img {
+            max-height: 70vh;
+            width: 100%;
+            object-fit: contain
         }
-
-            .drp-footer-note i {
-                font-style: normal;
-                width: 16px;
-                height: 16px;
-                border-radius: 50%;
-                border: 1px solid #cfd8dc;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
     </style>
 }
+
+
 
 <div class="container page-wrap">
     <div class="layout">
@@ -392,9 +400,10 @@
 
                 <!-- 行程介紹 -->
                 <div class="tab-pane fade" id="tab-itin">
-                    <!-- 景點 -->
+                    <!-- 景點（改為每個景點圖文並列＋點圖開 modal 看大圖） -->
                     <div class="mb-4">
                         <div class="sec-title">景點</div>
+
                         @if (Model.LocationsByDay.Any())
                         {
                             foreach (var day in Model.LocationsByDay)
@@ -403,51 +412,82 @@
                                     <div class="day-block">
                                         <div class="node"></div>
                                         <div class="day-title">第 @day.DayNumber 天</div>
-                                        <ul class="list-slim">
-                                            @foreach (var loc in day.Items)
-                                            {
-                                                <li>
-                                                    <i class="fa-solid fa-location-dot text-danger me-1"></i><b>@loc.Name</b><br />
-                                                    <span class="text-muted">@loc.Desc</span>
-                                                </li>
-                                            }
-                                        </ul>
 
-                                        @{
-                                            var imgs = day.Items.SelectMany(x => x.Pictures).Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
-                                            if (imgs.Count == 0) { imgs = new() { "/images/NoImage.png" }; }
-                                            var cid = $"spot_{day.DayNumber}";
-                                        }
-                                        <div id="@cid" class="carousel slide mt-1" data-bs-ride="carousel">
-                                            <div class="carousel-inner">
-                                                @for (int i = 0; i < imgs.Count; i++)
-                                                {
-                                                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                        <img src="@imgs[i]" class="d-block w-100" alt="spot">
+                                        @for (int i = 0; i < day.Items.Count; i++)
+                                        {
+                                            var loc = day.Items[i];
+                                            var imgs = loc.Pictures?.Where(u => !string.IsNullOrWhiteSpace(u)).ToList() ?? new List<string>();
+                                            var cover = imgs.FirstOrDefault() ?? "/images/NoImage.png";
+                                            var modalId = $"spotModal_{day.DayNumber}_{i}";
+
+                                            <div class="spot-row">
+                                                <!-- 左：文字 -->
+                                                <div>
+                                                    <div class="chip-pin mb-2">
+                                                        <i class="fa-solid fa-location-dot text-danger"></i>
+                                                        <span>@loc.Name</span>
                                                     </div>
-                                                }
+                                                    <div class="text-muted ck-content">@Html.Raw(loc.Desc)</div>
+                                                </div>
+
+                                                <!-- 右：縮圖（點擊開 Modal 內輪播） -->
+                                                <a class="spot-thumb" data-bs-toggle="modal" data-bs-target="#@modalId" title="點擊看大圖">
+                                                    <img src="@cover" alt="@loc.Name" loading="lazy" />
+                                                </a>
                                             </div>
-                                            <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
-                                                <span class="carousel-control-prev-icon"></span>
-                                            </button>
-                                            <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
-                                                <span class="carousel-control-next-icon"></span>
-                                            </button>
-                                        </div>
+
+                                            <!-- Modal：這個景點的相簿 -->
+                                            <div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body p-0">
+                                                            @if (imgs.Count <= 1)
+                                                            {
+                                                                <img src="@cover" class="w-100" alt="@loc.Name" />
+                                                            }
+                                                            else
+                                                            {
+                                                                var cid = $"spotCarousel_{day.DayNumber}_{i}";
+                                                                <div id="@cid" class="carousel slide" data-bs-ride="false">
+                                                                    <div class="carousel-inner">
+                                                                        @for (int k = 0; k < imgs.Count; k++)
+                                                                        {
+                                                                            <div class="carousel-item @(k == 0 ? "active" : "")">
+                                                                                <img src="@imgs[k]" class="d-block w-100" alt="@loc.Name">
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                    <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
+                                                                        <span class="carousel-control-prev-icon"></span>
+                                                                    </button>
+                                                                    <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
+                                                                        <span class="carousel-control-next-icon"></span>
+                                                                    </button>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             }
                         }
                         else
                         {
-
                             <div class="card-soft text-muted">尚無景點資料</div>
                         }
                     </div>
 
-                    <!-- 餐食 -->
+
+                    <!-- 餐食（圖文並列，每個餐廳/餐點各自相簿） -->
                     <div class="mb-4">
                         <div class="sec-title">餐食</div>
+
                         @if (Model.MealsByDay.Any())
                         {
                             foreach (var day in Model.MealsByDay)
@@ -457,56 +497,91 @@
                                         <div class="node"></div>
                                         <div class="day-title">第 @day.DayNumber 天</div>
 
-                                        @foreach (var grp in day.Meals)
+                                        @for (int g = 0; g < day.Meals.Count; g++)
                                         {
-                                            var title = grp.MealType switch { "Breakfast" => "早餐", "Lunch" => "午餐", "Dinner" => "晚餐", _ => grp.MealType };
-                                            <div class="mb-2">
-                                                <b>@title：</b>
-                                                @{
-                                                    var names = grp.Items.Select(x => x.Name).Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
-                                                    @:(@(names.Count > 0 ? string.Join("、", names) : "尚無資料"))
-                                                }
-                                            </div>
-                                            <div class="text-muted small" style="margin-top:-6px">
-                                                @string.Join("、", grp.Items.Select(x => x.Desc).Where(s => !string.IsNullOrWhiteSpace(s)))
-                                            </div>
-                                        }
+                                            var grp = day.Meals[g];
+                                            var mealTitle = grp.MealType switch { "Breakfast" => "早餐", "Lunch" => "午餐", "Dinner" => "晚餐", _ => grp.MealType };
 
-                                        @{
-                                            var imgs = day.Meals.SelectMany(m => m.Items.SelectMany(i => i.Pictures)).Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
-                                            if (imgs.Count == 0) { imgs = new() { "/images/NoImage.png" }; }
-                                            var cid = $"meal_{day.DayNumber}";
-                                        }
-                                        <div id="@cid" class="carousel slide mt-1" data-bs-ride="carousel">
-                                            <div class="carousel-inner">
-                                                @for (int i = 0; i < imgs.Count; i++)
-                                                {
-                                                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                        <img src="@imgs[i]" class="d-block w-100" alt="meal">
+                                            @for (int i = 0; i < grp.Items.Count; i++)
+                                            {
+                                                var item = grp.Items[i];
+                                                var imgs = item.Pictures?.Where(u => !string.IsNullOrWhiteSpace(u)).ToList() ?? new List<string>();
+                                                var cover = imgs.FirstOrDefault() ?? "/images/NoImage.png";
+                                                var modalId = $"mealModal_{day.DayNumber}_{g}_{i}";
+
+                                                <div class="spot-row">
+                                                    <div>
+                                                        <div class="chip chip-meal mb-2">
+                                                            <i class="fa-solid fa-utensils"></i>
+                                                            <span>@mealTitle</span>
+                                                            @if (!string.IsNullOrWhiteSpace(item.Name))
+                                                            {
+                                                                <span>・@item.Name</span>
+                                                            }
+                                                        </div>
+                                                        <div class="text-muted ck-content">
+                                                            @Html.Raw(item.Desc)
+                                                        </div>
                                                     </div>
-                                                }
-                                            </div>
-                                            <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
-                                                <span class="carousel-control-prev-icon"></span>
-                                            </button>
-                                            <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
-                                                <span class="carousel-control-next-icon"></span>
-                                            </button>
-                                        </div>
+
+                                                    <a class="spot-thumb" data-bs-toggle="modal" data-bs-target="#@modalId" title="點擊看餐食照片">
+                                                        <img src="@cover" alt="@($"{mealTitle}-{item.Name}")" loading="lazy" />
+                                                    </a>
+                                                </div>
+
+                                                <!-- Modal：此餐點相簿 -->
+                                                <div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-body p-0">
+                                                                @if (imgs.Count <= 1)
+                                                                {
+                                                                    <img src="@cover" class="w-100" alt="@($"{mealTitle}-{item.Name}")" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    var cid = $"mealCarousel_{day.DayNumber}_{g}_{i}";
+                                                                    <div id="@cid" class="carousel slide" data-bs-ride="false">
+                                                                        <div class="carousel-inner">
+                                                                            @for (int k = 0; k < imgs.Count; k++)
+                                                                            {
+                                                                                <div class="carousel-item @(k == 0 ? "active" : "")">
+                                                                                    <img src="@imgs[k]" class="d-block w-100" alt="@($"{mealTitle}-{item.Name}")">
+                                                                                </div>
+                                                                            }
+                                                                        </div>
+                                                                        <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
+                                                                            <span class="carousel-control-prev-icon"></span>
+                                                                        </button>
+                                                                        <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
+                                                                            <span class="carousel-control-next-icon"></span>
+                                                                        </button>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
                                     </div>
                                 </div>
                             }
                         }
                         else
                         {
-
                             <div class="card-soft text-muted">尚無餐點資料</div>
                         }
                     </div>
 
-                    <!-- 住宿 -->
+
+                    <!-- 住宿（圖文並列＋地址） -->
                     <div class="mb-4">
                         <div class="sec-title">住宿</div>
+
                         @if (Model.HotelsByDay.Any())
                         {
                             foreach (var day in Model.HotelsByDay)
@@ -515,88 +590,154 @@
                                     <div class="day-block">
                                         <div class="node"></div>
                                         <div class="day-title">第 @day.DayNumber 天</div>
-                                        <ul class="list-slim">
-                                            @foreach (var h in day.Items)
-                                            {
-                                                <li>
-                                                    <i class="fa-solid fa-bed me-1"></i><b>@h.Name</b><br />
-                                                    <span class="text-muted"><b>地址：</b>@h.Addr</span><br />
-                                                    <span class="text-muted">@h.Desc</span>
-                                                </li>
-                                            }
-                                        </ul>
-                                        @{
-                                            var imgs = day.Items.SelectMany(x => x.Pictures).Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
-                                            if (imgs.Count == 0) { imgs = new() { "/images/NoImage.png" }; }
-                                            var cid = $"hotel_{day.DayNumber}";
-                                        }
-                                        <div id="@cid" class="carousel slide mt-1" data-bs-ride="carousel">
-                                            <div class="carousel-inner">
-                                                @for (int i = 0; i < imgs.Count; i++)
-                                                {
-                                                    <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                        <img src="@imgs[i]" class="d-block w-100" alt="hotel">
+
+                                        @for (int i = 0; i < day.Items.Count; i++)
+                                        {
+                                            var h = day.Items[i];
+                                            var imgs = h.Pictures?.Where(u => !string.IsNullOrWhiteSpace(u)).ToList() ?? new List<string>();
+                                            var cover = imgs.FirstOrDefault() ?? "/images/NoImage.png";
+                                            var modalId = $"hotelModal_{day.DayNumber}_{i}";
+
+                                            <div class="spot-row">
+                                                <div>
+                                                    <div class="chip chip-hotel mb-2">
+                                                        <i class="fa-solid fa-bed"></i>
+                                                        <span>@h.Name</span>
                                                     </div>
-                                                }
+                                                    @if (!string.IsNullOrWhiteSpace(h.Addr))
+                                                    {
+                                                        <small class="hotel-addr"><i class="fa-solid fa-location-dot me-1"></i>@h.Addr</small>
+                                                    }
+                                                    <div class="text-muted ck-content">@Html.Raw(h.Desc)</div>
+                                                </div>
+
+                                                <a class="spot-thumb" data-bs-toggle="modal" data-bs-target="#@modalId" title="點擊看住宿照片">
+                                                    <img src="@cover" alt="@h.Name" loading="lazy" />
+                                                </a>
                                             </div>
-                                            <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
-                                                <span class="carousel-control-prev-icon"></span>
-                                            </button>
-                                            <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
-                                                <span class="carousel-control-next-icon"></span>
-                                            </button>
-                                        </div>
+
+                                            <!-- Modal：此住宿相簿 -->
+                                            <div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body p-0">
+                                                            @if (imgs.Count <= 1)
+                                                            {
+                                                                <img src="@cover" class="w-100" alt="@h.Name" />
+                                                            }
+                                                            else
+                                                            {
+                                                                var cid = $"hotelCarousel_{day.DayNumber}_{i}";
+                                                                <div id="@cid" class="carousel slide" data-bs-ride="false">
+                                                                    <div class="carousel-inner">
+                                                                        @for (int k = 0; k < imgs.Count; k++)
+                                                                        {
+                                                                            <div class="carousel-item @(k == 0 ? "active" : "")">
+                                                                                <img src="@imgs[k]" class="d-block w-100" alt="@h.Name">
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                    <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
+                                                                        <span class="carousel-control-prev-icon"></span>
+                                                                    </button>
+                                                                    <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
+                                                                        <span class="carousel-control-next-icon"></span>
+                                                                    </button>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             }
                         }
                         else
                         {
-
                             <div class="card-soft text-muted">尚無住宿資料</div>
                         }
                     </div>
 
-                    <!-- 交通 -->
+
+
+                    <!-- 交通（清單每一項皆圖文並列） -->
                     <div class="mb-4">
                         <div class="sec-title">交通</div>
+
                         @if (Model.Transports.Any())
                         {
                             <div class="card-soft">
-                                <ul class="list-slim">
-                                    @foreach (var t in Model.Transports)
-                                    {
-                                        <li><i class="fa-solid fa-bus me-1"></i><b>@t.Name</b><br /><span class="text-muted">@t.Desc</span></li>
-                                    }
-                                </ul>
-                                @{
-                                    var imgs = Model.Transports.SelectMany(x => x.Pictures).Where(u => !string.IsNullOrWhiteSpace(u)).ToList();
-                                    if (imgs.Count == 0) { imgs = new() { "/images/NoImage.png" }; }
-                                }
-                                <div id="trans_carousel" class="carousel slide mt-1" data-bs-ride="carousel">
-                                    <div class="carousel-inner">
-                                        @for (int i = 0; i < imgs.Count; i++)
-                                        {
-                                            <div class="carousel-item @(i == 0 ? "active" : "")">
-                                                <img src="@imgs[i]" class="d-block w-100" alt="transport">
+                                @for (int i = 0; i < Model.Transports.Count; i++)
+                                {
+                                    var t = Model.Transports[i];
+                                    var imgs = t.Pictures?.Where(u => !string.IsNullOrWhiteSpace(u)).ToList() ?? new List<string>();
+                                    var cover = imgs.FirstOrDefault() ?? "/images/NoImage.png";
+                                    var modalId = $"transModal_{i}";
+
+                                    <div class="spot-row">
+                                        <div>
+                                            <div class="chip chip-transport mb-2">
+                                                <i class="fa-solid fa-bus"></i>
+                                                <span>@t.Name</span>
                                             </div>
-                                        }
+                                            <div class="text-muted ck-content">@Html.Raw(t.Desc)</div>
+                                        </div>
+
+                                        <a class="spot-thumb" data-bs-toggle="modal" data-bs-target="#@modalId" title="點擊看交通照片">
+                                            <img src="@cover" alt="@t.Name" loading="lazy" />
+                                        </a>
                                     </div>
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#trans_carousel" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon"></span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#trans_carousel" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon"></span>
-                                    </button>
-                                </div>
+
+                                    <!-- Modal：此交通相簿 -->
+                                    <div class="modal fade" id="@modalId" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-body p-0">
+                                                    @if (imgs.Count <= 1)
+                                                    {
+                                                        <img src="@cover" class="w-100" alt="@t.Name" />
+                                                    }
+                                                    else
+                                                    {
+                                                        var cid = $"transCarousel_{i}";
+                                                        <div id="@cid" class="carousel slide" data-bs-ride="false">
+                                                            <div class="carousel-inner">
+                                                                @for (int k = 0; k < imgs.Count; k++)
+                                                                {
+                                                                    <div class="carousel-item @(k == 0 ? "active" : "")">
+                                                                        <img src="@imgs[k]" class="d-block w-100" alt="@t.Name">
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <button class="carousel-control-prev" type="button" data-bs-target="#@cid" data-bs-slide="prev">
+                                                                <span class="carousel-control-prev-icon"></span>
+                                                            </button>
+                                                            <button class="carousel-control-next" type="button" data-bs-target="#@cid" data-bs-slide="next">
+                                                                <span class="carousel-control-next-icon"></span>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">關閉</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         }
                         else
                         {
-
                             <div class="card-soft text-muted">尚無交通資料</div>
                         }
                     </div>
+
                 </div>
 
                 <!-- 注意事項 -->

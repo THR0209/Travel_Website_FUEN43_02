@@ -72,7 +72,7 @@
                     <span asp-validation-for="MaxPeople" class="text-danger"></span>
                 </div> *@
 
-                <div class="form-group mb-3">
+                @* <div class="form-group mb-3">
                     <label class="control-label">選擇關鍵字</label>
                     <select id="keywordSelect" class="form-select" asp-items="ViewBag.KeywordID">
                         <option value="">請選擇</option>
@@ -96,7 +96,7 @@
                             }
                         }
                     </div>
-                </div>
+                </div> *@
 
             </div>
         </div>
@@ -164,7 +164,7 @@
         document.getElementById('uploadImage').addEventListener('change', function(){ previewImage(this); });
     </script>
 
-    <<script>
+    @* <<script>
        function updateHiddenField() {
             const hiddenContainer = document.getElementById("KeywordIDsContainer");
             hiddenContainer.innerHTML = "";
@@ -201,5 +201,5 @@
         }
         document.addEventListener("DOMContentLoaded", updateHiddenField);
 
-    </script>
+    </script> *@
 }

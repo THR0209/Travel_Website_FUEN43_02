@@ -133,6 +133,10 @@
             if (clearBtn && !clearBtn._bound){
               clearBtn._bound = true;
               clearBtn.addEventListener('click', () => {
+                // 1) 清空文字欄位：關鍵字
+                const dest = filterForm.querySelector('input[name="Destination"]');
+                if (dest) { dest.value = ''; dest.removeAttribute('value'); }
+
                 // 重設整個左側表單（包含勾選的出發地）
                 filterForm.reset();
                 ajaxLoad(filterForm);

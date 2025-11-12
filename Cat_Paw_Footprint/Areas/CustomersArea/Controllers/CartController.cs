@@ -125,8 +125,8 @@ namespace Cat_Paw_Footprint.Areas.CustomersArea.Controllers
 					ProductName = p.ProductName ?? $"商品 {p.ProductID}",
 					Price = p.ProductPrice ?? 0,
 					Qty = qty,
-					ImageUrl = p.ProductImage != null
-						? "data:image/png;base64," + Convert.ToBase64String(p.ProductImage)
+					ImageUrl = p.ProductImageUrl != null
+						? p.ProductImageUrl
 						: Url.Content("~/images/NoImage.png")
 				});
 			}

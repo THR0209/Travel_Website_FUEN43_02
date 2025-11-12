@@ -1063,7 +1063,7 @@
                             </div>
                             <div class="product-body p-3">
                                 <h5 class="fw-bold mb-1 product-title">{{ p.productName }}</h5>
-                                <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p>
+                                @* <p class="text-muted mb-1"><i class="fa-solid fa-location-dot me-1 text-secondary"></i>{{ p.region }}</p> *@
                                 <div class="fw-bold text-primary">NT$ {{ p.price }} 起</div>
                                 <!-- 新增 查看詳情按鈕 -->
                                 <a :href="'/CustomersArea/Products/Details/' + p.productID"

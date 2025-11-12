@@ -149,12 +149,12 @@ namespace Cat_Paw_Footprint.Areas.ProductManagement.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(int id, SemiSelfProducts model, IFormFile? UploadImage, List<int>? KeywordID)
+		public async Task<IActionResult> Edit(int id, SemiSelfProducts model, IFormFile? UploadImage)
 		{
 			if (id != model.ProductID) return NotFound();
 
 			var entity = await _context.SemiSelfProducts
-				.Include(p => p.SemiKeywords)
+				//.Include(p => p.SemiKeywords)
 				.FirstOrDefaultAsync(p => p.ProductID == id);
 			if (entity == null) return NotFound();
 
