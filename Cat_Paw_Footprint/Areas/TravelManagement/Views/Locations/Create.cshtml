@@ -25,7 +25,6 @@
             <i class="bi bi-magic"></i> 一鍵輸入示範
         </button>
 
-
         <h6 class="text-muted mb-4">景點詳細資訊</h6>
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -141,6 +140,35 @@
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/ckeditor5.umd.js" crossorigin></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/46.1.0/translations/zh.umd.js" crossorigin></script>
     <script src="~/js/myckeditor.js"></script>
+
+    <script>
+        /* 一鍵輸入 */
+        document.getElementById("btnAutoFill").addEventListener("click", function () {
+            // 一般文字欄位
+            document.getElementById("LocationName").value = "澎湖跨海大橋2";
+            document.getElementById("LocationAddr").value = "澎湖縣白沙鄉通梁村200號";
+            document.getElementById("LocationPrice").value = "0";
+
+
+            // 下拉式選單（區域）
+            const regionSelect = document.getElementById("RegionID");
+            regionSelect.value = "5";  // 請改成離島在資料庫中的 RegionID 值
+            regionSelect.dispatchEvent(new Event("change")); // 觸發 onchange（若有連動地區）
+
+            // 下拉式選單（地區名稱）
+            const districtSelect = document.getElementById("DistrictID");
+            districtSelect.value = "20"; // 改成對應澎湖縣所在 DistrictID
+
+            // 關鍵字下拉（例如景點 / 海景）
+            const keywordSelect = document.getElementById("keywordSelect");
+            keywordSelect.value = "3"; // 假設「離島」的 KeywordID = 3
+            keywordSelect.dispatchEvent(new Event("change"));
+
+            // ✅ 觸發地址自動轉經緯度
+            document.getElementById("LocationAddr").dispatchEvent(new Event("blur"));
+        });
+
+    </script>
 
     <script>
         let selected = [];
@@ -282,16 +310,6 @@
                 }
             });
         });
-
-        // 一鍵輸入示範按鈕
-        document.getElementById("btnAutoFill").addEventListener("click", function () {
-            document.getElementById("LocationName").value = "澎湖跨海大橋";
-            document.getElementById("LocationAddr").value = "澎湖縣白沙鄉通梁村200號";
-            document.getElementById("LocationPrice").value = "0";
-            document.getElementById("editor").value = "澎湖跨海大橋是澎湖著名地標...";
-        });
-
-        
 
     </script>
 }

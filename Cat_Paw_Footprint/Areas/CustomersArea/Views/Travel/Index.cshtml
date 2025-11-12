@@ -108,14 +108,19 @@
 
                                     <!-- 有圖片 -> 顯示輪播 -->
                                     <div v-else v-for="(pic, i) in item.pictureUrl" :key="i"
-                                         class="carousel-item" :class="{'active': i===0}">
+                                         class="carousel-item" 
+                                         :class="{'active': i===0}">
 
                                         <!-- 圖片容器(每張圖片包在 .pic 裡，保留角標) -->
                                         <div class="pic">
-                                            <img :src="pic || '@Url.Content("~/images/NoImage.png")'"
-                                                 v-on:error ="e => e.target.src='@Url.Content("~/images/NoImage.png")'"
+                                            <img :src="item._loadedImages?.[i]
+                                                           ? item._loadedImages[i]         
+                                                           : (pic && pic.trim() !== '' ? pic : noImage)" 
+                                                 v-on:load="() => onImageLoad(item, i, pic)"
+                                                 v-on:error="() => onImageError(item, i)"
                                                  class="d-block w-100"
                                                  alt="圖片" />
+
                                         </div>
                                     </div>
 
@@ -266,8 +271,10 @@
                                     <div v-else v-for="(pic, i) in modalData.pictureUrl" :key="i"
                                          class="carousel-item" :class="{ 'active': i === 0 }">
                                         <div class="pic">
-                                            <img :src="pic || '@Url.Content("~/images/NoImage.png")'"
-                                                 v-on:error="e => e.target.src='@Url.Content("~/images/NoImage.png")'"
+                                            <img 
+                                                :src="pic ? pic : noImage"
+                                                 @* v-on:error="e => e.target.src = noImage" *@
+                                                 v-on:error ="handleImageError($event)"
                                                  class="d-block w-100"
                                                  alt="圖片" />
                                         </div>
@@ -552,6 +559,8 @@
                     busTab: "eta",             // 當前子頁面
                     showBusList: true,   // 控制是否顯示路線清單
 
+                    /* 圖片 */
+                    noImage: @Html.Raw(Json.Serialize(Url.Content("~/images/NoImage.png"))),
 
                 }
             },
@@ -606,6 +615,24 @@
 
             /* 方法(事件處理) */
             methods: {
+
+                // 圖片載入錯誤處理
+                handleImageError(e) {
+                  e.target.src = this.noImage;
+                },
+
+                // 🟢 圖片載入成功
+                onImageLoad(item, index, pic) {
+                    if (!item._loadedImages) item._loadedImages = {};
+                    item._loadedImages[index] = pic;
+                },
+
+                // 🔴 圖片載入失敗
+                onImageError(item, index) {
+                    if (!item._loadedImages) item._loadedImages = {};
+                    item._loadedImages[index] = this.noImage;
+                },
+
                 /* 取得目前登入者資訊 */
                 async getCurrentUser() {
                     try {
@@ -707,8 +734,18 @@
                         districtName: x.districtName,
                         rating: x.rating,
                         views: x.views,
-                        pictureUrl: x.pictureUrl || []
+                        // pictureUrl: x.pictureUrl || []
+                        // pictureUrl: (x.pictureUrl && x.pictureUrl.length > 0) ? x.pictureUrl : [this.noImage]
+                        pictureUrl:
+                                (x.pictureUrl && Array.isArray(x.pictureUrl) && x.pictureUrl.some(p => p && p.trim() !== ''))
+                                ? x.pictureUrl.filter(p => p && p.trim() !== '')
+                                : [],
+
                     }));
+
+                    // 每次切換分類後初始化 _loadedImages 讓載入中顯示 noImage
+                    this.items.forEach(item => item._loadedImages = {});
+
 
                     // 等 Vue 渲染完卡片後再初始化所有 carousel
                     this.$nextTick(() => {
@@ -1425,7 +1462,13 @@
                 busKeyword(newVal) {
                   this.filterBusRoutes(); // 任何輸入變化都觸發過濾
                   this.showBusList = true;  // 🆕 一輸入就回到清單模式
-                }
+                },
+
+                // 分類切換時重新抓取資料
+                currentType(newType) {
+                    console.log(`🌀 分類切換為：${newType}`);
+                    this.fetchData();
+                },
             },
 
             /* 元件載入時 */
