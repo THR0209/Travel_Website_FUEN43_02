@@ -77,6 +77,72 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // ==============================
+    // 🐾 景點門票 navLink 行為
+    // ==============================
+    const LocaLink = document.getElementById("navLocaLink");
+    if (LocaLink) {
+        LocaLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (!window.isHomePage) {
+                window.location.href = "/CustomersArea/Products/Browse?type=ticket";
+            } else {
+                document.querySelector('.search-tab[data-type="ticket"]')?.click();
+                const wrapper = document.querySelector(".search-wrapper");
+                if (wrapper) {
+                    window.scrollTo({
+                        top: wrapper.offsetTop - 80,
+                        behavior: "smooth"
+                    });
+                }
+            }
+        });
+    }
+
+    // ==============================
+    // 🐾 住宿 navLink 行為
+    // ==============================
+    const HotelLink = document.getElementById("navHotelLink");
+    if (HotelLink) {
+        HotelLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (!window.isHomePage) {
+                window.location.href = "/CustomersArea/Products/Browse?type=hotel";
+            } else {
+                document.querySelector('.search-tab[data-type="hotel"]')?.click();
+                const wrapper = document.querySelector(".search-wrapper");
+                if (wrapper) {
+                    window.scrollTo({
+                        top: wrapper.offsetTop - 80,
+                        behavior: "smooth"
+                    });
+                }
+            }
+        });
+    }
+
+    // ==============================
+    // 🐾 交通 navLink 行為
+    // ==============================
+    const TransLink = document.getElementById("navTransLink");
+    if (TransLink) {
+        TransLink.addEventListener("click", function (e) {
+            e.preventDefault();
+            if (!window.isHomePage) {
+                window.location.href = "/CustomersArea/Products/Browse?type=car";
+            } else {
+                document.querySelector('.search-tab[data-type="car"]')?.click();
+                const wrapper = document.querySelector(".search-wrapper");
+                if (wrapper) {
+                    window.scrollTo({
+                        top: wrapper.offsetTop - 80,
+                        behavior: "smooth"
+                    });
+                }
+            }
+        });
+    }
+
+    // ==============================
     // 🐾 優惠活動 navLink 行為
     // ==============================
     const promoLink = document.querySelector('.nav-link[href="#promotions"], .nav-link[data-type="promotion"]');
