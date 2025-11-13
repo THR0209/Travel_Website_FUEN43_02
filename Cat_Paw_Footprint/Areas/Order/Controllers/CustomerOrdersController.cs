@@ -206,9 +206,9 @@ namespace Cat_Paw_Footprint.Areas.Order.Controllers
                     count = g.Count(),
                     imageUrl = _context.Products
                                    .Where(p => p.ProductID == g.Key)
-                                   .Select(p => p.ProductImage != null
-                                       ? "data:image/png;base64," + Convert.ToBase64String(p.ProductImage)
-                                       : @Url.Content("~/images/NoImage.png"))
+                                   .Select(p => p.ProductImageUrl != null
+                                        ? p.ProductImageUrl
+                                        : Url.Content("~/images/NoImage.png"))
                                    .FirstOrDefault()
                 })
                 .OrderBy(x => x.productId)
